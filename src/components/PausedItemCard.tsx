@@ -20,16 +20,16 @@ const PausedItemCard = ({ item }: PausedItemCardProps) => {
         
         <div className="flex-1">
           <div className="flex justify-between items-start mb-2">
-            <h3 className="font-medium text-dark-gray">{item.name}</h3>
-            <span className="text-dark-gray font-medium">${item.price}</span>
+            <h3 className="font-medium text-black">{item.name}</h3>
+            <span className="text-black font-medium">${item.price}</span>
           </div>
           
-          <p className="text-taupe text-sm mb-1">{item.brand}</p>
-          <p className="text-taupe text-sm mb-3">
+          <p className="text-black text-sm mb-1">{item.brand}</p>
+          <p className="text-black text-sm mb-3">
             Paused while feeling <span className="bg-yellow-200 px-1 rounded">{item.reason}</span>
           </p>
           
-          <div className="bg-lavender text-dark-gray text-sm py-2 px-3 rounded-lg text-center">
+          <div className="bg-lavender text-black text-sm py-2 px-3 rounded-lg text-center">
             {item.checkInTime}
           </div>
         </div>
