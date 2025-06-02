@@ -2,7 +2,7 @@ import { Settings } from 'lucide-react';
 
 const PauseHeader = () => {
   return (
-    <header className="relative mb-24">
+    <header className="relative mb-18">
       <div className="text-center">
         <div className="text-black font-medium text-lg tracking-wide mb-2">
           POCKET || PAUSE
