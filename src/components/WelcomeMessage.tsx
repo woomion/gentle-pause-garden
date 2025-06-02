@@ -5,7 +5,7 @@ interface WelcomeMessageProps {
 
 const WelcomeMessage = ({ firstName = "Michelle" }: WelcomeMessageProps) => {
   return (
-    <div className="mb-8 mt-8">
+    <div className="mb-8 mt-18">
       <h1 className="text-3xl md:text-4xl font-bold text-black leading-tight">
         Hi {firstName} —
         <br />
