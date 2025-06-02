@@ -1,4 +1,5 @@
 
+
 import PausedItemCard from './PausedItemCard';
 
 const PausedSection = () => {
@@ -14,7 +15,7 @@ const PausedSection = () => {
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-semibold text-black mb-1">Paused for now</h2>
-      <p className="text-black text-lg mb-6">You haven't decided yet—and that's okay</p>
+      <p className="text-black text-lg mb-3">You haven't decided yet—and that's okay</p>
       
       <PausedItemCard item={pausedItem} />
     </div>
@@ -22,3 +23,4 @@ const PausedSection = () => {
 };
 
 export default PausedSection;
+
