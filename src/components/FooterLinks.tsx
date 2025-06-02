@@ -15,7 +15,7 @@ const FooterLinks = () => {
         <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
       </button>
       
-      <div className="text-center text-xs space-y-1 mt-12" style={{ color: '#A6A1AD' }}>
+      <div className="text-center text-xs space-y-1 mt-16" style={{ color: '#A6A1AD' }}>
         <p>|| Pocket Pause—your conscious spending companion</p>
         <div className="flex justify-center gap-4">
           <button className="hover:text-taupe transition-colors">Privacy Policy</button>
