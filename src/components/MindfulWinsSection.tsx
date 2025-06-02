@@ -3,8 +3,7 @@ import { ArrowRight } from 'lucide-react';
 
 const MindfulWinsSection = () => {
   return (
-    <div className="mb-8">
-      <h2 className="text-2xl font-semibold text-black mb-4">What you let go of</h2>
+    <div className="mb-16">
       
       <button className="flex items-center justify-center gap-2 w-full text-black hover:text-taupe transition-colors duration-200 py-2 group">
         <span className="text-sm font-medium relative">
