@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 
 const FooterLinks = () => {
   return (
-    <div className="space-y-4 mb-8 mt-8">
+    <div className="space-y-4 mb-8 mt-16">
       <button className="flex items-center justify-center gap-2 w-full text-black hover:text-taupe transition-colors duration-200 py-2 group">
         <span className="text-sm font-medium relative">
           See your mindful wins
