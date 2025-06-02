@@ -10,7 +10,7 @@ const PauseHeader = () => {
         </div>
       </div>
       
-      <button className="absolute top-12 right-0 p-2 text-black hover:text-taupe transition-colors">
+      <button className="absolute top-6 right-0 p-2 text-black hover:text-taupe transition-colors">
         <Settings size={24} />
       </button>
     </header>
