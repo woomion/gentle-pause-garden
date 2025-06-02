@@ -23,7 +23,7 @@ const AddPauseButton = ({ onAddPause }: AddPauseButtonProps) => {
   };
 
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       <button
         onClick={handleClick}
         className="relative w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-4 px-6 rounded-2xl transition-all duration-200 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
