@@ -6,6 +6,7 @@ import AddPauseButton from '../components/AddPauseButton';
 import InStoreModeButton from '../components/InStoreModeButton';
 import PausedSection from '../components/PausedSection';
 import GreaterJoySection from '../components/GreaterJoySection';
+import MindfulWinsSection from '../components/MindfulWinsSection';
 import FooterLinks from '../components/FooterLinks';
 
 const Index = () => {
@@ -26,6 +27,7 @@ const Index = () => {
         <InStoreModeButton />
         <PausedSection />
         <GreaterJoySection />
+        <MindfulWinsSection />
         <FooterLinks />
       </div>
       
