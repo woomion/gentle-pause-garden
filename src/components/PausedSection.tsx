@@ -13,8 +13,8 @@ const PausedSection = () => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-medium text-dark-gray mb-2">Paused for now</h2>
-      <p className="text-taupe text-sm mb-6">You haven't decided yet—and that's okay</p>
+      <h2 className="text-3xl font-semibold text-black mb-2">Paused for now</h2>
+      <p className="text-black text-base mb-6">You haven't decided yet—and that's okay</p>
       
       <PausedItemCard item={pausedItem} />
     </div>
