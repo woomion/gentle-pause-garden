@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,7 +19,17 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'inter': ['Inter', 'sans-serif'],
+			},
 			colors: {
+				// Pocket Pause custom colors
+				cream: '#F9F5EB',
+				lavender: '#D6BBF7',
+				taupe: '#998C75',
+				purple: '#6B4C9A',
+				'dark-gray': '#2B2B2B',
+				
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
