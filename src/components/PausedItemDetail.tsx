@@ -197,7 +197,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 <AlertDialogHeader>
                   <AlertDialogTitle>Mark as purchased?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will move "{item.itemName}" to your pause log as a thoughtful purchase decision.
+                    This will move "{item.itemName}" to your Pause Log as a thoughtful purchase decision.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
