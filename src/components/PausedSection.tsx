@@ -68,16 +68,16 @@ const PausedSection = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
+            
+            {/* Web only: Arrows positioned underneath with counter */}
+            <div className="hidden md:flex items-center justify-center mt-4 gap-4 relative">
+              <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
+              <span className="text-sm text-gray-600 px-4">
+                {current}/{pausedItems.length} items
+              </span>
+              <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
+            </div>
           </Carousel>
-          
-          {/* Web only: Arrows and counter underneath */}
-          <div className="hidden md:flex items-center justify-center mt-4 gap-4">
-            <CarouselPrevious className="relative left-0 top-0 translate-y-0" />
-            <span className="text-sm text-gray-600 px-4">
-              {current}/{pausedItems.length} items
-            </span>
-            <CarouselNext className="relative right-0 top-0 translate-y-0" />
-          </div>
           
           {/* Mobile only: Dots indicator */}
           <div className="flex md:hidden justify-center mt-4 gap-2">
