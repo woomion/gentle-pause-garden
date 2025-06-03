@@ -1,11 +1,11 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { parseProductUrl } from '../utils/urlParser';
 
 interface PauseFormProps {
   onClose: () => void;
@@ -45,9 +45,42 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
     otherDuration: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isParsingUrl, setIsParsingUrl] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleLinkChange = async (value: string) => {
+    setFormData(prev => ({ ...prev, link: value }));
+    
+    // Check if the value looks like a URL
+    if (value && (value.startsWith('http://') || value.startsWith('https://') || value.includes('.'))) {
+      setIsParsingUrl(true);
+      
+      try {
+        const productInfo = await parseProductUrl(value);
+        
+        // Only update fields that are currently empty and we found data for
+        setFormData(prev => ({
+          ...prev,
+          itemName: prev.itemName || productInfo.itemName || prev.itemName,
+          storeName: prev.storeName || productInfo.storeName || prev.storeName,
+          price: prev.price || productInfo.price || prev.price,
+        }));
+        
+        // If we found an image URL, you could optionally handle it here
+        if (productInfo.imageUrl) {
+          console.log('Found product image:', productInfo.imageUrl);
+          // Note: We can't automatically set a file input, but we could display the image
+        }
+        
+      } catch (error) {
+        console.error('Error parsing product URL:', error);
+      } finally {
+        setIsParsingUrl(false);
+      }
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,14 +147,21 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
               <Label htmlFor="link" className="text-dark-gray font-medium text-base">
                 Link (paste a product URL)
               </Label>
-              <Input
-                id="link"
-                type="url"
-                placeholder="www.example.com/item"
-                value={formData.link}
-                onChange={(e) => handleInputChange('link', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
-              />
+              <div className="relative">
+                <Input
+                  id="link"
+                  type="url"
+                  placeholder="www.example.com/item"
+                  value={formData.link}
+                  onChange={(e) => handleLinkChange(e.target.value)}
+                  className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                />
+                {isParsingUrl && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-lavender border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Item Name Field */}
