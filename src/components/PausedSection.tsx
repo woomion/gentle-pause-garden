@@ -39,7 +39,7 @@ const PausedSection = () => {
       {pausedItems.length === 1 ? (
         <PausedItemCard item={pausedItems[0]} />
       ) : (
-        <div className="relative">
+        <div className="relative px-12">
           <Carousel className="w-full">
             <CarouselContent>
               {pausedItems.map((item) => (
@@ -48,23 +48,17 @@ const PausedSection = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            {pausedItems.length > 1 && (
-              <>
-                <CarouselPrevious className="left-2" />
-                <CarouselNext className="right-2" />
-              </>
-            )}
+            <CarouselPrevious className="-left-12 top-1/2 -translate-y-1/2" />
+            <CarouselNext className="-right-12 top-1/2 -translate-y-1/2" />
           </Carousel>
-          {pausedItems.length > 1 && (
-            <div className="flex justify-center mt-2 gap-1">
-              {pausedItems.map((_, index) => (
-                <div
-                  key={index}
-                  className="w-2 h-2 rounded-full bg-gray-300"
-                />
-              ))}
-            </div>
-          )}
+          <div className="flex justify-center mt-4 gap-2">
+            {pausedItems.map((_, index) => (
+              <div
+                key={index}
+                className="w-2 h-2 rounded-full bg-gray-300"
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

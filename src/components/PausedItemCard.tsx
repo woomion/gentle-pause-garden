@@ -24,16 +24,26 @@ const PausedItemCard = ({ item }: PausedItemCardProps) => {
     return emotionColors[emotion] || '#F0F0EC';
   };
 
+  // Create image URL from uploaded file or use provided URL
+  const getImageUrl = () => {
+    if (item.photo && item.photo instanceof File) {
+      return URL.createObjectURL(item.photo);
+    }
+    return item.imageUrl;
+  };
+
+  const imageUrl = getImageUrl();
+
   return (
     <div className="bg-white/60 rounded-2xl p-4 mb-4 border border-lavender/30">
       <div className="flex items-start gap-4">
-        {/* Product image or placeholder */}
-        <div className="w-16 h-16 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
-          {item.imageUrl ? (
+        {/* Product image with consistent sizing */}
+        <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+          {imageUrl ? (
             <img 
-              src={item.imageUrl} 
+              src={imageUrl} 
               alt={item.itemName}
-              className="w-full h-full object-cover rounded-xl"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 // Fallback to placeholder if image fails to load
                 const target = e.target as HTMLImageElement;
