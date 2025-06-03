@@ -104,26 +104,26 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             <div className="bg-lavender text-black text-xs py-1.5 px-2 rounded text-center">
               {item.checkInTime}
             </div>
-
-            {item.link && (
-              <div className="text-center">
-                <a 
-                  href={item.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline hover:text-blue-800 text-sm"
-                >
-                  View item
-                </a>
-              </div>
-            )}
           </div>
 
-          {/* Delete button - less bold */}
-          <div className="pt-2 border-t border-gray-100">
+          {/* Bottom actions - side by side */}
+          <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
+            {item.link ? (
+              <a 
+                href={item.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800 text-sm"
+              >
+                View item
+              </a>
+            ) : (
+              <div></div>
+            )}
+            
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full text-gray-600 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200">
+                <Button variant="outline" size="sm" className="text-gray-600 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200">
                   Delete Item
                 </Button>
               </AlertDialogTrigger>
