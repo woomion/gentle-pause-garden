@@ -1,18 +1,20 @@
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Filter } from 'lucide-react';
+import { ArrowLeft, Filter, ShoppingBag, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { pauseLogStore, PauseLogItem } from '../stores/pauseLogStore';
 
 const PauseLog = () => {
-  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [pauseLogItems, setPauseLogItems] = useState<PauseLogItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<PauseLogItem[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
   const emotions = ['burnt out', 'sad', 'resentful', 'overwhelmed', 'curious', 'bored', 'inspired', 'deserving', 'anxious', 'lonely', 'celebratory', 'something else'];
+  const statuses = ['purchased', 'let-go'];
 
   const getEmotionColor = (emotion: string) => {
     const emotionColors: { [key: string]: string } = {
@@ -45,28 +47,45 @@ const PauseLog = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedFilter) {
-      setFilteredItems(pauseLogItems.filter(item => item.emotion === selectedFilter));
-    } else {
-      setFilteredItems(pauseLogItems);
-    }
-  }, [selectedFilter, pauseLogItems]);
+    let filtered = pauseLogItems;
 
-  const handleFilterClick = (emotion: string) => {
-    if (selectedFilter === emotion) {
-      setSelectedFilter(null);
-    } else {
-      setSelectedFilter(emotion);
+    // Filter by emotions
+    if (selectedEmotions.length > 0) {
+      filtered = filtered.filter(item => selectedEmotions.includes(item.emotion));
     }
-    setShowFilters(false);
+
+    // Filter by status
+    if (selectedStatuses.length > 0) {
+      filtered = filtered.filter(item => selectedStatuses.includes(item.status));
+    }
+
+    setFilteredItems(filtered);
+  }, [selectedEmotions, selectedStatuses, pauseLogItems]);
+
+  const handleEmotionClick = (emotion: string) => {
+    setSelectedEmotions(prev => 
+      prev.includes(emotion) 
+        ? prev.filter(e => e !== emotion)
+        : [...prev, emotion]
+    );
   };
 
-  const clearFilter = () => {
-    setSelectedFilter(null);
+  const handleStatusClick = (status: string) => {
+    setSelectedStatuses(prev => 
+      prev.includes(status) 
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
+    );
+  };
+
+  const clearAllFilters = () => {
+    setSelectedEmotions([]);
+    setSelectedStatuses([]);
     setShowFilters(false);
   };
 
   const getItemCount = filteredItems.length;
+  const hasActiveFilters = selectedEmotions.length > 0 || selectedStatuses.length > 0;
 
   // Empty state when no items have been let go of yet
   if (pauseLogItems.length === 0) {
@@ -83,7 +102,7 @@ const PauseLog = () => {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-semibold text-black mb-6">What You've Let Go Of</h1>
+          <h1 className="text-2xl font-semibold text-black mb-6">Your Pause Log</h1>
 
           {/* Empty state */}
           <div className="bg-white/60 rounded-lg p-8 text-center border border-gray-200 mt-16">
@@ -119,29 +138,54 @@ const PauseLog = () => {
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-semibold text-black mb-6">What You've Let Go Of</h1>
+        <h1 className="text-2xl font-semibold text-black mb-6">Your Pause Log</h1>
 
         {/* Filter Section */}
         <div className="mb-6">
-          {selectedFilter ? (
-            <div className="flex items-center gap-2 mb-4">
-              <Badge 
-                className="px-3 py-1 text-sm cursor-pointer"
-                style={{ backgroundColor: getEmotionColor(selectedFilter) }}
-                onClick={clearFilter}
+          {hasActiveFilters ? (
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm text-gray-600">{getItemCount} items</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter size={16} className="mr-2" />
+                  Filters active
+                </Button>
+              </div>
+              
+              {/* Active filters */}
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedEmotions.map(emotion => (
+                  <Badge 
+                    key={emotion}
+                    className="px-3 py-1 text-sm cursor-pointer text-black"
+                    style={{ backgroundColor: getEmotionColor(emotion) }}
+                    onClick={() => handleEmotionClick(emotion)}
+                  >
+                    {emotion} ×
+                  </Badge>
+                ))}
+                {selectedStatuses.map(status => (
+                  <Badge 
+                    key={status}
+                    className="px-3 py-1 text-sm cursor-pointer bg-gray-200 text-black"
+                    onClick={() => handleStatusClick(status)}
+                  >
+                    {status === 'purchased' ? 'Purchased' : 'Let go'} ×
+                  </Badge>
+                ))}
+              </div>
+              
+              <button 
+                onClick={clearAllFilters}
+                className="text-sm text-gray-600 hover:text-black underline"
               >
-                {selectedFilter} ×
-              </Badge>
-              <span className="text-sm text-gray-600">{getItemCount} items</span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter size={16} className="mr-2" />
-                Filters active
-              </Button>
+                Clear all filters
+              </button>
             </div>
           ) : (
             <div className="flex justify-end">
@@ -156,26 +200,46 @@ const PauseLog = () => {
             </div>
           )}
 
-          {selectedFilter && (
-            <p className="text-sm text-gray-600 text-center mb-4">
-              Paused while feeling: {selectedFilter}
-            </p>
-          )}
-
           {/* Filter Dropdown */}
           {showFilters && (
             <div className="bg-white rounded-lg shadow-lg p-4 mb-4 border">
-              <div className="flex flex-wrap gap-2">
-                {emotions.map(emotion => (
-                  <Badge
-                    key={emotion}
-                    className="cursor-pointer hover:opacity-80"
-                    style={{ backgroundColor: getEmotionColor(emotion) }}
-                    onClick={() => handleFilterClick(emotion)}
-                  >
-                    {emotion}
-                  </Badge>
-                ))}
+              <div className="space-y-4">
+                {/* Emotion filters */}
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Filter by emotion:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {emotions.map(emotion => (
+                      <Badge
+                        key={emotion}
+                        className={`cursor-pointer hover:opacity-80 text-black ${
+                          selectedEmotions.includes(emotion) ? 'ring-2 ring-blue-500' : ''
+                        }`}
+                        style={{ backgroundColor: getEmotionColor(emotion) }}
+                        onClick={() => handleEmotionClick(emotion)}
+                      >
+                        {emotion}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Status filters */}
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Filter by action:</h4>
+                  <div className="flex gap-2">
+                    {statuses.map(status => (
+                      <Badge
+                        key={status}
+                        className={`cursor-pointer hover:opacity-80 bg-gray-200 text-black ${
+                          selectedStatuses.includes(status) ? 'ring-2 ring-blue-500' : ''
+                        }`}
+                        onClick={() => handleStatusClick(status)}
+                      >
+                        {status === 'purchased' ? 'Purchased' : 'Let go'}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -187,18 +251,37 @@ const PauseLog = () => {
             <div key={item.id} className="bg-white/60 rounded-lg p-4 border border-gray-200">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-medium text-black">{item.itemName}</h3>
-                <span className="text-sm text-gray-600">Let go of on {item.letGoDate}</span>
+                <div className="flex items-center gap-2">
+                  {/* Status indicator */}
+                  {item.status === 'purchased' ? (
+                    <div className="flex items-center gap-1 text-green-600 text-xs font-medium">
+                      <ShoppingBag size={12} />
+                      Purchased
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-gray-600 text-xs font-medium">
+                      <X size={12} />
+                      Let go
+                    </div>
+                  )}
+                  <span className="text-sm text-gray-600">{item.letGoDate}</span>
+                </div>
               </div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm text-gray-600">Paused while feeling</span>
                 <Badge
-                  className="text-xs"
-                  style={{ backgroundColor: getEmotionColor(item.emotion) }}
+                  className="text-xs text-black"
+                  style={{ backgroundColor: getEmotionColor(item.emotion), color: '#000' }}
                 >
                   {item.emotion}
                 </Badge>
               </div>
-              <div className="text-sm text-gray-600">{item.storeName}</div>
+              <div className="text-sm text-gray-600 mb-2">{item.storeName}</div>
+              {item.notes && (
+                <div className="text-sm text-gray-700 italic bg-gray-50 p-2 rounded mt-2">
+                  "{item.notes}"
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -57,7 +57,9 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     pauseLogStore.addItem({
       itemName: item.itemName,
       emotion: item.emotion,
-      storeName: item.storeName
+      storeName: item.storeName,
+      status: 'let-go',
+      notes: item.notes
     });
     
     // Remove from paused items
@@ -76,7 +78,9 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     pauseLogStore.addItem({
       itemName: item.itemName,
       emotion: item.emotion,
-      storeName: item.storeName
+      storeName: item.storeName,
+      status: 'purchased',
+      notes: item.notes
     });
     
     // Remove from paused items

@@ -5,6 +5,8 @@ export interface PauseLogItem {
   storeName: string;
   emotion: string;
   letGoDate: string;
+  status: 'purchased' | 'let-go'; // Track if item was purchased or let go
+  notes?: string; // Include notes if they were provided
   originalPausedItem?: any; // Reference to original paused item if needed
 }
 
@@ -21,7 +23,15 @@ class PauseLogStore {
     try {
       const stored = localStorage.getItem(this.storageKey);
       if (stored) {
-        this.items = JSON.parse(stored);
+        const parsedItems = JSON.parse(stored);
+        // Migrate old items that don't have status
+        this.items = parsedItems.map((item: any) => ({
+          ...item,
+          status: item.status || 'let-go', // Default to 'let-go' for existing items
+          notes: item.notes || undefined
+        }));
+        // Save migrated data back
+        this.saveToStorage();
       }
     } catch (error) {
       console.error('Failed to load pause log from storage:', error);
