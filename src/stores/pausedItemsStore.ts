@@ -18,6 +18,42 @@ export interface PausedItem {
 class PausedItemsStore {
   private items: PausedItem[] = [];
   private listeners: Array<() => void> = [];
+  private storageKey = 'pausedItems';
+
+  constructor() {
+    this.loadFromStorage();
+  }
+
+  private loadFromStorage() {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      if (stored) {
+        const parsedItems = JSON.parse(stored);
+        // Convert pausedAt back to Date objects
+        this.items = parsedItems.map((item: any) => ({
+          ...item,
+          pausedAt: new Date(item.pausedAt)
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to load paused items from storage:', error);
+      this.items = [];
+    }
+  }
+
+  private saveToStorage() {
+    try {
+      // Note: We can't store File objects in localStorage, so photo will be lost on refresh
+      // For a production app, you'd want to upload the file to a server or use IndexedDB
+      const itemsToStore = this.items.map(item => ({
+        ...item,
+        photo: null // Remove File objects as they can't be serialized
+      }));
+      localStorage.setItem(this.storageKey, JSON.stringify(itemsToStore));
+    } catch (error) {
+      console.error('Failed to save paused items to storage:', error);
+    }
+  }
 
   addItem(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime'>) {
     const newItem: PausedItem = {
@@ -28,6 +64,7 @@ class PausedItemsStore {
     };
     
     this.items.push(newItem);
+    this.saveToStorage();
     this.notifyListeners();
     console.log('Added paused item:', newItem);
   }
@@ -38,6 +75,7 @@ class PausedItemsStore {
 
   removeItem(id: string) {
     this.items = this.items.filter(item => item.id !== id);
+    this.saveToStorage();
     this.notifyListeners();
   }
 
