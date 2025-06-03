@@ -1,11 +1,14 @@
 
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const MindfulWinsSection = () => {
   return (
     <div className="mb-16">
-      
-      <button className="flex items-center justify-center gap-2 w-full text-black hover:text-taupe transition-colors duration-200 py-2 group">
+      <Link 
+        to="/mindful-wins"
+        className="flex items-center justify-center gap-2 w-full text-black hover:text-taupe transition-colors duration-200 py-2 group"
+      >
         <span className="text-sm font-medium relative">
           See your mindful wins
           <div 
@@ -14,7 +17,7 @@ const MindfulWinsSection = () => {
           ></div>
         </span>
         <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
-      </button>
+      </Link>
     </div>
   );
 };
