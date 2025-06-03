@@ -1,9 +1,11 @@
 
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
+import { mindfulWinsStore } from '../stores/mindfulWinsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface PausedItemDetailProps {
   item: PausedItem;
@@ -13,6 +15,8 @@ interface PausedItemDetailProps {
 }
 
 const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailProps) => {
+  const { toast } = useToast();
+
   const getEmotionColor = (emotion: string) => {
     const emotionColors: { [key: string]: string } = {
       'bored': '#F6E3D5',
@@ -46,6 +50,25 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   const handleDelete = () => {
     onDelete(item.id);
     onClose();
+  };
+
+  const handleLetGo = () => {
+    // Move item to mindful wins
+    mindfulWinsStore.addItem({
+      itemName: item.itemName,
+      emotion: item.emotion,
+      storeName: item.storeName
+    });
+    
+    // Remove from paused items
+    onDelete(item.id);
+    onClose();
+    
+    // Show success toast
+    toast({
+      title: "Item let go",
+      description: `"${item.itemName}" has been moved to your mindful wins.`,
+    });
   };
 
   return (
@@ -104,6 +127,31 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             <div className="bg-lavender text-black text-xs py-1.5 px-2 rounded text-center">
               {item.checkInTime}
             </div>
+          </div>
+
+          {/* Let it go button */}
+          <div className="pt-2 border-t border-gray-100">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="w-full bg-black text-white hover:bg-gray-800">
+                  Let it go
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Let go of this item?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will move "{item.itemName}" to your mindful wins. You can always see what you've let go of in your mindful wins section.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Keep paused</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLetGo}>
+                    Let it go
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           {/* Bottom actions - side by side */}
