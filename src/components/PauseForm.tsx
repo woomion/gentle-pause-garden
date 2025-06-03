@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { parseProductUrl } from '../utils/urlParser';
+import { pausedItemsStore } from '../stores/pausedItemsStore';
 
 interface PauseFormProps {
   onClose: () => void;
@@ -60,6 +61,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
       
       try {
         const productInfo = await parseProductUrl(value);
+        console.log('Parsed product info:', productInfo);
         
         // Only update fields that are currently empty and we found data for
         setFormData(prev => ({
@@ -69,10 +71,9 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
           price: prev.price || productInfo.price || prev.price,
         }));
         
-        // If we found an image URL, you could optionally handle it here
+        // Log the image URL for debugging
         if (productInfo.imageUrl) {
           console.log('Found product image:', productInfo.imageUrl);
-          // Note: We can't automatically set a file input, but we could display the image
         }
         
       } catch (error) {
@@ -110,7 +111,20 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
     // Show ripple effect for 1 second
     setTimeout(() => {
       console.log('Pause item data:', formData);
-      // TODO: Save to database/collection
+      
+      // Add to store
+      pausedItemsStore.addItem({
+        itemName: formData.itemName || 'Unnamed Item',
+        storeName: formData.storeName || 'Unknown Store',
+        price: formData.price || '0',
+        emotion: formData.emotion,
+        notes: formData.notes,
+        duration: formData.duration,
+        otherDuration: formData.otherDuration,
+        link: formData.link,
+        photo: formData.photo
+      });
+      
       setIsSubmitting(false);
       onClose();
     }, 1000);
