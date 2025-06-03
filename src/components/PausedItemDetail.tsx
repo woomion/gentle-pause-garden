@@ -136,7 +136,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
-                  LET IT GO
+                  Let This Item Go
                 </button>
               </AlertDialogTrigger>
               <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
