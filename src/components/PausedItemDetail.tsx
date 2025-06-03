@@ -1,5 +1,3 @@
-
-
 import { Timer } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 import { mindfulWinsStore } from '../stores/mindfulWinsStore';
@@ -203,4 +201,3 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
 };
 
 export default PausedItemDetail;
-
