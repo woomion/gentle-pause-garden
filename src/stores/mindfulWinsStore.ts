@@ -37,7 +37,7 @@ class MindfulWinsStore {
     }
   }
 
-  addMindfulWin(item: Omit<MindfulWinItem, 'id' | 'letGoDate'>) {
+  addItem(item: Omit<MindfulWinItem, 'id' | 'letGoDate'>) {
     const newItem: MindfulWinItem = {
       ...item,
       id: Date.now().toString(),

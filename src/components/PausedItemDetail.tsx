@@ -66,21 +66,24 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     
     // Show success toast
     toast({
-      title: "Item let go",
+      title: "Item released",
       description: `"${item.itemName}" has been moved to your mindful wins.`,
     });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm mx-auto p-4">
+      <DialogContent 
+        className="max-w-sm mx-auto p-6 rounded-3xl"
+        style={{ backgroundColor: '#FAF6F1' }}
+      >
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-3">
-          {/* Product image - smaller */}
-          <div className="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+        <div className="space-y-6">
+          {/* Product image */}
+          <div className="w-full h-48 bg-gray-200 rounded-2xl flex items-center justify-center overflow-hidden">
             {imageUrl ? (
               <img 
                 src={imageUrl} 
@@ -89,55 +92,55 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
-                  target.parentElement!.innerHTML = '<div class="w-12 h-12 bg-gray-300 rounded-full opacity-50"></div>';
+                  target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>';
                 }}
               />
             ) : (
-              <div className="w-12 h-12 bg-gray-300 rounded-full opacity-50"></div>
+              <div className="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>
             )}
           </div>
 
-          {/* Item details - more compact */}
-          <div className="space-y-2">
+          {/* Item details */}
+          <div className="space-y-4">
             <div className="flex justify-between items-start">
-              <h3 className="text-lg font-medium text-black leading-tight">{item.itemName}</h3>
+              <h3 className="text-xl font-bold text-black leading-tight">{item.itemName}</h3>
               {item.price && (
-                <span className="text-base font-medium text-black ml-2">${item.price}</span>
+                <span className="text-xl font-bold text-black ml-2">${item.price}</span>
               )}
             </div>
             
-            <p className="text-gray-600 text-sm">{item.storeName}</p>
+            <p className="text-gray-600 text-base">{item.storeName}</p>
             
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="space-y-2">
               <span className="text-gray-600 text-sm">Feeling</span>
-              <span 
-                className="px-2 py-1 rounded text-xs"
-                style={{ backgroundColor: getEmotionColor(item.emotion) }}
-              >
-                {item.emotion}
-              </span>
+              <div>
+                <span 
+                  className="inline-block px-4 py-2 rounded-full text-sm font-medium"
+                  style={{ backgroundColor: getEmotionColor(item.emotion) }}
+                >
+                  {item.emotion}
+                </span>
+              </div>
             </div>
 
-            {item.notes && (
-              <div className="bg-gray-50 rounded-lg p-2">
-                <p className="text-gray-600 text-xs">{item.notes}</p>
-              </div>
-            )}
-
-            <div className="bg-lavender text-black text-xs py-1.5 px-2 rounded text-center">
+            {/* Pause Duration Indicator */}
+            <div 
+              className="w-full py-3 px-4 rounded-2xl text-center text-sm font-medium text-black"
+              style={{ backgroundColor: '#E7D9FA' }}
+            >
               {item.checkInTime}
             </div>
           </div>
 
           {/* Let it go button */}
-          <div className="pt-2 border-t border-gray-100">
+          <div className="pt-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button className="w-full bg-black text-white hover:bg-gray-800">
+                <Button className="w-full bg-black text-white hover:bg-gray-800 rounded-2xl py-3 text-base font-medium transition-all duration-200 hover:scale-[1.02]">
                   Let it go
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Let go of this item?</AlertDialogTitle>
                   <AlertDialogDescription>
@@ -145,8 +148,8 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Keep paused</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLetGo}>
+                  <AlertDialogCancel className="rounded-2xl">Keep paused</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLetGo} className="rounded-2xl">
                     Let it go
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -154,14 +157,14 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             </AlertDialog>
           </div>
 
-          {/* Bottom actions - side by side */}
-          <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
+          {/* Footer actions */}
+          <div className="pt-4 flex items-center justify-between">
             {item.link ? (
               <a 
                 href={item.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-blue-600 underline hover:text-blue-800 text-sm"
+                className="text-gray-600 text-sm hover:text-black transition-colors duration-200"
               >
                 View item
               </a>
@@ -171,11 +174,11 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-gray-600 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200">
-                  Delete Item
+                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-red-600 text-sm">
+                  Delete item
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
@@ -183,8 +186,8 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>
+                  <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="rounded-2xl">
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
