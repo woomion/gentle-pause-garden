@@ -142,8 +142,12 @@ class PausedItemsStore {
     const diffHours = Math.round(diffMs / (1000 * 60 * 60));
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffHours < 24) {
-      return `Checking-in in about ${diffHours} hours`;
+    if (diffHours <= 24) {
+      if (diffHours === 1) {
+        return 'Checking-in in about 1 hour';
+      } else {
+        return `Checking-in in about ${diffHours} hours`;
+      }
     } else if (diffDays === 1) {
       return 'Checking-in in about 1 day';
     } else {
