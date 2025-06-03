@@ -38,7 +38,7 @@ const Index = () => {
       <Sheet open={showForm} onOpenChange={setShowForm}>
         <SheetContent 
           side="bottom" 
-          className="h-[90vh] bg-cream border-t border-gray-200 rounded-t-2xl p-6"
+          className="h-[95vh] max-h-[95vh] bg-cream border-t border-gray-200 rounded-t-2xl p-6 overflow-hidden"
         >
           <PauseForm onClose={() => setShowForm(false)} />
         </SheetContent>
