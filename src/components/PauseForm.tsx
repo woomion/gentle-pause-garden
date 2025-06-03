@@ -224,28 +224,24 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
             </div>
 
 {/* Photo Upload Field */}
-<div className="space-y-1">
+            <div className="space-y-1">
   <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
     Photo (optional)
   </Label>
-  <div className="flex items-center h-12 rounded-xl overflow-hidden border border-gray-200 bg-white">
-    <Input
-      id="photo"
-      type="file"
-      accept="image/*"
-      onChange={handleFileChange}
-      className="text-sm text-gray-500
-                 file:mr-3 file:py-2 file:px-3
-                 file:rounded-lg file:border-0
-                 file:text-sm file:font-medium
-                 file:bg-lavender file:text-dark-gray
-                 hover:file:bg-lavender/80"
-      style={{
-        color: '#B0ABB7',
-        height: '48px'
-      }}
-    />
-  </div>
+  <input
+    id="photo"
+    type="file"
+    accept="image/*"
+    onChange={handleFileChange}
+    className="w-full text-sm text-gray-500
+               file:py-2 file:px-4
+               file:rounded-xl file:border-0
+               file:text-sm file:font-medium
+               file:bg-lavender file:text-dark-gray
+               hover:file:bg-lavender/90
+               rounded-xl border border-gray-200 bg-white h-12
+               overflow-hidden"
+  />
 </div>
 
             {/* Emotion Selection */}
