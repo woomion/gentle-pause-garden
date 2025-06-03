@@ -160,7 +160,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           </div>
 
           {/* Footer actions */}
-          <div className="pt-4 flex items-center justify-between">
+          <div className="pt-2 flex items-center justify-between">
             {item.link ? (
               <a 
                 href={item.link} 
