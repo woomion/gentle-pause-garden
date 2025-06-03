@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -131,6 +132,54 @@
 
   .dark .text-black {
     color: #F9F5EB !important;
+  }
+
+  /* Dark mode for form elements */
+  .dark .text-dark-gray {
+    color: #F9F5EB !important;
+  }
+
+  .dark .placeholder\:text-\[\#B0ABB7\]::placeholder {
+    color: rgba(249, 245, 235, 0.5) !important;
+  }
+
+  /* Dark mode for inputs and form fields */
+  .dark input {
+    background-color: rgba(249, 245, 235, 0.1) !important;
+    border-color: rgba(249, 245, 235, 0.2) !important;
+    color: #F9F5EB !important;
+  }
+
+  .dark textarea {
+    background-color: rgba(249, 245, 235, 0.1) !important;
+    border-color: rgba(249, 245, 235, 0.2) !important;
+    color: #F9F5EB !important;
+  }
+
+  .dark select {
+    background-color: rgba(249, 245, 235, 0.1) !important;
+    border-color: rgba(249, 245, 235, 0.2) !important;
+    color: #F9F5EB !important;
+  }
+
+  /* Dark mode for dropdown content */
+  .dark [data-radix-select-content] {
+    background-color: rgba(32, 14, 59, 0.95) !important;
+    border-color: rgba(249, 245, 235, 0.2) !important;
+  }
+
+  .dark [data-radix-select-item] {
+    color: #F9F5EB !important;
+  }
+
+  /* Dark mode for file inputs */
+  .dark input[type="file"] {
+    color: #F9F5EB !important;
+  }
+
+  .dark input[type="file"]::file-selector-button {
+    background-color: #C8B6E2 !important;
+    color: #2B2B2B !important;
   }
 }
 

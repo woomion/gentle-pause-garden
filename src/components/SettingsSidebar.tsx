@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
-import { Toggle } from '@/components/ui/toggle';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface SettingsSidebarProps {
@@ -25,10 +25,14 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
           {/* About Pocket Pause */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">About Pocket Pause</h3>
-            <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
-              <p className="text-sm text-black dark:text-[#F9F5EB] leading-relaxed">
-                Pocket Pause is your conscious spending companion. We help you pause, reflect, and make mindful purchasing decisions that align with your values and goals.
-              </p>
+            <div className="space-y-2">
+              <Link 
+                to="/about"
+                onClick={() => onOpenChange(false)}
+                className="w-full text-left p-3 rounded-lg bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-colors block"
+              >
+                <span className="text-black dark:text-[#F9F5EB]">About Pocket Pause</span>
+              </Link>
             </div>
           </div>
 
@@ -48,7 +52,9 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
             <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-black dark:text-[#F9F5EB] font-medium">Dark Mode</span>
+                  <span className="text-black dark:text-[#F9F5EB] font-medium">
+                    {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                  </span>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Switch between light and dark themes</p>
                 </div>
                 <Switch 
