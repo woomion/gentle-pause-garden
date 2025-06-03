@@ -190,7 +190,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button className="text-gray-600 text-sm hover:text-black transition-colors duration-200 underline">
-                  I Bought This
+                  I Purchased This
                 </button>
               </AlertDialogTrigger>
               <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
