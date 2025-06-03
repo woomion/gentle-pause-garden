@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -179,7 +178,15 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 h-12 flex items-center justify-center file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-lavender file:text-dark-gray hover:file:bg-lavender/80"
+                className="bg-white border-gray-200 rounded-xl h-12 flex items-center file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-lavender file:text-dark-gray hover:file:bg-lavender/80 [&::file-selector-button]:mr-3 [&::file-selector-button]:py-2 [&::file-selector-button]:px-3 [&::file-selector-button]:rounded-lg [&::file-selector-button]:border-0 [&::file-selector-button]:text-sm [&::file-selector-button]:font-medium [&::file-selector-button]:bg-lavender [&::file-selector-button]:text-dark-gray hover:[&::file-selector-button]:bg-lavender/80"
+                style={{ 
+                  color: '#B0ABB7',
+                  paddingTop: '0',
+                  paddingBottom: '0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: '48px'
+                }}
               />
             </div>
 
@@ -218,7 +225,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="Why do you want this item?"
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] text-base"
               />
             </div>
 
