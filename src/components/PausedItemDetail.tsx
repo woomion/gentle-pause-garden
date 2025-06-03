@@ -1,4 +1,5 @@
-import { Timer } from 'lucide-react';
+
+import { Timer, ExternalLink } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -70,6 +71,29 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     });
   };
 
+  const handleBought = () => {
+    // Move item to pause log
+    pauseLogStore.addItem({
+      itemName: item.itemName,
+      emotion: item.emotion,
+      storeName: item.storeName
+    });
+    
+    // Remove from paused items
+    onDelete(item.id);
+    onClose();
+    
+    // Show success toast
+    toast({
+      title: "Great choice!",
+      description: "We've moved this thoughtful decision to your Pause Log for future reference.",
+    });
+  };
+
+  const handleKeepPaused = () => {
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
@@ -132,8 +156,33 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             </div>
           </div>
 
-          {/* Let it go button */}
+          {/* I bought this button */}
           <div className="pt-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+                  I Bought This
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Mark as purchased?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will move "{item.itemName}" to your pause log as a thoughtful purchase decision.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-2xl" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleBought} className="rounded-2xl">
+                    Yes, I bought it
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+
+          {/* Let it go button */}
+          <div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
@@ -148,7 +197,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-2xl">Keep paused</AlertDialogCancel>
+                  <AlertDialogCancel className="rounded-2xl" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
                   <AlertDialogAction onClick={handleLetGo} className="rounded-2xl">
                     Let it go
                   </AlertDialogAction>
@@ -164,8 +213,9 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 href={item.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-gray-600 text-sm hover:text-black transition-colors duration-200"
+                className="text-gray-600 text-sm hover:text-black transition-colors duration-200 flex items-center gap-1"
               >
+                <ExternalLink size={14} />
                 View item
               </a>
             ) : (
