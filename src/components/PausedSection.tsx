@@ -53,8 +53,7 @@ const PausedSection = () => {
       {pausedItems.length === 1 ? (
         <>
           <PausedItemCard item={pausedItems[0]} />
-          {/* Web only: Show "1 item" text */}
-          <div className="hidden md:flex justify-center mt-4">
+          <div className="flex justify-center mt-4">
             <span className="text-sm text-gray-600">1 item</span>
           </div>
         </>
@@ -79,16 +78,18 @@ const PausedSection = () => {
             </div>
           </Carousel>
           
-          {/* Mobile only: Dots indicator */}
-          <div className="flex md:hidden justify-center mt-4 gap-2">
-            {pausedItems.map((_, index) => (
-              <div
-                key={index}
-                className={`w-2 h-2 rounded-full ${
-                  index === current - 1 ? 'bg-gray-600' : 'bg-gray-300'
-                }`}
-              />
-            ))}
+          {/* Mobile only: Swipe indicator with count */}
+          <div className="flex md:hidden justify-center mt-4">
+            <div className="bg-gray-100 rounded-full px-3 py-1 flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+              </div>
+              <span className="text-xs text-gray-600">
+                {current}/{pausedItems.length}
+              </span>
+            </div>
           </div>
         </div>
       )}
