@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -119,7 +120,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="www.example.com/item"
                 value={formData.link}
                 onChange={(e) => handleInputChange('link', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
@@ -134,7 +135,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="What are you thinking of buying?"
                 value={formData.itemName}
                 onChange={(e) => handleInputChange('itemName', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
@@ -149,7 +150,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="Where is this item from?"
                 value={formData.storeName}
                 onChange={(e) => handleInputChange('storeName', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
@@ -164,7 +165,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="0.00"
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
@@ -197,7 +198,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
               </Label>
               <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
                 <SelectTrigger className="bg-white border-gray-200 rounded-xl py-3 px-4">
-                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7]" />
+                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-200 rounded-xl max-h-60 overflow-y-auto">
                   {emotions.map((emotion) => (
@@ -225,7 +226,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="Why do you want this item?"
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] text-base"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
@@ -260,7 +261,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 <SelectTrigger className={`bg-white border-2 rounded-xl py-3 px-4 transition-all ${
                   formData.otherDuration ? 'border-lavender bg-lavender' : 'border-gray-200 hover:border-lavender/50'
                 }`}>
-                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7]" />
+                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-200 rounded-xl">
                   {otherPauseLengths.map((duration) => (
