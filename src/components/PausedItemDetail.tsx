@@ -100,7 +100,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           </div>
 
           {/* Item details */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-black leading-tight">{item.itemName}</h3>
               {item.price && (
@@ -110,8 +110,8 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             
             <p className="text-gray-600 text-base">{item.storeName}</p>
             
-            <div className="space-y-2">
-              <span className="text-gray-600 text-sm">Feeling</span>
+            <div className="space-y-1">
+              <span className="text-gray-600 text-sm">Paused while feeling</span>
               <div>
                 <span 
                   className="inline-block px-4 py-2 rounded-full text-sm font-medium"
