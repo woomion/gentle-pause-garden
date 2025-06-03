@@ -115,7 +115,7 @@ const PauseLog = () => {
           <div className="bg-white/60 rounded-lg p-8 text-center border border-gray-200 mt-16">
             <p className="text-gray-500 text-lg mb-2">Nothing here yet</p>
             <p className="text-gray-400 text-sm">
-              When you decide to let go of paused items, they'll appear here in your pause log.
+              When you make decisions on your paused items, they'll appear here in your Pause Log.
             </p>
           </div>
 
