@@ -11,6 +11,7 @@ export interface PausedItem {
   otherDuration?: string;
   link?: string;
   photo?: File | null;
+  photoDataUrl?: string; // Add this to store base64 image data
   pausedAt: Date;
   checkInTime: string;
 }
@@ -43,8 +44,7 @@ class PausedItemsStore {
 
   private saveToStorage() {
     try {
-      // Note: We can't store File objects in localStorage, so photo will be lost on refresh
-      // For a production app, you'd want to upload the file to a server or use IndexedDB
+      // Store items with base64 image data instead of File objects
       const itemsToStore = this.items.map(item => ({
         ...item,
         photo: null // Remove File objects as they can't be serialized
@@ -55,12 +55,33 @@ class PausedItemsStore {
     }
   }
 
-  addItem(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime'>) {
+  private async convertFileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async addItem(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime'>) {
+    let photoDataUrl: string | undefined;
+    
+    // Convert photo to base64 if it exists
+    if (item.photo && item.photo instanceof File) {
+      try {
+        photoDataUrl = await this.convertFileToDataUrl(item.photo);
+      } catch (error) {
+        console.error('Failed to convert image to base64:', error);
+      }
+    }
+
     const newItem: PausedItem = {
       ...item,
       id: Date.now().toString(),
       pausedAt: new Date(),
-      checkInTime: this.calculateCheckInTime(item.duration || item.otherDuration || '24 hours')
+      checkInTime: this.calculateCheckInTime(item.duration || item.otherDuration || '24 hours'),
+      photoDataUrl
     };
     
     this.items.push(newItem);

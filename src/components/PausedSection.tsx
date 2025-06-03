@@ -53,7 +53,7 @@ const PausedSection = () => {
       {pausedItems.length === 1 ? (
         <>
           <PausedItemCard item={pausedItems[0]} />
-          <div className="flex justify-center mt-4">
+          <div className="flex justify-center mt-2">
             <span className="text-sm text-gray-600">1 item</span>
           </div>
         </>
@@ -78,9 +78,9 @@ const PausedSection = () => {
             </div>
           </Carousel>
           
-          {/* Mobile only: Swipe indicator with count */}
-          <div className="flex md:hidden justify-center mt-4">
-            <div className="bg-gray-100 rounded-full px-3 py-1 flex items-center gap-2">
+          {/* Mobile only: Swipe indicator with count, closer to cards */}
+          <div className="flex md:hidden justify-center mt-2">
+            <div className="bg-white rounded-full px-3 py-1 flex items-center gap-2 border border-gray-200">
               <div className="flex items-center gap-1">
                 <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                 <div className="w-1 h-1 bg-gray-400 rounded-full"></div>

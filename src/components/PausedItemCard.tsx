@@ -24,11 +24,17 @@ const PausedItemCard = ({ item }: PausedItemCardProps) => {
     return emotionColors[emotion] || '#F0F0EC';
   };
 
-  // Create image URL from uploaded file or use provided URL
+  // Create image URL from uploaded file, stored base64 data, or use provided URL
   const getImageUrl = () => {
+    // First check if there's a stored base64 image
+    if (item.photoDataUrl) {
+      return item.photoDataUrl;
+    }
+    // Then check if there's a current File object (for newly added items)
     if (item.photo && item.photo instanceof File) {
       return URL.createObjectURL(item.photo);
     }
+    // Finally fall back to imageUrl
     return item.imageUrl;
   };
 
