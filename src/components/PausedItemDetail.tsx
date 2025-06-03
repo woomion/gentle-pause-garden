@@ -156,33 +156,8 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             </div>
           </div>
 
-          {/* I bought this button */}
-          <div className="pt-2">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
-                  I Bought This
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Mark as purchased?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will move "{item.itemName}" to your pause log as a thoughtful purchase decision.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-2xl" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleBought} className="rounded-2xl">
-                    Yes, I bought it
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-
           {/* Let it go button */}
-          <div>
+          <div className="pt-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
@@ -200,6 +175,31 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                   <AlertDialogCancel className="rounded-2xl" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
                   <AlertDialogAction onClick={handleLetGo} className="rounded-2xl">
                     Let it go
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+
+          {/* I bought this button */}
+          <div className="text-center">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="text-gray-600 text-sm hover:text-black transition-colors duration-200 underline">
+                  I Bought This
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Mark as purchased?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will move "{item.itemName}" to your pause log as a thoughtful purchase decision.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-2xl" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleBought} className="rounded-2xl">
+                    Yes, I bought it
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
