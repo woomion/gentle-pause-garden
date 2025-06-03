@@ -8,39 +8,44 @@ import PausedSection from '../components/PausedSection';
 import GreaterJoySection from '../components/GreaterJoySection';
 import MindfulWinsSection from '../components/MindfulWinsSection';
 import FooterLinks from '../components/FooterLinks';
-import PauseForm from '../components/PauseForm';
 
 const Index = () => {
   const [showForm, setShowForm] = useState(false);
 
   const handleAddPause = () => {
-    console.log('Add pause button clicked - opening form after animation');
-    // Delay to allow ripple animation to complete
-    setTimeout(() => {
-      setShowForm(true);
-    }, 600); // Matches the ripple animation duration
+    console.log('Add pause button clicked - form will open here');
+    // TODO: Open pause item form
+    setShowForm(true);
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-cream">
-        <div className="max-w-md mx-auto px-6 py-8">
-          <PauseHeader />
-          <WelcomeMessage firstName="Michelle" />
-          <AddPauseButton onAddPause={handleAddPause} />
-          <InStoreModeButton />
-          <PausedSection />
-          <GreaterJoySection />
-          <MindfulWinsSection />
-          <FooterLinks />
-        </div>
+    <div className="min-h-screen bg-cream">
+      <div className="max-w-md mx-auto px-6 py-8">
+        <PauseHeader />
+        <WelcomeMessage firstName="Michelle" />
+        <AddPauseButton onAddPause={handleAddPause} />
+        <InStoreModeButton />
+        <PausedSection />
+        <GreaterJoySection />
+        <MindfulWinsSection />
+        <FooterLinks />
       </div>
       
-      <PauseForm 
-        isOpen={showForm} 
-        onClose={() => setShowForm(false)} 
-      />
-    </>
+      {showForm && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4">
+          <div className="bg-cream rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-medium text-dark-gray mb-4">Pause Item Form</h3>
+            <p className="text-taupe text-sm mb-4">Form will be built in next step</p>
+            <button 
+              onClick={() => setShowForm(false)}
+              className="w-full bg-lavender text-dark-gray py-2 px-4 rounded-xl"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
