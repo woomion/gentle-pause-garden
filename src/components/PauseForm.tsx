@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -178,7 +179,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-lavender file:text-dark-gray hover:file:bg-lavender/80"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 text-center file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-lavender file:text-dark-gray hover:file:bg-lavender/80 file:mx-auto"
               />
             </div>
 
