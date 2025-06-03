@@ -1,4 +1,3 @@
-
 import { Timer, ExternalLink } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
@@ -87,11 +86,16 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     onDelete(item.id);
     onClose();
     
-    // Show success toast
-    toast({
-      title: "Great choice!",
+    // Show success toast that auto-dismisses
+    const toastInstance = toast({
+      title: "Great, you made a conscious choice!",
       description: "We've moved this thoughtful decision to your Pause Log for future reference.",
     });
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      toastInstance.dismiss();
+    }, 3000);
   };
 
   const handleKeepPaused = () => {
