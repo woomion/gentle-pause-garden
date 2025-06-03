@@ -25,7 +25,7 @@ const Index = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-cream">
+      <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
         <div className="max-w-md mx-auto px-6 py-8">
           <PauseHeader />
           <WelcomeMessage firstName="Michelle" />

@@ -1,5 +1,9 @@
 
+import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Switch } from '@/components/ui/switch';
+import { Toggle } from '@/components/ui/toggle';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SettingsSidebarProps {
   open: boolean;
@@ -7,50 +11,81 @@ interface SettingsSidebarProps {
 }
 
 const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
+  const { isDarkMode, toggleTheme } = useTheme();
+  const [remindersEnabled, setRemindersEnabled] = useState(false);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-80 bg-cream">
+      <SheetContent side="right" className="w-80 bg-cream dark:bg-[#200E3B] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle className="text-xl font-semibold text-black">Settings</SheetTitle>
+          <SheetTitle className="text-xl font-semibold text-black dark:text-[#F9F5EB]">Settings & Info</SheetTitle>
         </SheetHeader>
         
         <div className="mt-6 space-y-6">
+          {/* About Pocket Pause */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-black">Account</h3>
+            <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">About Pocket Pause</h3>
+            <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
+              <p className="text-sm text-black dark:text-[#F9F5EB] leading-relaxed">
+                Pocket Pause is your conscious spending companion. We help you pause, reflect, and make mindful purchasing decisions that align with your values and goals.
+              </p>
+            </div>
+          </div>
+
+          {/* Privacy Policy */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Legal</h3>
             <div className="space-y-2">
-              <button className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-white/80 transition-colors">
-                <span className="text-black">Profile Settings</span>
-              </button>
-              <button className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-white/80 transition-colors">
-                <span className="text-black">Notifications</span>
+              <button className="w-full text-left p-3 rounded-lg bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-colors">
+                <span className="text-black dark:text-[#F9F5EB]">Privacy Policy</span>
               </button>
             </div>
           </div>
-          
+
+          {/* Appearance */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-black">Preferences</h3>
+            <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Appearance</h3>
+            <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-black dark:text-[#F9F5EB] font-medium">Dark Mode</span>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Switch between light and dark themes</p>
+                </div>
+                <Switch 
+                  checked={isDarkMode} 
+                  onCheckedChange={toggleTheme}
+                  className="ml-4"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Account */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Account</h3>
             <div className="space-y-2">
-              <button className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-white/80 transition-colors">
-                <span className="text-black">Theme</span>
-              </button>
-              <button className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-white/80 transition-colors">
-                <span className="text-black">Language</span>
+              <button className="w-full text-left p-3 rounded-lg bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-colors">
+                <span className="text-black dark:text-[#F9F5EB]">Sign In / Sync Settings</span>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Sync your data across devices</p>
               </button>
             </div>
           </div>
-          
+
+          {/* Notifications */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-black">Support</h3>
-            <div className="space-y-2">
-              <button className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-white/80 transition-colors">
-                <span className="text-black">Help Center</span>
-              </button>
-              <button className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-white/80 transition-colors">
-                <span className="text-black">Contact Us</span>
-              </button>
-              <button className="w-full text-left p-3 rounded-lg bg-white/60 hover:bg-white/80 transition-colors">
-                <span className="text-black">Privacy Policy</span>
-              </button>
+            <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Notifications</h3>
+            <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-black dark:text-[#F9F5EB] font-medium">Gentle Reminders</span>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Get mindful nudges for conscious spending</p>
+                </div>
+                <Switch 
+                  checked={remindersEnabled} 
+                  onCheckedChange={setRemindersEnabled}
+                  className="ml-4"
+                />
+              </div>
             </div>
           </div>
         </div>
