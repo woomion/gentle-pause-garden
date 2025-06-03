@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { pausedItemsStore, PausedItem } from '../stores/pausedItemsStore';
 import PausedItemCard from './PausedItemCard';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from '@/components/ui/carousel';
 
 const PausedSection = () => {
   const [pausedItems, setPausedItems] = useState<PausedItem[]>([]);
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     // Initial load
@@ -18,6 +20,18 @@ const PausedSection = () => {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
 
   if (pausedItems.length === 0) {
     return (
@@ -37,10 +51,16 @@ const PausedSection = () => {
       <p className="text-black text-lg mb-3">You haven't decided yet—and that's okay</p>
       
       {pausedItems.length === 1 ? (
-        <PausedItemCard item={pausedItems[0]} />
+        <>
+          <PausedItemCard item={pausedItems[0]} />
+          {/* Web only: Show "1 item" text */}
+          <div className="hidden md:flex justify-center mt-4">
+            <span className="text-sm text-gray-600">1 item</span>
+          </div>
+        </>
       ) : (
-        <div className="relative px-12">
-          <Carousel className="w-full">
+        <div className="relative">
+          <Carousel className="w-full" setApi={setApi}>
             <CarouselContent>
               {pausedItems.map((item) => (
                 <CarouselItem key={item.id}>
@@ -48,14 +68,25 @@ const PausedSection = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="-left-12 top-1/2 -translate-y-1/2" />
-            <CarouselNext className="-right-12 top-1/2 -translate-y-1/2" />
           </Carousel>
-          <div className="flex justify-center mt-4 gap-2">
+          
+          {/* Web only: Arrows and counter underneath */}
+          <div className="hidden md:flex items-center justify-center mt-4 gap-4">
+            <CarouselPrevious className="relative left-0 top-0 translate-y-0" />
+            <span className="text-sm text-gray-600 px-4">
+              {current}/{pausedItems.length} items
+            </span>
+            <CarouselNext className="relative right-0 top-0 translate-y-0" />
+          </div>
+          
+          {/* Mobile only: Dots indicator */}
+          <div className="flex md:hidden justify-center mt-4 gap-2">
             {pausedItems.map((_, index) => (
               <div
                 key={index}
-                className="w-2 h-2 rounded-full bg-gray-300"
+                className={`w-2 h-2 rounded-full ${
+                  index === current - 1 ? 'bg-gray-600' : 'bg-gray-300'
+                }`}
               />
             ))}
           </div>
