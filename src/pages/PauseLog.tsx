@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Filter, Trash } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { pauseLogStore, PauseLogItem } from '../stores/pauseLogStore';
+import PauseHeader from '../components/PauseHeader';
 
 const PauseLog = () => {
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
@@ -96,13 +98,14 @@ const PauseLog = () => {
     return (
       <div className="min-h-screen bg-cream">
         <div className="max-w-md mx-auto px-6 py-8">
-          {/* Header */}
+          <PauseHeader />
+
+          {/* Back button */}
           <div className="flex items-center justify-between mb-6">
             <Link to="/" className="flex items-center gap-2 text-black hover:text-gray-600">
               <ArrowLeft size={20} />
               <span className="text-sm">Back to Home</span>
             </Link>
-            <div className="w-6 h-6 border border-gray-300 rounded"></div>
           </div>
 
           {/* Title */}
@@ -132,13 +135,14 @@ const PauseLog = () => {
   return (
     <div className="min-h-screen bg-cream">
       <div className="max-w-md mx-auto px-6 py-8">
-        {/* Header */}
+        <PauseHeader />
+
+        {/* Back button */}
         <div className="flex items-center justify-between mb-6">
           <Link to="/" className="flex items-center gap-2 text-black hover:text-gray-600">
             <ArrowLeft size={20} />
             <span className="text-sm">Back to Home</span>
           </Link>
-          <div className="w-6 h-6 border border-gray-300 rounded"></div>
         </div>
 
         {/* Title */}
