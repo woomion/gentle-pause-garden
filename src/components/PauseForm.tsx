@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -184,7 +183,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 />
                 {!formData.photo && (
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#B0ABB7] pointer-events-none">
-                    No photo chosen
+                    No file chosen
                   </div>
                 )}
               </div>
