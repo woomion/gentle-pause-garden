@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,22 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData(prev => ({ ...prev, photo: file }));
+  };
+
+  const handleDurationSelect = (duration: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      duration: duration,
+      otherDuration: '' // Clear dropdown selection
+    }));
+  };
+
+  const handleOtherDurationSelect = (value: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      otherDuration: value,
+      duration: '' // Clear button selection
+    }));
   };
 
   const handleSubmit = async () => {
@@ -223,7 +240,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 {['24 hours', '3 days', '1 week'].map((duration) => (
                   <button
                     key={duration}
-                    onClick={() => handleInputChange('duration', duration)}
+                    onClick={() => handleDurationSelect(duration)}
                     className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
                       formData.duration === duration
                         ? 'bg-lavender border-lavender text-dark-gray'
@@ -238,10 +255,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
               {/* Other pause lengths dropdown */}
               <Select 
                 value={formData.otherDuration} 
-                onValueChange={(value) => {
-                  handleInputChange('otherDuration', value);
-                  handleInputChange('duration', value);
-                }}
+                onValueChange={handleOtherDurationSelect}
               >
                 <SelectTrigger className={`bg-white border-2 rounded-xl py-3 px-4 transition-all ${
                   formData.otherDuration ? 'border-lavender bg-lavender' : 'border-gray-200 hover:border-lavender/50'
