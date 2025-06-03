@@ -50,14 +50,14 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto">
+      <DialogContent className="max-w-sm mx-auto p-4">
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          {/* Product image */}
-          <div className="w-full h-48 bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+        <div className="space-y-3">
+          {/* Product image - smaller */}
+          <div className="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
             {imageUrl ? (
               <img 
                 src={imageUrl} 
@@ -66,29 +66,29 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
-                  target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>';
+                  target.parentElement!.innerHTML = '<div class="w-12 h-12 bg-gray-300 rounded-full opacity-50"></div>';
                 }}
               />
             ) : (
-              <div className="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>
+              <div className="w-12 h-12 bg-gray-300 rounded-full opacity-50"></div>
             )}
           </div>
 
-          {/* Item details */}
-          <div className="space-y-3">
+          {/* Item details - more compact */}
+          <div className="space-y-2">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-semibold text-black">{item.itemName}</h3>
+              <h3 className="text-lg font-medium text-black leading-tight">{item.itemName}</h3>
               {item.price && (
-                <span className="text-lg font-medium text-black">${item.price}</span>
+                <span className="text-base font-medium text-black ml-2">${item.price}</span>
               )}
             </div>
             
-            <p className="text-gray-700">{item.storeName}</p>
+            <p className="text-gray-600 text-sm">{item.storeName}</p>
             
-            <div className="flex items-center gap-2">
-              <span className="text-gray-700">Paused while feeling</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-gray-600 text-sm">Feeling</span>
               <span 
-                className="px-3 py-1 rounded-full text-sm"
+                className="px-2 py-1 rounded text-xs"
                 style={{ backgroundColor: getEmotionColor(item.emotion) }}
               >
                 {item.emotion}
@@ -96,18 +96,17 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             </div>
 
             {item.notes && (
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-1">Notes:</p>
-                <p className="text-gray-600 text-sm">{item.notes}</p>
+              <div className="bg-gray-50 rounded-lg p-2">
+                <p className="text-gray-600 text-xs">{item.notes}</p>
               </div>
             )}
 
-            <div className="bg-lavender text-black text-sm py-2 px-3 rounded-lg">
+            <div className="bg-lavender text-black text-xs py-1.5 px-2 rounded text-center">
               {item.checkInTime}
             </div>
 
             {item.link && (
-              <div className="pt-2">
+              <div className="text-center">
                 <a 
                   href={item.link} 
                   target="_blank" 
@@ -120,11 +119,11 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             )}
           </div>
 
-          {/* Delete button */}
-          <div className="pt-4 border-t">
+          {/* Delete button - less bold */}
+          <div className="pt-2 border-t border-gray-100">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full">
+                <Button variant="outline" size="sm" className="w-full text-gray-600 border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200">
                   Delete Item
                 </Button>
               </AlertDialogTrigger>
