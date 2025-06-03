@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,11 +25,10 @@ const emotions = [
   { name: 'something else', color: '#F0F0EC' }
 ];
 
-const pauseDurations = [
-  '24 hours',
-  '3 days', 
-  '1 week',
-  'A Season (3 months)'
+const otherPauseLengths = [
+  '2 weeks',
+  '1 month',
+  '3 months'
 ];
 
 const PauseForm = ({ onClose }: PauseFormProps) => {
@@ -42,7 +40,8 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
     photo: null as File | null,
     emotion: '',
     notes: '',
-    duration: ''
+    duration: '',
+    otherDuration: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -92,10 +91,10 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
             Add Something to Pause
           </h1>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Link Field */}
-            <div className="space-y-2">
-              <Label htmlFor="link" className="text-dark-gray font-medium">
+            <div className="space-y-1">
+              <Label htmlFor="link" className="text-dark-gray font-medium text-base">
                 Link (paste a product URL)
               </Label>
               <Input
@@ -104,13 +103,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="www.example.com/item"
                 value={formData.link}
                 onChange={(e) => handleInputChange('link', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7]"
               />
             </div>
 
             {/* Item Name Field */}
-            <div className="space-y-2">
-              <Label htmlFor="itemName" className="text-dark-gray font-medium">
+            <div className="space-y-1">
+              <Label htmlFor="itemName" className="text-dark-gray font-medium text-base">
                 Item Name
               </Label>
               <Input
@@ -119,13 +118,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="What are you thinking of buying?"
                 value={formData.itemName}
                 onChange={(e) => handleInputChange('itemName', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7]"
               />
             </div>
 
             {/* Store Name Field */}
-            <div className="space-y-2">
-              <Label htmlFor="storeName" className="text-dark-gray font-medium">
+            <div className="space-y-1">
+              <Label htmlFor="storeName" className="text-dark-gray font-medium text-base">
                 Store Name
               </Label>
               <Input
@@ -134,13 +133,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="Where is this item from?"
                 value={formData.storeName}
                 onChange={(e) => handleInputChange('storeName', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7]"
               />
             </div>
 
             {/* Price Field */}
-            <div className="space-y-2">
-              <Label htmlFor="price" className="text-dark-gray font-medium">
+            <div className="space-y-1">
+              <Label htmlFor="price" className="text-dark-gray font-medium text-base">
                 Price
               </Label>
               <Input
@@ -149,13 +148,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="0.00"
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7]"
               />
             </div>
 
             {/* Photo Upload Field */}
-            <div className="space-y-2">
-              <Label htmlFor="photo" className="text-dark-gray font-medium">
+            <div className="space-y-1">
+              <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
                 Photo (optional)
               </Label>
               <div className="relative">
@@ -167,7 +166,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                   className="bg-white border-gray-200 rounded-xl py-3 px-4 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-lavender file:text-dark-gray hover:file:bg-lavender/80"
                 />
                 {!formData.photo && (
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#B0ABB7] pointer-events-none">
                     No photo chosen
                   </div>
                 )}
@@ -175,13 +174,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
             </div>
 
             {/* Emotion Selection */}
-            <div className="space-y-2">
-              <Label className="text-dark-gray font-medium">
+            <div className="space-y-1">
+              <Label className="text-dark-gray font-medium text-base">
                 How are you feeling right now?
               </Label>
               <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
                 <SelectTrigger className="bg-white border-gray-200 rounded-xl py-3 px-4">
-                  <SelectValue placeholder="Select emotion" />
+                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7]" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-200 rounded-xl max-h-60 overflow-y-auto">
                   {emotions.map((emotion) => (
@@ -200,8 +199,8 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
             </div>
 
             {/* Notes Field */}
-            <div className="space-y-2">
-              <Label htmlFor="notes" className="text-dark-gray font-medium">
+            <div className="space-y-1">
+              <Label htmlFor="notes" className="text-dark-gray font-medium text-base">
                 Notes (optional)
               </Label>
               <Textarea
@@ -209,21 +208,23 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="Why do you want this item?"
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7]"
               />
             </div>
 
             {/* Pause Duration */}
-            <div className="space-y-3">
-              <Label className="text-dark-gray font-medium">
+            <div className="space-y-2">
+              <Label className="text-dark-gray font-medium text-base">
                 Pause for
               </Label>
-              <div className="grid grid-cols-2 gap-3">
-                {pauseDurations.map((duration) => (
+              
+              {/* Row of three buttons */}
+              <div className="grid grid-cols-3 gap-2">
+                {['24 hours', '3 days', '1 week'].map((duration) => (
                   <button
                     key={duration}
                     onClick={() => handleInputChange('duration', duration)}
-                    className={`py-3 px-4 rounded-xl border-2 transition-all ${
+                    className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
                       formData.duration === duration
                         ? 'bg-lavender border-lavender text-dark-gray'
                         : 'bg-white border-gray-200 text-dark-gray hover:border-lavender/50'
@@ -233,6 +234,28 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                   </button>
                 ))}
               </div>
+              
+              {/* Other pause lengths dropdown */}
+              <Select 
+                value={formData.otherDuration} 
+                onValueChange={(value) => {
+                  handleInputChange('otherDuration', value);
+                  handleInputChange('duration', value);
+                }}
+              >
+                <SelectTrigger className={`bg-white border-2 rounded-xl py-3 px-4 transition-all ${
+                  formData.otherDuration ? 'border-lavender bg-lavender' : 'border-gray-200 hover:border-lavender/50'
+                }`}>
+                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7]" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-gray-200 rounded-xl">
+                  {otherPauseLengths.map((duration) => (
+                    <SelectItem key={duration} value={duration} className="rounded-lg my-1">
+                      {duration}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Action Buttons */}

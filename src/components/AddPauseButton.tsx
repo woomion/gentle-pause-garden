@@ -7,17 +7,12 @@ interface AddPauseButtonProps {
 
 const AddPauseButton = ({ onAddPause }: AddPauseButtonProps) => {
   const [showRipple, setShowRipple] = useState(false);
-  const [showAffirmation, setShowAffirmation] = useState(false);
 
   const handleClick = () => {
     setShowRipple(true);
-    setShowAffirmation(true);
     
     // Reset ripple after animation
     setTimeout(() => setShowRipple(false), 600);
-    
-    // Hide affirmation after showing it briefly
-    setTimeout(() => setShowAffirmation(false), 2000);
     
     onAddPause();
   };
@@ -38,13 +33,6 @@ const AddPauseButton = ({ onAddPause }: AddPauseButtonProps) => {
         
         ADD NEW PAUSE ITEM
       </button>
-      
-      {/* Affirmation message */}
-      {showAffirmation && (
-        <div className="mt-3 text-center text-black text-sm font-medium animate-fade-in">
-          You paused. That's presence.
-        </div>
-      )}
     </div>
   );
 };
