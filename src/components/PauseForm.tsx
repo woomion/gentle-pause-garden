@@ -224,33 +224,23 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
             </div>
 
 {/* Photo Upload Field */}
-<div className="space-y-1">
-  <Label
-    htmlFor="photo"
-    className="text-dark-gray font-medium text-base"
-  >
+            <div className="space-y-1">
+  <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
     Photo (optional)
   </Label>
-  <Input
+  <input
     id="photo"
     type="file"
     accept="image/*"
     onChange={handleFileChange}
-    className="bg-white border-gray-200 rounded-xl h-12 text-sm text-gray-500
-               file:py-0 file:px-4
+    className="w-full text-sm text-gray-500
+               file:py-2 file:px-4
                file:rounded-xl file:border-0
-               file:font-medium file:bg-lavender file:text-dark-gray
-               hover:file:bg-lavender/80
-               [&::file-selector-button]:py-0 [&::file-selector-button]:px-4
-               [&::file-selector-button]:rounded-xl [&::file-selector-button]:border-0
-               [&::file-selector-button]:font-medium [&::file-selector-button]:bg-lavender
-               [&::file-selector-button]:text-dark-gray hover:[&::file-selector-button]:bg-lavender/80"
-    style={{
-      color: '#B0ABB7',
-      height: '48px',
-      paddingTop: 0,
-      paddingBottom: 0
-    }}
+               file:text-sm file:font-medium
+               file:bg-lavender file:text-dark-gray
+               hover:file:bg-lavender/90
+               rounded-xl border border-gray-200 bg-white h-12
+               overflow-hidden"
   />
 </div>
 
