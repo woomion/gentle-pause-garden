@@ -1,4 +1,3 @@
-
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 import { mindfulWinsStore } from '../stores/mindfulWinsStore';
@@ -136,9 +135,9 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           <div className="pt-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button className="w-full bg-black text-white hover:bg-gray-800 rounded-2xl py-3 text-base font-medium transition-all duration-200 hover:scale-[1.02]">
-                  Let it go
-                </Button>
+                <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-3 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+                  LET IT GO
+                </button>
               </AlertDialogTrigger>
               <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
                 <AlertDialogHeader>
