@@ -5,58 +5,22 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-// For now, we'll use mock data that matches the mockup
-const mockMindfulWins = [
-  {
-    id: '1',
-    itemName: 'Arizona Vegan Matte Black Birkenstock',
-    emotion: 'burnt out',
-    letGoDate: 'May 28',
-    storeName: 'Birkenstock Store'
-  },
-  {
-    id: '2',
-    itemName: 'Montana Short Free People',
-    emotion: 'sad',
-    letGoDate: 'May 21',
-    storeName: 'Free People'
-  },
-  {
-    id: '3',
-    itemName: 'Your Court Dress Z Supply',
-    emotion: 'resentful',
-    letGoDate: 'May 5',
-    storeName: 'Z Supply'
-  },
-  {
-    id: '4',
-    itemName: 'Arizona Vegan Matte Black Birkenstock',
-    emotion: 'resentful',
-    letGoDate: 'May 28',
-    storeName: 'Birkenstock Store'
-  },
-  {
-    id: '5',
-    itemName: 'Montana Short Free People',
-    emotion: 'overwhelmed',
-    letGoDate: 'May 21',
-    storeName: 'Free People'
-  },
-  {
-    id: '6',
-    itemName: 'Your Court Dress Z Supply',
-    emotion: 'curious',
-    letGoDate: 'May 5',
-    storeName: 'Z Supply'
-  }
-];
+// We'll create a separate store for mindful wins items
+interface MindfulWinItem {
+  id: string;
+  itemName: string;
+  emotion: string;
+  letGoDate: string;
+  storeName: string;
+}
 
 const MindfulWins = () => {
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
-  const [filteredItems, setFilteredItems] = useState(mockMindfulWins);
+  const [mindfulWinItems, setMindfulWinItems] = useState<MindfulWinItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<MindfulWinItem[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
-  const emotions = ['burnt out', 'sad', 'resentful', 'overwhelmed', 'curious'];
+  const emotions = ['burnt out', 'sad', 'resentful', 'overwhelmed', 'curious', 'bored', 'inspired', 'deserving', 'anxious', 'lonely', 'celebratory', 'something else'];
 
   const getEmotionColor = (emotion: string) => {
     const emotionColors: { [key: string]: string } = {
@@ -77,12 +41,28 @@ const MindfulWins = () => {
   };
 
   useEffect(() => {
+    // Load mindful wins from localStorage
+    const loadMindfulWins = () => {
+      try {
+        const stored = localStorage.getItem('mindfulWins');
+        if (stored) {
+          setMindfulWinItems(JSON.parse(stored));
+        }
+      } catch (error) {
+        console.error('Failed to load mindful wins:', error);
+      }
+    };
+
+    loadMindfulWins();
+  }, []);
+
+  useEffect(() => {
     if (selectedFilter) {
-      setFilteredItems(mockMindfulWins.filter(item => item.emotion === selectedFilter));
+      setFilteredItems(mindfulWinItems.filter(item => item.emotion === selectedFilter));
     } else {
-      setFilteredItems(mockMindfulWins);
+      setFilteredItems(mindfulWinItems);
     }
-  }, [selectedFilter]);
+  }, [selectedFilter, mindfulWinItems]);
 
   const handleFilterClick = (emotion: string) => {
     if (selectedFilter === emotion) {
@@ -99,6 +79,44 @@ const MindfulWins = () => {
   };
 
   const getItemCount = filteredItems.length;
+
+  // Empty state when no items have been let go of yet
+  if (mindfulWinItems.length === 0) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <div className="max-w-md mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <Link to="/" className="flex items-center gap-2 text-black hover:text-gray-600">
+              <ArrowLeft size={20} />
+              <span className="text-sm">Back to Home</span>
+            </Link>
+            <div className="w-6 h-6 border border-gray-300 rounded"></div>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-2xl font-semibold text-black mb-6">What You've Let Go Of</h1>
+
+          {/* Empty state */}
+          <div className="bg-white/60 rounded-lg p-8 text-center border border-gray-200 mt-16">
+            <p className="text-gray-500 text-lg mb-2">Nothing here yet</p>
+            <p className="text-gray-400 text-sm">
+              When you decide to let go of paused items, they'll appear here as mindful wins.
+            </p>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-16 text-center text-xs text-gray-400">
+            <p>|| Pocket Pause—your conscious spending companion</p>
+            <div className="flex justify-center gap-4 mt-2">
+              <span>Privacy Policy</span>
+              <span>About</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream">
