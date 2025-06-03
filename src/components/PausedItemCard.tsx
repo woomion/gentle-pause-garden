@@ -1,4 +1,5 @@
 
+import { Timer } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 
 interface PausedItemCardProps {
@@ -43,52 +44,59 @@ const PausedItemCard = ({ item, onClick }: PausedItemCardProps) => {
 
   return (
     <div 
-      className="bg-white/60 rounded-2xl p-4 mb-4 border border-lavender/30 cursor-pointer hover:bg-white/80 transition-colors"
+      className="bg-white/60 rounded-2xl border border-lavender/30 cursor-pointer hover:bg-white/80 transition-colors relative overflow-hidden"
       onClick={onClick}
     >
-      <div className="flex items-start gap-4">
-        {/* Product image with consistent sizing */}
-        <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {imageUrl ? (
-            <img 
-              src={imageUrl} 
-              alt={item.itemName}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback to placeholder if image fails to load
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                target.parentElement!.innerHTML = '<div class="w-8 h-8 bg-gray-300 rounded-full opacity-50"></div>';
-              }}
-            />
-          ) : (
-            <div className="w-8 h-8 bg-gray-300 rounded-full opacity-50"></div>
-          )}
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="font-medium text-black truncate pr-2">{item.itemName}</h3>
-            <span className="text-black font-medium flex-shrink-0">
-              {item.price ? `$${item.price}` : ''}
-            </span>
+      <div className="p-4 pb-12">
+        <div className="flex items-start gap-4">
+          {/* Product image with consistent sizing */}
+          <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt={item.itemName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.parentElement!.innerHTML = '<div class="w-8 h-8 bg-gray-300 rounded-full opacity-50"></div>';
+                }}
+              />
+            ) : (
+              <div className="w-8 h-8 bg-gray-300 rounded-full opacity-50"></div>
+            )}
           </div>
           
-          <p className="text-black text-sm mb-1">{item.storeName}</p>
-          <p className="text-black text-sm mb-3">
-            Paused while feeling{' '}
-            <span 
-              className="px-2 py-1 rounded text-xs"
-              style={{ backgroundColor: getEmotionColor(item.emotion) }}
-            >
-              {item.emotion}
-            </span>
-          </p>
-          
-          <div className="bg-lavender text-black text-sm py-2 px-3 rounded-lg text-center">
-            {item.checkInTime}
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-medium text-black truncate pr-2">{item.itemName}</h3>
+              <span className="text-black font-medium flex-shrink-0">
+                {item.price ? `$${item.price}` : ''}
+              </span>
+            </div>
+            
+            <p className="text-black text-sm mb-1">{item.storeName}</p>
+            <div className="text-black text-sm mb-3">
+              <span>Paused while feeling </span>
+              <span 
+                className="inline-block px-2 py-1 rounded text-xs"
+                style={{ backgroundColor: getEmotionColor(item.emotion) }}
+              >
+                {item.emotion}
+              </span>
+            </div>
           </div>
         </div>
+      </div>
+      
+      {/* Full-width banner at bottom */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium text-black flex items-center justify-center gap-2 rounded-b-2xl"
+        style={{ backgroundColor: '#E7D9FA' }}
+      >
+        <Timer size={14} />
+        {item.checkInTime}
       </div>
     </div>
   );
