@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Filter, ShoppingBag, X } from 'lucide-react';
+import { ArrowLeft, Filter, Trash } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { pauseLogStore, PauseLogItem } from '../stores/pauseLogStore';
 
 const PauseLog = () => {
@@ -32,6 +32,10 @@ const PauseLog = () => {
       'something else': '#F0F0EC'
     };
     return emotionColors[emotion] || '#F0F0EC';
+  };
+
+  const deleteItem = (id: string) => {
+    pauseLogStore.deleteItem(id);
   };
 
   useEffect(() => {
@@ -248,24 +252,9 @@ const PauseLog = () => {
         {/* Items List */}
         <div className="space-y-4">
           {filteredItems.map((item) => (
-            <div key={item.id} className="bg-white/60 rounded-lg p-4 border border-gray-200">
-              <div className="flex justify-between items-start mb-2">
+            <div key={item.id} className="bg-white/60 rounded-lg p-4 border border-gray-200 relative">
+              <div className="mb-2">
                 <h3 className="font-medium text-black">{item.itemName}</h3>
-                <div className="flex items-center gap-2">
-                  {/* Status indicator */}
-                  {item.status === 'purchased' ? (
-                    <div className="flex items-center gap-1 text-green-600 text-xs font-medium">
-                      <ShoppingBag size={12} />
-                      Purchased
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-gray-600 text-xs font-medium">
-                      <X size={12} />
-                      Let go
-                    </div>
-                  )}
-                  <span className="text-sm text-gray-600">{item.letGoDate}</span>
-                </div>
               </div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm text-gray-600">Paused while feeling</span>
@@ -276,12 +265,37 @@ const PauseLog = () => {
                   {item.emotion}
                 </Badge>
               </div>
-              <div className="text-sm text-gray-600 mb-2">{item.storeName}</div>
+              <div className="text-sm text-gray-600 mb-2">
+                {item.status === 'purchased' ? `Purchased on ${item.letGoDate}` : `Let go of on ${item.letGoDate}`}
+              </div>
               {item.notes && (
                 <div className="text-sm text-gray-700 italic bg-gray-50 p-2 rounded mt-2">
                   "{item.notes}"
                 </div>
               )}
+              
+              {/* Delete button in bottom right */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="absolute bottom-3 right-3 p-1 text-gray-400 hover:text-red-500 transition-colors">
+                    <Trash size={16} />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete from Pause Log?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently remove "{item.itemName}" from your pause log. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteItem(item.id)} className="rounded-2xl">
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ))}
         </div>

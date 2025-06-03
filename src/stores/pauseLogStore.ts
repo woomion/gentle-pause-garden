@@ -1,4 +1,3 @@
-
 export interface PauseLogItem {
   id: string;
   itemName: string;
@@ -58,6 +57,13 @@ class PauseLogStore {
     this.saveToStorage();
     this.notifyListeners();
     console.log('Added pause log item:', newItem);
+  }
+
+  deleteItem(id: string) {
+    this.items = this.items.filter(item => item.id !== id);
+    this.saveToStorage();
+    this.notifyListeners();
+    console.log('Deleted pause log item:', id);
   }
 
   getItems(): PauseLogItem[] {
