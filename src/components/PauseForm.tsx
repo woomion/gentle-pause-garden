@@ -173,20 +173,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
               <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
                 Photo (optional)
               </Label>
-              <div className="relative">
-                <Input
-                  id="photo"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="bg-white border-gray-200 rounded-xl py-3 px-4 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-lavender file:text-dark-gray hover:file:bg-lavender/80"
-                />
-                {!formData.photo && (
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#B0ABB7] pointer-events-none">
-                    No file chosen
-                  </div>
-                )}
-              </div>
+              <Input
+                id="photo"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-lavender file:text-dark-gray hover:file:bg-lavender/80"
+              />
             </div>
 
             {/* Emotion Selection */}
