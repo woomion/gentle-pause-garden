@@ -1,5 +1,6 @@
 
-import { X } from 'lucide-react';
+
+import { Timer } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 import { mindfulWinsStore } from '../stores/mindfulWinsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -83,29 +84,32 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
         
         <div className="space-y-6">
           {/* Product image */}
-          <div className="w-full h-48 bg-gray-200 rounded-2xl flex items-center justify-center overflow-hidden">
-            {imageUrl ? (
-              <img 
-                src={imageUrl} 
-                alt={item.itemName}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>';
-                }}
-              />
-            ) : (
-              <div className="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>
-            )}
-          </div>
+          <div className="relative">
+            <div className="w-full h-48 bg-gray-200 rounded-2xl flex items-center justify-center overflow-hidden">
+              {imageUrl ? (
+                <img 
+                  src={imageUrl} 
+                  alt={item.itemName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>';
+                  }}
+                />
+              ) : (
+                <div className="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>
+              )}
+            </div>
 
-          {/* Pause Duration Indicator - moved below image */}
-          <div 
-            className="w-full py-3 px-4 rounded-2xl text-center text-sm font-medium text-black -mt-2"
-            style={{ backgroundColor: '#E7D9FA' }}
-          >
-            {item.checkInTime}
+            {/* Pause Duration Banner - touching bottom of image */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 py-2 px-4 rounded-b-2xl text-center text-xs font-medium text-black flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#E7D9FA' }}
+            >
+              <Timer size={14} />
+              {item.checkInTime}
+            </div>
           </div>
 
           {/* Item details */}
@@ -199,3 +203,4 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
 };
 
 export default PausedItemDetail;
+
