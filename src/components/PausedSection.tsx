@@ -2,12 +2,14 @@
 import { useState, useEffect } from 'react';
 import { pausedItemsStore, PausedItem } from '../stores/pausedItemsStore';
 import PausedItemCard from './PausedItemCard';
+import PausedItemDetail from './PausedItemDetail';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from '@/components/ui/carousel';
 
 const PausedSection = () => {
   const [pausedItems, setPausedItems] = useState<PausedItem[]>([]);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
 
   useEffect(() => {
     // Initial load
@@ -33,6 +35,18 @@ const PausedSection = () => {
     });
   }, [api]);
 
+  const handleItemClick = (item: PausedItem) => {
+    setSelectedItem(item);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedItem(null);
+  };
+
+  const handleDeleteItem = (id: string) => {
+    pausedItemsStore.removeItem(id);
+  };
+
   if (pausedItems.length === 0) {
     return (
       <div className="mb-8">
@@ -52,7 +66,7 @@ const PausedSection = () => {
       
       {pausedItems.length === 1 ? (
         <>
-          <PausedItemCard item={pausedItems[0]} />
+          <PausedItemCard item={pausedItems[0]} onClick={() => handleItemClick(pausedItems[0])} />
           <div className="flex justify-center mt-2">
             <span className="text-sm text-gray-600">1 item</span>
           </div>
@@ -63,7 +77,7 @@ const PausedSection = () => {
             <CarouselContent>
               {pausedItems.map((item) => (
                 <CarouselItem key={item.id}>
-                  <PausedItemCard item={item} />
+                  <PausedItemCard item={item} onClick={() => handleItemClick(item)} />
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -92,6 +106,16 @@ const PausedSection = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Item detail modal */}
+      {selectedItem && (
+        <PausedItemDetail
+          item={selectedItem}
+          isOpen={!!selectedItem}
+          onClose={handleCloseDetail}
+          onDelete={handleDeleteItem}
+        />
       )}
     </div>
   );

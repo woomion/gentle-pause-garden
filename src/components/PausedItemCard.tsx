@@ -3,9 +3,10 @@ import { PausedItem } from '../stores/pausedItemsStore';
 
 interface PausedItemCardProps {
   item: PausedItem;
+  onClick: () => void;
 }
 
-const PausedItemCard = ({ item }: PausedItemCardProps) => {
+const PausedItemCard = ({ item, onClick }: PausedItemCardProps) => {
   const getEmotionColor = (emotion: string) => {
     const emotionColors: { [key: string]: string } = {
       'bored': '#F6E3D5',
@@ -41,7 +42,10 @@ const PausedItemCard = ({ item }: PausedItemCardProps) => {
   const imageUrl = getImageUrl();
 
   return (
-    <div className="bg-white/60 rounded-2xl p-4 mb-4 border border-lavender/30">
+    <div 
+      className="bg-white/60 rounded-2xl p-4 mb-4 border border-lavender/30 cursor-pointer hover:bg-white/80 transition-colors"
+      onClick={onClick}
+    >
       <div className="flex items-start gap-4">
         {/* Product image with consistent sizing */}
         <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
