@@ -4,15 +4,7 @@ import { ArrowLeft, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-// We'll create a separate store for pause log items
-interface PauseLogItem {
-  id: string;
-  itemName: string;
-  emotion: string;
-  letGoDate: string;
-  storeName: string;
-}
+import { pauseLogStore, PauseLogItem } from '../stores/pauseLogStore';
 
 const PauseLog = () => {
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
@@ -41,19 +33,15 @@ const PauseLog = () => {
   };
 
   useEffect(() => {
-    // Load pause log from localStorage
-    const loadPauseLog = () => {
-      try {
-        const stored = localStorage.getItem('pauseLog');
-        if (stored) {
-          setPauseLogItems(JSON.parse(stored));
-        }
-      } catch (error) {
-        console.error('Failed to load pause log:', error);
-      }
+    // Load pause log items and set up subscription
+    const loadItems = () => {
+      setPauseLogItems(pauseLogStore.getItems());
     };
 
-    loadPauseLog();
+    loadItems();
+    const unsubscribe = pauseLogStore.subscribe(loadItems);
+
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -210,6 +198,7 @@ const PauseLog = () => {
                   {item.emotion}
                 </Badge>
               </div>
+              <div className="text-sm text-gray-600">{item.storeName}</div>
             </div>
           ))}
         </div>
