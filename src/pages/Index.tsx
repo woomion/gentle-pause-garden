@@ -8,18 +8,14 @@ import PausedSection from '../components/PausedSection';
 import GreaterJoySection from '../components/GreaterJoySection';
 import MindfulWinsSection from '../components/MindfulWinsSection';
 import FooterLinks from '../components/FooterLinks';
-import PauseForm from '../components/PauseForm';
-import { Sheet, SheetContent } from '../components/ui/sheet';
 
 const Index = () => {
   const [showForm, setShowForm] = useState(false);
 
   const handleAddPause = () => {
-    console.log('Add pause button clicked - form will open after delay');
-    // Add a delay to allow the ripple animation to show
-    setTimeout(() => {
-      setShowForm(true);
-    }, 600); // 600ms matches the ripple animation duration
+    console.log('Add pause button clicked - form will open here');
+    // TODO: Open pause item form
+    setShowForm(true);
   };
 
   return (
@@ -35,14 +31,20 @@ const Index = () => {
         <FooterLinks />
       </div>
       
-      <Sheet open={showForm} onOpenChange={setShowForm}>
-        <SheetContent 
-          side="bottom" 
-          className="h-[95vh] max-h-[95vh] bg-cream border-t border-gray-200 rounded-t-2xl p-6 overflow-hidden"
-        >
-          <PauseForm onClose={() => setShowForm(false)} />
-        </SheetContent>
-      </Sheet>
+      {showForm && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4">
+          <div className="bg-cream rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-medium text-dark-gray mb-4">Pause Item Form</h3>
+            <p className="text-taupe text-sm mb-4">Form will be built in next step</p>
+            <button 
+              onClick={() => setShowForm(false)}
+              className="w-full bg-lavender text-dark-gray py-2 px-4 rounded-xl"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
