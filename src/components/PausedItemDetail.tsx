@@ -1,6 +1,6 @@
 import { Timer } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
-import { mindfulWinsStore } from '../stores/mindfulWinsStore';
+import { pauseLogStore } from '../stores/pauseLogStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
@@ -52,8 +52,8 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   };
 
   const handleLetGo = () => {
-    // Move item to mindful wins
-    mindfulWinsStore.addItem({
+    // Move item to pause log
+    pauseLogStore.addItem({
       itemName: item.itemName,
       emotion: item.emotion,
       storeName: item.storeName
@@ -66,7 +66,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     // Show success toast
     toast({
       title: "Item released",
-      description: `"${item.itemName}" has been moved to your mindful wins.`,
+      description: `"${item.itemName}" has been moved to your pause log.`,
     });
   };
 
@@ -144,7 +144,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 <AlertDialogHeader>
                   <AlertDialogTitle>Let go of this item?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will move "{item.itemName}" to your mindful wins. You can always see what you've let go of in your mindful wins section.
+                    This will move "{item.itemName}" to your pause log. You can always see what you've let go of in your pause log section.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

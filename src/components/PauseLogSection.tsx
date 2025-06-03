@@ -2,11 +2,11 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const MindfulWinsSection = () => {
+const PauseLogSection = () => {
   return (
     <div className="mb-16">
       <Link 
-        to="/mindful-wins"
+        to="/pause-log"
         className="flex items-center justify-center gap-2 w-full text-black hover:text-taupe transition-colors duration-200 py-2 group"
       >
         <span className="text-sm font-medium relative">
@@ -22,4 +22,4 @@ const MindfulWinsSection = () => {
   );
 };
 
-export default MindfulWinsSection;
+export default PauseLogSection;

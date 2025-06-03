@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-// We'll create a separate store for mindful wins items
-interface MindfulWinItem {
+// We'll create a separate store for pause log items
+interface PauseLogItem {
   id: string;
   itemName: string;
   emotion: string;
@@ -14,10 +14,10 @@ interface MindfulWinItem {
   storeName: string;
 }
 
-const MindfulWins = () => {
+const PauseLog = () => {
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
-  const [mindfulWinItems, setMindfulWinItems] = useState<MindfulWinItem[]>([]);
-  const [filteredItems, setFilteredItems] = useState<MindfulWinItem[]>([]);
+  const [pauseLogItems, setPauseLogItems] = useState<PauseLogItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<PauseLogItem[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
   const emotions = ['burnt out', 'sad', 'resentful', 'overwhelmed', 'curious', 'bored', 'inspired', 'deserving', 'anxious', 'lonely', 'celebratory', 'something else'];
@@ -41,28 +41,28 @@ const MindfulWins = () => {
   };
 
   useEffect(() => {
-    // Load mindful wins from localStorage
-    const loadMindfulWins = () => {
+    // Load pause log from localStorage
+    const loadPauseLog = () => {
       try {
-        const stored = localStorage.getItem('mindfulWins');
+        const stored = localStorage.getItem('pauseLog');
         if (stored) {
-          setMindfulWinItems(JSON.parse(stored));
+          setPauseLogItems(JSON.parse(stored));
         }
       } catch (error) {
-        console.error('Failed to load mindful wins:', error);
+        console.error('Failed to load pause log:', error);
       }
     };
 
-    loadMindfulWins();
+    loadPauseLog();
   }, []);
 
   useEffect(() => {
     if (selectedFilter) {
-      setFilteredItems(mindfulWinItems.filter(item => item.emotion === selectedFilter));
+      setFilteredItems(pauseLogItems.filter(item => item.emotion === selectedFilter));
     } else {
-      setFilteredItems(mindfulWinItems);
+      setFilteredItems(pauseLogItems);
     }
-  }, [selectedFilter, mindfulWinItems]);
+  }, [selectedFilter, pauseLogItems]);
 
   const handleFilterClick = (emotion: string) => {
     if (selectedFilter === emotion) {
@@ -81,7 +81,7 @@ const MindfulWins = () => {
   const getItemCount = filteredItems.length;
 
   // Empty state when no items have been let go of yet
-  if (mindfulWinItems.length === 0) {
+  if (pauseLogItems.length === 0) {
     return (
       <div className="min-h-screen bg-cream">
         <div className="max-w-md mx-auto px-6 py-8">
@@ -101,7 +101,7 @@ const MindfulWins = () => {
           <div className="bg-white/60 rounded-lg p-8 text-center border border-gray-200 mt-16">
             <p className="text-gray-500 text-lg mb-2">Nothing here yet</p>
             <p className="text-gray-400 text-sm">
-              When you decide to let go of paused items, they'll appear here as mindful wins.
+              When you decide to let go of paused items, they'll appear here in your pause log.
             </p>
           </div>
 
@@ -227,4 +227,4 @@ const MindfulWins = () => {
   );
 };
 
-export default MindfulWins;
+export default PauseLog;

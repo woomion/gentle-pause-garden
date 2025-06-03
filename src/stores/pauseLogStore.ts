@@ -1,5 +1,5 @@
 
-export interface MindfulWinItem {
+export interface PauseLogItem {
   id: string;
   itemName: string;
   storeName: string;
@@ -8,10 +8,10 @@ export interface MindfulWinItem {
   originalPausedItem?: any; // Reference to original paused item if needed
 }
 
-class MindfulWinsStore {
-  private items: MindfulWinItem[] = [];
+class PauseLogStore {
+  private items: PauseLogItem[] = [];
   private listeners: Array<() => void> = [];
-  private storageKey = 'mindfulWins';
+  private storageKey = 'pauseLog';
 
   constructor() {
     this.loadFromStorage();
@@ -24,7 +24,7 @@ class MindfulWinsStore {
         this.items = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('Failed to load mindful wins from storage:', error);
+      console.error('Failed to load pause log from storage:', error);
       this.items = [];
     }
   }
@@ -33,12 +33,12 @@ class MindfulWinsStore {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.items));
     } catch (error) {
-      console.error('Failed to save mindful wins to storage:', error);
+      console.error('Failed to save pause log to storage:', error);
     }
   }
 
-  addItem(item: Omit<MindfulWinItem, 'id' | 'letGoDate'>) {
-    const newItem: MindfulWinItem = {
+  addItem(item: Omit<PauseLogItem, 'id' | 'letGoDate'>) {
+    const newItem: PauseLogItem = {
       ...item,
       id: Date.now().toString(),
       letGoDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -47,10 +47,10 @@ class MindfulWinsStore {
     this.items.push(newItem);
     this.saveToStorage();
     this.notifyListeners();
-    console.log('Added mindful win:', newItem);
+    console.log('Added pause log item:', newItem);
   }
 
-  getItems(): MindfulWinItem[] {
+  getItems(): PauseLogItem[] {
     return [...this.items];
   }
 
@@ -66,4 +66,4 @@ class MindfulWinsStore {
   }
 }
 
-export const mindfulWinsStore = new MindfulWinsStore();
+export const pauseLogStore = new PauseLogStore();

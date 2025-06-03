@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
 import AddPauseButton from '../components/AddPauseButton';
 import InStoreModeButton from '../components/InStoreModeButton';
 import PausedSection from '../components/PausedSection';
-import MindfulWinsSection from '../components/MindfulWinsSection';
+import PauseLogSection from '../components/PauseLogSection';
 import FooterLinks from '../components/FooterLinks';
 import PauseForm from '../components/PauseForm';
 
@@ -33,7 +32,7 @@ const Index = () => {
           <AddPauseButton onAddPause={handleAddPause} />
           <InStoreModeButton />
           <PausedSection />
-          <MindfulWinsSection />
+          <PauseLogSection />
           <FooterLinks />
         </div>
       </div>
