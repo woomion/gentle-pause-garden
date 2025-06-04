@@ -65,6 +65,12 @@ const Index = () => {
   };
 
   const handleAddPause = () => {
+    // If user is not authenticated, show signup modal instead
+    if (!user) {
+      setShowSignupModal(true);
+      return;
+    }
+
     console.log('Add pause button clicked - form will open after animation');
     // Delay to allow ripple animation to complete
     setTimeout(() => {
@@ -102,10 +108,12 @@ const Index = () => {
       
       {showForm && <PauseForm onClose={handleCloseForm} onShowSignup={handleShowSignup} />}
       
-      <WelcomeModal 
-        open={showWelcomeModal} 
-        onComplete={handleWelcomeComplete} 
-      />
+      {user && (
+        <WelcomeModal 
+          open={showWelcomeModal} 
+          onComplete={handleWelcomeComplete} 
+        />
+      )}
       
       <SignupModal 
         isOpen={showSignupModal} 
