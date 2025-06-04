@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { pausedItemsStore, PausedItem } from '../stores/pausedItemsStore';
 import PausedItemCard from './PausedItemCard';
 import PausedItemDetail from './PausedItemDetail';
@@ -11,70 +11,88 @@ const PausedSection = () => {
   const [current, setCurrent] = useState(0);
   const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
 
+  const sortItemsByDate = useCallback((items: PausedItem[]) => {
+    return items.sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
+  }, []);
+
   useEffect(() => {
-    // Initial load with sorting by most recent first
-    const items = pausedItemsStore.getItems().sort((a, b) => 
-      new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime()
-    );
+    const items = sortItemsByDate(pausedItemsStore.getItems());
     setPausedItems(items);
 
-    // Subscribe to changes
     const unsubscribe = pausedItemsStore.subscribe(() => {
-      const updatedItems = pausedItemsStore.getItems().sort((a, b) => 
-        new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime()
-      );
+      const updatedItems = sortItemsByDate(pausedItemsStore.getItems());
       setPausedItems(updatedItems);
     });
 
     return unsubscribe;
-  }, []);
+  }, [sortItemsByDate]);
 
   useEffect(() => {
-    if (!api) {
-      return;
-    }
+    if (!api) return;
+
+    const updateCurrent = () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    };
 
     setCurrent(api.selectedScrollSnap() + 1);
+    api.on('select', updateCurrent);
 
-    api.on('select', () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-    });
+    return () => {
+      api.off('select', updateCurrent);
+    };
   }, [api]);
 
-  const handleItemClick = (item: PausedItem) => {
+  const handleItemClick = useCallback((item: PausedItem) => {
     setSelectedItem(item);
-  };
+  }, []);
 
-  const handleCloseDetail = () => {
+  const handleCloseDetail = useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
-  const handleDeleteItem = (id: string) => {
+  const handleDeleteItem = useCallback((id: string) => {
     pausedItemsStore.removeItem(id);
-  };
+    setSelectedItem(null);
+  }, []);
 
   if (pausedItems.length === 0) {
     return (
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-black mb-0">Paused for now</h2>
-        <p className="text-black text-lg mb-3">You haven't decided yet—and that's okay</p>
-        <div className="bg-white/60 rounded-2xl p-6 text-center border border-lavender/30">
-          <p className="text-gray-500">No paused items yet. Add something to get started!</p>
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+          Paused for now
+        </h2>
+        <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
+          You haven't decided yet—and that's okay
+        </p>
+        <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
+          <p className="text-gray-500 dark:text-gray-400">
+            No paused items yet. Add something to get started!
+          </p>
         </div>
       </div>
     );
   }
 
+  const totalItems = pausedItems.length;
+  const isSingleItem = totalItems === 1;
+
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold text-black mb-0">Paused for now</h2>
-      <p className="text-black text-lg mb-3">You haven't decided yet—and that's okay</p>
+      <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+        Paused for now
+      </h2>
+      <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
+        You haven't decided yet—and that's okay
+      </p>
       
-      {pausedItems.length === 1 ? (
+      {isSingleItem ? (
         <>
-          <PausedItemCard item={pausedItems[0]} onClick={() => handleItemClick(pausedItems[0])} />
+          <PausedItemCard 
+            item={pausedItems[0]} 
+            onClick={() => handleItemClick(pausedItems[0])} 
+          />
           <div className="flex justify-center mt-2">
-            <span className="text-sm text-gray-600">1 item</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">1 item</span>
           </div>
         </>
       ) : (
@@ -83,38 +101,38 @@ const PausedSection = () => {
             <CarouselContent>
               {pausedItems.map((item) => (
                 <CarouselItem key={item.id}>
-                  <PausedItemCard item={item} onClick={() => handleItemClick(item)} />
+                  <PausedItemCard 
+                    item={item} 
+                    onClick={() => handleItemClick(item)} 
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>
             
-            {/* Web only: Arrows positioned underneath with counter */}
-            <div className="hidden md:flex items-center justify-center mt-4 gap-4 relative">
+            <div className="hidden md:flex items-center justify-center mt-4 gap-4">
               <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-              <span className="text-sm text-gray-600 px-4">
-                {current}/{pausedItems.length} items
+              <span className="text-sm text-gray-600 dark:text-gray-400 px-4">
+                {current}/{totalItems} items
               </span>
               <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
             </div>
           </Carousel>
           
-          {/* Mobile only: Swipe indicator with count, closer to cards */}
           <div className="flex md:hidden justify-center mt-2">
-            <div className="bg-white rounded-full px-3 py-1 flex items-center gap-2 border border-gray-200">
-              <div className="flex items-center gap-1">
-                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+            <div className="bg-white dark:bg-white/10 rounded-full px-3 py-1 flex items-center gap-2 border border-gray-200 dark:border-gray-600">
+              <div className="flex items-center gap-1" aria-hidden="true">
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
               </div>
-              <span className="text-xs text-gray-600">
-                {current}/{pausedItems.length}
+              <span className="text-xs text-gray-600 dark:text-gray-400">
+                {current}/{totalItems}
               </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Item detail modal */}
       {selectedItem && (
         <PausedItemDetail
           item={selectedItem}

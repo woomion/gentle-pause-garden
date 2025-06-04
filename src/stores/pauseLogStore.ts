@@ -1,35 +1,36 @@
+
 export interface PauseLogItem {
   id: string;
   itemName: string;
   storeName: string;
   emotion: string;
   letGoDate: string;
-  status: 'purchased' | 'let-go'; // Track if item was purchased or let go
-  notes?: string; // Include notes if they were provided
-  originalPausedItem?: any; // Reference to original paused item if needed
+  status: 'purchased' | 'let-go';
+  notes?: string;
+  originalPausedItem?: any;
 }
+
+type Listener = () => void;
 
 class PauseLogStore {
   private items: PauseLogItem[] = [];
-  private listeners: Array<() => void> = [];
-  private storageKey = 'pauseLog';
+  private listeners: Set<Listener> = new Set();
+  private readonly storageKey = 'pauseLog';
 
   constructor() {
     this.loadFromStorage();
   }
 
-  private loadFromStorage() {
+  private loadFromStorage(): void {
     try {
       const stored = localStorage.getItem(this.storageKey);
       if (stored) {
         const parsedItems = JSON.parse(stored);
-        // Migrate old items that don't have status
         this.items = parsedItems.map((item: any) => ({
           ...item,
-          status: item.status || 'let-go', // Default to 'let-go' for existing items
+          status: item.status || 'let-go',
           notes: item.notes || undefined
         }));
-        // Save migrated data back
         this.saveToStorage();
       }
     } catch (error) {
@@ -38,7 +39,7 @@ class PauseLogStore {
     }
   }
 
-  private saveToStorage() {
+  private saveToStorage(): void {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.items));
     } catch (error) {
@@ -46,39 +47,50 @@ class PauseLogStore {
     }
   }
 
-  addItem(item: Omit<PauseLogItem, 'id' | 'letGoDate'>) {
+  addItem(item: Omit<PauseLogItem, 'id' | 'letGoDate'>): void {
     const newItem: PauseLogItem = {
       ...item,
-      id: Date.now().toString(),
-      letGoDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      letGoDate: new Date().toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      })
     };
     
     this.items.push(newItem);
     this.saveToStorage();
     this.notifyListeners();
-    console.log('Added pause log item:', newItem);
   }
 
-  deleteItem(id: string) {
+  deleteItem(id: string): void {
+    const initialLength = this.items.length;
     this.items = this.items.filter(item => item.id !== id);
-    this.saveToStorage();
-    this.notifyListeners();
-    console.log('Deleted pause log item:', id);
+    
+    if (this.items.length !== initialLength) {
+      this.saveToStorage();
+      this.notifyListeners();
+    }
   }
 
   getItems(): PauseLogItem[] {
     return [...this.items];
   }
 
-  subscribe(listener: () => void) {
-    this.listeners.push(listener);
+  subscribe(listener: Listener): () => void {
+    this.listeners.add(listener);
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners.delete(listener);
     };
   }
 
-  private notifyListeners() {
-    this.listeners.forEach(listener => listener());
+  private notifyListeners(): void {
+    this.listeners.forEach(listener => {
+      try {
+        listener();
+      } catch (error) {
+        console.error('Error in store listener:', error);
+      }
+    });
   }
 }
 
