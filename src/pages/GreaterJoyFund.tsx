@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import EditIntentionModal from '../components/EditIntentionModal';
 import GreaterJoyHeader from '../components/GreaterJoyHeader';
 import IntentionSection from '../components/IntentionSection';
 import ReflectionTab from '../components/ReflectionTab';
@@ -11,7 +9,6 @@ import { pauseLogStore } from '../stores/pauseLogStore';
 
 const GreaterJoyFund = () => {
   const [intention, setIntention] = useState("");
-  const [isEditingIntention, setIsEditingIntention] = useState(false);
   const [reflection, setReflection] = useState("");
   const [stats, setStats] = useState({
     totalPauses: 0,
@@ -119,7 +116,7 @@ const GreaterJoyFund = () => {
         
         <IntentionSection 
           intention={intention}
-          onEdit={() => setIsEditingIntention(true)}
+          onSave={handleIntentionSave}
         />
 
         <Tabs defaultValue="reflection" className="mb-8">
@@ -154,14 +151,6 @@ const GreaterJoyFund = () => {
           <p>|| Pocket Pause—your conscious spending companion</p>
         </div>
       </div>
-
-      {isEditingIntention && (
-        <EditIntentionModal
-          intention={intention}
-          onSave={handleIntentionSave}
-          onClose={() => setIsEditingIntention(false)}
-        />
-      )}
     </div>
   );
 };
