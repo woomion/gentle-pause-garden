@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Filter, Trash } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -73,6 +74,7 @@ const PauseLog = () => {
         ? prev.filter(e => e !== emotion)
         : [...prev, emotion]
     );
+    setShowFilters(false); // Close filter dropdown when an emotion is selected
   };
 
   const handleStatusClick = (status: string) => {
@@ -81,6 +83,7 @@ const PauseLog = () => {
         ? prev.filter(s => s !== status)
         : [...prev, status]
     );
+    setShowFilters(false); // Close filter dropdown when a status is selected
   };
 
   const clearAllFilters = () => {
