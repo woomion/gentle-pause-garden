@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import PauseLog from "./pages/PauseLog";
 import About from "./pages/About";
 import GreaterJoyFund from "./pages/GreaterJoyFund";
 import NotFound from "./pages/NotFound";
+import DonationSuccess from "./pages/DonationSuccess";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import AuthGuard from "./components/AuthGuard";
@@ -44,6 +44,11 @@ const App = () => (
               <Route path="/greater-joy-fund" element={
                 <AuthGuard>
                   <GreaterJoyFund />
+                </AuthGuard>
+              } />
+              <Route path="/donation-success" element={
+                <AuthGuard>
+                  <DonationSuccess />
                 </AuthGuard>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
