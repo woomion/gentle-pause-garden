@@ -52,10 +52,10 @@ const WelcomeModal = ({ open, onComplete }: WelcomeModalProps) => {
                   How Pocket Pause works:
                 </h3>
                 <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-                  <p>📝 Add items you're considering buying</p>
-                  <p>⏸️ Set a pause period to think it over</p>
-                  <p>🤔 We'll remind you when it's time to decide</p>
-                  <p>💡 Make more intentional purchase decisions</p>
+                  <p>• Add items you're considering buying</p>
+                  <p>• Set a pause period to think it over</p>
+                  <p>• We'll remind you when it's time to decide</p>
+                  <p>• Make more intentional purchase decisions</p>
                 </div>
               </div>
             </div>
@@ -65,7 +65,7 @@ const WelcomeModal = ({ open, onComplete }: WelcomeModalProps) => {
               className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-6"
               disabled={!name.trim()}
             >
-              Get Started
+              Got it!
             </Button>
           </form>
         </div>
