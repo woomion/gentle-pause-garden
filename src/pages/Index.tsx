@@ -12,6 +12,7 @@ import SupportCTA from '../components/SupportCTA';
 import PauseForm from '../components/PauseForm';
 import WelcomeModal from '../components/WelcomeModal';
 import { useNotifications } from '../hooks/useNotifications';
+import { useAuth } from '../contexts/AuthContext';
 
 const Index = () => {
   const [showForm, setShowForm] = useState(false);
@@ -22,22 +23,25 @@ const Index = () => {
     return saved ? JSON.parse(saved) : false;
   });
 
+  const { user } = useAuth();
+
   // Initialize notifications
   useNotifications(notificationsEnabled);
 
-  // Check if this is the user's first visit
+  // Check if this is the user's first visit or get user's name
   useEffect(() => {
-    const savedName = localStorage.getItem('userName');
-    const hasVisited = localStorage.getItem('hasVisited');
-    
-    if (savedName) {
-      setUserName(savedName);
+    if (user) {
+      // Get user's first name from user metadata or profile
+      const firstName = user.user_metadata?.first_name || '';
+      setUserName(firstName);
+      
+      // Check if user needs welcome flow
+      const hasCompletedWelcome = localStorage.getItem(`hasCompletedWelcome_${user.id}`);
+      if (!hasCompletedWelcome && !firstName) {
+        setShowWelcomeModal(true);
+      }
     }
-    
-    if (!hasVisited) {
-      setShowWelcomeModal(true);
-    }
-  }, []);
+  }, [user]);
 
   // Listen for changes to notification settings
   useEffect(() => {
@@ -52,8 +56,9 @@ const Index = () => {
 
   const handleWelcomeComplete = (name: string) => {
     setUserName(name);
-    localStorage.setItem('userName', name);
-    localStorage.setItem('hasVisited', 'true');
+    if (user) {
+      localStorage.setItem(`hasCompletedWelcome_${user.id}`, 'true');
+    }
     setShowWelcomeModal(false);
   };
 
