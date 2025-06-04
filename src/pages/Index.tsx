@@ -13,6 +13,7 @@ import PauseForm from '../components/PauseForm';
 import WelcomeModal from '../components/WelcomeModal';
 import SignupModal from '../components/SignupModal';
 import { useNotifications } from '../hooks/useNotifications';
+import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../contexts/AuthContext';
 
 const Index = () => {
@@ -20,12 +21,9 @@ const Index = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [userName, setUserName] = useState('');
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
-    const saved = localStorage.getItem('notificationsEnabled');
-    return saved ? JSON.parse(saved) : false;
-  });
 
   const { user } = useAuth();
+  const { notificationsEnabled } = useUserSettings();
 
   // Initialize notifications
   useNotifications(notificationsEnabled);
@@ -44,17 +42,6 @@ const Index = () => {
       }
     }
   }, [user]);
-
-  // Listen for changes to notification settings
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = localStorage.getItem('notificationsEnabled');
-      setNotificationsEnabled(saved ? JSON.parse(saved) : false);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
 
   const handleWelcomeComplete = (name: string) => {
     setUserName(name);

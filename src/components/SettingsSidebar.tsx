@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '../hooks/useNotifications';
+import { useUserSettings } from '../hooks/useUserSettings';
 import { notificationService } from '../services/notificationService';
 import FeedbackModal from './FeedbackModal';
 
@@ -18,24 +19,22 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { toast } = useToast();
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [remindersEnabled, setRemindersEnabled] = useState(() => {
-    const saved = localStorage.getItem('notificationsEnabled');
-    return saved ? JSON.parse(saved) : false;
-  });
+  const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
 
-  const { enableNotifications } = useNotifications(remindersEnabled);
+  const { enableNotifications } = useNotifications(notificationsEnabled);
 
   const handleNotificationToggle = async (checked: boolean) => {
     if (checked) {
       const granted = await enableNotifications();
       if (granted) {
-        setRemindersEnabled(true);
-        localStorage.setItem('notificationsEnabled', 'true');
-        notificationService.setEnabled(true);
-        toast({
-          title: "Notifications enabled",
-          description: "We'll gently remind you when items are ready for review.",
-        });
+        const success = await updateNotificationSetting(true);
+        if (success) {
+          notificationService.setEnabled(true);
+          toast({
+            title: "Notifications enabled",
+            description: "We'll gently remind you when items are ready for review.",
+          });
+        }
       } else {
         toast({
           title: "Permission denied",
@@ -43,13 +42,14 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
         });
       }
     } else {
-      setRemindersEnabled(false);
-      localStorage.setItem('notificationsEnabled', 'false');
-      notificationService.setEnabled(false);
-      toast({
-        title: "Notifications disabled",
-        description: "You won't receive review reminders anymore.",
-      });
+      const success = await updateNotificationSetting(false);
+      if (success) {
+        notificationService.setEnabled(false);
+        toast({
+          title: "Notifications disabled",
+          description: "You won't receive review reminders anymore.",
+        });
+      }
     }
   };
 
@@ -134,8 +134,9 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
                     <p className="text-sm text-gray-600 dark:text-gray-300">We'll remind you when an item's ready for a thoughtful decision — no pressure.</p>
                   </div>
                   <Switch 
-                    checked={remindersEnabled} 
+                    checked={notificationsEnabled} 
                     onCheckedChange={handleNotificationToggle}
+                    disabled={loading}
                     className="ml-4"
                   />
                 </div>
