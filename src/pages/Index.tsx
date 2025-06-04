@@ -11,12 +11,14 @@ import FooterLinks from '../components/FooterLinks';
 import SupportCTA from '../components/SupportCTA';
 import PauseForm from '../components/PauseForm';
 import WelcomeModal from '../components/WelcomeModal';
+import SignupModal from '../components/SignupModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { useAuth } from '../contexts/AuthContext';
 
 const Index = () => {
   const [showForm, setShowForm] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
   const [userName, setUserName] = useState('');
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     const saved = localStorage.getItem('notificationsEnabled');
@@ -74,6 +76,14 @@ const Index = () => {
     setShowForm(false);
   };
 
+  const handleShowSignup = () => {
+    setShowSignupModal(true);
+  };
+
+  const handleCloseSignup = () => {
+    setShowSignupModal(false);
+  };
+
   return (
     <>
       <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
@@ -90,11 +100,16 @@ const Index = () => {
         </div>
       </div>
       
-      {showForm && <PauseForm onClose={handleCloseForm} />}
+      {showForm && <PauseForm onClose={handleCloseForm} onShowSignup={handleShowSignup} />}
       
       <WelcomeModal 
         open={showWelcomeModal} 
         onComplete={handleWelcomeComplete} 
+      />
+      
+      <SignupModal 
+        isOpen={showSignupModal} 
+        onClose={handleCloseSignup} 
       />
     </>
   );

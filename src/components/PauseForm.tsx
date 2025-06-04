@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,9 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PauseFormProps {
   onClose: () => void;
+  onShowSignup?: () => void;
 }
 
 const emotions = [
@@ -34,7 +35,8 @@ const otherPauseLengths = [
   '3 months'
 ];
 
-const PauseForm = ({ onClose }: PauseFormProps) => {
+const PauseForm = ({ onClose, onShowSignup }: PauseFormProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     link: '',
     itemName: '',
@@ -128,6 +130,11 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
       
       setIsSubmitting(false);
       onClose();
+      
+      // If user is not authenticated, show signup modal
+      if (!user && onShowSignup) {
+        onShowSignup();
+      }
     }, 1000);
   };
 
