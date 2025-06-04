@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ArrowLeft, Edit2, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -60,29 +59,27 @@ const GreaterJoyFund = () => {
           </p>
         </div>
 
-        {/* Intention Card - centerpiece with soft rounded styling */}
-        <Card className="mb-8 rounded-xl border border-gray-200/60 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}>
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center flex-1">
-                <h2 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-relaxed flex-1">
-                  {intention}
-                </h2>
+        {/* Intention Card - centerpiece with no background */}
+        <div className="mb-8 p-6">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center flex-1">
+              <h2 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-relaxed flex-1">
+                {intention}
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsEditingIntention(true)}
-                  className="ml-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent"
+                  className="ml-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent inline-flex"
                 >
                   <Edit2 size={16} />
                 </Button>
-              </div>
+              </h2>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-              A place to remember what you're reaching for
-            </p>
-          </CardContent>
-        </Card>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+            A place to remember what you're reaching for
+          </p>
+        </div>
 
         {/* Outline-style Tabs with proper spacing */}
         <Tabs defaultValue="reflection" className="mb-8">
