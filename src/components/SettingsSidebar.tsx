@@ -1,9 +1,11 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '@/hooks/use-toast';
+import { useNotifications } from '../hooks/useNotifications';
+import { notificationService } from '../services/notificationService';
 
 interface SettingsSidebarProps {
   open: boolean;
@@ -12,7 +14,41 @@ interface SettingsSidebarProps {
 
 const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const { isDarkMode, toggleTheme } = useTheme();
-  const [remindersEnabled, setRemindersEnabled] = useState(false);
+  const { toast } = useToast();
+  const [remindersEnabled, setRemindersEnabled] = useState(() => {
+    const saved = localStorage.getItem('notificationsEnabled');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const { enableNotifications } = useNotifications(remindersEnabled);
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    if (checked) {
+      const granted = await enableNotifications();
+      if (granted) {
+        setRemindersEnabled(true);
+        localStorage.setItem('notificationsEnabled', 'true');
+        notificationService.setEnabled(true);
+        toast({
+          title: "Notifications enabled",
+          description: "We'll gently remind you when items are ready for review.",
+        });
+      } else {
+        toast({
+          title: "Permission denied",
+          description: "Please allow notifications in your browser settings to receive reminders.",
+        });
+      }
+    } else {
+      setRemindersEnabled(false);
+      localStorage.setItem('notificationsEnabled', 'false');
+      notificationService.setEnabled(false);
+      toast({
+        title: "Notifications disabled",
+        description: "You won't receive review reminders anymore.",
+      });
+    }
+  };
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -88,7 +124,7 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
                 </div>
                 <Switch 
                   checked={remindersEnabled} 
-                  onCheckedChange={setRemindersEnabled}
+                  onCheckedChange={handleNotificationToggle}
                   className="ml-4"
                 />
               </div>

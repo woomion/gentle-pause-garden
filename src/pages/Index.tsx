@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
@@ -9,9 +8,28 @@ import PauseLogSection from '../components/PauseLogSection';
 import GreaterJoyFundCTA from '../components/GreaterJoyFundCTA';
 import FooterLinks from '../components/FooterLinks';
 import PauseForm from '../components/PauseForm';
+import { useNotifications } from '../hooks/useNotifications';
 
 const Index = () => {
   const [showForm, setShowForm] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    const saved = localStorage.getItem('notificationsEnabled');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Initialize notifications
+  useNotifications(notificationsEnabled);
+
+  // Listen for changes to notification settings
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('notificationsEnabled');
+      setNotificationsEnabled(saved ? JSON.parse(saved) : false);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleAddPause = () => {
     console.log('Add pause button clicked - form will open after animation');
