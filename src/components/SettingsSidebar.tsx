@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
@@ -78,12 +79,12 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
 
           {/* Notifications */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Notifications</h3>
+            <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Pause Notifications</h3>
             <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-black dark:text-[#F9F5EB] font-medium">Gentle Reminders</span>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">Get mindful nudges for conscious spending</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">We'll remind you when an item's ready for a thoughtful decision — no pressure.</p>
                 </div>
                 <Switch 
                   checked={remindersEnabled} 
