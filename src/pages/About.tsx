@@ -28,7 +28,7 @@ const About = () => {
         {/* About content */}
         <div className="space-y-6">
           <h1 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] text-center">
-            A gentle space to notice before you spend
+            About Pocket Pause
           </h1>
           
           <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6 space-y-6">
