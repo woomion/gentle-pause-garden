@@ -8,6 +8,7 @@ import PausedSection from '../components/PausedSection';
 import PauseLogSection from '../components/PauseLogSection';
 import GreaterJoyFundCTA from '../components/GreaterJoyFundCTA';
 import FooterLinks from '../components/FooterLinks';
+import SupportCTA from '../components/SupportCTA';
 import PauseForm from '../components/PauseForm';
 import WelcomeModal from '../components/WelcomeModal';
 import { useNotifications } from '../hooks/useNotifications';
@@ -79,6 +80,7 @@ const Index = () => {
           <PausedSection />
           <GreaterJoyFundCTA />
           <PauseLogSection />
+          <SupportCTA />
           <FooterLinks />
         </div>
       </div>

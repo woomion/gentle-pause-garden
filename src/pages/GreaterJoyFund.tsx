@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GreaterJoyHeader from '../components/GreaterJoyHeader';
 import IntentionSection from '../components/IntentionSection';
 import ReflectionTab from '../components/ReflectionTab';
 import StatsTab from '../components/StatsTab';
+import SupportCTA from '../components/SupportCTA';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
 
@@ -146,6 +148,8 @@ const GreaterJoyFund = () => {
             <StatsTab stats={stats} />
           </TabsContent>
         </Tabs>
+
+        <SupportCTA />
 
         <div className="mt-16 text-center text-xs space-y-1" style={{ color: '#A6A1AD' }}>
           <p>|| Pocket Pause—your conscious spending companion</p>
