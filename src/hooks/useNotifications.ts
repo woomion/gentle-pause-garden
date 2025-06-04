@@ -21,7 +21,6 @@ export const useNotifications = (enabled: boolean) => {
       notificationService.showNotification(title, {
         body,
         tag: 'pocket-pause-review',
-        renotify: true,
         requireInteraction: false
       });
     }
