@@ -28,33 +28,47 @@ const About = () => {
         {/* About content */}
         <div className="space-y-6">
           <h1 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] text-center">
-            About Pocket Pause
+            A gentle space to notice before you spend
           </h1>
           
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
+          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6 space-y-6">
             <p className="text-black dark:text-[#F9F5EB] leading-relaxed">
-              Pocket Pause is your conscious spending companion. We help you pause, reflect, and make mindful purchasing decisions that align with your values and goals.
+              Pocket Pause is your conscious spending companion. It helps you create a pause — a breath — between impulse and action.
+            </p>
+            
+            <p className="text-black dark:text-[#F9F5EB] leading-relaxed">
+              We're not here to guilt you into saving. We're not anti-shopping. We simply believe that awareness is powerful, and that mindful choices, whether big or small, can create more alignment, ease, and joy in your life.
+            </p>
+            
+            <p className="text-black dark:text-[#F9F5EB] leading-relaxed">
+              Whether you're feeling tempted, burnt out, curious, or celebratory — Pocket Pause offers a soft moment to ask:
+            </p>
+            
+            <p className="text-black dark:text-[#F9F5EB] leading-relaxed italic text-center">
+              "What am I truly reaching for?"
+            </p>
+            
+            <p className="text-black dark:text-[#F9F5EB] leading-relaxed">
+              You can pause an item you're considering, tag how you're feeling, and track your choices inside your Greater Joy Fund — a space to reflect on what matters most to you.
+            </p>
+            
+            <p className="text-black dark:text-[#F9F5EB] leading-relaxed">
+              There's no right or wrong outcome. You can let something go. You can come back later. Or you can decide that yes, this purchase feels aligned — and go forward with clarity.
             </p>
             
             <div className="mt-6 space-y-4">
-              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">How it works</h3>
-              <ul className="space-y-2 text-black dark:text-[#F9F5EB]">
-                <li>• Pause before purchasing items that catch your eye</li>
-                <li>• Reflect on your emotions and motivations</li>
-                <li>• Give yourself time to make conscious decisions</li>
-                <li>• Review your pause log to understand your spending patterns</li>
-              </ul>
+              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">What Pocket Pause encourages:</h3>
+              <div className="space-y-2 text-black dark:text-[#F9F5EB]">
+                <p>Presence over perfection</p>
+                <p>Emotional honesty over avoidance</p>
+                <p>Self-trust over impulse</p>
+                <p>Sustainable joy over quick dopamine</p>
+              </div>
             </div>
             
-            <div className="mt-6 space-y-4">
-              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Benefits</h3>
-              <ul className="space-y-2 text-black dark:text-[#F9F5EB]">
-                <li>• Reduce impulse purchases</li>
-                <li>• Increase mindful spending</li>
-                <li>• Better align purchases with your values</li>
-                <li>• Save money for things that truly matter</li>
-              </ul>
-            </div>
+            <p className="text-black dark:text-[#F9F5EB] leading-relaxed">
+              We believe there's power in paying attention — and beauty in slowing down, even just for a moment.
+            </p>
           </div>
         </div>
 
