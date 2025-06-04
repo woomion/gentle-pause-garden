@@ -14,6 +14,7 @@ export interface PausedItem {
   photoDataUrl?: string;
   pausedAt: Date;
   checkInTime: string;
+  checkInDate: Date;
 }
 
 type Listener = () => void;
@@ -34,8 +35,10 @@ class PausedItemsStore {
         const parsedItems = JSON.parse(stored);
         this.items = parsedItems.map((item: any) => ({
           ...item,
-          pausedAt: new Date(item.pausedAt)
+          pausedAt: new Date(item.pausedAt),
+          checkInDate: new Date(item.checkInDate || item.pausedAt)
         }));
+        this.updateCheckInTimes();
       }
     } catch (error) {
       console.error('Failed to load paused items from storage:', error);
@@ -64,39 +67,48 @@ class PausedItemsStore {
     });
   }
 
-  private calculateCheckInTime(duration: string): string {
-    const now = new Date();
-    const checkInDate = new Date(now);
+  private calculateCheckInDate(duration: string, pausedAt: Date): Date {
+    const checkInDate = new Date(pausedAt);
 
     const durationMap: Record<string, () => void> = {
-      '24 hours': () => checkInDate.setHours(now.getHours() + 24),
-      '3 days': () => checkInDate.setDate(now.getDate() + 3),
-      '1 week': () => checkInDate.setDate(now.getDate() + 7),
-      '2 weeks': () => checkInDate.setDate(now.getDate() + 14),
-      '1 month': () => checkInDate.setMonth(now.getMonth() + 1),
-      '3 months': () => checkInDate.setMonth(now.getMonth() + 3)
+      '24 hours': () => checkInDate.setHours(pausedAt.getHours() + 24),
+      '3 days': () => checkInDate.setDate(pausedAt.getDate() + 3),
+      '1 week': () => checkInDate.setDate(pausedAt.getDate() + 7),
+      '2 weeks': () => checkInDate.setDate(pausedAt.getDate() + 14),
+      '1 month': () => checkInDate.setMonth(pausedAt.getMonth() + 1),
+      '3 months': () => checkInDate.setMonth(pausedAt.getMonth() + 3)
     };
 
     const adjustTime = durationMap[duration.toLowerCase()];
     if (adjustTime) {
       adjustTime();
     } else {
-      checkInDate.setHours(now.getHours() + 24);
+      checkInDate.setHours(pausedAt.getHours() + 24);
     }
 
+    return checkInDate;
+  }
+
+  private calculateCheckInTimeDisplay(checkInDate: Date): string {
+    const now = new Date();
     const diffMs = checkInDate.getTime() - now.getTime();
     const diffHours = Math.round(diffMs / (1000 * 60 * 60));
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffHours <= 0) return 'Checking-in now';
-    if (diffHours === 1) return 'Checking-in in about 1 hour';
-    if (diffHours <= 24) return `Checking-in in about ${diffHours} hours`;
-    if (diffDays === 1) return 'Checking-in in about 1 day';
+    if (diffHours <= 0) return 'Ready to review';
+    if (diffHours <= 24) return `Checking-in in ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
+    if (diffDays === 1) return 'Checking-in in 1 day';
     
-    return `Checking-in in about ${diffDays} days`;
+    return `Checking-in in ${diffDays} days`;
   }
 
-  async addItem(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime'>): Promise<void> {
+  private updateCheckInTimes(): void {
+    this.items.forEach(item => {
+      item.checkInTime = this.calculateCheckInTimeDisplay(item.checkInDate);
+    });
+  }
+
+  async addItem(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>): Promise<void> {
     let photoDataUrl: string | undefined;
     
     if (item.photo instanceof File) {
@@ -107,11 +119,15 @@ class PausedItemsStore {
       }
     }
 
+    const pausedAt = new Date();
+    const checkInDate = this.calculateCheckInDate(item.duration || item.otherDuration || '24 hours', pausedAt);
+
     const newItem: PausedItem = {
       ...item,
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      pausedAt: new Date(),
-      checkInTime: this.calculateCheckInTime(item.duration || item.otherDuration || '24 hours'),
+      pausedAt,
+      checkInDate,
+      checkInTime: this.calculateCheckInTimeDisplay(checkInDate),
       photoDataUrl
     };
     
@@ -121,7 +137,13 @@ class PausedItemsStore {
   }
 
   getItems(): PausedItem[] {
+    this.updateCheckInTimes();
     return [...this.items];
+  }
+
+  getItemsForReview(): PausedItem[] {
+    const now = new Date();
+    return this.items.filter(item => item.checkInDate <= now);
   }
 
   removeItem(id: string): void {
