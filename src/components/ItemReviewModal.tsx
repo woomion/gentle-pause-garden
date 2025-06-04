@@ -93,7 +93,7 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
         <DialogContent className="max-w-sm mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600">
           <DialogHeader>
             <DialogTitle className="text-center text-lg font-semibold text-black dark:text-[#F9F5EB] mb-2">
-              Time to decide
+              Time to Review
             </DialogTitle>
             {items.length > 1 && (
               <p className="text-center text-sm text-gray-600 dark:text-gray-300">
@@ -163,12 +163,14 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
                 Let This Item Go
               </button>
 
-              <button 
-                onClick={() => setShowConfirmDialog('purchased')}
-                className="w-full bg-lavender hover:bg-lavender/90 text-black font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                I Purchased This
-              </button>
+              <div className="text-center">
+                <button 
+                  onClick={() => setShowConfirmDialog('purchased')}
+                  className="text-black dark:text-[#F9F5EB] hover:text-gray-700 dark:hover:text-gray-300 underline underline-offset-4 transition-colors duration-200 text-base font-medium"
+                >
+                  I'm Purchasing this Item
+                </button>
+              </div>
             </div>
 
             {/* Footer */}
