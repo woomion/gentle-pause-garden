@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Edit2, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import EditIntentionModal from '../components/EditIntentionModal';
+import { pausedItemsStore } from '../stores/pausedItemsStore';
+import { pauseLogStore } from '../stores/pauseLogStore';
 
 const GreaterJoyFund = () => {
   const [intention, setIntention] = useState("More peace in my day");
@@ -15,6 +17,85 @@ const GreaterJoyFund = () => {
   const [reflection, setReflection] = useState("");
   const [isReflectionComplete, setIsReflectionComplete] = useState(false);
   const [isEditingReflection, setIsEditingReflection] = useState(false);
+  const [stats, setStats] = useState({
+    totalPauses: 0,
+    weeklyPauses: 0,
+    monthlyPauses: 0,
+    totalAmount: 0,
+    weeklyAmount: 0,
+    monthlyAmount: 0,
+    topEmotion: 'overwhelmed'
+  });
+
+  useEffect(() => {
+    const calculateStats = () => {
+      const pausedItems = pausedItemsStore.getItems();
+      const pauseLogItems = pauseLogStore.getItems();
+      const allItems = [...pausedItems, ...pauseLogItems];
+
+      const now = new Date();
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      // Calculate pauses
+      const totalPauses = allItems.length;
+      const weeklyPauses = allItems.filter(item => {
+        const itemDate = 'pausedAt' in item ? new Date(item.pausedAt) : new Date(item.letGoDate);
+        return itemDate >= oneWeekAgo;
+      }).length;
+      const monthlyPauses = allItems.filter(item => {
+        const itemDate = 'pausedAt' in item ? new Date(item.pausedAt) : new Date(item.letGoDate);
+        return itemDate >= oneMonthAgo;
+      }).length;
+
+      // Calculate amounts (only from items with price data)
+      const itemsWithPrice = pausedItems.filter(item => item.price && !isNaN(parseFloat(item.price.replace(/[$,]/g, ''))));
+      const totalAmount = itemsWithPrice.reduce((sum, item) => {
+        return sum + parseFloat(item.price.replace(/[$,]/g, ''));
+      }, 0);
+
+      const weeklyItems = itemsWithPrice.filter(item => new Date(item.pausedAt) >= oneWeekAgo);
+      const weeklyAmount = weeklyItems.reduce((sum, item) => {
+        return sum + parseFloat(item.price.replace(/[$,]/g, ''));
+      }, 0);
+
+      const monthlyItems = itemsWithPrice.filter(item => new Date(item.pausedAt) >= oneMonthAgo);
+      const monthlyAmount = monthlyItems.reduce((sum, item) => {
+        return sum + parseFloat(item.price.replace(/[$,]/g, ''));
+      }, 0);
+
+      // Find most common emotion
+      const emotions = allItems.map(item => item.emotion).filter(Boolean);
+      const emotionCounts = emotions.reduce((acc, emotion) => {
+        acc[emotion] = (acc[emotion] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const topEmotion = Object.entries(emotionCounts).length > 0 
+        ? Object.entries(emotionCounts).sort(([,a], [,b]) => b - a)[0][0]
+        : 'overwhelmed';
+
+      setStats({
+        totalPauses,
+        weeklyPauses,
+        monthlyPauses,
+        totalAmount,
+        weeklyAmount,
+        monthlyAmount,
+        topEmotion
+      });
+    };
+
+    calculateStats();
+
+    const unsubscribePaused = pausedItemsStore.subscribe(calculateStats);
+    const unsubscribeLog = pauseLogStore.subscribe(calculateStats);
+
+    return () => {
+      unsubscribePaused();
+      unsubscribeLog();
+    };
+  }, []);
 
   const handleCompleteReflection = () => {
     if (reflection.trim()) {
@@ -26,6 +107,13 @@ const GreaterJoyFund = () => {
   const handleEditReflection = () => {
     setIsReflectionComplete(false);
     setIsEditingReflection(true);
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
   };
 
   return (
@@ -179,41 +267,52 @@ const GreaterJoyFund = () => {
               <div className="space-y-6">
                 <div className="space-y-3">
                   <p className="text-black dark:text-[#F9F5EB] font-medium">
-                    You've paused X times this week
+                    You've paused {stats.weeklyPauses} {stats.weeklyPauses === 1 ? 'time' : 'times'} this week
                   </p>
                   <p className="text-black dark:text-[#F9F5EB] font-medium">
-                    X times this month
+                    {stats.monthlyPauses} {stats.monthlyPauses === 1 ? 'time' : 'times'} this month
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <p className="text-black dark:text-[#F9F5EB] font-medium">
-                    In total, you've let go of $XX.XX
-                  </p>
-                  <p className="text-black dark:text-[#F9F5EB]">
-                    $XX.XX this week
-                  </p>
-                  <p className="text-black dark:text-[#F9F5EB]">
-                    $XX.XX this month
-                  </p>
-                </div>
+                {stats.totalAmount > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-black dark:text-[#F9F5EB] font-medium">
+                      In total, you've let go of {formatCurrency(stats.totalAmount)}
+                    </p>
+                    {stats.weeklyAmount > 0 && (
+                      <p className="text-black dark:text-[#F9F5EB]">
+                        {formatCurrency(stats.weeklyAmount)} this week
+                      </p>
+                    )}
+                    {stats.monthlyAmount > 0 && (
+                      <p className="text-black dark:text-[#F9F5EB]">
+                        {formatCurrency(stats.monthlyAmount)} this month
+                      </p>
+                    )}
+                  </div>
+                )}
 
-                <div className="space-y-3">
-                  <p className="text-black dark:text-[#F9F5EB]">
-                    Most of your pauses happen when you feel:{' '}
-                    <Badge 
-                      className="rounded-full px-3 py-1 text-black font-medium ml-1"
-                      style={{ backgroundColor: '#CAB6F7' }}
-                    >
-                      overwhelmed
-                    </Badge>
-                    {' '}(that's helpful to notice!)
-                  </p>
-                </div>
+                {stats.totalPauses > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-black dark:text-[#F9F5EB]">
+                      Most of your pauses happen when you feel:{' '}
+                      <Badge 
+                        className="rounded-full px-3 py-1 text-black font-medium ml-1"
+                        style={{ backgroundColor: '#CAB6F7' }}
+                      >
+                        {stats.topEmotion}
+                      </Badge>
+                      {' '}(that's helpful to notice!)
+                    </p>
+                  </div>
+                )}
 
                 <div className="pt-6 text-center">
                   <p className="text-black dark:text-[#F9F5EB] font-medium text-base leading-relaxed">
-                    You're noticing. You're pausing. You're choosing.
+                    {stats.totalPauses > 0 
+                      ? "You're noticing. You're pausing. You're choosing."
+                      : "Start pausing items to see your mindful choices grow!"
+                    }
                   </p>
                 </div>
               </div>
