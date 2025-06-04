@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
@@ -21,7 +20,7 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
           <DrawerTitle className="text-xl font-semibold text-black dark:text-[#F9F5EB]">Settings & Info</DrawerTitle>
         </DrawerHeader>
         
-        <div className="px-6 pb-6 space-y-6 max-h-[70vh] overflow-y-auto">
+        <div className="px-6 pb-12 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* About Pocket Pause */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">About Pocket Pause</h3>
