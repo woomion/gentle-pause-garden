@@ -74,22 +74,12 @@ const GreaterJoyFund = () => {
             <TabsTrigger 
               value="reflection" 
               className="rounded-full font-medium data-[state=active]:text-black text-gray-600"
-              style={{ 
-                backgroundColor: 'transparent',
-                '--active-bg': '#CAB6F7'
-              }}
-              data-active-style="background-color: #CAB6F7;"
             >
               Reflection
             </TabsTrigger>
             <TabsTrigger 
               value="stats" 
               className="rounded-full font-medium data-[state=active]:text-black text-gray-600"
-              style={{ 
-                backgroundColor: 'transparent',
-                '--active-bg': '#CAB6F7'
-              }}
-              data-active-style="background-color: #CAB6F7;"
             >
               Stats
             </TabsTrigger>
