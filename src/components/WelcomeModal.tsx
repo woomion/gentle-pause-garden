@@ -34,7 +34,7 @@ const WelcomeModal = ({ open, onComplete }: WelcomeModalProps) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name" className="text-black dark:text-[#F9F5EB] font-medium">
-                What's your name?
+                What should we call you?
               </Label>
               <Input
                 id="name"
@@ -60,13 +60,14 @@ const WelcomeModal = ({ open, onComplete }: WelcomeModalProps) => {
               </div>
             </div>
             
-            <Button
+            <button
               type="submit"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-6"
+              className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
+              style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
               disabled={!name.trim()}
             >
               Got it!
-            </Button>
+            </button>
           </form>
         </div>
       </DialogContent>
