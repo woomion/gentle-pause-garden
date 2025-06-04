@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Edit2, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import EditIntentionModal from '../components/EditIntentionModal';
+import { pauseLogStore, PauseLogItem } from '../stores/pauseLogStore';
+import { pausedItemsStore, PausedItem } from '../stores/pausedItemsStore';
 
 const GreaterJoyFund = () => {
   const [intention, setIntention] = useState("More peace in my day");
@@ -15,6 +16,98 @@ const GreaterJoyFund = () => {
   const [reflection, setReflection] = useState("");
   const [isReflectionComplete, setIsReflectionComplete] = useState(false);
   const [isEditingReflection, setIsEditingReflection] = useState(false);
+  const [pauseLogItems, setPauseLogItems] = useState<PauseLogItem[]>([]);
+  const [pausedItems, setPausedItems] = useState<PausedItem[]>([]);
+
+  useEffect(() => {
+    // Load pause log items and set up subscription
+    const loadPauseLogItems = () => {
+      setPauseLogItems(pauseLogStore.getItems());
+    };
+
+    const loadPausedItems = () => {
+      setPausedItems(pausedItemsStore.getItems());
+    };
+
+    loadPauseLogItems();
+    loadPausedItems();
+    
+    const unsubscribePauseLog = pauseLogStore.subscribe(loadPauseLogItems);
+    const unsubscribePausedItems = pausedItemsStore.subscribe(loadPausedItems);
+
+    return () => {
+      unsubscribePauseLog();
+      unsubscribePausedItems();
+    };
+  }, []);
+
+  const calculateStats = () => {
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Combine paused items and pause log items for total pause count
+    const allPauses = [
+      ...pausedItems.map(item => ({ date: item.pausedAt, emotion: item.emotion })),
+      ...pauseLogItems.map(item => ({ 
+        date: new Date(item.letGoDate + ', ' + new Date().getFullYear()), 
+        emotion: item.emotion 
+      }))
+    ];
+
+    const pausesThisWeek = allPauses.filter(pause => pause.date >= oneWeekAgo).length;
+    const pausesThisMonth = allPauses.filter(pause => pause.date >= oneMonthAgo).length;
+    const totalPauses = allPauses.length;
+
+    // Calculate money amounts from items that were let go
+    const letGoItems = pauseLogItems.filter(item => item.status === 'let-go');
+    
+    let totalLetGo = 0;
+    let letGoThisWeek = 0;
+    let letGoThisMonth = 0;
+
+    letGoItems.forEach(item => {
+      // Try to find the original paused item to get the price
+      const originalItem = pausedItems.find(pItem => 
+        pItem.itemName === item.itemName && pItem.storeName === item.storeName
+      );
+      
+      if (originalItem) {
+        const price = parseFloat(originalItem.price.replace(/[^0-9.]/g, '')) || 0;
+        totalLetGo += price;
+        
+        const itemDate = new Date(item.letGoDate + ', ' + new Date().getFullYear());
+        if (itemDate >= oneWeekAgo) {
+          letGoThisWeek += price;
+        }
+        if (itemDate >= oneMonthAgo) {
+          letGoThisMonth += price;
+        }
+      }
+    });
+
+    // Find most common emotion
+    const emotionCounts: { [key: string]: number } = {};
+    allPauses.forEach(pause => {
+      emotionCounts[pause.emotion] = (emotionCounts[pause.emotion] || 0) + 1;
+    });
+
+    const mostCommonEmotion = Object.entries(emotionCounts).reduce((a, b) => 
+      emotionCounts[a[0]] > emotionCounts[b[0]] ? a : b
+    )?.[0] || 'overwhelmed';
+
+    return {
+      pausesThisWeek,
+      pausesThisMonth,
+      totalPauses,
+      totalLetGo,
+      letGoThisWeek,
+      letGoThisMonth,
+      mostCommonEmotion
+    };
+  };
+
+  const stats = calculateStats();
 
   const handleCompleteReflection = () => {
     if (reflection.trim()) {
@@ -179,37 +272,45 @@ const GreaterJoyFund = () => {
               <div className="space-y-6">
                 <div className="space-y-3">
                   <p className="text-black dark:text-[#F9F5EB] font-medium">
-                    You've paused X times this week
+                    You've paused {stats.pausesThisWeek} {stats.pausesThisWeek === 1 ? 'time' : 'times'} this week
                   </p>
                   <p className="text-black dark:text-[#F9F5EB] font-medium">
-                    X times this month
+                    {stats.pausesThisMonth} {stats.pausesThisMonth === 1 ? 'time' : 'times'} this month
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <p className="text-black dark:text-[#F9F5EB] font-medium">
-                    In total, you've let go of $XX.XX
-                  </p>
-                  <p className="text-black dark:text-[#F9F5EB]">
-                    $XX.XX this week
-                  </p>
-                  <p className="text-black dark:text-[#F9F5EB]">
-                    $XX.XX this month
-                  </p>
-                </div>
+                {stats.totalLetGo > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-black dark:text-[#F9F5EB] font-medium">
+                      In total, you've let go of ${stats.totalLetGo.toFixed(2)}
+                    </p>
+                    {stats.letGoThisWeek > 0 && (
+                      <p className="text-black dark:text-[#F9F5EB]">
+                        ${stats.letGoThisWeek.toFixed(2)} this week
+                      </p>
+                    )}
+                    {stats.letGoThisMonth > 0 && (
+                      <p className="text-black dark:text-[#F9F5EB]">
+                        ${stats.letGoThisMonth.toFixed(2)} this month
+                      </p>
+                    )}
+                  </div>
+                )}
 
-                <div className="space-y-3">
-                  <p className="text-black dark:text-[#F9F5EB]">
-                    Most of your pauses happen when you feel:{' '}
-                    <Badge 
-                      className="rounded-full px-3 py-1 text-black font-medium ml-1"
-                      style={{ backgroundColor: '#CAB6F7' }}
-                    >
-                      overwhelmed
-                    </Badge>
-                    {' '}(that's helpful to notice!)
-                  </p>
-                </div>
+                {stats.totalPauses > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-black dark:text-[#F9F5EB]">
+                      Most of your pauses happen when you feel:{' '}
+                      <Badge 
+                        className="rounded-full px-3 py-1 text-black font-medium ml-1"
+                        style={{ backgroundColor: '#CAB6F7' }}
+                      >
+                        {stats.mostCommonEmotion}
+                      </Badge>
+                      {' '}(that's helpful to notice!)
+                    </p>
+                  </div>
+                )}
 
                 <div className="pt-6 text-center">
                   <p className="text-black dark:text-[#F9F5EB] font-medium text-base leading-relaxed">
