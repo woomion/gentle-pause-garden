@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -15,13 +15,13 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const [remindersEnabled, setRemindersEnabled] = useState(false);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-80 bg-cream dark:bg-[#200E3B] overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="text-xl font-semibold text-black dark:text-[#F9F5EB]">Settings & Info</SheetTitle>
-        </SheetHeader>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-w-sm mx-auto bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20">
+        <DrawerHeader>
+          <DrawerTitle className="text-xl font-semibold text-black dark:text-[#F9F5EB]">Settings & Info</DrawerTitle>
+        </DrawerHeader>
         
-        <div className="mt-6 space-y-6">
+        <div className="px-6 pb-6 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* About Pocket Pause */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">About Pocket Pause</h3>
@@ -95,8 +95,8 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
             </div>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 };
 
