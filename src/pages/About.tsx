@@ -27,9 +27,14 @@ const About = () => {
 
         {/* About content */}
         <div className="space-y-6">
-          <h1 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] text-center">
-            About Pocket Pause
-          </h1>
+          <div className="text-left">
+            <h1 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
+              About Pocket Pause
+            </h1>
+            <p className="text-lg text-black dark:text-[#F9F5EB] mt-2">
+              A gentle space to notice before you spend
+            </p>
+          </div>
           
           <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6 space-y-6">
             <p className="text-black dark:text-[#F9F5EB] leading-relaxed">
