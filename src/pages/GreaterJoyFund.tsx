@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ArrowLeft, Edit2 } from 'lucide-react';
+import { ArrowLeft, Edit2, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +13,20 @@ const GreaterJoyFund = () => {
   const [intention, setIntention] = useState("More peace in my day");
   const [isEditingIntention, setIsEditingIntention] = useState(false);
   const [reflection, setReflection] = useState("");
+  const [isReflectionComplete, setIsReflectionComplete] = useState(false);
+  const [isEditingReflection, setIsEditingReflection] = useState(false);
+
+  const handleCompleteReflection = () => {
+    if (reflection.trim()) {
+      setIsReflectionComplete(true);
+      setIsEditingReflection(false);
+    }
+  };
+
+  const handleEditReflection = () => {
+    setIsReflectionComplete(false);
+    setIsEditingReflection(true);
+  };
 
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: '#FAF6F1' }}>
@@ -50,17 +64,19 @@ const GreaterJoyFund = () => {
         <Card className="mb-8 rounded-xl border border-gray-200/60 shadow-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}>
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-3">
-              <h2 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-relaxed">
-                {intention}
-              </h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsEditingIntention(true)}
-                className="ml-3 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8"
-              >
-                <Edit2 size={16} />
-              </Button>
+              <div className="flex items-center flex-1">
+                <h2 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-relaxed flex-1">
+                  {intention}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsEditingIntention(true)}
+                  className="ml-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent"
+                >
+                  <Edit2 size={16} />
+                </Button>
+              </div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
               A place to remember what you're reaching for
@@ -68,18 +84,18 @@ const GreaterJoyFund = () => {
           </CardContent>
         </Card>
 
-        {/* Pill-style Tabs with proper spacing */}
+        {/* Outline-style Tabs with proper spacing */}
         <Tabs defaultValue="reflection" className="mb-8">
-          <TabsList className="grid w-full grid-cols-2 mb-8 rounded-full p-1 h-12" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent p-0 h-auto gap-2">
             <TabsTrigger 
               value="reflection" 
-              className="rounded-full font-medium data-[state=active]:text-black text-gray-600"
+              className="rounded-full font-medium border border-gray-300 bg-transparent hover:bg-gray-100 data-[state=active]:bg-[#CAB6F7] data-[state=active]:text-black data-[state=active]:border-[#CAB6F7] text-gray-600 py-2 px-4"
             >
               Reflection
             </TabsTrigger>
             <TabsTrigger 
               value="stats" 
-              className="rounded-full font-medium data-[state=active]:text-black text-gray-600"
+              className="rounded-full font-medium border border-gray-300 bg-transparent hover:bg-gray-100 data-[state=active]:bg-[#CAB6F7] data-[state=active]:text-black data-[state=active]:border-[#CAB6F7] text-gray-600 py-2 px-4"
             >
               Stats
             </TabsTrigger>
@@ -91,29 +107,84 @@ const GreaterJoyFund = () => {
                 Your reason for pausing—in your own words
               </h3>
               
-              <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-                <p className="mb-4">What are you tending to instead of spending? What feeling are you hoping for? What really matters right now?</p>
-              </div>
+              {!isReflectionComplete && !isEditingReflection && (
+                <>
+                  <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                    <p className="mb-4">What are you tending to instead of spending? What feeling are you hoping for? What really matters right now?</p>
+                  </div>
 
-              <Textarea
-                value={reflection}
-                onChange={(e) => setReflection(e.target.value)}
-                placeholder="Write your reflection here. You can keep it short, or let it unfold."
-                className="min-h-[100px] rounded-xl border border-gray-200/60 text-black dark:text-[#F9F5EB] resize-none"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}
-              />
+                  <div className="relative">
+                    <Textarea
+                      value={reflection}
+                      onChange={(e) => setReflection(e.target.value)}
+                      onFocus={() => setIsEditingReflection(true)}
+                      placeholder="Write your reflection here. You can keep it short, or let it unfold."
+                      className="min-h-[100px] rounded-xl border border-gray-200/60 text-black dark:text-[#F9F5EB] resize-none"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}
+                    />
+                  </div>
+                </>
+              )}
 
-              <Card className="rounded-xl border border-gray-200/60" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>
-                <CardContent className="p-4">
-                  <h4 className="font-semibold text-black dark:text-[#F9F5EB] mb-3 text-sm">Prompt ideas:</h4>
-                  <ul className="text-sm text-black dark:text-[#F9F5EB] space-y-2">
-                    <li>• What am I truly reaching for?</li>
-                    <li>• What's behind my purchasing desires?</li>
-                    <li>• What do I already have?</li>
-                    <li>• What's one way I can give myself peace today?</li>
-                  </ul>
-                </CardContent>
-              </Card>
+              {isEditingReflection && (
+                <>
+                  <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                    <p className="mb-4">What are you tending to instead of spending? What feeling are you hoping for? What really matters right now?</p>
+                  </div>
+
+                  <div className="relative">
+                    <Textarea
+                      value={reflection}
+                      onChange={(e) => setReflection(e.target.value)}
+                      placeholder="Write your reflection here. You can keep it short, or let it unfold."
+                      className="min-h-[100px] rounded-xl border border-gray-200/60 text-black dark:text-[#F9F5EB] resize-none"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}
+                      autoFocus
+                    />
+                    {reflection.trim() && (
+                      <Button
+                        onClick={handleCompleteReflection}
+                        className="absolute top-2 right-2 h-8 w-8 p-0 bg-[#CAB6F7] hover:bg-[#B8A6D2] text-black"
+                        size="icon"
+                      >
+                        <Check size={16} />
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {isReflectionComplete && (
+                <div className="relative">
+                  <div className="flex items-start gap-2">
+                    <p className="text-black dark:text-[#F9F5EB] leading-relaxed flex-1">
+                      {reflection}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleEditReflection}
+                      className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent"
+                    >
+                      <Edit2 size={16} />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {!isReflectionComplete && (
+                <Card className="rounded-xl border border-gray-200/60" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}>
+                  <CardContent className="p-4">
+                    <h4 className="font-semibold text-black dark:text-[#F9F5EB] mb-3 text-sm">Prompt ideas:</h4>
+                    <ul className="text-sm text-black dark:text-[#F9F5EB] space-y-2">
+                      <li>• What am I truly reaching for?</li>
+                      <li>• What's behind my purchasing desires?</li>
+                      <li>• What do I already have?</li>
+                      <li>• What's one way I can give myself peace today?</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
