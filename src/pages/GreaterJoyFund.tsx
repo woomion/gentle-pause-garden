@@ -59,8 +59,8 @@ const GreaterJoyFund = () => {
           </p>
         </div>
 
-        {/* Intention Card - centerpiece with no background */}
-        <div className="mb-8 p-6">
+        {/* Intention Card - centerpiece with no background, aligned left */}
+        <div className="mb-8">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center flex-1">
               <h2 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-relaxed flex-1">
