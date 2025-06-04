@@ -8,6 +8,9 @@ interface IntentionSectionProps {
 }
 
 const IntentionSection = ({ intention, onEdit }: IntentionSectionProps) => {
+  const displayText = intention || "Enter a title for your joy fund (ex: More peace in my day)";
+  const isPlaceholder = !intention;
+  
   return (
     <div className="mb-8 mt-12">
       <h1 className="text-xl font-medium text-black dark:text-[#F9F5EB] mb-2">
@@ -19,8 +22,12 @@ const IntentionSection = ({ intention, onEdit }: IntentionSectionProps) => {
       
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center flex-1">
-          <h2 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-relaxed flex-1">
-            {intention}
+          <h2 className={`text-xl font-bold leading-relaxed flex-1 ${
+            isPlaceholder 
+              ? 'text-gray-400 dark:text-gray-500 italic' 
+              : 'text-black dark:text-[#F9F5EB]'
+          }`}>
+            {displayText}
             <Button
               variant="ghost"
               size="icon"

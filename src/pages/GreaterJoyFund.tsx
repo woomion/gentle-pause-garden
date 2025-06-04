@@ -10,7 +10,7 @@ import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
 
 const GreaterJoyFund = () => {
-  const [intention, setIntention] = useState("More peace in my day");
+  const [intention, setIntention] = useState("");
   const [isEditingIntention, setIsEditingIntention] = useState(false);
   const [reflection, setReflection] = useState("");
   const [stats, setStats] = useState({
