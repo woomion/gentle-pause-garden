@@ -22,21 +22,24 @@ const IntentionSection = ({ intention, onEdit }: IntentionSectionProps) => {
       
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center flex-1">
-          <h2 className={`text-xl font-bold leading-relaxed flex-1 ${
-            isPlaceholder 
-              ? 'text-gray-400 dark:text-gray-500 italic' 
-              : 'text-black dark:text-[#F9F5EB]'
-          }`}>
+          <h2 
+            className={`text-xl font-bold leading-relaxed flex-1 cursor-pointer ${
+              isPlaceholder 
+                ? 'text-gray-400 dark:text-gray-500 italic' 
+                : 'text-black dark:text-[#F9F5EB]'
+            }`}
+            onClick={onEdit}
+          >
             {displayText}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onEdit}
-              className="ml-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent inline-flex"
-            >
-              <Edit2 size={16} />
-            </Button>
           </h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onEdit}
+            className="ml-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent"
+          >
+            <Edit2 size={16} />
+          </Button>
         </div>
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">

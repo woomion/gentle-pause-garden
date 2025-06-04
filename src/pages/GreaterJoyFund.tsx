@@ -23,11 +23,27 @@ const GreaterJoyFund = () => {
     topEmotion: 'overwhelmed'
   });
 
+  // Load intention from localStorage on mount
+  useEffect(() => {
+    const savedIntention = localStorage.getItem('joyFundIntention');
+    if (savedIntention) {
+      setIntention(savedIntention);
+    }
+  }, []);
+
+  // Save intention to localStorage when it changes
+  const handleIntentionSave = (newIntention: string) => {
+    setIntention(newIntention);
+    localStorage.setItem('joyFundIntention', newIntention);
+  };
+
   useEffect(() => {
     const calculateStats = () => {
       const pausedItems = pausedItemsStore.getItems();
       const pauseLogItems = pauseLogStore.getItems();
       const allItems = [...pausedItems, ...pauseLogItems];
+
+      console.log('Calculating stats with items:', allItems);
 
       const now = new Date();
       const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -71,7 +87,7 @@ const GreaterJoyFund = () => {
         ? Object.entries(emotionCounts).sort(([,a], [,b]) => b - a)[0][0]
         : 'overwhelmed';
 
-      setStats({
+      const newStats = {
         totalPauses,
         weeklyPauses,
         monthlyPauses,
@@ -79,7 +95,10 @@ const GreaterJoyFund = () => {
         weeklyAmount,
         monthlyAmount,
         topEmotion
-      });
+      };
+
+      console.log('New stats calculated:', newStats);
+      setStats(newStats);
     };
 
     calculateStats();
@@ -139,7 +158,7 @@ const GreaterJoyFund = () => {
       {isEditingIntention && (
         <EditIntentionModal
           intention={intention}
-          onSave={setIntention}
+          onSave={handleIntentionSave}
           onClose={() => setIsEditingIntention(false)}
         />
       )}

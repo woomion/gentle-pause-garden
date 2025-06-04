@@ -23,6 +23,8 @@ const StatsTab = ({ stats }: StatsTabProps) => {
     }).format(amount);
   };
 
+  console.log('StatsTab stats:', stats);
+
   return (
     <div className="space-y-8">
       <h3 className="text-lg font-bold text-black dark:text-[#F9F5EB] mb-6">
@@ -60,7 +62,9 @@ const StatsTab = ({ stats }: StatsTabProps) => {
         <div className="space-y-3">
           <p className="text-black dark:text-[#F9F5EB]">
             Most of your pauses happen when you feel:{' '}
-            {stats.totalPauses > 0 ? (
+            {stats.totalPauses === 0 ? (
+              <span className="text-gray-500 dark:text-gray-400 italic">we'll find out</span>
+            ) : (
               <>
                 <Badge 
                   className="rounded-full px-3 py-1 text-black font-medium ml-1"
@@ -70,8 +74,6 @@ const StatsTab = ({ stats }: StatsTabProps) => {
                 </Badge>
                 {' '}(that's helpful to notice!)
               </>
-            ) : (
-              <span className="text-gray-500 dark:text-gray-400 italic">we'll find out</span>
             )}
           </p>
         </div>
