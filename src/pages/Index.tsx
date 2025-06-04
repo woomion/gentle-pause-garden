@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
@@ -5,6 +6,7 @@ import AddPauseButton from '../components/AddPauseButton';
 import InStoreModeButton from '../components/InStoreModeButton';
 import PausedSection from '../components/PausedSection';
 import PauseLogSection from '../components/PauseLogSection';
+import GreaterJoyFundCTA from '../components/GreaterJoyFundCTA';
 import FooterLinks from '../components/FooterLinks';
 import PauseForm from '../components/PauseForm';
 
@@ -32,6 +34,7 @@ const Index = () => {
           <AddPauseButton onAddPause={handleAddPause} />
           <InStoreModeButton />
           <PausedSection />
+          <GreaterJoyFundCTA />
           <PauseLogSection />
           <FooterLinks />
         </div>
