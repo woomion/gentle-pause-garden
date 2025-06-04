@@ -12,12 +12,18 @@ const PausedSection = () => {
   const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
 
   useEffect(() => {
-    // Initial load
-    setPausedItems(pausedItemsStore.getItems());
+    // Initial load with sorting by most recent first
+    const items = pausedItemsStore.getItems().sort((a, b) => 
+      new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime()
+    );
+    setPausedItems(items);
 
     // Subscribe to changes
     const unsubscribe = pausedItemsStore.subscribe(() => {
-      setPausedItems(pausedItemsStore.getItems());
+      const updatedItems = pausedItemsStore.getItems().sort((a, b) => 
+        new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime()
+      );
+      setPausedItems(updatedItems);
     });
 
     return unsubscribe;

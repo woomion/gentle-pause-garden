@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { ArrowLeft, Edit2, Check, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, Edit2, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +15,6 @@ const GreaterJoyFund = () => {
   const [reflection, setReflection] = useState("");
   const [isReflectionComplete, setIsReflectionComplete] = useState(false);
   const [isEditingReflection, setIsEditingReflection] = useState(false);
-  const [isPromptDrawerOpen, setIsPromptDrawerOpen] = useState(false);
 
   const handleCompleteReflection = () => {
     if (reflection.trim()) {
@@ -226,74 +226,6 @@ const GreaterJoyFund = () => {
           <p>|| Pocket Pause—your conscious spending companion</p>
         </div>
       </div>
-
-      {/* Side Drawer for Prompt Ideas */}
-      {(!isReflectionComplete && (
-        <>
-          {/* Trigger button with vertical text */}
-          <div 
-            className="fixed right-0 top-1/2 transform -translate-y-1/2 z-40 cursor-pointer"
-            onClick={() => setIsPromptDrawerOpen(true)}
-          >
-            <div className="bg-[#CAB6F7] hover:bg-[#B8A6D2] transition-colors duration-200 rounded-l-lg px-2 py-6 shadow-lg">
-              <div className="transform -rotate-90 whitespace-nowrap text-black font-medium text-sm">
-                Need some inspiration?
-              </div>
-            </div>
-          </div>
-
-          {/* Overlay */}
-          {isPromptDrawerOpen && (
-            <div 
-              className="fixed inset-0 bg-black/30 z-50"
-              onClick={() => setIsPromptDrawerOpen(false)}
-            />
-          )}
-
-          {/* Drawer */}
-          <div className={`fixed right-0 top-0 h-full w-80 bg-white dark:bg-[#200E3B] border-l border-gray-200 dark:border-gray-600 shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
-            isPromptDrawerOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}>
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h4 className="font-semibold text-black dark:text-[#F9F5EB] text-lg">Need some inspiration?</h4>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsPromptDrawerOpen(false)}
-                  className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8"
-                >
-                  <ChevronLeft size={20} />
-                </Button>
-              </div>
-              
-              <div className="space-y-4">
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                  Here are some prompts to help you reflect:
-                </p>
-                <ul className="text-sm text-black dark:text-[#F9F5EB] space-y-3">
-                  <li className="flex items-start">
-                    <span className="text-[#CAB6F7] mr-2">•</span>
-                    What am I truly reaching for?
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#CAB6F7] mr-2">•</span>
-                    What's behind my purchasing desires?
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#CAB6F7] mr-2">•</span>
-                    What do I already have?
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#CAB6F7] mr-2">•</span>
-                    What's one way I can give myself peace today?
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </>
-      ))}
 
       {/* Edit Intention Modal */}
       {isEditingIntention && (
