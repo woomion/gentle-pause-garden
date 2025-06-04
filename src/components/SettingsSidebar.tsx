@@ -124,17 +124,6 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
               </div>
             </div>
 
-            {/* Account */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Account</h3>
-              <div className="space-y-2">
-                <button className="w-full text-left p-3 rounded-lg bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-colors">
-                  <span className="text-black dark:text-[#F9F5EB]">Sign In / Sync Settings</span>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Sync your data across devices</p>
-                </button>
-              </div>
-            </div>
-
             {/* Notifications */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Pause Notifications</h3>
