@@ -58,61 +58,59 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
         A growing reflection of your mindful choices
       </p>
       
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-start flex-1">
-          {isEditing ? (
-            <div className="flex-1 space-y-3">
-              <Textarea
-                ref={textareaRef}
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Enter a title for your joy fund (ex: More peace in my day)"
-                className="text-xl font-bold leading-relaxed resize-none min-h-[60px] bg-transparent border-2 border-gray-300 dark:border-gray-600 focus:border-[#CAB6F7] dark:focus:border-[#CAB6F7] text-black dark:text-[#F9F5EB]"
-              />
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSave}
-                  size="sm"
-                  className="bg-[#CAB6F7] hover:bg-[#B8A3F5] text-black font-medium"
-                >
-                  <Check size={14} className="mr-1" />
-                  Save
-                </Button>
-                <Button
-                  onClick={handleCancel}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB]"
-                >
-                  <X size={14} className="mr-1" />
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h2 
-                className={`text-xl font-bold leading-relaxed flex-1 cursor-pointer ${
-                  isPlaceholder 
-                    ? 'text-gray-400 dark:text-gray-500 italic' 
-                    : 'text-black dark:text-[#F9F5EB]'
-                }`}
-                onClick={handleEdit}
-              >
-                {displayText}
-              </h2>
+      <div className="mb-3">
+        {isEditing ? (
+          <div className="space-y-3">
+            <Textarea
+              ref={textareaRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter a title for your joy fund (ex: More peace in my day)"
+              className="text-xl font-bold leading-relaxed resize-none min-h-[60px] bg-transparent border-2 border-gray-300 dark:border-gray-600 focus:border-[#CAB6F7] dark:focus:border-[#CAB6F7] text-black dark:text-[#F9F5EB]"
+            />
+            <div className="flex gap-2">
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleEdit}
-                className="ml-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent"
+                onClick={handleSave}
+                size="sm"
+                className="bg-[#CAB6F7] hover:bg-[#B8A3F5] text-black font-medium"
               >
-                <Edit2 size={16} />
+                <Check size={14} className="mr-1" />
+                Save
               </Button>
-            </>
-          )}
-        </div>
+              <Button
+                onClick={handleCancel}
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB]"
+              >
+                <X size={14} className="mr-1" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <h2 
+              className={`text-xl font-bold leading-relaxed cursor-pointer ${
+                isPlaceholder 
+                  ? 'text-gray-400 dark:text-gray-500 italic' 
+                  : 'text-black dark:text-[#F9F5EB]'
+              }`}
+              onClick={handleEdit}
+            >
+              {displayText}
+            </h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleEdit}
+              className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent flex-shrink-0"
+            >
+              <Edit2 size={16} />
+            </Button>
+          </div>
+        )}
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
         A place to remember what you're reaching for
