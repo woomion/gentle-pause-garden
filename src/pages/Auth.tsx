@@ -84,6 +84,10 @@ const Auth = () => {
     }
   };
 
+  const handleNotNow = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] flex items-center justify-center px-6">
       <div className="max-w-md w-full space-y-8">
@@ -96,7 +100,7 @@ const Auth = () => {
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
             {isSignUp 
-              ? 'Start your mindful shopping journey' 
+              ? 'Start pausing' 
               : 'Continue your pause practice'
             }
           </p>
@@ -150,14 +154,24 @@ const Auth = () => {
               />
             </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-[#F9F5EB] font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
-              style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-            >
-              {loading ? 'Loading...' : (isSignUp ? 'Create Account' : 'Sign In')}
-            </Button>
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="button"
+                onClick={handleNotNow}
+                variant="outline"
+                className="flex-1 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
+              >
+                Not now
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-[#F9F5EB] font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+                style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+              >
+                {loading ? 'Loading...' : (isSignUp ? 'Create Account' : 'Sign In')}
+              </Button>
+            </div>
           </form>
 
           <div className="mt-6 text-center">
