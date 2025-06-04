@@ -1,3 +1,4 @@
+
 import { Timer } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 
@@ -79,8 +80,11 @@ const PausedItemCard = ({ item, onClick }: PausedItemCardProps) => {
             <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
               <span>Paused while feeling </span>
               <span 
-                className="inline-block px-2 py-1 rounded text-xs font-medium text-black"
-                style={{ backgroundColor: getEmotionColor(item.emotion) }}
+                className="inline-block px-2 py-1 rounded text-xs font-medium"
+                style={{ 
+                  backgroundColor: getEmotionColor(item.emotion),
+                  color: '#000'
+                }}
               >
                 {item.emotion}
               </span>
@@ -91,8 +95,11 @@ const PausedItemCard = ({ item, onClick }: PausedItemCardProps) => {
       
       {/* Full-width banner at bottom */}
       <div 
-        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium text-black flex items-center justify-center gap-2 rounded-b-2xl"
-        style={{ backgroundColor: '#E7D9FA' }}
+        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl"
+        style={{ 
+          backgroundColor: '#E7D9FA',
+          color: '#000'
+        }}
       >
         <Timer size={14} />
         {item.checkInTime}

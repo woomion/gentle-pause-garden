@@ -1,4 +1,3 @@
-
 import { Timer, ExternalLink } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
@@ -134,8 +133,11 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
 
             {/* Pause Duration Banner - touching bottom of image */}
             <div 
-              className="absolute bottom-0 left-0 right-0 py-2 px-4 rounded-b-2xl text-center text-xs font-medium text-black flex items-center justify-center gap-2"
-              style={{ backgroundColor: '#E7D9FA' }}
+              className="absolute bottom-0 left-0 right-0 py-2 px-4 rounded-b-2xl text-center text-xs font-medium flex items-center justify-center gap-2"
+              style={{ 
+                backgroundColor: '#E7D9FA',
+                color: '#000'
+              }}
             >
               <Timer size={14} />
               {item.checkInTime}
@@ -156,8 +158,11 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             <div className="flex items-center gap-2">
               <span className="text-gray-600 dark:text-gray-300 text-sm">Paused while feeling</span>
               <span 
-                className="inline-block px-4 py-2 rounded-full text-sm font-medium text-black"
-                style={{ backgroundColor: getEmotionColor(item.emotion) }}
+                className="inline-block px-4 py-2 rounded-full text-sm font-medium"
+                style={{ 
+                  backgroundColor: getEmotionColor(item.emotion),
+                  color: '#000'
+                }}
               >
                 {item.emotion}
               </span>
