@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GreaterJoyHeader from '../components/GreaterJoyHeader';
 import IntentionSection from '../components/IntentionSection';
@@ -10,6 +10,7 @@ import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
 
 const GreaterJoyFund = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [intention, setIntention] = useState("");
   const [reflection, setReflection] = useState("");
   const [stats, setStats] = useState({
@@ -21,6 +22,14 @@ const GreaterJoyFund = () => {
     monthlyAmount: 0,
     topEmotion: 'overwhelmed'
   });
+
+  // Get active tab from URL or default to reflection
+  const activeTab = searchParams.get('tab') || 'reflection';
+
+  // Handle tab change and update URL
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value });
+  };
 
   // Load intention from localStorage on mount
   useEffect(() => {
@@ -121,7 +130,7 @@ const GreaterJoyFund = () => {
           onSave={handleIntentionSave}
         />
 
-        <Tabs defaultValue="reflection" className="mb-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
           <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent p-0 h-auto gap-2">
             <TabsTrigger 
               value="reflection" 
