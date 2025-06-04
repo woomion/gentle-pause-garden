@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -131,19 +132,19 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-cream z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-cream dark:bg-[#200E3B] z-50 overflow-y-auto transition-colors duration-300">
       <div className="min-h-screen px-6 py-8">
         {/* Header */}
         <header className="relative mb-8">
           <div className="text-center">
-            <div className="text-black font-medium text-lg tracking-wide mb-2">
+            <div className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2">
               POCKET || PAUSE
             </div>
           </div>
           
           <button 
             onClick={onClose}
-            className="absolute top-6 right-0 p-2 text-black hover:text-taupe transition-colors"
+            className="absolute top-6 right-0 p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
           >
             <X size={24} />
           </button>
@@ -151,14 +152,14 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
 
         {/* Form */}
         <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-semibold text-dark-gray text-center mb-8">
+          <h1 className="text-2xl font-semibold text-dark-gray dark:text-[#F9F5EB] text-center mb-8">
             Add Something to Pause
           </h1>
 
           <div className="space-y-4">
             {/* Link Field */}
             <div className="space-y-1">
-              <Label htmlFor="link" className="text-dark-gray font-medium text-base">
+              <Label htmlFor="link" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Link (paste a product URL)
               </Label>
               <div className="relative">
@@ -168,7 +169,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                   placeholder="www.example.com/item"
                   value={formData.link}
                   onChange={(e) => handleLinkChange(e.target.value)}
-                  className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                  className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
                 />
                 {isParsingUrl && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -180,7 +181,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
 
             {/* Item Name Field */}
             <div className="space-y-1">
-              <Label htmlFor="itemName" className="text-dark-gray font-medium text-base">
+              <Label htmlFor="itemName" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Item Name
               </Label>
               <Input
@@ -189,13 +190,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="What are you thinking of buying?"
                 value={formData.itemName}
                 onChange={(e) => handleInputChange('itemName', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
               />
             </div>
 
             {/* Store Name Field */}
             <div className="space-y-1">
-              <Label htmlFor="storeName" className="text-dark-gray font-medium text-base">
+              <Label htmlFor="storeName" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Store Name
               </Label>
               <Input
@@ -204,13 +205,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="Where is this item from?"
                 value={formData.storeName}
                 onChange={(e) => handleInputChange('storeName', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
               />
             </div>
 
             {/* Price Field */}
             <div className="space-y-1">
-              <Label htmlFor="price" className="text-dark-gray font-medium text-base">
+              <Label htmlFor="price" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Price
               </Label>
               <Input
@@ -219,43 +220,43 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="0.00"
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
               />
             </div>
 
-{/* Photo Upload Field */}
+            {/* Photo Upload Field */}
             <div className="space-y-1">
-  <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
-    Photo (optional)
-  </Label>
-  <input
-    id="photo"
-    type="file"
-    accept="image/*"
-    onChange={handleFileChange}
-    className="w-full text-sm text-gray-500
-               file:py-2 file:px-4
-               file:rounded-xl file:border-0
-               file:text-sm file:font-medium
-               file:bg-lavender file:text-dark-gray
-               hover:file:bg-lavender/90
-               rounded-xl border border-gray-200 bg-white h-12
-               overflow-hidden"
-  />
-</div>
+              <Label htmlFor="photo" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Photo (optional)
+              </Label>
+              <input
+                id="photo"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full text-sm text-gray-500 dark:text-gray-300
+                           file:py-2 file:px-4
+                           file:rounded-xl file:border-0
+                           file:text-sm file:font-medium
+                           file:bg-lavender file:text-dark-gray
+                           hover:file:bg-lavender/90
+                           rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 h-12
+                           overflow-hidden"
+              />
+            </div>
 
             {/* Emotion Selection */}
             <div className="space-y-1">
-              <Label className="text-dark-gray font-medium text-base">
+              <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 How are you feeling right now?
               </Label>
               <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
-                <SelectTrigger className="bg-white border-gray-200 rounded-xl py-3 px-4">
-                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
+                <SelectTrigger className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 dark:text-[#F9F5EB]">
+                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200 rounded-xl max-h-60 overflow-y-auto">
+                <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-xl max-h-60 overflow-y-auto">
                   {emotions.map((emotion) => (
-                    <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1">
+                    <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1 dark:text-[#F9F5EB] dark:focus:bg-white/10">
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-4 h-4 rounded-full"
@@ -271,7 +272,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
 
             {/* Notes Field */}
             <div className="space-y-1">
-              <Label htmlFor="notes" className="text-dark-gray font-medium text-base">
+              <Label htmlFor="notes" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Notes (optional)
               </Label>
               <Textarea
@@ -279,13 +280,13 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 placeholder="Why do you want this item?"
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
               />
             </div>
 
             {/* Pause Duration */}
             <div className="space-y-2">
-              <Label className="text-dark-gray font-medium text-base">
+              <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Pause for
               </Label>
               
@@ -298,7 +299,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                     className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
                       formData.duration === duration
                         ? 'bg-lavender border-lavender text-dark-gray'
-                        : 'bg-white border-gray-200 text-dark-gray hover:border-lavender/50'
+                        : 'bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-dark-gray dark:text-[#F9F5EB] hover:border-lavender/50'
                     }`}
                   >
                     {duration}
@@ -311,14 +312,14 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
                 value={formData.otherDuration} 
                 onValueChange={handleOtherDurationSelect}
               >
-                <SelectTrigger className={`bg-white border-2 rounded-xl py-3 px-4 transition-all ${
-                  formData.otherDuration ? 'border-lavender bg-lavender' : 'border-gray-200 hover:border-lavender/50'
+                <SelectTrigger className={`bg-white dark:bg-white/10 border-2 rounded-xl py-3 px-4 transition-all dark:text-[#F9F5EB] ${
+                  formData.otherDuration ? 'border-lavender bg-lavender dark:bg-lavender text-dark-gray' : 'border-gray-200 dark:border-gray-600 hover:border-lavender/50'
                 }`}>
-                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
+                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200 rounded-xl">
+                <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-xl">
                   {otherPauseLengths.map((duration) => (
-                    <SelectItem key={duration} value={duration} className="rounded-lg my-1">
+                    <SelectItem key={duration} value={duration} className="rounded-lg my-1 dark:text-[#F9F5EB] dark:focus:bg-white/10">
                       {duration}
                     </SelectItem>
                   ))}
@@ -331,7 +332,7 @@ const PauseForm = ({ onClose }: PauseFormProps) => {
               <Button
                 variant="outline"
                 onClick={onClose}
-                className="flex-1 bg-white border-gray-200 text-dark-gray hover:bg-gray-50 rounded-xl py-3"
+                className="flex-1 bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-dark-gray dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
               >
                 Cancel
               </Button>

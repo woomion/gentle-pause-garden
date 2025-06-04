@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ArrowLeft, Edit2, Check, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -30,7 +29,7 @@ const GreaterJoyFund = () => {
   };
 
   return (
-    <div className="min-h-screen transition-colors duration-300 relative" style={{ backgroundColor: '#FAF6F1' }}>
+    <div className="min-h-screen transition-colors duration-300 relative bg-[#FAF6F1] dark:bg-[#200E3B]">
       <div className="max-w-md mx-auto px-6 py-8">
         {/* Header with back button */}
         <header className="relative mb-8">
@@ -88,13 +87,13 @@ const GreaterJoyFund = () => {
           <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent p-0 h-auto gap-2">
             <TabsTrigger 
               value="reflection" 
-              className="rounded-full font-medium border border-gray-300 bg-transparent hover:bg-gray-100 data-[state=active]:bg-[#CAB6F7] data-[state=active]:text-black data-[state=active]:border-[#CAB6F7] text-gray-600 py-2 px-4"
+              className="rounded-full font-medium border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=active]:bg-[#CAB6F7] data-[state=active]:text-black data-[state=active]:border-[#CAB6F7] text-gray-600 dark:text-gray-300 py-2 px-4"
             >
               Reflection
             </TabsTrigger>
             <TabsTrigger 
               value="stats" 
-              className="rounded-full font-medium border border-gray-300 bg-transparent hover:bg-gray-100 data-[state=active]:bg-[#CAB6F7] data-[state=active]:text-black data-[state=active]:border-[#CAB6F7] text-gray-600 py-2 px-4"
+              className="rounded-full font-medium border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=active]:bg-[#CAB6F7] data-[state=active]:text-black data-[state=active]:border-[#CAB6F7] text-gray-600 dark:text-gray-300 py-2 px-4"
             >
               Stats
             </TabsTrigger>
@@ -118,8 +117,7 @@ const GreaterJoyFund = () => {
                       onChange={(e) => setReflection(e.target.value)}
                       onFocus={() => setIsEditingReflection(true)}
                       placeholder="Write your reflection here. You can keep it short, or let it unfold."
-                      className="min-h-[100px] rounded-xl border border-gray-200/60 text-black dark:text-[#F9F5EB] resize-none"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}
+                      className="min-h-[100px] rounded-xl border border-gray-200/60 dark:border-gray-600 text-black dark:text-[#F9F5EB] resize-none bg-white/70 dark:bg-white/10"
                     />
                   </div>
                 </>
@@ -136,8 +134,7 @@ const GreaterJoyFund = () => {
                       value={reflection}
                       onChange={(e) => setReflection(e.target.value)}
                       placeholder="Write your reflection here. You can keep it short, or let it unfold."
-                      className="min-h-[100px] rounded-xl border border-gray-200/60 text-black dark:text-[#F9F5EB] resize-none"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}
+                      className="min-h-[100px] rounded-xl border border-gray-200/60 dark:border-gray-600 text-black dark:text-[#F9F5EB] resize-none bg-white/70 dark:bg-white/10"
                       autoFocus
                     />
                     {reflection.trim() && (
@@ -254,27 +251,27 @@ const GreaterJoyFund = () => {
           )}
 
           {/* Drawer */}
-          <div className={`fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+          <div className={`fixed right-0 top-0 h-full w-80 bg-white dark:bg-[#200E3B] border-l border-gray-200 dark:border-gray-600 shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
             isPromptDrawerOpen ? 'translate-x-0' : 'translate-x-full'
           }`}>
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h4 className="font-semibold text-black text-lg">Need some inspiration?</h4>
+                <h4 className="font-semibold text-black dark:text-[#F9F5EB] text-lg">Need some inspiration?</h4>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsPromptDrawerOpen(false)}
-                  className="text-gray-500 hover:text-black h-8 w-8"
+                  className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8"
                 >
                   <ChevronLeft size={20} />
                 </Button>
               </div>
               
               <div className="space-y-4">
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                   Here are some prompts to help you reflect:
                 </p>
-                <ul className="text-sm text-black space-y-3">
+                <ul className="text-sm text-black dark:text-[#F9F5EB] space-y-3">
                   <li className="flex items-start">
                     <span className="text-[#CAB6F7] mr-2">•</span>
                     What am I truly reaching for?

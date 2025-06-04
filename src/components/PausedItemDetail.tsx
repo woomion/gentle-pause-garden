@@ -1,3 +1,4 @@
+
 import { Timer, ExternalLink } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
@@ -105,8 +106,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-sm mx-auto p-6 rounded-3xl"
-        style={{ backgroundColor: '#FAF6F1' }}
+        className="max-w-sm mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600"
       >
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
@@ -115,7 +115,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
         <div className="space-y-6">
           {/* Product image */}
           <div className="relative">
-            <div className="w-full h-48 bg-gray-200 rounded-2xl flex items-center justify-center overflow-hidden">
+            <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center overflow-hidden">
               {imageUrl ? (
                 <img 
                   src={imageUrl} 
@@ -124,11 +124,11 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
-                    target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>';
+                    target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>';
                   }}
                 />
               ) : (
-                <div className="w-16 h-16 bg-gray-300 rounded-full opacity-50"></div>
+                <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>
               )}
             </div>
 
@@ -145,18 +145,18 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           {/* Item details */}
           <div className="space-y-2">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-black leading-tight">{item.itemName}</h3>
+              <h3 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-tight">{item.itemName}</h3>
               {item.price && (
-                <span className="text-xl font-bold text-black ml-2">${item.price}</span>
+                <span className="text-xl font-bold text-black dark:text-[#F9F5EB] ml-2">${item.price}</span>
               )}
             </div>
             
-            <p className="text-gray-600 text-base">{item.storeName}</p>
+            <p className="text-gray-600 dark:text-gray-300 text-base">{item.storeName}</p>
             
             <div className="flex items-center gap-2">
-              <span className="text-gray-600 text-sm">Paused while feeling</span>
+              <span className="text-gray-600 dark:text-gray-300 text-sm">Paused while feeling</span>
               <span 
-                className="inline-block px-4 py-2 rounded-full text-sm font-medium"
+                className="inline-block px-4 py-2 rounded-full text-sm font-medium text-black"
                 style={{ backgroundColor: getEmotionColor(item.emotion) }}
               >
                 {item.emotion}
@@ -168,20 +168,20 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           <div className="pt-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+                <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 dark:hover:bg-lavender/20 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
                   Let This Item Go
                 </button>
               </AlertDialogTrigger>
-              <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
+              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Let go of this item?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Let go of this item?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
                     This will move "{item.itemName}" to your pause log. You can always see what you've let go of in your pause log section.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-2xl" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLetGo} className="rounded-2xl">
+                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLetGo} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
                     Let it go
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -193,20 +193,20 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           <div className="text-center">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <button className="text-gray-600 text-sm hover:text-black transition-colors duration-200 underline">
+                <button className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 underline">
                   I Purchased This
                 </button>
               </AlertDialogTrigger>
-              <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
+              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Mark as purchased?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Mark as purchased?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
                     This will move "{item.itemName}" to your Pause Log as a thoughtful purchase decision.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-2xl" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleBought} className="rounded-2xl">
+                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleBought} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
                     Yes, I bought it
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -221,7 +221,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 href={item.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-gray-600 text-sm hover:text-black transition-colors duration-200 flex items-center gap-1"
+                className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1"
               >
                 <ExternalLink size={14} />
                 View item
@@ -232,20 +232,20 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-red-600 text-sm">
+                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 text-sm">
                   Delete item
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent style={{ backgroundColor: '#FAF6F1' }} className="rounded-3xl">
+              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
                     This will permanently delete "{item.itemName}" from your paused items. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="rounded-2xl">
+                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="rounded-2xl bg-red-500 hover:bg-red-600 text-white">
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
