@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore, PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
@@ -235,6 +236,12 @@ const PausedSection = () => {
 
   const totalItems = activeItems.length;
   const isSingleItem = totalItems === 1;
+  
+  // Group items into pairs for desktop view
+  const groupedItems = [];
+  for (let i = 0; i < activeItems.length; i += 2) {
+    groupedItems.push(activeItems.slice(i, i + 2));
+  }
 
   return (
     <div className="mb-8">
@@ -256,36 +263,62 @@ const PausedSection = () => {
       
       {isSingleItem ? (
         <>
-          <PausedItemCard 
-            item={activeItems[0]} 
-            onClick={() => handleItemClick(activeItems[0])} 
-          />
+          <div className="md:max-w-md md:mx-auto lg:max-w-md lg:mx-auto">
+            <PausedItemCard 
+              item={activeItems[0]} 
+              onClick={() => handleItemClick(activeItems[0])} 
+            />
+          </div>
           <div className="flex justify-center mt-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">1 item</span>
           </div>
         </>
       ) : (
         <div className="relative">
-          <Carousel className="w-full" setApi={setApi}>
-            <CarouselContent>
-              {activeItems.map((item) => (
-                <CarouselItem key={item.id}>
-                  <PausedItemCard 
-                    item={item} 
-                    onClick={() => handleItemClick(item)} 
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            
-            <div className="hidden md:flex items-center justify-center mt-4 gap-4">
-              <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-              <span className="text-sm text-gray-600 dark:text-gray-400 px-4">
-                {current}/{totalItems} items
-              </span>
-              <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
-            </div>
-          </Carousel>
+          {/* Mobile: single column carousel */}
+          <div className="block md:hidden">
+            <Carousel className="w-full" setApi={setApi}>
+              <CarouselContent>
+                {activeItems.map((item) => (
+                  <CarouselItem key={item.id}>
+                    <PausedItemCard 
+                      item={item} 
+                      onClick={() => handleItemClick(item)} 
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
+
+          {/* Desktop: two column carousel */}
+          <div className="hidden md:block">
+            <Carousel className="w-full" setApi={setApi}>
+              <CarouselContent>
+                {groupedItems.map((group, groupIndex) => (
+                  <CarouselItem key={groupIndex}>
+                    <div className="grid grid-cols-2 gap-4">
+                      {group.map((item) => (
+                        <PausedItemCard 
+                          key={item.id}
+                          item={item} 
+                          onClick={() => handleItemClick(item)} 
+                        />
+                      ))}
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              
+              <div className="flex items-center justify-center mt-4 gap-4">
+                <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
+                <span className="text-sm text-gray-600 dark:text-gray-400 px-4">
+                  {current}/{groupedItems.length} slides
+                </span>
+                <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
+              </div>
+            </Carousel>
+          </div>
           
           <div className="flex md:hidden justify-center mt-2">
             <div className="bg-white dark:bg-white/10 rounded-full px-3 py-1 flex items-center gap-2 border border-gray-200 dark:border-gray-600">

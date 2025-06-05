@@ -17,30 +17,30 @@ const PauseLog = () => {
   const stats = {
     totalPauses: items.length,
     weeklyPauses: items.filter(item => {
-      const itemDate = new Date(item.created_at);
+      const itemDate = new Date(item.pausedAt);
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return itemDate >= weekAgo;
     }).length,
     monthlyPauses: items.filter(item => {
-      const itemDate = new Date(item.created_at);
+      const itemDate = new Date(item.pausedAt);
       const monthAgo = new Date();
       monthAgo.setMonth(monthAgo.getMonth() - 1);
       return itemDate >= monthAgo;
     }).length,
-    totalAmount: items.reduce((sum, item) => sum + (item.price || 0), 0),
+    totalAmount: items.reduce((sum, item) => sum + (Number(item.price) || 0), 0),
     weeklyAmount: items.filter(item => {
-      const itemDate = new Date(item.created_at);
+      const itemDate = new Date(item.pausedAt);
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return itemDate >= weekAgo;
-    }).reduce((sum, item) => sum + (item.price || 0), 0),
+    }).reduce((sum, item) => sum + (Number(item.price) || 0), 0),
     monthlyAmount: items.filter(item => {
-      const itemDate = new Date(item.created_at);
+      const itemDate = new Date(item.pausedAt);
       const monthAgo = new Date();
       monthAgo.setMonth(monthAgo.getMonth() - 1);
       return itemDate >= monthAgo;
-    }).reduce((sum, item) => sum + (item.price || 0), 0),
+    }).reduce((sum, item) => sum + (Number(item.price) || 0), 0),
     topEmotion: items.length > 0 ? (items[0].emotion || 'curious') : 'curious'
   };
 
@@ -54,7 +54,7 @@ const PauseLog = () => {
 
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
-      <div className="max-w-md md:max-w-2xl lg:max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
         <div className="flex items-center mb-6">
           <Link to="/" className="mr-4">
             <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />

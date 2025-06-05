@@ -15,7 +15,7 @@ const GreaterJoyFund = () => {
   return (
     <>
       <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
-        <div className="max-w-md md:max-w-2xl lg:max-w-4xl mx-auto px-6 py-8">
+        <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
           <div className="flex items-center mb-6">
             <Link to="/" className="mr-4">
               <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />
