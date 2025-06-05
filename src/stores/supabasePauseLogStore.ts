@@ -33,7 +33,7 @@ class SupabasePauseLogStore {
       itemName: dbItem.title,
       storeName: 'Unknown Store', // We should add store_name column to DB
       emotion: dbItem.reason || 'something else',
-      letGoDate: new Date(dbItem.updated_at || dbItem.created_at).toLocaleDateString('en-US', { 
+      letGoDate: new Date(dbItem.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric' 
       }),
@@ -48,7 +48,7 @@ class SupabasePauseLogStore {
         .from('paused_items')
         .select('*')
         .in('status', ['purchased', 'let-go'])
-        .order('updated_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error loading pause log items:', error);
