@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
@@ -52,11 +53,10 @@ const Index = () => {
   };
 
   const handleAddPause = () => {
-    console.log('Add pause button clicked - form will open after animation');
     // Delay to allow ripple animation to complete
     setTimeout(() => {
       setShowForm(true);
-    }, 650); // Slightly longer than the 600ms ripple animation
+    }, 650);
   };
 
   const handleCloseForm = () => {
@@ -72,7 +72,7 @@ const Index = () => {
 
   const handleCloseSignup = () => {
     setShowSignupModal(false);
-    setSignupModalDismissed(true); // Remember that user dismissed the modal
+    setSignupModalDismissed(true);
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -27,7 +28,7 @@ const PauseLog = () => {
     });
   }, [items, emotionFilter, statusFilter]);
 
-  const getEmotionColor = (emotion: string) => {
+  const getEmotionColor = (emotion: string): string => {
     const emotionColors: Record<string, string> = {
       'bored': '#F6E3D5',
       'overwhelmed': '#E9E2F7',
