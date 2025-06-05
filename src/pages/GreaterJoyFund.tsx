@@ -1,170 +1,134 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import { useState } from 'react';
+import { ArrowLeft, Heart, Gift, Users, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import DonationModal from '../components/DonationModal';
 import GreaterJoyHeader from '../components/GreaterJoyHeader';
-import IntentionSection from '../components/IntentionSection';
-import ReflectionTab from '../components/ReflectionTab';
-import StatsTab from '../components/StatsTab';
-import SupportCTA from '../components/SupportCTA';
-import { pausedItemsStore } from '../stores/pausedItemsStore';
-import { pauseLogStore } from '../stores/pauseLogStore';
 
 const GreaterJoyFund = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [intention, setIntention] = useState("");
-  const [reflection, setReflection] = useState("");
-  const [stats, setStats] = useState({
-    totalPauses: 0,
-    weeklyPauses: 0,
-    monthlyPauses: 0,
-    totalAmount: 0,
-    weeklyAmount: 0,
-    monthlyAmount: 0,
-    topEmotion: 'overwhelmed'
-  });
+  const [showDonationModal, setShowDonationModal] = useState(false);
 
-  // Get active tab from URL or default to reflection
-  const activeTab = searchParams.get('tab') || 'reflection';
-
-  // Handle tab change and update URL
-  const handleTabChange = (value: string) => {
-    setSearchParams({ tab: value });
+  const handleDonateClick = () => {
+    setShowDonationModal(true);
   };
-
-  // Load intention from localStorage on mount
-  useEffect(() => {
-    const savedIntention = localStorage.getItem('joyFundIntention');
-    if (savedIntention) {
-      setIntention(savedIntention);
-    }
-  }, []);
-
-  // Save intention to localStorage when it changes
-  const handleIntentionSave = (newIntention: string) => {
-    setIntention(newIntention);
-    localStorage.setItem('joyFundIntention', newIntention);
-  };
-
-  useEffect(() => {
-    const calculateStats = () => {
-      const pausedItems = pausedItemsStore.getItems();
-      const pauseLogItems = pauseLogStore.getItems();
-      const allItems = [...pausedItems, ...pauseLogItems];
-
-      console.log('Calculating stats with items:', allItems);
-
-      const now = new Date();
-      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-      // Calculate pauses
-      const totalPauses = allItems.length;
-      const weeklyPauses = allItems.filter(item => {
-        const itemDate = 'pausedAt' in item ? new Date(item.pausedAt) : new Date(item.letGoDate);
-        return itemDate >= oneWeekAgo;
-      }).length;
-      const monthlyPauses = allItems.filter(item => {
-        const itemDate = 'pausedAt' in item ? new Date(item.pausedAt) : new Date(item.letGoDate);
-        return itemDate >= oneMonthAgo;
-      }).length;
-
-      // Calculate amounts (only from items with price data)
-      const itemsWithPrice = pausedItems.filter(item => item.price && !isNaN(parseFloat(item.price.replace(/[$,]/g, ''))));
-      const totalAmount = itemsWithPrice.reduce((sum, item) => {
-        return sum + parseFloat(item.price.replace(/[$,]/g, ''));
-      }, 0);
-
-      const weeklyItems = itemsWithPrice.filter(item => new Date(item.pausedAt) >= oneWeekAgo);
-      const weeklyAmount = weeklyItems.reduce((sum, item) => {
-        return sum + parseFloat(item.price.replace(/[$,]/g, ''));
-      }, 0);
-
-      const monthlyItems = itemsWithPrice.filter(item => new Date(item.pausedAt) >= oneMonthAgo);
-      const monthlyAmount = monthlyItems.reduce((sum, item) => {
-        return sum + parseFloat(item.price.replace(/[$,]/g, ''));
-      }, 0);
-
-      // Find most common emotion
-      const emotions = allItems.map(item => item.emotion).filter(Boolean);
-      const emotionCounts = emotions.reduce((acc, emotion) => {
-        acc[emotion] = (acc[emotion] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      const topEmotion = Object.entries(emotionCounts).length > 0 
-        ? Object.entries(emotionCounts).sort(([,a], [,b]) => b - a)[0][0]
-        : 'overwhelmed';
-
-      const newStats = {
-        totalPauses,
-        weeklyPauses,
-        monthlyPauses,
-        totalAmount,
-        weeklyAmount,
-        monthlyAmount,
-        topEmotion
-      };
-
-      console.log('New stats calculated:', newStats);
-      setStats(newStats);
-    };
-
-    calculateStats();
-
-    const unsubscribePaused = pausedItemsStore.subscribe(calculateStats);
-    const unsubscribeLog = pauseLogStore.subscribe(calculateStats);
-
-    return () => {
-      unsubscribePaused();
-      unsubscribeLog();
-    };
-  }, []);
 
   return (
-    <div className="min-h-screen transition-colors duration-300 relative bg-[#FAF6F1] dark:bg-[#200E3B]">
-      <div className="max-w-md mx-auto px-6 py-8">
-        <GreaterJoyHeader />
-        
-        <IntentionSection 
-          intention={intention}
-          onSave={handleIntentionSave}
-        />
+    <>
+      <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
+        <div className="max-w-md md:max-w-2xl lg:max-w-4xl mx-auto px-6 py-8">
+          <div className="flex items-center mb-6">
+            <Link to="/" className="mr-4">
+              <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />
+            </Link>
+            <h1 className="text-2xl font-semibold text-taupe dark:text-cream">Greater Joy Fund</h1>
+          </div>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent p-0 h-auto gap-2">
-            <TabsTrigger 
-              value="reflection" 
-              className="rounded-full font-medium border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=active]:bg-[#CAB6F7] data-[state=active]:text-black data-[state=active]:border-[#CAB6F7] text-gray-600 dark:text-gray-300 py-2 px-4"
-            >
-              Reflection
-            </TabsTrigger>
-            <TabsTrigger 
-              value="stats" 
-              className="rounded-full font-medium border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=active]:bg-[#CAB6F7] data-[state=active]:text-black data-[state=active]:border-[#CAB6F7] text-gray-600 dark:text-gray-300 py-2 px-4"
-            >
-              Stats
-            </TabsTrigger>
-          </TabsList>
+          <GreaterJoyHeader />
 
-          <TabsContent value="reflection" className="mt-0">
-            <ReflectionTab 
-              reflection={reflection}
-              setReflection={setReflection}
-            />
-          </TabsContent>
+          <div className="space-y-6">
+            <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Heart className="w-6 h-6 text-purple" />
+                <h2 className="text-xl font-semibold text-taupe dark:text-cream">What is the Greater Joy Fund?</h2>
+              </div>
+              <p className="text-dark-gray dark:text-cream mb-4">
+                The Greater Joy Fund transforms your paused purchases into meaningful impact. Instead of buying 
+                something you've decided you don't truly need, you can redirect that money toward causes that 
+                create lasting joy in the world.
+              </p>
+              <p className="text-dark-gray dark:text-cream">
+                It's about turning moments of conscious choice into ripples of positive change—for both 
+                yourself and others.
+              </p>
+            </div>
 
-          <TabsContent value="stats" className="mt-0">
-            <StatsTab stats={stats} />
-          </TabsContent>
-        </Tabs>
+            <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Gift className="w-6 h-6 text-purple" />
+                <h2 className="text-xl font-semibold text-taupe dark:text-cream">How it works</h2>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-lavender text-lg">1️⃣</span>
+                  <div className="text-dark-gray dark:text-cream">
+                    <strong>Pause & Reflect:</strong> You decide not to purchase something after your pause period.
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-lavender text-lg">2️⃣</span>
+                  <div className="text-dark-gray dark:text-cream">
+                    <strong>Choose Joy:</strong> Donate all or part of what you would have spent to meaningful causes.
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-lavender text-lg">3️⃣</span>
+                  <div className="text-dark-gray dark:text-cream">
+                    <strong>Feel the Impact:</strong> Experience the unique satisfaction of conscious choice and generosity.
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <SupportCTA />
+            <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="w-6 h-6 text-purple" />
+                <h2 className="text-xl font-semibold text-taupe dark:text-cream">Where your donations go</h2>
+              </div>
+              <p className="text-dark-gray dark:text-cream mb-4">
+                We partner with carefully selected organizations that create meaningful, lasting impact:
+              </p>
+              <div className="space-y-3 text-dark-gray dark:text-cream">
+                <div className="flex items-center gap-3">
+                  <span className="w-2 h-2 bg-lavender rounded-full"></span>
+                  <span><strong>Mental Health Support:</strong> Organizations providing accessible therapy and wellness resources</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-2 h-2 bg-lavender rounded-full"></span>
+                  <span><strong>Environmental Protection:</strong> Projects focused on sustainability and climate action</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-2 h-2 bg-lavender rounded-full"></span>
+                  <span><strong>Education Access:</strong> Programs that provide learning opportunities to underserved communities</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-2 h-2 bg-lavender rounded-full"></span>
+                  <span><strong>Local Community Support:</strong> Grassroots organizations creating positive change</span>
+                </div>
+              </div>
+            </div>
 
-        <div className="mt-16 text-center text-xs space-y-1" style={{ color: '#A6A1AD' }}>
-          <p>|| Pocket Pause—your conscious spending companion</p>
+            <div className="bg-gradient-to-r from-lavender/20 to-purple/20 dark:from-lavender/10 dark:to-purple/10 rounded-lg p-6 border border-lavender/30">
+              <div className="flex items-center gap-3 mb-4">
+                <Sparkles className="w-6 h-6 text-purple" />
+                <h2 className="text-xl font-semibold text-taupe dark:text-cream">Ready to create greater joy?</h2>
+              </div>
+              <p className="text-dark-gray dark:text-cream mb-6">
+                Transform your mindful spending choices into positive impact. Every donation, no matter the size, 
+                creates ripples of change and contributes to a more joyful world.
+              </p>
+              <button
+                onClick={handleDonateClick}
+                className="w-full bg-purple hover:bg-purple/90 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+              >
+                Make a Donation
+              </button>
+            </div>
+
+            <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                The Greater Joy Fund is managed transparently. You'll receive updates on how your contributions 
+                are making a difference in the world.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      <DonationModal 
+        isOpen={showDonationModal} 
+        onClose={() => setShowDonationModal(false)} 
+      />
+    </>
   );
 };
 
