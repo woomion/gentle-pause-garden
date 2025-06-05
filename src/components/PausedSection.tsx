@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore, PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
@@ -328,7 +327,7 @@ const PausedSection = () => {
                 <div className="w-1 h-1 bg-gray-400 rounded-full" />
               </div>
               <span className="text-xs text-gray-600 dark:text-gray-400">
-                {current}/{totalItems}
+                {totalItems} {totalItems === 1 ? 'item' : 'items'}
               </span>
             </div>
           </div>
