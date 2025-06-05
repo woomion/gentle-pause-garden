@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '../contexts/AuthContext';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
@@ -60,18 +61,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
     resolver: zodResolver(formSchema),
   });
 
-  useEffect(() => {
-    // Generate a random string of lowercase letters
-    let placeholder = '';
-    const characters = 'abcdefghijklmnopqrstuvwxyz';
-    const charactersLength = characters.length;
-    for (let i = 0; i < 8; i++) {
-      placeholder += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    // Set the notes to the placeholder
-    setNotes(placeholder);
-  }, []);
-
   const handleImageUpload = (file: File, dataUrl: string) => {
     setPhoto(file);
     setPhotoDataUrl(dataUrl);
@@ -107,17 +96,14 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
     setIsSubmitting(true);
     
     try {
-      // Clean the notes - if it's empty, placeholder text, or just whitespace, set to empty string
-      const cleanNotes = notes.trim() && !notes.match(/^[a-z]{8,}$/) ? notes.trim() : '';
-      
       const pauseData = {
         itemName: itemName.trim(),
         storeName: storeName.trim(),
         price: price || undefined,
         url: url || undefined,
         emotion,
-        notes: cleanNotes,
-        duration: pauseDuration, // Map pauseDuration to duration for the store
+        notes: notes.trim() || undefined,
+        duration: pauseDuration,
         photo: photo || undefined,
         photoDataUrl: photoDataUrl || undefined,
         imageUrl: imageUrl || undefined
@@ -173,6 +159,21 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
           </button>
 
           <form onSubmit={handleFormSubmit} className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="url" className="text-black dark:text-[#F9F5EB]">Link to product (optional)</Label>
+              <Input 
+                id="url" 
+                placeholder="Enter URL" 
+                type="url"
+                {...register('url')}
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+              />
+              {errors.url && (
+                <p className="text-red-500 text-sm">{errors.url.message}</p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="itemName" className="text-black dark:text-[#F9F5EB]">Item name</Label>
@@ -205,36 +206,19 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="price" className="text-black dark:text-[#F9F5EB]">Price (optional)</Label>
-                <Input 
-                  id="price" 
-                  placeholder="Enter price" 
-                  type="text"
-                  {...register('price')}
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-                 {errors.price && (
-                  <p className="text-red-500 text-sm">{errors.price.message}</p>
-                )}
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="url" className="text-black dark:text-[#F9F5EB]">Link to product (optional)</Label>
-                <Input 
-                  id="url" 
-                  placeholder="Enter URL" 
-                  type="url"
-                  {...register('url')}
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                />
-                {errors.url && (
-                  <p className="text-red-500 text-sm">{errors.url.message}</p>
-                )}
-              </div>
+            <div className="grid gap-2">
+              <Label htmlFor="price" className="text-black dark:text-[#F9F5EB]">Price (optional)</Label>
+              <Input 
+                id="price" 
+                placeholder="Enter price" 
+                type="text"
+                {...register('price')}
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+               {errors.price && (
+                <p className="text-red-500 text-sm">{errors.price.message}</p>
+              )}
             </div>
 
             <div className="grid gap-2">
@@ -278,19 +262,23 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="pauseDuration" className="text-black dark:text-[#F9F5EB]">Pause duration</Label>
-              <Select onValueChange={(value) => setPauseDuration(value)}>
-                <SelectTrigger className="bg-white/60 dark:bg-white/10 border border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]">
-                  <SelectValue placeholder="Select a duration" />
-                </SelectTrigger>
-                <SelectContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]">
-                  <SelectItem value="1 day">1 day</SelectItem>
-                  <SelectItem value="3 days">3 days</SelectItem>
-                  <SelectItem value="1 week">1 week</SelectItem>
-                  <SelectItem value="2 weeks">2 weeks</SelectItem>
-                  <SelectItem value="1 month">1 month</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-black dark:text-[#F9F5EB]">Pause duration</Label>
+              <ToggleGroup 
+                type="single" 
+                value={pauseDuration} 
+                onValueChange={(value) => setPauseDuration(value || '')}
+                className="justify-start"
+              >
+                <ToggleGroupItem value="24 hours" aria-label="24 hours">
+                  24 hours
+                </ToggleGroupItem>
+                <ToggleGroupItem value="1 day" aria-label="1 day">
+                  1 day
+                </ToggleGroupItem>
+                <ToggleGroupItem value="3 days" aria-label="3 days">
+                  3 days
+                </ToggleGroupItem>
+              </ToggleGroup>
               {errors.pauseDuration && (
                 <p className="text-red-500 text-sm">{errors.pauseDuration.message}</p>
               )}
@@ -301,9 +289,23 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
               onImageUrlChange={handleImageUrlChange}
             />
 
-            <Button type="submit" disabled={isSubmitting} className="bg-[#CAB6F7] hover:bg-[#B8A3F0] text-black">
-              {isSubmitting ? "Pausing..." : "Pause Decision"}
-            </Button>
+            <div className="flex gap-2 pt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onClose}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="bg-[#CAB6F7] hover:bg-[#B8A3F0] text-black flex-1"
+              >
+                {isSubmitting ? "Starting Pause..." : "Start Pause"}
+              </Button>
+            </div>
           </form>
         </div>
       </DialogContent>
