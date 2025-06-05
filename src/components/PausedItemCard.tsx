@@ -28,19 +28,46 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
   }, [item.emotion]);
 
   const imageUrl = useMemo(() => {
-    // Priority: Supabase Storage URL > local photo data > file object > link URL
-    if (item.imageUrl && item.imageUrl.includes('supabase')) return item.imageUrl;
-    if (item.photoDataUrl) return item.photoDataUrl;
-    if (item.photo instanceof File) return URL.createObjectURL(item.photo);
-    return item.imageUrl;
-  }, [item.photoDataUrl, item.photo, item.imageUrl]);
+    console.log('PausedItemCard - Getting image for item:', {
+      id: item.id,
+      imageUrl: item.imageUrl,
+      photoDataUrl: item.photoDataUrl,
+      hasPhoto: !!item.photo
+    });
+
+    // Priority: Supabase Storage URL > photoDataUrl > file object > imageUrl
+    if (item.imageUrl && item.imageUrl.includes('supabase')) {
+      console.log('Using Supabase Storage URL:', item.imageUrl);
+      return item.imageUrl;
+    }
+    if (item.photoDataUrl) {
+      console.log('Using photoDataUrl');
+      return item.photoDataUrl;
+    }
+    if (item.photo instanceof File) {
+      console.log('Creating object URL from file');
+      return URL.createObjectURL(item.photo);
+    }
+    if (item.imageUrl) {
+      console.log('Using parsed imageUrl:', item.imageUrl);
+      return item.imageUrl;
+    }
+    
+    console.log('No image URL found for item:', item.id);
+    return null;
+  }, [item.photoDataUrl, item.photo, item.imageUrl, item.id]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('Image failed to load:', imageUrl, 'for item:', item.id);
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
     if (target.parentElement) {
       target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50" aria-hidden="true"></div>';
     }
+  };
+
+  const handleImageLoad = () => {
+    console.log('Image loaded successfully:', imageUrl, 'for item:', item.id);
   };
 
   const formattedPrice = item.price ? `$${item.price}` : '';
@@ -68,6 +95,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
                 alt={item.itemName}
                 className="w-full h-full object-cover"
                 onError={handleImageError}
+                onLoad={handleImageLoad}
                 loading="lazy"
               />
             ) : (

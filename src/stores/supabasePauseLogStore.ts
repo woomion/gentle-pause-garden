@@ -13,8 +13,8 @@ export interface PauseLogItem {
   originalPausedItem?: any;
 }
 
-type DbPauseLogItem = Database['public']['Tables']['paused_items']['Row'];
-type DbPauseLogItemInsert = Database['public']['Tables']['paused_items']['Insert'];
+type DbPausedItem = Database['public']['Tables']['paused_items']['Row'];
+type DbPausedItemInsert = Database['public']['Tables']['paused_items']['Insert'];
 
 type Listener = () => void;
 
@@ -27,11 +27,13 @@ class SupabasePauseLogStore {
     this.loadItems();
   }
 
-  private convertDbToLocal(dbItem: DbPauseLogItem): PauseLogItem {
+  private convertDbToLocal(dbItem: DbPausedItem): PauseLogItem {
+    console.log('Converting DB item to local:', dbItem);
+    
     return {
       id: dbItem.id,
       itemName: dbItem.title,
-      storeName: 'Unknown Store', // We should add store_name column to DB
+      storeName: dbItem.url ? this.extractStoreName(dbItem.url) : 'Unknown Store',
       emotion: dbItem.reason || 'something else',
       letGoDate: new Date(dbItem.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
@@ -42,8 +44,19 @@ class SupabasePauseLogStore {
     };
   }
 
+  private extractStoreName(url: string): string {
+    try {
+      const hostname = new URL(url).hostname;
+      return hostname.replace('www.', '').split('.')[0];
+    } catch {
+      return 'Unknown Store';
+    }
+  }
+
   async loadItems(): Promise<void> {
     try {
+      console.log('Loading pause log items from Supabase...');
+      
       const { data, error } = await supabase
         .from('paused_items')
         .select('*')
@@ -55,7 +68,12 @@ class SupabasePauseLogStore {
         return;
       }
 
+      console.log('Raw pause log data from Supabase:', data);
+      
       this.items = data?.map(item => this.convertDbToLocal(item)) || [];
+      
+      console.log('Converted pause log items:', this.items);
+      
       this.isLoaded = true;
       this.notifyListeners();
     } catch (error) {
@@ -65,6 +83,8 @@ class SupabasePauseLogStore {
 
   async addItem(item: Omit<PauseLogItem, 'id' | 'letGoDate'>): Promise<void> {
     try {
+      console.log('Adding item to pause log:', item);
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('User not authenticated');
@@ -92,6 +112,8 @@ class SupabasePauseLogStore {
         return;
       }
 
+      console.log('Successfully added pause log item to database:', data);
+
       const newItem = this.convertDbToLocal(data);
       this.items.unshift(newItem);
       this.notifyListeners();
@@ -102,6 +124,8 @@ class SupabasePauseLogStore {
 
   async deleteItem(id: string): Promise<void> {
     try {
+      console.log('Deleting pause log item:', id);
+      
       const { error } = await supabase
         .from('paused_items')
         .delete()

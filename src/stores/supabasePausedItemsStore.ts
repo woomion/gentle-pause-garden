@@ -83,12 +83,19 @@ class SupabasePausedItemsStore {
     const pausedAt = new Date(dbItem.created_at);
     const reviewAt = new Date(dbItem.review_at);
     
+    console.log('Converting DB item to local:', {
+      id: dbItem.id,
+      title: dbItem.title,
+      url: dbItem.url,
+      reason: dbItem.reason
+    });
+    
     return {
       id: dbItem.id,
       itemName: dbItem.title,
-      storeName: dbItem.reason || 'Unknown Store', // Temporary fix - we should add store_name column
+      storeName: dbItem.reason || 'Unknown Store', // Using reason field temporarily
       price: dbItem.price?.toString() || '',
-      imageUrl: dbItem.url || undefined,
+      imageUrl: dbItem.url || undefined, // This should contain the image URL
       emotion: dbItem.reason || 'something else',
       notes: dbItem.notes || undefined,
       duration: `${dbItem.pause_duration_days} days`,
@@ -107,11 +114,16 @@ class SupabasePausedItemsStore {
     const reviewAt = new Date();
     reviewAt.setDate(reviewAt.getDate() + pauseDurationDays);
 
+    // Store the final image URL in the url field
+    const finalUrl = imageUrl || item.imageUrl || item.link || null;
+    
+    console.log('Converting local to DB with imageUrl:', finalUrl);
+
     return {
       title: item.itemName,
       price: item.price ? parseFloat(item.price) : null,
-      url: imageUrl || item.link || null,
-      reason: item.emotion,
+      url: finalUrl, // This will store either the uploaded image URL or the parsed image URL
+      reason: item.storeName, // Temporarily storing store name in reason field
       notes: item.notes || null,
       pause_duration_days: pauseDurationDays,
       review_at: reviewAt.toISOString(),
@@ -153,6 +165,8 @@ class SupabasePausedItemsStore {
 
   async loadItems(): Promise<void> {
     try {
+      console.log('Loading paused items from Supabase...');
+      
       const { data, error } = await supabase
         .from('paused_items')
         .select('*')
@@ -164,9 +178,14 @@ class SupabasePausedItemsStore {
         return;
       }
 
+      console.log('Raw paused items data from Supabase:', data);
+
       this.items = data?.map(item => this.convertDbToLocal(item)) || [];
       this.updateCheckInTimes();
       this.isLoaded = true;
+      
+      console.log('Converted paused items:', this.items);
+      
       this.notifyListeners();
     } catch (error) {
       console.error('Error in loadItems:', error);
@@ -185,7 +204,8 @@ class SupabasePausedItemsStore {
         hasPhoto: !!item.photo,
         hasImageUrl: !!item.imageUrl,
         photoSize: item.photo?.size,
-        photoName: item.photo?.name
+        photoName: item.photo?.name,
+        imageUrl: item.imageUrl
       });
 
       // Upload image if provided
