@@ -126,7 +126,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
             Need inspiration?
           </button>
         </DialogTrigger>
-        <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-gray-700 max-w-md">
+        <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-gray-700 max-w-xs sm:max-w-sm">
           <DialogHeader className="pt-4">
             <DialogTitle className="text-black dark:text-[#F9F5EB] text-lg leading-relaxed">
               Here are a few ways other people have named their Joy Fund:

@@ -8,6 +8,7 @@ import ReflectionTab from '../components/ReflectionTab';
 import StatsTab from '../components/StatsTab';
 import PauseHeader from '../components/PauseHeader';
 import FooterLinks from '../components/FooterLinks';
+import GreaterJoyDonation from '../components/GreaterJoyDonation';
 import { usePausedItems } from '../hooks/usePausedItems';
 
 const GreaterJoyFund = () => {
@@ -106,6 +107,8 @@ const GreaterJoyFund = () => {
             <StatsTab stats={stats} />
           </TabsContent>
         </Tabs>
+
+        <GreaterJoyDonation />
 
         <FooterLinks />
       </div>
