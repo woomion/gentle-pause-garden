@@ -11,6 +11,38 @@ import { usePausedItems } from '../hooks/usePausedItems';
 const PauseLog = () => {
   const { items } = usePausedItems();
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [reflection, setReflection] = useState('');
+
+  // Calculate stats from items
+  const stats = {
+    totalPauses: items.length,
+    weeklyPauses: items.filter(item => {
+      const itemDate = new Date(item.created_at);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return itemDate >= weekAgo;
+    }).length,
+    monthlyPauses: items.filter(item => {
+      const itemDate = new Date(item.created_at);
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      return itemDate >= monthAgo;
+    }).length,
+    totalAmount: items.reduce((sum, item) => sum + (item.price || 0), 0),
+    weeklyAmount: items.filter(item => {
+      const itemDate = new Date(item.created_at);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return itemDate >= weekAgo;
+    }).reduce((sum, item) => sum + (item.price || 0), 0),
+    monthlyAmount: items.filter(item => {
+      const itemDate = new Date(item.created_at);
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      return itemDate >= monthAgo;
+    }).reduce((sum, item) => sum + (item.price || 0), 0),
+    topEmotion: items.length > 0 ? (items[0].emotion || 'curious') : 'curious'
+  };
 
   const handleItemClick = (item: any) => {
     setSelectedItem(item);
@@ -69,11 +101,11 @@ const PauseLog = () => {
           </TabsContent>
 
           <TabsContent value="stats">
-            <StatsTab />
+            <StatsTab stats={stats} />
           </TabsContent>
 
           <TabsContent value="reflection">
-            <ReflectionTab />
+            <ReflectionTab reflection={reflection} setReflection={setReflection} />
           </TabsContent>
         </Tabs>
       </div>

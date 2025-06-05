@@ -125,8 +125,8 @@ const GreaterJoyFund = () => {
       </div>
 
       <DonationModal 
-        isOpen={showDonationModal} 
-        onClose={() => setShowDonationModal(false)} 
+        open={showDonationModal} 
+        onOpenChange={setShowDonationModal} 
       />
     </>
   );
