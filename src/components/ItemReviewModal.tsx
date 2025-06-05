@@ -64,8 +64,8 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
     onItemDecided(currentItem.id);
     
     const toastMessage = action === 'let-go' 
-      ? `"${currentItem.itemName}" has been moved to your pause log.`
-      : "We've moved this thoughtful decision to your Pause Log for future reference.";
+      ? `"${currentItem.itemName}" has been moved to your paused decision log.`
+      : "We've moved this thoughtful decision to your Paused Decision Log for future reference.";
     
     const toastTitle = action === 'let-go' 
       ? "Item released" 
@@ -197,7 +197,7 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
           <AlertDialogHeader>
             <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Let go of this item?</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-              This will move "{currentItem.itemName}" to your pause log.
+              This will move "{currentItem.itemName}" to your paused decision log.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -216,7 +216,7 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
           <AlertDialogHeader>
             <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Mark as purchased?</AlertDialogTitle>
             <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-              This will move "{currentItem.itemName}" to your Pause Log as a thoughtful purchase decision.
+              This will move "{currentItem.itemName}" to your Paused Decision Log as a thoughtful purchase decision.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

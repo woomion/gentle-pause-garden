@@ -10,7 +10,7 @@ const PauseLogSection = () => {
         className="flex items-center justify-center gap-2 w-full text-black hover:text-taupe transition-colors duration-200 py-2 group"
       >
         <span className="text-sm font-medium relative">
-          See your Pause Log
+          See your Paused Decision Log
           <div 
             className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
             style={{ backgroundColor: '#DFCBFC' }}

@@ -36,31 +36,42 @@ class SupabasePausedItemsStore {
 
   private async uploadImage(file: File): Promise<string | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('=== IMAGE UPLOAD DEBUG START ===');
+      
+      // Step 1: Check user authentication
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log('1. User check:', { 
+        user: user ? { id: user.id, email: user.email } : null, 
+        error: userError 
+      });
+      
       if (!user) {
-        console.error('No authenticated user for image upload');
+        console.error('❌ No authenticated user for image upload');
         return null;
       }
 
+      // Step 2: Prepare file upload details
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-      console.log('Starting image upload to Supabase Storage:', {
+      console.log('2. File details:', {
+        originalName: file.name,
         fileName,
         fileSize: file.size,
         fileType: file.type,
         bucket: 'paused-items'
       });
 
-      // First check if bucket exists
+      // Step 3: Check if bucket exists and is accessible
+      console.log('3. Checking bucket accessibility...');
       const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-      console.log('Available buckets:', buckets);
+      console.log('3a. Available buckets:', buckets?.map(b => ({ id: b.id, name: b.name, public: b.public })));
       
       if (bucketError) {
-        console.error('Error checking buckets:', bucketError);
+        console.error('3b. ❌ Error checking buckets:', bucketError);
       }
 
-      // Upload the file to Supabase Storage
+      // Step 4: Attempt file upload
+      console.log('4. Starting file upload...');
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('paused-items')
         .upload(fileName, file, {
@@ -68,27 +79,45 @@ class SupabasePausedItemsStore {
           upsert: false
         });
 
+      console.log('4a. Upload result:', { data: uploadData, error: uploadError });
+
       if (uploadError) {
-        console.error('Error uploading image to Supabase Storage:', uploadError);
-        console.error('Upload error details:', {
+        console.error('4b. ❌ Upload failed:', {
           message: uploadError.message,
           bucket: 'paused-items',
-          fileName
+          fileName,
+          fullError: uploadError
         });
         return null;
       }
 
-      console.log('Image uploaded successfully:', uploadData);
+      console.log('4c. ✅ Upload successful:', uploadData);
 
-      // Get the public URL for the uploaded file
+      // Step 5: Generate public URL
+      console.log('5. Generating public URL...');
       const { data: urlData } = supabase.storage
         .from('paused-items')
         .getPublicUrl(fileName);
 
-      console.log('Generated public URL:', urlData.publicUrl);
+      console.log('5a. Public URL generated:', urlData.publicUrl);
+      
+      // Step 6: Verify URL accessibility
+      console.log('6. Verifying URL accessibility...');
+      try {
+        const response = await fetch(urlData.publicUrl, { method: 'HEAD' });
+        console.log('6a. URL check response:', { 
+          status: response.status, 
+          statusText: response.statusText,
+          ok: response.ok 
+        });
+      } catch (urlError) {
+        console.error('6b. ⚠️ URL verification failed:', urlError);
+      }
+
+      console.log('=== IMAGE UPLOAD DEBUG END ===');
       return urlData.publicUrl;
     } catch (error) {
-      console.error('Error in uploadImage:', error);
+      console.error('❌ Unexpected error in uploadImage:', error);
       return null;
     }
   }
@@ -249,13 +278,16 @@ class SupabasePausedItemsStore {
 
   async addItem(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>): Promise<void> {
     try {
+      console.log('=== ADD ITEM DEBUG START ===');
+      
+      // Step 1: Check authentication
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.error('User not authenticated');
+        console.error('❌ User not authenticated');
         return;
       }
 
-      console.log('Adding item with data:', {
+      console.log('1. Adding item for user:', user.id, 'with data:', {
         itemName: item.itemName,
         emotion: item.emotion,
         storeName: item.storeName,
@@ -263,25 +295,29 @@ class SupabasePausedItemsStore {
         hasImageUrl: !!item.imageUrl,
         hasLink: !!item.link,
         photoSize: item.photo?.size,
-        photoName: item.photo?.name
+        photoName: item.photo?.name,
+        photoType: item.photo?.type
       });
 
-      // Upload image if provided
+      // Step 2: Handle image upload if provided
       let uploadedImageUrl: string | null = null;
       if (item.photo) {
-        console.log('Attempting to upload photo to Supabase Storage...');
+        console.log('2. Photo detected, starting upload process...');
         uploadedImageUrl = await this.uploadImage(item.photo);
-        if (uploadedImageUrl) {
-          console.log('Photo uploaded successfully with URL:', uploadedImageUrl);
-        } else {
-          console.error('Failed to upload photo to Supabase Storage - will proceed without image');
-        }
+        console.log('2a. Upload result:', { 
+          success: !!uploadedImageUrl, 
+          url: uploadedImageUrl 
+        });
+      } else {
+        console.log('2. No photo to upload');
       }
 
+      // Step 3: Convert to database format
       const dbItem = this.convertLocalToDb(item, uploadedImageUrl || undefined);
+      console.log('3. Database item prepared:', dbItem);
       
-      console.log('Saving item to database:', dbItem);
-      
+      // Step 4: Save to database
+      console.log('4. Saving to database...');
       const { data, error } = await supabase
         .from('paused_items')
         .insert({
@@ -292,31 +328,34 @@ class SupabasePausedItemsStore {
         .single();
 
       if (error) {
-        console.error('Error adding paused item to database:', error);
-        console.error('Database error details:', {
+        console.error('4a. ❌ Database save failed:', {
           message: error.message,
           code: error.code,
           details: error.details,
-          hint: error.hint
+          hint: error.hint,
+          fullError: error
         });
         return;
       }
 
-      console.log('Item saved to database successfully:', data);
+      console.log('4b. ✅ Database save successful:', data);
 
+      // Step 5: Update local state
       const newItem = this.convertDbToLocal(data);
       this.items.unshift(newItem);
       this.updateCheckInTimes();
       this.notifyListeners();
       
-      console.log('Item successfully added with final data:', {
+      console.log('5. ✅ Item successfully added with final data:', {
         id: newItem.id,
         imageUrl: newItem.imageUrl,
         storeName: newItem.storeName,
         emotion: newItem.emotion
       });
+      
+      console.log('=== ADD ITEM DEBUG END ===');
     } catch (error) {
-      console.error('Error in addItem:', error);
+      console.error('❌ Unexpected error in addItem:', error);
     }
   }
 

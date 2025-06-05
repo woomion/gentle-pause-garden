@@ -73,7 +73,7 @@ const PauseLog = () => {
             <span className="text-sm">Back to home</span>
           </Link>
           
-          <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Pause Log</h1>
+          <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Paused Decision Log</h1>
           
           {/* Show auth status for debugging */}
           {!user && items.length > 0 && (
@@ -139,9 +139,9 @@ const PauseLog = () => {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete from Pause Log</AlertDialogTitle>
+                      <AlertDialogTitle>Delete from Paused Decision Log</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete "{item.itemName}" from your Pause Log? This action cannot be undone.
+                        Are you sure you want to delete "{item.itemName}" from your Paused Decision Log? This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
