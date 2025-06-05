@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
+import { pausedItemsStore, PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
 import PausedItemCard from './PausedItemCard';
 import PausedItemDetail from './PausedItemDetail';
@@ -7,46 +8,65 @@ import ItemReviewModal from './ItemReviewModal';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from '@/components/ui/carousel';
 
 const PausedSection = () => {
-  const [pausedItems, setPausedItems] = useState<PausedItem[]>([]);
-  const [itemsForReview, setItemsForReview] = useState<PausedItem[]>([]);
+  const [pausedItems, setPausedItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
+  const [itemsForReview, setItemsForReview] = useState<(PausedItem | LocalPausedItem)[]>([]);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-  const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<PausedItem | LocalPausedItem | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const { user } = useAuth();
 
-  const sortItemsByDate = useCallback((items: PausedItem[]) => {
+  const sortItemsByDate = useCallback((items: (PausedItem | LocalPausedItem)[]) => {
     return items.sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
   }, []);
 
   useEffect(() => {
-    if (!user) return;
-
     const updateItems = () => {
-      const allItems = supabasePausedItemsStore.getItems();
-      const reviewItems = supabasePausedItemsStore.getItemsForReview();
-      
-      setPausedItems(sortItemsByDate(allItems));
-      setItemsForReview(reviewItems);
-      
-      if (supabasePausedItemsStore.isDataLoaded()) {
+      if (user) {
+        // Use Supabase store for authenticated users
+        const allItems = supabasePausedItemsStore.getItems();
+        const reviewItems = supabasePausedItemsStore.getItemsForReview();
+        
+        setPausedItems(sortItemsByDate(allItems));
+        setItemsForReview(reviewItems);
+        
+        if (supabasePausedItemsStore.isDataLoaded()) {
+          setIsLoading(false);
+        }
+      } else {
+        // Use local store for guest users
+        const allItems = pausedItemsStore.getItems();
+        const reviewItems = pausedItemsStore.getItemsForReview();
+        
+        setPausedItems(sortItemsByDate(allItems));
+        setItemsForReview(reviewItems);
         setIsLoading(false);
       }
     };
 
     updateItems();
 
-    const unsubscribe = supabasePausedItemsStore.subscribe(updateItems);
-    
-    // Update every minute to keep countdown accurate
-    const interval = setInterval(updateItems, 60000);
+    let unsubscribe: (() => void) | undefined;
+    let interval: NodeJS.Timeout | undefined;
+
+    if (user) {
+      // Set up Supabase store subscription
+      unsubscribe = supabasePausedItemsStore.subscribe(updateItems);
+      // Update every minute to keep countdown accurate
+      interval = setInterval(updateItems, 60000);
+    } else {
+      // Set up local store subscription
+      unsubscribe = pausedItemsStore.subscribe(updateItems);
+      // Update every minute to keep countdown accurate
+      interval = setInterval(updateItems, 60000);
+    }
 
     return () => {
-      unsubscribe();
-      clearInterval(interval);
+      if (unsubscribe) unsubscribe();
+      if (interval) clearInterval(interval);
     };
   }, [sortItemsByDate, user]);
 
@@ -65,7 +85,7 @@ const PausedSection = () => {
     };
   }, [api]);
 
-  const handleItemClick = useCallback((item: PausedItem) => {
+  const handleItemClick = useCallback((item: PausedItem | LocalPausedItem) => {
     setSelectedItem(item);
   }, []);
 
@@ -74,9 +94,13 @@ const PausedSection = () => {
   }, []);
 
   const handleDeleteItem = useCallback(async (id: string) => {
-    await supabasePausedItemsStore.removeItem(id);
+    if (user) {
+      await supabasePausedItemsStore.removeItem(id);
+    } else {
+      pausedItemsStore.removeItem(id);
+    }
     setSelectedItem(null);
-  }, []);
+  }, [user]);
 
   const handleStartReview = useCallback(() => {
     setCurrentReviewIndex(0);
@@ -89,36 +113,43 @@ const PausedSection = () => {
   }, []);
 
   const handleItemDecided = useCallback(async (id: string) => {
-    await supabasePausedItemsStore.removeItem(id);
+    if (user) {
+      await supabasePausedItemsStore.removeItem(id);
+    } else {
+      pausedItemsStore.removeItem(id);
+    }
     // Update the review items list
     setItemsForReview(prev => prev.filter(item => item.id !== id));
-  }, []);
+  }, [user]);
 
   const handleNextReview = useCallback(() => {
     setCurrentReviewIndex(prev => prev + 1);
   }, []);
 
-  // If user is not logged in, show login prompt
+  // If user is not logged in, show guest mode with local items
   if (!user) {
-    return (
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-          Paused for now
-        </h2>
-        <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
-          You haven't decided yet—and that's okay
-        </p>
-        <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
-          <p className="text-gray-500 dark:text-gray-400">
-            Sign up to start pausing and syncing your items across devices!
+    // Loading state for guests
+    if (isLoading) {
+      return (
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+            Paused for now
+          </h2>
+          <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
+            You haven't decided yet—and that's okay
           </p>
+          <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
+            <p className="text-gray-500 dark:text-gray-400">
+              Loading your paused items...
+            </p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
-  // Loading state
-  if (isLoading) {
+  // Loading state for authenticated users
+  if (user && isLoading) {
     return (
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
@@ -192,7 +223,10 @@ const PausedSection = () => {
         </p>
         <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
           <p className="text-gray-500 dark:text-gray-400">
-            No paused items yet. Add something to get started!
+            {!user 
+              ? "No paused items yet. Add something to get started! (Guest mode - items stored locally)"
+              : "No paused items yet. Add something to get started!"
+            }
           </p>
         </div>
       </div>
@@ -210,6 +244,15 @@ const PausedSection = () => {
       <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
         You haven't decided yet—and that's okay
       </p>
+      
+      {/* Guest mode indicator */}
+      {!user && activeItems.length > 0 && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-4">
+          <p className="text-amber-800 dark:text-amber-200 text-sm text-center">
+            <strong>Guest Mode:</strong> Items stored locally only
+          </p>
+        </div>
+      )}
       
       {isSingleItem ? (
         <>

@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
+import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PauseFormProps {
@@ -112,11 +113,10 @@ const PauseForm = ({ onClose, onShowSignup }: PauseFormProps) => {
     setIsSubmitting(true);
     
     // Show ripple effect for 1 second
-    setTimeout(() => {
+    setTimeout(async () => {
       console.log('Pause item data:', formData);
       
-      // Add to store
-      pausedItemsStore.addItem({
+      const itemData = {
         itemName: formData.itemName || 'Unnamed Item',
         storeName: formData.storeName || 'Unknown Store',
         price: formData.price || '0',
@@ -126,7 +126,14 @@ const PauseForm = ({ onClose, onShowSignup }: PauseFormProps) => {
         otherDuration: formData.otherDuration,
         link: formData.link,
         photo: formData.photo
-      });
+      };
+
+      // Use appropriate store based on authentication status
+      if (user) {
+        await supabasePausedItemsStore.addItem(itemData);
+      } else {
+        pausedItemsStore.addItem(itemData);
+      }
       
       setIsSubmitting(false);
       onClose();
@@ -162,6 +169,21 @@ const PauseForm = ({ onClose, onShowSignup }: PauseFormProps) => {
           <h1 className="text-2xl font-semibold text-dark-gray dark:text-[#F9F5EB] text-center mb-8">
             Add Something to Pause
           </h1>
+
+          {/* Guest mode banner */}
+          {!user && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
+              <p className="text-amber-800 dark:text-amber-200 text-sm text-center">
+                <strong>Guest Mode:</strong> Your paused items will be stored locally and won't sync across devices. 
+                <button 
+                  onClick={onShowSignup}
+                  className="underline hover:no-underline ml-1"
+                >
+                  Sign up to sync!
+                </button>
+              </p>
+            </div>
+          )}
 
           <div className="space-y-4">
             {/* Link Field */}
