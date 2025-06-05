@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { pausedItemsStore, PausedItem } from '../stores/pausedItemsStore';
+import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
+import { useAuth } from '../contexts/AuthContext';
 import PausedItemCard from './PausedItemCard';
 import PausedItemDetail from './PausedItemDetail';
 import ItemReviewModal from './ItemReviewModal';
@@ -13,23 +14,32 @@ const PausedSection = () => {
   const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { user } = useAuth();
 
   const sortItemsByDate = useCallback((items: PausedItem[]) => {
     return items.sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
   }, []);
 
   useEffect(() => {
+    if (!user) return;
+
     const updateItems = () => {
-      const allItems = pausedItemsStore.getItems();
-      const reviewItems = pausedItemsStore.getItemsForReview();
+      const allItems = supabasePausedItemsStore.getItems();
+      const reviewItems = supabasePausedItemsStore.getItemsForReview();
       
       setPausedItems(sortItemsByDate(allItems));
       setItemsForReview(reviewItems);
+      
+      if (supabasePausedItemsStore.isDataLoaded()) {
+        setIsLoading(false);
+      }
     };
 
     updateItems();
 
-    const unsubscribe = pausedItemsStore.subscribe(updateItems);
+    const unsubscribe = supabasePausedItemsStore.subscribe(updateItems);
     
     // Update every minute to keep countdown accurate
     const interval = setInterval(updateItems, 60000);
@@ -38,7 +48,7 @@ const PausedSection = () => {
       unsubscribe();
       clearInterval(interval);
     };
-  }, [sortItemsByDate]);
+  }, [sortItemsByDate, user]);
 
   useEffect(() => {
     if (!api) return;
@@ -63,8 +73,8 @@ const PausedSection = () => {
     setSelectedItem(null);
   }, []);
 
-  const handleDeleteItem = useCallback((id: string) => {
-    pausedItemsStore.removeItem(id);
+  const handleDeleteItem = useCallback(async (id: string) => {
+    await supabasePausedItemsStore.removeItem(id);
     setSelectedItem(null);
   }, []);
 
@@ -78,8 +88,8 @@ const PausedSection = () => {
     setCurrentReviewIndex(0);
   }, []);
 
-  const handleItemDecided = useCallback((id: string) => {
-    pausedItemsStore.removeItem(id);
+  const handleItemDecided = useCallback(async (id: string) => {
+    await supabasePausedItemsStore.removeItem(id);
     // Update the review items list
     setItemsForReview(prev => prev.filter(item => item.id !== id));
   }, []);
@@ -87,6 +97,44 @@ const PausedSection = () => {
   const handleNextReview = useCallback(() => {
     setCurrentReviewIndex(prev => prev + 1);
   }, []);
+
+  // If user is not logged in, show login prompt
+  if (!user) {
+    return (
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+          Paused for now
+        </h2>
+        <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
+          You haven't decided yet—and that's okay
+        </p>
+        <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
+          <p className="text-gray-500 dark:text-gray-400">
+            Sign up to start pausing and syncing your items across devices!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+          Paused for now
+        </h2>
+        <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
+          You haven't decided yet—and that's okay
+        </p>
+        <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
+          <p className="text-gray-500 dark:text-gray-400">
+            Loading your paused items...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const activeItems = pausedItems.filter(item => !itemsForReview.some(reviewItem => reviewItem.id === item.id));
 
