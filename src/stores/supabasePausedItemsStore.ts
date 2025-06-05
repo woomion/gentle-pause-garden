@@ -72,7 +72,6 @@ class SupabasePausedItemsStore {
         console.error('Error uploading image to Supabase Storage:', uploadError);
         console.error('Upload error details:', {
           message: uploadError.message,
-          statusCode: uploadError.statusCode,
           bucket: 'paused-items',
           fileName
         });
