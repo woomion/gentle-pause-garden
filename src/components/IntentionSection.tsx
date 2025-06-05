@@ -122,17 +122,17 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
       </p>
       <Dialog open={inspirationOpen} onOpenChange={setInspirationOpen}>
         <DialogTrigger asChild>
-          <button className="text-sm text-[#CAB6F7] hover:text-[#B8A3F5] underline">
+          <button className="text-sm text-[#8B5A96] hover:text-[#6B4C9A] underline">
             Need inspiration?
           </button>
         </DialogTrigger>
-        <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-gray-700">
-          <DialogHeader>
-            <DialogTitle className="text-black dark:text-[#F9F5EB]">
+        <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-gray-700 max-w-md">
+          <DialogHeader className="pt-4">
+            <DialogTitle className="text-black dark:text-[#F9F5EB] text-lg leading-relaxed">
               Here are a few ways other people have named their Joy Fund:
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 text-black dark:text-[#F9F5EB]">
+          <div className="space-y-3 text-black dark:text-[#F9F5EB] pb-2">
             <p>&quot;More calm in my day&quot;</p>
             <p>&quot;Presence &gt; pressure&quot;</p>
             <p>&quot;One good choice at a time&quot;</p>
