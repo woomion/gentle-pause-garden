@@ -175,7 +175,7 @@ const PauseLog = () => {
                   </span>
                 </div>
                 
-                {item.notes && (
+                {item.notes && item.notes.trim() && (
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
                     {item.notes}
                   </p>

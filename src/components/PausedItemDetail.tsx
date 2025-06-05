@@ -214,6 +214,15 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 {item.emotion}
               </span>
             </div>
+
+            {/* Only show notes if they exist and aren't empty */}
+            {item.notes && item.notes.trim() && (
+              <div className="pt-2">
+                <p className="text-gray-600 dark:text-gray-300 text-sm">
+                  {item.notes}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Let it go button */}
