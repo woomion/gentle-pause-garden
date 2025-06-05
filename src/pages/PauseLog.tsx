@@ -1,113 +1,140 @@
 
-import { useState } from 'react';
-import { ArrowLeft, Calendar, TrendingUp, Heart } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ArrowLeft, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import PausedItemCard from '../components/PausedItemCard';
-import StatsTab from '../components/StatsTab';
-import ReflectionTab from '../components/ReflectionTab';
-import { usePausedItems } from '../hooks/usePausedItems';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { usePauseLog } from '../hooks/usePauseLog';
 
 const PauseLog = () => {
-  const { items } = usePausedItems();
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [reflection, setReflection] = useState('');
+  const { items } = usePauseLog();
+  const [emotionFilter, setEmotionFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Calculate stats from items
-  const stats = {
-    totalPauses: items.length,
-    weeklyPauses: items.filter(item => {
-      const itemDate = new Date(item.pausedAt);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return itemDate >= weekAgo;
-    }).length,
-    monthlyPauses: items.filter(item => {
-      const itemDate = new Date(item.pausedAt);
-      const monthAgo = new Date();
-      monthAgo.setMonth(monthAgo.getMonth() - 1);
-      return itemDate >= monthAgo;
-    }).length,
-    totalAmount: items.reduce((sum, item) => sum + (Number(item.price) || 0), 0),
-    weeklyAmount: items.filter(item => {
-      const itemDate = new Date(item.pausedAt);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return itemDate >= weekAgo;
-    }).reduce((sum, item) => sum + (Number(item.price) || 0), 0),
-    monthlyAmount: items.filter(item => {
-      const itemDate = new Date(item.pausedAt);
-      const monthAgo = new Date();
-      monthAgo.setMonth(monthAgo.getMonth() - 1);
-      return itemDate >= monthAgo;
-    }).reduce((sum, item) => sum + (Number(item.price) || 0), 0),
-    topEmotion: items.length > 0 ? (items[0].emotion || 'curious') : 'curious'
-  };
+  // Get unique emotions from items
+  const uniqueEmotions = useMemo(() => {
+    const emotions = items.map(item => item.emotion).filter(Boolean);
+    return [...new Set(emotions)];
+  }, [items]);
 
-  const handleItemClick = (item: any) => {
-    setSelectedItem(item);
-  };
+  // Filter items based on selected filters
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      const emotionMatch = emotionFilter === 'all' || item.emotion === emotionFilter;
+      const statusMatch = statusFilter === 'all' || item.status === statusFilter;
+      return emotionMatch && statusMatch;
+    });
+  }, [items, emotionFilter, statusFilter]);
 
-  const handleCloseDetail = () => {
-    setSelectedItem(null);
+  const getEmotionColor = (emotion: string) => {
+    const emotionColors: Record<string, string> = {
+      'bored': '#F6E3D5',
+      'overwhelmed': '#E9E2F7',
+      'burnt out': '#FBF3C2',
+      'sad': '#DCE7F5',
+      'inspired': '#FBE7E6',
+      'deserving': '#E7D8F3',
+      'curious': '#DDEEDF',
+      'anxious': '#EDEAE5',
+      'lonely': '#CED8E3',
+      'celebratory': '#FAEED6',
+      'resentful': '#EAC9C3',
+      'something else': '#F0F0EC'
+    };
+    return emotionColors[emotion] || '#F0F0EC';
   };
 
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
       <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
-        <div className="flex items-center mb-6">
-          <Link to="/" className="mr-4">
-            <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />
-          </Link>
-          <h1 className="text-2xl font-semibold text-taupe dark:text-cream">Your Pause Log</h1>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <Link to="/" className="mr-4">
+              <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />
+            </Link>
+            <h1 className="text-2xl font-semibold text-taupe dark:text-cream">What You've Let Go Of</h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-taupe dark:text-cream" />
+            <span className="text-sm text-taupe dark:text-cream">Filter</span>
+          </div>
         </div>
 
-        <Tabs defaultValue="log" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="log" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Log
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Stats
-            </TabsTrigger>
-            <TabsTrigger value="reflection" className="flex items-center gap-2">
-              <Heart className="w-4 h-4" />
-              Reflection
-            </TabsTrigger>
-          </TabsList>
+        {/* Filters */}
+        <div className="flex gap-4 mb-6">
+          <Select value={emotionFilter} onValueChange={setEmotionFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="All emotions" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All emotions</SelectItem>
+              {uniqueEmotions.map(emotion => (
+                <SelectItem key={emotion} value={emotion}>{emotion}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <TabsContent value="log" className="space-y-4">
-            {items.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">🪴</div>
-                <p className="text-taupe dark:text-cream mb-2">Your pause garden is empty</p>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Start pausing items to see them grow here
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="All outcomes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All outcomes</SelectItem>
+              <SelectItem value="purchased">Purchased</SelectItem>
+              <SelectItem value="let-go">Let go</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Items List */}
+        <div className="space-y-4">
+          {filteredItems.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🪴</div>
+              <p className="text-taupe dark:text-cream mb-2">No items found</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                Try adjusting your filters or add some paused items first
+              </p>
+            </div>
+          ) : (
+            filteredItems.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium text-black dark:text-[#F9F5EB] text-lg">
+                    {item.itemName}
+                  </h3>
+                </div>
+                
+                <p className="text-black dark:text-[#F9F5EB] text-sm mb-3">
+                  {item.storeName}
+                </p>
+                
+                <div className="mb-2">
+                  <span 
+                    className="inline-block px-2 py-1 rounded text-xs font-medium"
+                    style={{ 
+                      backgroundColor: getEmotionColor(item.emotion),
+                      color: '#000'
+                    }}
+                  >
+                    {item.emotion}
+                  </span>
+                </div>
+                
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  {item.status === 'purchased' 
+                    ? `Purchased on ${item.letGoDate}`
+                    : `Let go of on ${item.letGoDate}`
+                  }
                 </p>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <PausedItemCard
-                    key={item.id}
-                    item={item}
-                    onClick={() => handleItemClick(item)}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="stats">
-            <StatsTab stats={stats} />
-          </TabsContent>
-
-          <TabsContent value="reflection">
-            <ReflectionTab reflection={reflection} setReflection={setReflection} />
-          </TabsContent>
-        </Tabs>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
