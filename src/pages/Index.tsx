@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
@@ -92,7 +91,13 @@ const Index = () => {
         </div>
       </div>
       
-      {showForm && <PauseForm onClose={handleCloseForm} onShowSignup={handleShowSignup} />}
+      {showForm && (
+        <PauseForm 
+          onClose={handleCloseForm} 
+          onShowSignup={handleShowSignup}
+          signupModalDismissed={signupModalDismissed}
+        />
+      )}
       
       {user && (
         <WelcomeModal 

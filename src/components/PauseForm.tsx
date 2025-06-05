@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface PauseFormProps {
   onClose: () => void;
   onShowSignup?: () => void;
+  signupModalDismissed?: boolean;
 }
 
 const emotions = [
@@ -36,7 +37,7 @@ const otherPauseLengths = [
   '3 months'
 ];
 
-const PauseForm = ({ onClose, onShowSignup }: PauseFormProps) => {
+const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     link: '',
@@ -138,8 +139,8 @@ const PauseForm = ({ onClose, onShowSignup }: PauseFormProps) => {
       setIsSubmitting(false);
       onClose();
       
-      // If user is not authenticated, show signup modal
-      if (!user && onShowSignup) {
+      // Only show signup modal if user is not authenticated AND hasn't dismissed it
+      if (!user && !signupModalDismissed && onShowSignup) {
         onShowSignup();
       }
     }, 1000);
@@ -175,12 +176,14 @@ const PauseForm = ({ onClose, onShowSignup }: PauseFormProps) => {
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
               <p className="text-amber-800 dark:text-amber-200 text-sm text-center">
                 <strong>Guest Mode:</strong> Your paused items will be stored locally and won't sync across devices. 
-                <button 
-                  onClick={onShowSignup}
-                  className="underline hover:no-underline ml-1"
-                >
-                  Sign up to sync!
-                </button>
+                {!signupModalDismissed && (
+                  <button 
+                    onClick={onShowSignup}
+                    className="underline hover:no-underline ml-1"
+                  >
+                    Sign up to sync!
+                  </button>
+                )}
               </p>
             </div>
           )}
