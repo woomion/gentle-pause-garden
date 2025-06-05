@@ -1,6 +1,7 @@
 
 import { useState, useMemo } from 'react';
-import { Filter } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePauseLog } from '../hooks/usePauseLog';
 import PauseHeader from '../components/PauseHeader';
@@ -50,12 +51,19 @@ const PauseLog = () => {
         <PauseHeader />
         
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-taupe dark:text-cream mb-6">What You've Let Go Of</h1>
+          <div className="flex items-center mb-6">
+            <Link 
+              to="/"
+              className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors mr-2"
+            >
+              <ArrowLeft size={20} />
+            </Link>
+            <h1 className="text-2xl font-semibold text-black dark:text-cream">Your Pause Log</h1>
+          </div>
           
           {/* Filter label */}
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-4 h-4 text-taupe dark:text-cream" />
-            <span className="text-sm text-taupe dark:text-cream font-medium">Filters</span>
+          <div className="mb-2">
+            <span className="text-sm text-black dark:text-cream">Filter for:</span>
           </div>
 
           {/* Filter dropdowns */}
