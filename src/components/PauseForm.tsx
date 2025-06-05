@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,10 +49,12 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     emotion: '',
     notes: '',
     duration: '',
-    otherDuration: ''
+    otherDuration: '',
+    imageUrl: '' // Add imageUrl to track parsed images
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingUrl, setIsParsingUrl] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -74,6 +77,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           itemName: prev.itemName || productInfo.itemName || prev.itemName,
           storeName: prev.storeName || productInfo.storeName || prev.storeName,
           price: prev.price || productInfo.price || prev.price,
+          imageUrl: prev.imageUrl || productInfo.imageUrl || prev.imageUrl,
         }));
         
         // Log the image URL for debugging
@@ -92,7 +96,25 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData(prev => ({ ...prev, photo: file }));
+    
+    // Create preview URL for the uploaded photo
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setPhotoPreview(previewUrl);
+      console.log('Photo selected for upload:', file.name, file.size);
+    } else {
+      setPhotoPreview(null);
+    }
   };
+
+  // Clean up preview URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
 
   const handleDurationSelect = (duration: string) => {
     setFormData(prev => ({ 
@@ -126,11 +148,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         duration: formData.duration,
         otherDuration: formData.otherDuration,
         link: formData.link,
-        photo: formData.photo
+        photo: formData.photo,
+        imageUrl: formData.imageUrl // Include parsed image URL
       };
 
       // Use appropriate store based on authentication status
       if (user) {
+        console.log('Uploading to Supabase with photo:', !!formData.photo);
         await supabasePausedItemsStore.addItem(itemData);
       } else {
         pausedItemsStore.addItem(itemData);
@@ -209,6 +233,11 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   </div>
                 )}
               </div>
+              {formData.imageUrl && !formData.photo && (
+                <div className="mt-2">
+                  <p className="text-sm text-green-600 dark:text-green-400">✓ Found product image automatically</p>
+                </div>
+              )}
             </div>
 
             {/* Item Name Field */}
@@ -275,6 +304,16 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                            rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 h-12
                            overflow-hidden"
               />
+              {photoPreview && (
+                <div className="mt-2">
+                  <img 
+                    src={photoPreview} 
+                    alt="Photo preview" 
+                    className="w-20 h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                  />
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">✓ Photo ready to upload</p>
+                </div>
+              )}
             </div>
 
             {/* Emotion Selection */}

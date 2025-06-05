@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -42,6 +43,8 @@ class SupabasePausedItemsStore {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
+      console.log('Uploading image to Supabase Storage:', fileName);
+
       const { error: uploadError } = await supabase.storage
         .from('paused-items')
         .upload(fileName, file);
@@ -55,6 +58,7 @@ class SupabasePausedItemsStore {
         .from('paused-items')
         .getPublicUrl(fileName);
 
+      console.log('Image uploaded successfully:', data.publicUrl);
       return data.publicUrl;
     } catch (error) {
       console.error('Error in uploadImage:', error);
@@ -93,7 +97,7 @@ class SupabasePausedItemsStore {
     return {
       title: item.itemName,
       price: item.price ? parseFloat(item.price) : null,
-      url: imageUrl || item.link || null,
+      url: imageUrl || item.imageUrl || item.link || null,
       reason: item.emotion,
       notes: item.notes || null,
       pause_duration_days: pauseDurationDays,
@@ -164,13 +168,23 @@ class SupabasePausedItemsStore {
         return;
       }
 
+      console.log('Adding item with photo:', !!item.photo, 'and imageUrl:', !!item.imageUrl);
+
       // Upload image if provided
       let imageUrl: string | null = null;
       if (item.photo) {
+        console.log('Uploading photo to Supabase Storage...');
         imageUrl = await this.uploadImage(item.photo);
+        if (imageUrl) {
+          console.log('Photo uploaded successfully:', imageUrl);
+        } else {
+          console.error('Failed to upload photo');
+        }
       }
 
       const dbItem = this.convertLocalToDb(item, imageUrl || undefined);
+      
+      console.log('Saving item to database with URL:', dbItem.url);
       
       const { data, error } = await supabase
         .from('paused_items')
@@ -187,14 +201,17 @@ class SupabasePausedItemsStore {
       }
 
       const newItem = this.convertDbToLocal(data);
-      // Set the uploaded image URL
+      // Set the uploaded image URL if we have one
       if (imageUrl) {
         newItem.imageUrl = imageUrl;
+        console.log('Set imageUrl on new item:', imageUrl);
       }
       
       this.items.unshift(newItem);
       this.updateCheckInTimes();
       this.notifyListeners();
+      
+      console.log('Item successfully added with image:', !!newItem.imageUrl);
     } catch (error) {
       console.error('Error in addItem:', error);
     }

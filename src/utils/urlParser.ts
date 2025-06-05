@@ -26,6 +26,8 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     try {
       // Use a CORS proxy to fetch the page content
       const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      console.log('Fetching product info from:', url);
+      
       const response = await fetch(proxyUrl);
       const data = await response.json();
       
@@ -37,18 +39,21 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
         const scrapedName = extractItemName(doc);
         if (scrapedName && !productInfo.itemName) {
           productInfo.itemName = scrapedName;
+          console.log('Extracted item name:', scrapedName);
         }
         
         // Extract price from various sources
         const scrapedPrice = extractPrice(doc);
         if (scrapedPrice && !productInfo.price) {
           productInfo.price = scrapedPrice;
+          console.log('Extracted price:', scrapedPrice);
         }
         
-        // Extract image URL
+        // Extract image URL with improved selectors
         const scrapedImage = extractImageUrl(doc, urlObj.origin);
         if (scrapedImage && !productInfo.imageUrl) {
           productInfo.imageUrl = scrapedImage;
+          console.log('Extracted image URL:', scrapedImage);
         }
       }
     } catch (fetchError) {
@@ -122,7 +127,9 @@ const extractStoreName = (hostname: string): string => {
     'adidas.com': 'Adidas',
     'zara.com': 'Zara',
     'hm.com': 'H&M',
-    'uniqlo.com': 'Uniqlo'
+    'uniqlo.com': 'Uniqlo',
+    'shopify.com': 'Shopify Store',
+    'bigcommerce.com': 'BigCommerce Store'
   };
   
   for (const [domain, name] of Object.entries(storeMap)) {
@@ -132,12 +139,12 @@ const extractStoreName = (hostname: string): string => {
   }
   
   // Fallback: capitalize first letter and remove .com
-  storeName = storeName.replace(/\.(com|co\.uk|ca|org|net|de|fr)$/, '');
+  storeName = storeName.replace(/\.(com|co\.uk|ca|org|net|de|fr|shop)$/, '');
   return storeName.charAt(0).toUpperCase() + storeName.slice(1);
 };
 
 const extractItemName = (doc: Document): string | undefined => {
-  // Try various selectors for product titles
+  // Try various selectors for product titles in order of preference
   const selectors = [
     'meta[property="og:title"]',
     'meta[name="twitter:title"]',
@@ -150,16 +157,18 @@ const extractItemName = (doc: Document): string | undefined => {
     'h1[class*="title"]',
     'h1[class*="product"]',
     'h1[class*="name"]',
-    'h1',
     '.product-name',
-    '.item-title'
+    '.item-title',
+    '[class*="ProductTitle"]',
+    '[class*="product-title"]',
+    'h1'
   ];
   
   for (const selector of selectors) {
     const element = doc.querySelector(selector);
     if (element) {
       const content = element.getAttribute('content') || element.textContent;
-      if (content && content.trim() && content.length > 5) {
+      if (content && content.trim() && content.length > 5 && content.length < 200) {
         return content.trim().substring(0, 100); // Limit length
       }
     }
@@ -169,7 +178,7 @@ const extractItemName = (doc: Document): string | undefined => {
   const title = doc.title;
   if (title && title.length > 5) {
     // Remove common e-commerce suffixes
-    const cleanTitle = title.replace(/ - (Amazon|eBay|Target|Walmart|Best Buy).*$/i, '').trim();
+    const cleanTitle = title.replace(/ - (Amazon|eBay|Target|Walmart|Best Buy|Shop|Store).*$/i, '').trim();
     return cleanTitle.substring(0, 100);
   }
   
@@ -192,7 +201,9 @@ const extractPrice = (doc: Document): string | undefined => {
     '.price-now',
     '[class*="current"]',
     '.a-price-whole', // Amazon specific
-    '.display-price' // Best Buy specific
+    '.display-price', // Best Buy specific
+    '[class*="Price"]',
+    '[id*="price"]'
   ];
   
   for (const selector of selectors) {
@@ -204,8 +215,9 @@ const extractPrice = (doc: Document): string | undefined => {
         const priceMatch = content.match(/[\$£€¥]?[\d,]+\.?\d*/);
         if (priceMatch) {
           let price = priceMatch[0].replace(/[£€¥\$,]/g, '');
-          // Ensure it's a valid number
-          if (!isNaN(parseFloat(price)) && parseFloat(price) > 0) {
+          // Ensure it's a valid number and reasonable price range
+          const numPrice = parseFloat(price);
+          if (!isNaN(numPrice) && numPrice > 0 && numPrice < 100000) {
             return price;
           }
         }
@@ -217,21 +229,25 @@ const extractPrice = (doc: Document): string | undefined => {
 };
 
 const extractImageUrl = (doc: Document, origin: string): string | undefined => {
-  // Try various selectors for product images
+  // Try various selectors for product images with improved priority
   const selectors = [
     'meta[property="og:image"]',
     'meta[name="twitter:image"]',
+    'meta[property="og:image:url"]',
     '[data-automation-id="product-image"] img',
     '[data-testid="product-image"] img',
     '.product-image img',
     '#product-image img',
     '.hero-image img',
     '.main-image img',
-    '[class*="product"] img[src*="jpg"]',
-    '[class*="product"] img[src*="jpeg"]',
-    '[class*="product"] img[src*="png"]',
-    'img[alt*="product"]',
-    'img[alt*="item"]'
+    '[class*="ProductImage"] img',
+    '[class*="product-image"] img',
+    '[class*="hero"] img',
+    '[class*="main"] img',
+    'img[alt*="product" i]',
+    'img[alt*="item" i]',
+    'img[src*="product"]',
+    'img[class*="product"]'
   ];
   
   for (const selector of selectors) {
@@ -239,15 +255,25 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
     if (element) {
       const src = element.getAttribute('content') || element.getAttribute('src');
       if (src && src.trim() && !src.includes('data:image') && src.length > 10) {
+        // Skip obvious placeholder or icon images
+        if (src.includes('placeholder') || src.includes('icon') || src.includes('logo') || 
+            src.includes('spinner') || src.includes('loading') || src.width < 100 || src.height < 100) {
+          continue;
+        }
+        
         // Convert relative URLs to absolute
         try {
           const imageUrl = new URL(src, origin).href;
-          // Basic validation that it's likely an image
-          if (imageUrl.match(/\.(jpg|jpeg|png|webp|gif)($|\?)/i)) {
+          // Basic validation that it's likely a product image
+          if (imageUrl.match(/\.(jpg|jpeg|png|webp|gif)($|\?)/i) || 
+              imageUrl.includes('images') || imageUrl.includes('media')) {
             return imageUrl;
           }
         } catch {
-          return src;
+          // If URL construction fails, try returning the src as-is if it looks like a URL
+          if (src.startsWith('http')) {
+            return src;
+          }
         }
       }
     }
