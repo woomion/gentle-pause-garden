@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -98,9 +97,13 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Legal</h3>
               <div className="space-y-2">
-                <button className="w-full text-left p-3 rounded-lg bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-colors">
+                <Link 
+                  to="/privacy-policy"
+                  onClick={() => onOpenChange(false)}
+                  className="w-full text-left p-3 rounded-lg bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-colors block"
+                >
                   <span className="text-black dark:text-[#F9F5EB]">Privacy Policy</span>
-                </button>
+                </Link>
               </div>
             </div>
 

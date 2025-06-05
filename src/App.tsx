@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import PauseLog from "./pages/PauseLog";
 import About from "./pages/About";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import GreaterJoyFund from "./pages/GreaterJoyFund";
 import NotFound from "./pages/NotFound";
 import DonationSuccess from "./pages/DonationSuccess";
@@ -26,6 +28,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/" element={
                 <AuthGuard>
                   <Index />
