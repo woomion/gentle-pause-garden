@@ -1,10 +1,13 @@
+
 import { Timer, ExternalLink } from 'lucide-react';
-import { PausedItem } from '../stores/pausedItemsStore';
+import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PausedItemDetailProps {
   item: PausedItem;
@@ -15,6 +18,7 @@ interface PausedItemDetailProps {
 
 const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const getEmotionColor = (emotion: string) => {
     const emotionColors: { [key: string]: string } = {
@@ -35,10 +39,32 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   };
 
   const getImageUrl = () => {
-    if (item.imageUrl && item.imageUrl.includes('supabase')) return item.imageUrl;
-    if (item.photoDataUrl) return item.photoDataUrl;
-    if (item.photo && item.photo instanceof File) return URL.createObjectURL(item.photo);
-    return item.imageUrl;
+    // Debug logging
+    console.log('Getting image URL for item:', {
+      itemId: item.id,
+      imageUrl: item.imageUrl,
+      photoDataUrl: item.photoDataUrl,
+      hasPhoto: !!item.photo
+    });
+    
+    if (item.imageUrl && item.imageUrl.includes('supabase')) {
+      console.log('Using Supabase image URL:', item.imageUrl);
+      return item.imageUrl;
+    }
+    if (item.photoDataUrl) {
+      console.log('Using photo data URL');
+      return item.photoDataUrl;
+    }
+    if (item.photo && item.photo instanceof File) {
+      console.log('Creating object URL from file');
+      return URL.createObjectURL(item.photo);
+    }
+    if (item.imageUrl) {
+      console.log('Using regular image URL:', item.imageUrl);
+      return item.imageUrl;
+    }
+    console.log('No image URL found');
+    return null;
   };
 
   const imageUrl = getImageUrl();
@@ -48,15 +74,25 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     onClose();
   };
 
-  const handleLetGo = () => {
-    // Move item to pause log
-    pauseLogStore.addItem({
-      itemName: item.itemName,
-      emotion: item.emotion,
-      storeName: item.storeName,
-      status: 'let-go',
-      notes: item.notes
-    });
+  const handleLetGo = async () => {
+    // Use appropriate pause log store based on authentication
+    if (user) {
+      await supabasePauseLogStore.addItem({
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
+        status: 'let-go',
+        notes: item.notes
+      });
+    } else {
+      pauseLogStore.addItem({
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
+        status: 'let-go',
+        notes: item.notes
+      });
+    }
     
     // Remove from paused items
     onDelete(item.id);
@@ -69,15 +105,25 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     });
   };
 
-  const handleBought = () => {
-    // Move item to pause log
-    pauseLogStore.addItem({
-      itemName: item.itemName,
-      emotion: item.emotion,
-      storeName: item.storeName,
-      status: 'purchased',
-      notes: item.notes
-    });
+  const handleBought = async () => {
+    // Use appropriate pause log store based on authentication
+    if (user) {
+      await supabasePauseLogStore.addItem({
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
+        status: 'purchased',
+        notes: item.notes
+      });
+    } else {
+      pauseLogStore.addItem({
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
+        status: 'purchased',
+        notes: item.notes
+      });
+    }
     
     // Remove from paused items
     onDelete(item.id);
@@ -118,9 +164,13 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                   alt={item.itemName}
                   className="w-full h-full object-cover"
                   onError={(e) => {
+                    console.error('Image failed to load:', imageUrl);
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
                     target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>';
+                  }}
+                  onLoad={() => {
+                    console.log('Image loaded successfully:', imageUrl);
                   }}
                 />
               ) : (

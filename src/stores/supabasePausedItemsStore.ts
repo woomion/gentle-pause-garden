@@ -86,7 +86,7 @@ class SupabasePausedItemsStore {
     return {
       id: dbItem.id,
       itemName: dbItem.title,
-      storeName: '', // We'll need to store this separately or add to DB
+      storeName: dbItem.reason || 'Unknown Store', // Temporary fix - we should add store_name column
       price: dbItem.price?.toString() || '',
       imageUrl: dbItem.url || undefined,
       emotion: dbItem.reason || 'something else',

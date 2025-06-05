@@ -5,11 +5,20 @@ import { Link } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { usePauseLog } from '../hooks/usePauseLog';
+import { useSupabasePauseLog } from '../hooks/useSupabasePauseLog';
+import { useAuth } from '../contexts/AuthContext';
 import PauseHeader from '../components/PauseHeader';
 import FooterLinks from '../components/FooterLinks';
 
 const PauseLog = () => {
-  const { items, deleteItem } = usePauseLog();
+  const { user } = useAuth();
+  
+  // Use appropriate hook based on authentication
+  const localPauseLog = usePauseLog();
+  const supabasePauseLog = useSupabasePauseLog();
+  
+  const { items, deleteItem } = user ? supabasePauseLog : localPauseLog;
+  
   const [emotionFilter, setEmotionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -65,6 +74,15 @@ const PauseLog = () => {
           </Link>
           
           <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Pause Log</h1>
+          
+          {/* Show auth status for debugging */}
+          {!user && items.length > 0 && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-4">
+              <p className="text-amber-800 dark:text-amber-200 text-sm text-center">
+                <strong>Guest Mode:</strong> Items stored locally only
+              </p>
+            </div>
+          )}
           
           {/* Filter label */}
           <div className="mb-2">
