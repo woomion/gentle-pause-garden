@@ -32,25 +32,27 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
       id: item.id,
       imageUrl: item.imageUrl,
       photoDataUrl: item.photoDataUrl,
-      hasPhoto: !!item.photo
+      hasPhoto: !!item.photo,
+      itemName: item.itemName
     });
 
-    // Priority: Supabase Storage URL > photoDataUrl > file object > imageUrl
-    if (item.imageUrl && item.imageUrl.includes('supabase')) {
-      console.log('Using Supabase Storage URL:', item.imageUrl);
-      return item.imageUrl;
+    // Priority: Supabase Storage URL > photoDataUrl > file object
+    if (item.imageUrl) {
+      if (item.imageUrl.includes('supabase')) {
+        console.log('Using Supabase Storage URL:', item.imageUrl);
+        return item.imageUrl;
+      } else {
+        console.log('Using regular imageUrl (might be product link):', item.imageUrl);
+        return item.imageUrl;
+      }
     }
     if (item.photoDataUrl) {
-      console.log('Using photoDataUrl');
+      console.log('Using photoDataUrl (local storage)');
       return item.photoDataUrl;
     }
     if (item.photo instanceof File) {
       console.log('Creating object URL from file');
       return URL.createObjectURL(item.photo);
-    }
-    if (item.imageUrl) {
-      console.log('Using parsed imageUrl:', item.imageUrl);
-      return item.imageUrl;
     }
     
     console.log('No image URL found for item:', item.id);

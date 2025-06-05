@@ -48,8 +48,17 @@ class SupabasePausedItemsStore {
       console.log('Starting image upload to Supabase Storage:', {
         fileName,
         fileSize: file.size,
-        fileType: file.type
+        fileType: file.type,
+        bucket: 'paused-items'
       });
+
+      // First check if bucket exists
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      console.log('Available buckets:', buckets);
+      
+      if (bucketError) {
+        console.error('Error checking buckets:', bucketError);
+      }
 
       // Upload the file to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -61,6 +70,12 @@ class SupabasePausedItemsStore {
 
       if (uploadError) {
         console.error('Error uploading image to Supabase Storage:', uploadError);
+        console.error('Upload error details:', {
+          message: uploadError.message,
+          statusCode: uploadError.statusCode,
+          bucket: 'paused-items',
+          fileName
+        });
         return null;
       }
 
@@ -128,15 +143,29 @@ class SupabasePausedItemsStore {
     const reviewAt = new Date();
     reviewAt.setDate(reviewAt.getDate() + pauseDurationDays);
 
-    // Store the final image URL in the url field
-    const finalUrl = imageUrl || item.imageUrl || item.link || null;
+    // CRITICAL: For authenticated users, we need to store images differently
+    // If we have an uploaded image URL, use that
+    // If we have a product link and no uploaded image, store the link separately
+    let finalUrl = null;
+    
+    if (imageUrl) {
+      // This is an uploaded image - store it in the url field
+      finalUrl = imageUrl;
+      console.log('Using uploaded image URL:', imageUrl);
+    } else if (item.link && !item.photo) {
+      // This is a product link without an uploaded image - store the link
+      finalUrl = item.link;
+      console.log('Using product link:', item.link);
+    }
     
     console.log('Converting local to DB:', {
       itemName: item.itemName,
       emotion: item.emotion,
       storeName: item.storeName,
       finalUrl,
-      notes: item.notes
+      notes: item.notes,
+      hasUploadedImage: !!imageUrl,
+      hasProductLink: !!item.link
     });
 
     return {
@@ -235,25 +264,21 @@ class SupabasePausedItemsStore {
         storeName: item.storeName,
         hasPhoto: !!item.photo,
         hasImageUrl: !!item.imageUrl,
+        hasLink: !!item.link,
         photoSize: item.photo?.size,
-        photoName: item.photo?.name,
-        imageUrl: item.imageUrl
+        photoName: item.photo?.name
       });
 
       // Upload image if provided
       let finalImageUrl: string | null = null;
       if (item.photo) {
-        console.log('Uploading photo to Supabase Storage...');
+        console.log('Attempting to upload photo to Supabase Storage...');
         finalImageUrl = await this.uploadImage(item.photo);
         if (finalImageUrl) {
           console.log('Photo uploaded successfully with URL:', finalImageUrl);
         } else {
-          console.error('Failed to upload photo to Supabase Storage');
+          console.error('Failed to upload photo to Supabase Storage - will proceed without image');
         }
-      } else if (item.imageUrl) {
-        // Use the parsed image URL from the link
-        finalImageUrl = item.imageUrl;
-        console.log('Using parsed image URL:', finalImageUrl);
       }
 
       const dbItem = this.convertLocalToDb(item, finalImageUrl || undefined);
@@ -271,6 +296,12 @@ class SupabasePausedItemsStore {
 
       if (error) {
         console.error('Error adding paused item to database:', error);
+        console.error('Database error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         return;
       }
 
@@ -281,7 +312,12 @@ class SupabasePausedItemsStore {
       this.updateCheckInTimes();
       this.notifyListeners();
       
-      console.log('Item successfully added with final image URL:', newItem.imageUrl);
+      console.log('Item successfully added with final data:', {
+        id: newItem.id,
+        imageUrl: newItem.imageUrl,
+        storeName: newItem.storeName,
+        emotion: newItem.emotion
+      });
     } catch (error) {
       console.error('Error in addItem:', error);
     }
