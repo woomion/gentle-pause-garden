@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -38,28 +37,42 @@ class SupabasePausedItemsStore {
   private async uploadImage(file: File): Promise<string | null> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) {
+        console.error('No authenticated user for image upload');
+        return null;
+      }
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-      console.log('Uploading image to Supabase Storage:', fileName);
+      console.log('Starting image upload to Supabase Storage:', {
+        fileName,
+        fileSize: file.size,
+        fileType: file.type
+      });
 
-      const { error: uploadError } = await supabase.storage
+      // Upload the file to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('paused-items')
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) {
-        console.error('Error uploading image:', uploadError);
+        console.error('Error uploading image to Supabase Storage:', uploadError);
         return null;
       }
 
-      const { data } = supabase.storage
+      console.log('Image uploaded successfully:', uploadData);
+
+      // Get the public URL for the uploaded file
+      const { data: urlData } = supabase.storage
         .from('paused-items')
         .getPublicUrl(fileName);
 
-      console.log('Image uploaded successfully:', data.publicUrl);
-      return data.publicUrl;
+      console.log('Generated public URL:', urlData.publicUrl);
+      return urlData.publicUrl;
     } catch (error) {
       console.error('Error in uploadImage:', error);
       return null;
@@ -97,7 +110,7 @@ class SupabasePausedItemsStore {
     return {
       title: item.itemName,
       price: item.price ? parseFloat(item.price) : null,
-      url: imageUrl || item.imageUrl || item.link || null,
+      url: imageUrl || item.link || null,
       reason: item.emotion,
       notes: item.notes || null,
       pause_duration_days: pauseDurationDays,
@@ -168,23 +181,32 @@ class SupabasePausedItemsStore {
         return;
       }
 
-      console.log('Adding item with photo:', !!item.photo, 'and imageUrl:', !!item.imageUrl);
+      console.log('Adding item with data:', {
+        hasPhoto: !!item.photo,
+        hasImageUrl: !!item.imageUrl,
+        photoSize: item.photo?.size,
+        photoName: item.photo?.name
+      });
 
       // Upload image if provided
-      let imageUrl: string | null = null;
+      let finalImageUrl: string | null = null;
       if (item.photo) {
         console.log('Uploading photo to Supabase Storage...');
-        imageUrl = await this.uploadImage(item.photo);
-        if (imageUrl) {
-          console.log('Photo uploaded successfully:', imageUrl);
+        finalImageUrl = await this.uploadImage(item.photo);
+        if (finalImageUrl) {
+          console.log('Photo uploaded successfully with URL:', finalImageUrl);
         } else {
-          console.error('Failed to upload photo');
+          console.error('Failed to upload photo to Supabase Storage');
         }
+      } else if (item.imageUrl) {
+        // Use the parsed image URL from the link
+        finalImageUrl = item.imageUrl;
+        console.log('Using parsed image URL:', finalImageUrl);
       }
 
-      const dbItem = this.convertLocalToDb(item, imageUrl || undefined);
+      const dbItem = this.convertLocalToDb(item, finalImageUrl || undefined);
       
-      console.log('Saving item to database with URL:', dbItem.url);
+      console.log('Saving item to database with final URL:', dbItem.url);
       
       const { data, error } = await supabase
         .from('paused_items')
@@ -196,22 +218,18 @@ class SupabasePausedItemsStore {
         .single();
 
       if (error) {
-        console.error('Error adding paused item:', error);
+        console.error('Error adding paused item to database:', error);
         return;
       }
 
+      console.log('Item saved to database successfully:', data);
+
       const newItem = this.convertDbToLocal(data);
-      // Set the uploaded image URL if we have one
-      if (imageUrl) {
-        newItem.imageUrl = imageUrl;
-        console.log('Set imageUrl on new item:', imageUrl);
-      }
-      
       this.items.unshift(newItem);
       this.updateCheckInTimes();
       this.notifyListeners();
       
-      console.log('Item successfully added with image:', !!newItem.imageUrl);
+      console.log('Item successfully added with final image URL:', newItem.imageUrl);
     } catch (error) {
       console.error('Error in addItem:', error);
     }
