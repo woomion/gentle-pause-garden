@@ -82,6 +82,9 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
 
   const formattedPrice = item.price ? `$${item.price}` : '';
 
+  // Check if notes exist and are meaningful (not just placeholder text)
+  const hasValidNotes = item.notes && item.notes.trim() && !item.notes.match(/^[a-z]{8,}$/);
+
   return (
     <div 
       className="bg-white/60 dark:bg-white/10 rounded-2xl border border-lavender/30 dark:border-gray-600 cursor-pointer hover:bg-white/80 dark:hover:bg-white/20 transition-colors relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#CAB6F7] focus:ring-offset-2"
@@ -141,6 +144,12 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
                 {item.emotion}
               </span>
             </div>
+            
+            {hasValidNotes && (
+              <p className="text-gray-600 dark:text-gray-400 text-xs">
+                {item.notes}
+              </p>
+            )}
           </div>
         </div>
       </div>
