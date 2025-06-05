@@ -1,10 +1,10 @@
 
 import { useState, useMemo } from 'react';
-import { ArrowLeft, Filter } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Filter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePauseLog } from '../hooks/usePauseLog';
+import PauseHeader from '../components/PauseHeader';
+import FooterLinks from '../components/FooterLinks';
 
 const PauseLog = () => {
   const { items } = usePauseLog();
@@ -47,44 +47,42 @@ const PauseLog = () => {
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
       <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <Link to="/" className="mr-4">
-              <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />
-            </Link>
-            <h1 className="text-2xl font-semibold text-taupe dark:text-cream">What You've Let Go Of</h1>
-          </div>
+        <PauseHeader />
+        
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-taupe dark:text-cream mb-6">What You've Let Go Of</h1>
           
-          <div className="flex items-center gap-2">
+          {/* Filter label */}
+          <div className="flex items-center gap-2 mb-4">
             <Filter className="w-4 h-4 text-taupe dark:text-cream" />
-            <span className="text-sm text-taupe dark:text-cream">Filter</span>
+            <span className="text-sm text-taupe dark:text-cream font-medium">Filters</span>
           </div>
-        </div>
 
-        {/* Filters */}
-        <div className="flex gap-4 mb-6">
-          <Select value={emotionFilter} onValueChange={setEmotionFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="All emotions" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All emotions</SelectItem>
-              {uniqueEmotions.map(emotion => (
-                <SelectItem key={emotion} value={emotion}>{emotion}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Filter dropdowns */}
+          <div className="flex gap-4">
+            <Select value={emotionFilter} onValueChange={setEmotionFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All emotions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All emotions</SelectItem>
+                {uniqueEmotions.map(emotion => (
+                  <SelectItem key={emotion} value={emotion}>{emotion}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="All outcomes" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All outcomes</SelectItem>
-              <SelectItem value="purchased">Purchased</SelectItem>
-              <SelectItem value="let-go">Let go</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All outcomes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All outcomes</SelectItem>
+                <SelectItem value="purchased">Purchased</SelectItem>
+                <SelectItem value="let-go">Let go</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Items List */}
@@ -135,6 +133,8 @@ const PauseLog = () => {
             ))
           )}
         </div>
+
+        <FooterLinks />
       </div>
     </div>
   );
