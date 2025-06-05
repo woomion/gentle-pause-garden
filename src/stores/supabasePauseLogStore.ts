@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -28,10 +27,10 @@ class SupabasePauseLogStore {
   }
 
   private convertDbToLocal(dbItem: DbPausedItem): PauseLogItem {
-    console.log('Converting DB item to local:', dbItem);
+    console.log('Converting DB item to local for pause log:', dbItem);
     
-    // Extract store name from URL or use emotion as fallback
-    const storeName = this.extractStoreName(dbItem.url || '') || dbItem.reason || 'Unknown Store';
+    // Extract store name from URL or use a fallback
+    const storeName = this.extractStoreName(dbItem.url || '') || 'Unknown Store';
     
     return {
       id: dbItem.id,
@@ -61,6 +60,15 @@ class SupabasePauseLogStore {
     try {
       console.log('Loading pause log items from Supabase...');
       
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No authenticated user, skipping pause log load');
+        this.items = [];
+        this.isLoaded = true;
+        this.notifyListeners();
+        return;
+      }
+
       const { data, error } = await supabase
         .from('paused_items')
         .select('*')

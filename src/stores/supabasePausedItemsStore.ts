@@ -87,15 +87,19 @@ class SupabasePausedItemsStore {
       id: dbItem.id,
       title: dbItem.title,
       url: dbItem.url,
-      reason: dbItem.reason
+      reason: dbItem.reason,
+      rawItem: dbItem
     });
+    
+    // Extract store name from URL if available
+    const storeName = dbItem.url ? this.extractStoreName(dbItem.url) : 'Unknown Store';
     
     return {
       id: dbItem.id,
       itemName: dbItem.title,
-      storeName: this.extractStoreName(dbItem.url || ''),
+      storeName: storeName,
       price: dbItem.price?.toString() || '',
-      imageUrl: dbItem.url || undefined, // Use the URL field for image
+      imageUrl: dbItem.url || undefined,
       emotion: dbItem.reason || 'something else',
       notes: dbItem.notes || undefined,
       duration: `${dbItem.pause_duration_days} days`,
@@ -127,12 +131,18 @@ class SupabasePausedItemsStore {
     // Store the final image URL in the url field
     const finalUrl = imageUrl || item.imageUrl || item.link || null;
     
-    console.log('Converting local to DB with imageUrl:', finalUrl);
+    console.log('Converting local to DB:', {
+      itemName: item.itemName,
+      emotion: item.emotion,
+      storeName: item.storeName,
+      finalUrl,
+      notes: item.notes
+    });
 
     return {
       title: item.itemName,
       price: item.price ? parseFloat(item.price) : null,
-      url: finalUrl, // This will store either the uploaded image URL or the parsed image URL
+      url: finalUrl,
       reason: item.emotion, // Store emotion in reason field
       notes: item.notes || null,
       pause_duration_days: pauseDurationDays,
@@ -177,6 +187,15 @@ class SupabasePausedItemsStore {
     try {
       console.log('Loading paused items from Supabase...');
       
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No authenticated user, skipping load');
+        this.items = [];
+        this.isLoaded = true;
+        this.notifyListeners();
+        return;
+      }
+
       const { data, error } = await supabase
         .from('paused_items')
         .select('*')
@@ -211,6 +230,9 @@ class SupabasePausedItemsStore {
       }
 
       console.log('Adding item with data:', {
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
         hasPhoto: !!item.photo,
         hasImageUrl: !!item.imageUrl,
         photoSize: item.photo?.size,
@@ -236,7 +258,7 @@ class SupabasePausedItemsStore {
 
       const dbItem = this.convertLocalToDb(item, finalImageUrl || undefined);
       
-      console.log('Saving item to database with final URL:', dbItem.url);
+      console.log('Saving item to database:', dbItem);
       
       const { data, error } = await supabase
         .from('paused_items')
