@@ -20,6 +20,7 @@ const Index = () => {
   const [showForm, setShowForm] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const [signupModalDismissed, setSignupModalDismissed] = useState(false);
   const [userName, setUserName] = useState('');
 
   const { user } = useAuth();
@@ -52,12 +53,6 @@ const Index = () => {
   };
 
   const handleAddPause = () => {
-    // If user is not authenticated, show signup modal instead
-    if (!user) {
-      setShowSignupModal(true);
-      return;
-    }
-
     console.log('Add pause button clicked - form will open after animation');
     // Delay to allow ripple animation to complete
     setTimeout(() => {
@@ -70,17 +65,21 @@ const Index = () => {
   };
 
   const handleShowSignup = () => {
-    setShowSignupModal(true);
+    // Only show signup modal if user is not authenticated AND hasn't dismissed it
+    if (!user && !signupModalDismissed) {
+      setShowSignupModal(true);
+    }
   };
 
   const handleCloseSignup = () => {
     setShowSignupModal(false);
+    setSignupModalDismissed(true); // Remember that user dismissed the modal
   };
 
   return (
     <>
       <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
-        <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
+        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-6 py-8">
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           <AddPauseButton onAddPause={handleAddPause} />
