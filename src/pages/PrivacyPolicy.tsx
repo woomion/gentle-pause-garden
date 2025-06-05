@@ -16,7 +16,7 @@ const PrivacyPolicy = () => {
             Back to Home
           </Link>
           <h1 className="text-3xl font-bold text-black dark:text-[#F9F5EB] mb-2">Privacy Policy</h1>
-          <p className="text-gray-600 dark:text-gray-300">Last updated: {new Date().toLocaleDateString()}</p>
+          <p className="text-gray-600 dark:text-gray-300">Last updated: June 2025</p>
         </div>
 
         {/* Content */}
@@ -25,145 +25,136 @@ const PrivacyPolicy = () => {
             
             {/* Introduction */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Introduction</h2>
               <p className="mb-4">
-                Pocket Pause ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our web application designed to help you make more conscious spending decisions.
+                Pocket Pause ("we," "our," or "us") is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information when you use Pocket Pause — a simple tool to support more intentional, conscious spending decisions.
               </p>
               <p>
-                By using Pocket Pause, you agree to the collection and use of information in accordance with this policy.
+                By using Pocket Pause, you agree to this policy.
               </p>
             </section>
 
-            {/* Information We Collect */}
+            {/* What We Collect */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Information We Collect</h2>
+              <h2 className="text-xl font-semibold mb-4">What We Collect</h2>
+              <p className="mb-4">
+                We collect only what we need to help you use Pocket Pause effectively and securely.
+              </p>
               
-              <h3 className="text-lg font-medium mb-2">Account Information</h3>
+              <h3 className="text-lg font-medium mb-2">If you create an account:</h3>
               <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Email address (for account creation and authentication)</li>
-                <li>First name (optional, for personalization)</li>
-                <li>Password (encrypted and stored securely through Supabase Auth)</li>
+                <li>Email address (for login and account recovery)</li>
+                <li>First name (optional, used for personalization)</li>
+                <li>Password (securely encrypted and stored via Supabase Auth)</li>
               </ul>
 
-              <h3 className="text-lg font-medium mb-2">Paused Items Data</h3>
+              <h3 className="text-lg font-medium mb-2">If you use the app features:</h3>
               <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Item names and descriptions</li>
-                <li>Store names and item prices</li>
-                <li>Product URLs and images (if provided)</li>
-                <li>Your emotional state when pausing items</li>
-                <li>Personal notes and reflections</li>
-                <li>Pause duration preferences</li>
-                <li>Review and decision history</li>
+                <li>Paused item names, descriptions, prices, store names</li>
+                <li>Links or images (if you choose to include them)</li>
+                <li>Optional emotional tags you assign to items (e.g., "curious" or "overwhelmed")</li>
+                <li>Optional personal notes and reflections</li>
+                <li>Pause durations and decision history</li>
               </ul>
 
-              <h3 className="text-lg font-medium mb-2">Usage Data</h3>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>App usage patterns and preferences</li>
-                <li>Notification settings</li>
-                <li>Theme preferences (light/dark mode)</li>
-              </ul>
-
-              <h3 className="text-lg font-medium mb-2">Technical Data</h3>
+              <h3 className="text-lg font-medium mb-2">If you use the app generally:</h3>
               <ul className="list-disc pl-6 space-y-1">
-                <li>Browser type and version</li>
-                <li>Device information</li>
-                <li>IP address (for security and fraud prevention)</li>
-                <li>Session data and authentication tokens</li>
+                <li>App usage patterns (like theme preference, notification settings)</li>
+                <li>Technical data (browser, device type, IP address — for security purposes)</li>
               </ul>
             </section>
 
-            {/* How We Use Your Information */}
+            {/* How Your Data Is Used */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">How We Use Your Information</h2>
+              <h2 className="text-xl font-semibold mb-4">How Your Data Is Used</h2>
+              <p className="mb-4">We use your information to:</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>To provide and maintain the Pocket Pause service</li>
-                <li>To authenticate your account and ensure security</li>
-                <li>To store and sync your paused items across devices</li>
-                <li>To send gentle reminder notifications (if enabled)</li>
-                <li>To personalize your experience with the app</li>
-                <li>To analyze usage patterns and improve our service</li>
-                <li>To respond to your inquiries and provide customer support</li>
-                <li>To detect and prevent fraud or unauthorized access</li>
+                <li>Provide and maintain Pocket Pause</li>
+                <li>Keep your account secure</li>
+                <li>Save and sync your paused items across devices (if logged in)</li>
+                <li>Support a personalized, private experience</li>
+                <li>Help you reflect on your choices</li>
+                <li>Send you reminder notifications (if turned on)</li>
+                <li>Improve the app through anonymous usage patterns</li>
+                <li>Protect against fraud or unauthorized use</li>
               </ul>
             </section>
 
-            {/* Data Storage and Security */}
+            {/* How Your Data Is Protected */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Data Storage and Security</h2>
+              <h2 className="text-xl font-semibold mb-4">How Your Data Is Protected</h2>
               <p className="mb-4">
-                Your data is stored securely using Supabase, a trusted backend-as-a-service platform that provides:
+                Pocket Pause uses Supabase, a secure backend platform with:
               </p>
               <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>End-to-end encryption for data in transit and at rest</li>
-                <li>Row-level security (RLS) policies ensuring you can only access your own data</li>
-                <li>Secure authentication powered by industry-standard protocols</li>
-                <li>Regular security audits and compliance with data protection standards</li>
-                <li>Data hosting in secure, SOC 2 compliant data centers</li>
+                <li>End-to-end encryption (in transit and at rest)</li>
+                <li>Row-Level Security (you can only access your own data)</li>
+                <li>Secure authentication (industry-standard)</li>
+                <li>Hosting in SOC 2-compliant data centers</li>
               </ul>
               <p>
-                We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.
+                We also take care to implement safeguards that keep your data private and protected.
               </p>
             </section>
 
-            {/* Data Sharing */}
+            {/* We Don't Sell or Share Your Info */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Data Sharing and Disclosure</h2>
+              <h2 className="text-xl font-semibold mb-4">We Don't Sell or Share Your Info</h2>
               <p className="mb-4">
-                We do not sell, trade, or otherwise transfer your personal information to third parties, except in the following circumstances:
+                We never sell or trade your personal information. Your data will only be shared:
               </p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Service Providers:</strong> We may share data with Supabase and other trusted service providers who assist in operating our application</li>
-                <li><strong>Legal Requirements:</strong> We may disclose your information if required by law or in response to valid legal requests</li>
-                <li><strong>Business Transfers:</strong> In the event of a merger, acquisition, or sale of assets, your information may be transferred as part of that transaction</li>
-                <li><strong>Safety and Security:</strong> We may disclose information to protect the rights, property, or safety of Pocket Pause, our users, or others</li>
+                <li>With trusted service providers (like Supabase) to run the app</li>
+                <li>If legally required (e.g., court order)</li>
+                <li>In rare business transitions (e.g., if Pocket Pause merges or is acquired)</li>
+                <li>To protect our rights, users, or platform from harm or fraud</li>
               </ul>
-            </section>
-
-            {/* Your Rights and Choices */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4">Your Rights and Choices</h2>
-              <p className="mb-4">You have the following rights regarding your personal data:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li><strong>Access:</strong> You can access and review your personal data through your account</li>
-                <li><strong>Correction:</strong> You can update or correct your personal information at any time</li>
-                <li><strong>Deletion:</strong> You can delete your account and all associated data</li>
-                <li><strong>Export:</strong> You can request a copy of your data in a portable format</li>
-                <li><strong>Notification Controls:</strong> You can enable or disable push notifications at any time</li>
-                <li><strong>Withdraw Consent:</strong> You can withdraw consent for data processing by deleting your account</li>
-              </ul>
-              <p>
-                To exercise these rights, please contact us or use the settings available in your account.
-              </p>
             </section>
 
             {/* Guest Mode */}
             <section>
               <h2 className="text-xl font-semibold mb-4">Guest Mode</h2>
-              <p>
-                Pocket Pause offers a guest mode that allows you to use the app without creating an account. In guest mode:
+              <p className="mb-4">
+                You can use Pocket Pause in Guest Mode — no login needed. In guest mode:
               </p>
-              <ul className="list-disc pl-6 mt-2 space-y-1">
-                <li>Your paused items are stored locally on your device only</li>
-                <li>No personal data is collected or transmitted to our servers</li>
-                <li>Data is not synced across devices and will be lost if you clear your browser data</li>
-                <li>You can upgrade to a full account at any time to enable cloud sync</li>
+              <ul className="list-disc pl-6 space-y-1">
+                <li>Nothing is stored on our servers</li>
+                <li>Paused items stay only on your device (not synced)</li>
+                <li>Data may be lost if you clear your browser or change devices</li>
+                <li>You can upgrade to a full account anytime to save your data across devices.</li>
               </ul>
             </section>
 
-            {/* Cookies and Local Storage */}
+            {/* Your Rights */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Cookies and Local Storage</h2>
+              <h2 className="text-xl font-semibold mb-4">Your Rights</h2>
+              <p className="mb-4">You're always in control. You can:</p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>Access your data</li>
+                <li>Edit or update your info</li>
+                <li>Delete your account at any time</li>
+                <li>Request a downloadable copy of your data</li>
+                <li>Turn notifications on or off</li>
+                <li>Withdraw consent by deleting your account</li>
+              </ul>
+              <p>
+                These options are available in your account settings, or you can reach out directly.
+              </p>
+            </section>
+
+            {/* Cookies & Local Storage */}
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Cookies & Local Storage</h2>
               <p className="mb-4">
-                Pocket Pause uses browser local storage and session storage to:
+                We use local storage (not tracking cookies) to:
               </p>
               <ul className="list-disc pl-6 space-y-1">
-                <li>Maintain your login session and authentication state</li>
-                <li>Store your preferences (theme, notification settings)</li>
-                <li>Cache paused items for offline access and better performance</li>
-                <li>Remember your welcome flow completion status</li>
+                <li>Keep you logged in</li>
+                <li>Remember your theme and notification preferences</li>
+                <li>Improve load time and offline access</li>
+                <li>Save progress in the welcome flow</li>
               </ul>
               <p className="mt-4">
-                We do not use tracking cookies or third-party analytics cookies.
+                We do not use third-party ad trackers or analytics cookies.
               </p>
             </section>
 
@@ -171,31 +162,29 @@ const PrivacyPolicy = () => {
             <section>
               <h2 className="text-xl font-semibold mb-4">Children's Privacy</h2>
               <p>
-                Pocket Pause is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe we have collected information from a child under 13, please contact us immediately.
+                Pocket Pause is not designed for children under 13. We don't knowingly collect data from anyone under 13. If you believe we have, please contact us and we'll promptly delete it.
               </p>
             </section>
 
-            {/* Changes to Privacy Policy */}
+            {/* Policy Changes */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Changes to This Privacy Policy</h2>
+              <h2 className="text-xl font-semibold mb-4">Policy Changes</h2>
               <p>
-                We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date. You are advised to review this Privacy Policy periodically for any changes.
+                We may update this policy occasionally. When we do, we'll post the new version here and update the date at the top. We encourage you to check back from time to time.
               </p>
             </section>
 
-            {/* Contact Information */}
+            {/* Contact */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Contact Us</h2>
+              <h2 className="text-xl font-semibold mb-4">Contact</h2>
               <p className="mb-4">
-                If you have any questions about this Privacy Policy or our data practices, please contact us:
+                Have questions or want to reach us?
               </p>
+              <p>You can contact us:</p>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Through the feedback form in the app settings</li>
-                <li>By email at: [Your Contact Email]</li>
+                <li>By email: [Insert email]</li>
               </ul>
-              <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                This privacy policy is designed to be transparent about our data practices while ensuring your personal information remains secure and private.
-              </p>
             </section>
 
           </div>
