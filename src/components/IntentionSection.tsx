@@ -133,14 +133,14 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-black dark:text-[#F9F5EB]">
-            <p>"More calm in my day"</p>
-            <p>"Presence > pressure"</p>
-            <p>"One good choice at a time"</p>
-            <p>"Peace over urgency"</p>
-            <p>"More walks, fewer carts"</p>
-            <p>"Rooted, not rushed"</p>
-            <p>"Space to choose what matters"</p>
-            <p>"Trusting myself again"</p>
+            <p>&quot;More calm in my day&quot;</p>
+            <p>&quot;Presence &gt; pressure&quot;</p>
+            <p>&quot;One good choice at a time&quot;</p>
+            <p>&quot;Peace over urgency&quot;</p>
+            <p>&quot;More walks, fewer carts&quot;</p>
+            <p>&quot;Rooted, not rushed&quot;</p>
+            <p>&quot;Space to choose what matters&quot;</p>
+            <p>&quot;Trusting myself again&quot;</p>
           </div>
         </DialogContent>
       </Dialog>
