@@ -55,20 +55,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
+  const { register, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   useEffect(() => {
-    // Generate a random string of lowercase letters
-    let placeholder = '';
-    const characters = 'abcdefghijklmnopqrstuvwxyz';
-    const charactersLength = characters.length;
-    for (let i = 0; i < 8; i++) {
-      placeholder += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    // Set the notes to the placeholder
-    setNotes(placeholder);
+    // Don't set placeholder text anymore - just leave notes empty
+    setNotes('');
   }, []);
 
   const handleImageUpload = (file: File, dataUrl: string) => {
@@ -96,7 +89,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
     setImageUrl(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!itemName.trim() || !storeName.trim() || !emotion || !pauseDuration) {
@@ -106,17 +99,17 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
     setIsSubmitting(true);
     
     try {
-      // Clean the notes - if it's empty, placeholder text, or just whitespace, set to empty string
-      const cleanNotes = notes.trim() && !notes.match(/^[a-z]{8,}$/) ? notes.trim() : '';
+      // Only include notes if they're actually meaningful (not empty, not placeholder)
+      const shouldIncludeNotes = notes.trim() && !notes.match(/^[a-z]{8,}$/);
       
       const pauseData = {
         itemName: itemName.trim(),
         storeName: storeName.trim(),
-        price: price || undefined,
-        url: url || undefined,
+        price: price?.toString() || '',
+        link: url || undefined,
         emotion,
-        notes: cleanNotes, // Use cleaned notes
-        pauseDuration,
+        notes: shouldIncludeNotes ? notes.trim() : undefined,
+        duration: pauseDuration,
         photo: photo || undefined,
         photoDataUrl: photoDataUrl || undefined,
         imageUrl: imageUrl || undefined
@@ -171,7 +164,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
             <X size={20} />
           </button>
 
-          <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+          <form onSubmit={onSubmit} className="grid gap-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="itemName" className="text-black dark:text-[#F9F5EB]">Item name</Label>
