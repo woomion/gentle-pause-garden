@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -102,7 +101,6 @@ const PauseLog = () => {
         <div className="space-y-4">
           {filteredItems.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">🪴</div>
               <p className="text-taupe dark:text-cream mb-2">No items found</p>
               <p className="text-gray-500 dark:text-gray-400 text-sm">
                 Try adjusting your filters or add some paused items first
