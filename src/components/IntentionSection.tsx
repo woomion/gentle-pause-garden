@@ -2,6 +2,7 @@
 import { Edit2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useState, useRef, useEffect } from 'react';
 
 interface IntentionSectionProps {
@@ -12,6 +13,7 @@ interface IntentionSectionProps {
 const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(intention);
+  const [inspirationOpen, setInspirationOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const displayText = intention || 'Give your Joy Fund a name — like "More calm, less clutter" or "Aligned with my values"';
@@ -51,17 +53,27 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
   
   return (
     <div className="mb-8">
-      <div className="mb-3">
+      <div className="mb-2">
         {isEditing ? (
           <div className="space-y-3">
-            <Textarea
-              ref={textareaRef}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder='Give your Joy Fund a name — like "More calm, less clutter" or "Aligned with my values"'
-              className="text-xl font-bold leading-relaxed resize-none min-h-[60px] bg-transparent border-2 border-gray-300 dark:border-gray-600 focus:border-[#CAB6F7] dark:focus:border-[#CAB6F7] text-black dark:text-[#F9F5EB]"
-            />
+            <div className="relative">
+              <Textarea
+                ref={textareaRef}
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder='Give your Joy Fund a name — like "More calm, less clutter" or "Aligned with my values"'
+                className="text-xl font-bold leading-relaxed resize-none min-h-[60px] bg-transparent border-2 border-gray-300 dark:border-gray-600 focus:border-[#CAB6F7] dark:focus:border-[#CAB6F7] text-black dark:text-[#F9F5EB] pr-12"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent flex-shrink-0"
+                disabled
+              >
+                <Edit2 size={16} />
+              </Button>
+            </div>
             <div className="flex gap-2">
               <Button
                 onClick={handleSave}
@@ -83,9 +95,9 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="relative">
             <h2 
-              className={`text-xl font-bold leading-relaxed cursor-pointer ${
+              className={`text-xl font-bold leading-relaxed cursor-pointer pr-10 ${
                 isPlaceholder 
                   ? 'text-gray-400 dark:text-gray-500 italic' 
                   : 'text-black dark:text-[#F9F5EB]'
@@ -98,16 +110,40 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
               variant="ghost"
               size="icon"
               onClick={handleEdit}
-              className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent flex-shrink-0"
+              className="absolute right-0 top-0 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent flex-shrink-0"
             >
               <Edit2 size={16} />
             </Button>
           </div>
         )}
       </div>
-      <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-        A phrase to come back to when a decision feels cloudy — to help you choose with clarity and care.
+      <p className="text-sm text-gray-600 dark:text-gray-300 font-medium mb-2">
+        A phrase to come back to, to help you choose with clarity and care.
       </p>
+      <Dialog open={inspirationOpen} onOpenChange={setInspirationOpen}>
+        <DialogTrigger asChild>
+          <button className="text-sm text-[#CAB6F7] hover:text-[#B8A3F5] underline">
+            Need inspiration?
+          </button>
+        </DialogTrigger>
+        <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-black dark:text-[#F9F5EB]">
+              Here are a few ways other people have named their Joy Fund:
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-black dark:text-[#F9F5EB]">
+            <p>"More calm in my day"</p>
+            <p>"Presence > pressure"</p>
+            <p>"One good choice at a time"</p>
+            <p>"Peace over urgency"</p>
+            <p>"More walks, fewer carts"</p>
+            <p>"Rooted, not rushed"</p>
+            <p>"Space to choose what matters"</p>
+            <p>"Trusting myself again"</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -84,7 +84,7 @@ const GreaterJoyFund = () => {
             <span className="text-sm">Back to home</span>
           </Link>
           
-          <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Greater Joy Fund</h1>
+          <h1 className="text-2xl font-semibold text-black dark:text-cream mb-2">Your Greater Joy Fund</h1>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-8">
             A growing reflection of your mindful choices
           </p>
