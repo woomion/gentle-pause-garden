@@ -30,10 +30,13 @@ class SupabasePauseLogStore {
   private convertDbToLocal(dbItem: DbPausedItem): PauseLogItem {
     console.log('Converting DB item to local:', dbItem);
     
+    // Extract store name from URL or use emotion as fallback
+    const storeName = this.extractStoreName(dbItem.url || '') || dbItem.reason || 'Unknown Store';
+    
     return {
       id: dbItem.id,
       itemName: dbItem.title,
-      storeName: dbItem.url ? this.extractStoreName(dbItem.url) : 'Unknown Store',
+      storeName: storeName,
       emotion: dbItem.reason || 'something else',
       letGoDate: new Date(dbItem.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
@@ -45,11 +48,12 @@ class SupabasePauseLogStore {
   }
 
   private extractStoreName(url: string): string {
+    if (!url) return '';
     try {
       const hostname = new URL(url).hostname;
       return hostname.replace('www.', '').split('.')[0];
     } catch {
-      return 'Unknown Store';
+      return '';
     }
   }
 

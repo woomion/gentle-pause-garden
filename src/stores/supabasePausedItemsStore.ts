@@ -93,9 +93,9 @@ class SupabasePausedItemsStore {
     return {
       id: dbItem.id,
       itemName: dbItem.title,
-      storeName: dbItem.reason || 'Unknown Store', // Using reason field temporarily
+      storeName: this.extractStoreName(dbItem.url || ''),
       price: dbItem.price?.toString() || '',
-      imageUrl: dbItem.url || undefined, // This should contain the image URL
+      imageUrl: dbItem.url || undefined, // Use the URL field for image
       emotion: dbItem.reason || 'something else',
       notes: dbItem.notes || undefined,
       duration: `${dbItem.pause_duration_days} days`,
@@ -107,6 +107,16 @@ class SupabasePausedItemsStore {
       checkInTime: this.calculateCheckInTimeDisplay(reviewAt),
       checkInDate: reviewAt
     };
+  }
+
+  private extractStoreName(url: string): string {
+    if (!url) return 'Unknown Store';
+    try {
+      const hostname = new URL(url).hostname;
+      return hostname.replace('www.', '').split('.')[0];
+    } catch {
+      return 'Unknown Store';
+    }
   }
 
   private convertLocalToDb(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>, imageUrl?: string): Omit<DbPausedItemInsert, 'user_id'> {
@@ -123,7 +133,7 @@ class SupabasePausedItemsStore {
       title: item.itemName,
       price: item.price ? parseFloat(item.price) : null,
       url: finalUrl, // This will store either the uploaded image URL or the parsed image URL
-      reason: item.storeName, // Temporarily storing store name in reason field
+      reason: item.emotion, // Store emotion in reason field
       notes: item.notes || null,
       pause_duration_days: pauseDurationDays,
       review_at: reviewAt.toISOString(),
