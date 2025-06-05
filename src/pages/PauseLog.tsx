@@ -126,69 +126,74 @@ const PauseLog = () => {
               </p>
             </div>
           ) : (
-            filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600 relative"
-              >
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
-                      <X size={16} />
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete from Paused Decision Log</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete "{item.itemName}" from your Paused Decision Log? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteItem(item.id)}>
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+            filteredItems.map((item) => {
+              // Check if notes exist and are meaningful (not just placeholder text)
+              const hasValidNotes = item.notes && item.notes.trim() && !item.notes.match(/^[a-z]{8,}$/);
+              
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600 relative"
+                >
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                        <X size={16} />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete from Paused Decision Log</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{item.itemName}" from your Paused Decision Log? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteItem(item.id)}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
-                <div className="mb-3">
-                  <h3 className="text-black dark:text-[#F9F5EB] text-lg">
-                    <span className="font-medium">{item.itemName}</span>
-                    <span className="font-normal"> from {item.storeName}</span>
-                  </h3>
-                </div>
-                
-                <div className="mb-2">
-                  <span className="text-black dark:text-[#F9F5EB] text-sm">
-                    Paused while feeling{' '}
-                  </span>
-                  <span 
-                    className="inline-block px-2 py-1 rounded text-xs font-medium"
-                    style={{ 
-                      backgroundColor: getEmotionColor(item.emotion),
-                      color: '#000'
-                    }}
-                  >
-                    {item.emotion}
-                  </span>
-                </div>
-                
-                {item.notes && item.notes.trim() && (
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-                    {item.notes}
+                  <div className="mb-3">
+                    <h3 className="text-black dark:text-[#F9F5EB] text-lg">
+                      <span className="font-medium">{item.itemName}</span>
+                      <span className="font-normal"> from {item.storeName}</span>
+                    </h3>
+                  </div>
+                  
+                  <div className="mb-2">
+                    <span className="text-black dark:text-[#F9F5EB] text-sm">
+                      Paused while feeling{' '}
+                    </span>
+                    <span 
+                      className="inline-block px-2 py-1 rounded text-xs font-medium"
+                      style={{ 
+                        backgroundColor: getEmotionColor(item.emotion),
+                        color: '#000'
+                      }}
+                    >
+                      {item.emotion}
+                    </span>
+                  </div>
+                  
+                  {hasValidNotes && (
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                      {item.notes}
+                    </p>
+                  )}
+                  
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {item.status === 'purchased' 
+                      ? `Purchased on ${item.letGoDate}`
+                      : `Let go of on ${item.letGoDate}`
+                    }
                   </p>
-                )}
-                
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  {item.status === 'purchased' 
-                    ? `Purchased on ${item.letGoDate}`
-                    : `Let go of on ${item.letGoDate}`
-                  }
-                </p>
-              </div>
-            ))
+                </div>
+              );
+            })
           )}
         </div>
 
