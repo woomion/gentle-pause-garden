@@ -38,12 +38,20 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
 
     // Priority: Supabase Storage URL > photoDataUrl > file object
     if (item.imageUrl) {
+      // Check if this is a Supabase Storage URL (contains supabase)
       if (item.imageUrl.includes('supabase')) {
         console.log('Using Supabase Storage URL:', item.imageUrl);
         return item.imageUrl;
       } else {
-        console.log('Using regular imageUrl (might be product link):', item.imageUrl);
-        return item.imageUrl;
+        // This might be a product URL - only use if it's a valid image URL
+        try {
+          new URL(item.imageUrl);
+          console.log('Using external image URL:', item.imageUrl);
+          return item.imageUrl;
+        } catch {
+          console.log('Invalid image URL, skipping:', item.imageUrl);
+          return null;
+        }
       }
     }
     if (item.photoDataUrl) {
@@ -55,7 +63,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
       return URL.createObjectURL(item.photo);
     }
     
-    console.log('No image URL found for item:', item.id);
+    console.log('No valid image URL found for item:', item.id);
     return null;
   }, [item.photoDataUrl, item.photo, item.imageUrl, item.id]);
 

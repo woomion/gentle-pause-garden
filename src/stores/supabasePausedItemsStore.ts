@@ -142,17 +142,15 @@ class SupabasePausedItemsStore {
     const reviewAt = new Date();
     reviewAt.setDate(reviewAt.getDate() + pauseDurationDays);
 
-    // CRITICAL: For authenticated users, we need to store images differently
-    // If we have an uploaded image URL, use that
-    // If we have a product link and no uploaded image, store the link separately
+    // For authenticated users, prioritize uploaded images over product links
     let finalUrl = null;
     
     if (imageUrl) {
-      // This is an uploaded image - store it in the url field
+      // This is an uploaded image URL from Supabase Storage
       finalUrl = imageUrl;
       console.log('Using uploaded image URL:', imageUrl);
     } else if (item.link && !item.photo) {
-      // This is a product link without an uploaded image - store the link
+      // This is a product link without an uploaded image
       finalUrl = item.link;
       console.log('Using product link:', item.link);
     }
@@ -171,7 +169,7 @@ class SupabasePausedItemsStore {
       title: item.itemName,
       price: item.price ? parseFloat(item.price) : null,
       url: finalUrl,
-      reason: item.emotion, // Store emotion in reason field
+      reason: item.emotion,
       notes: item.notes || null,
       pause_duration_days: pauseDurationDays,
       review_at: reviewAt.toISOString(),
@@ -269,18 +267,18 @@ class SupabasePausedItemsStore {
       });
 
       // Upload image if provided
-      let finalImageUrl: string | null = null;
+      let uploadedImageUrl: string | null = null;
       if (item.photo) {
         console.log('Attempting to upload photo to Supabase Storage...');
-        finalImageUrl = await this.uploadImage(item.photo);
-        if (finalImageUrl) {
-          console.log('Photo uploaded successfully with URL:', finalImageUrl);
+        uploadedImageUrl = await this.uploadImage(item.photo);
+        if (uploadedImageUrl) {
+          console.log('Photo uploaded successfully with URL:', uploadedImageUrl);
         } else {
           console.error('Failed to upload photo to Supabase Storage - will proceed without image');
         }
       }
 
-      const dbItem = this.convertLocalToDb(item, finalImageUrl || undefined);
+      const dbItem = this.convertLocalToDb(item, uploadedImageUrl || undefined);
       
       console.log('Saving item to database:', dbItem);
       
