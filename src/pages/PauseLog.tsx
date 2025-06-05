@@ -127,8 +127,12 @@ const PauseLog = () => {
             </div>
           ) : (
             filteredItems.map((item) => {
-              // Check if notes exist and are meaningful (not just placeholder text)
-              const hasValidNotes = item.notes && item.notes.trim() && !item.notes.match(/^[a-z]{8,}$/);
+              // Check if notes exist and are meaningful (not just placeholder text, empty, or null values)
+              const hasValidNotes = item.notes && 
+                item.notes.trim() && 
+                !item.notes.match(/^[a-z]{8,}$/) && 
+                item.notes !== 'undefined' && 
+                item.notes !== 'null';
               
               return (
                 <div

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { X, Timer, ExternalLink, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -72,8 +71,12 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
 
   const formattedPrice = item.price ? `$${item.price}` : '';
 
-  // Check if notes exist and are meaningful (not just placeholder text)
-  const hasValidNotes = item.notes && item.notes.trim() && !item.notes.match(/^[a-z]{8,}$/);
+  // Check if notes exist and are meaningful (not just placeholder text, empty, or null values)
+  const hasValidNotes = item.notes && 
+    item.notes.trim() && 
+    !item.notes.match(/^[a-z]{8,}$/) && 
+    item.notes !== 'undefined' && 
+    item.notes !== 'null';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

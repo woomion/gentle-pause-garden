@@ -82,8 +82,12 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
 
   const formattedPrice = item.price ? `$${item.price}` : '';
 
-  // Check if notes exist and are meaningful (not just placeholder text)
-  const hasValidNotes = item.notes && item.notes.trim() && !item.notes.match(/^[a-z]{8,}$/);
+  // Check if notes exist and are meaningful (not just placeholder text or empty)
+  const hasValidNotes = item.notes && 
+    item.notes.trim() && 
+    !item.notes.match(/^[a-z]{8,}$/) && 
+    item.notes !== 'undefined' && 
+    item.notes !== 'null';
 
   return (
     <div 
