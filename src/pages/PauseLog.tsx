@@ -50,16 +50,16 @@ const PauseLog = () => {
       <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
         <PauseHeader />
         
-        <div className="mb-6">
-          <div className="flex items-center mb-6">
-            <Link 
-              to="/"
-              className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors mr-2"
-            >
-              <ArrowLeft size={20} />
-            </Link>
-            <h1 className="text-2xl font-semibold text-black dark:text-cream">Your Pause Log</h1>
-          </div>
+        <div className="mb-6 mt-8">
+          <Link 
+            to="/"
+            className="inline-flex items-center text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors mb-4"
+          >
+            <ArrowLeft size={20} className="mr-2" />
+            <span className="text-sm">Back to home</span>
+          </Link>
+          
+          <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Pause Log</h1>
           
           {/* Filter label */}
           <div className="mb-2">
@@ -109,17 +109,17 @@ const PauseLog = () => {
                 key={item.id}
                 className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium text-black dark:text-[#F9F5EB] text-lg">
-                    {item.itemName}
+                <div className="mb-3">
+                  <h3 className="text-black dark:text-[#F9F5EB] text-lg">
+                    <span className="font-medium">{item.itemName}</span>
+                    <span className="font-normal"> from {item.storeName}</span>
                   </h3>
                 </div>
                 
-                <p className="text-black dark:text-[#F9F5EB] text-sm mb-3">
-                  {item.storeName}
-                </p>
-                
                 <div className="mb-2">
+                  <span className="text-black dark:text-[#F9F5EB] text-sm">
+                    Paused while feeling{' '}
+                  </span>
                   <span 
                     className="inline-block px-2 py-1 rounded text-xs font-medium"
                     style={{ 
@@ -130,6 +130,12 @@ const PauseLog = () => {
                     {item.emotion}
                   </span>
                 </div>
+                
+                {item.notes && (
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                    {item.notes}
+                  </p>
+                )}
                 
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
                   {item.status === 'purchased' 
