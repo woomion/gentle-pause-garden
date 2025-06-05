@@ -25,7 +25,7 @@ const formSchema = z.object({
     message: "Store name must be at least 2 characters.",
   }),
   price: z.string().optional(),
-  url: z.string().url("Please enter a valid URL").optional(),
+  url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   emotion: z.string().min(2, {
     message: "Please select an emotion.",
   }),
@@ -64,7 +64,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
   const handleImageUpload = (file: File, dataUrl: string) => {
     setPhoto(file);
     setPhotoDataUrl(dataUrl);
-    setImageUrl(null); // Clear any existing image URL
+    setImageUrl(null);
   };
 
   const handleImageUrlChange = (url: string) => {

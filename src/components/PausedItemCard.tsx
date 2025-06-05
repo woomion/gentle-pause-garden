@@ -139,7 +139,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
             <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
               <span>Paused while feeling </span>
               <span 
-                className="inline-block px-2 py-1 rounded text-xs font-medium"
+                className="inline-block px-2 py-1 rounded text-xs font-medium emotion-badge"
                 style={{ 
                   backgroundColor: emotionColor,
                   color: '#000'
