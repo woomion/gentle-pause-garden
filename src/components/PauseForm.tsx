@@ -49,7 +49,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [itemName, setItemName] = useState('');
   const [storeName, setStoreName] = useState('');
-  const [price, setPrice] = useState<number | null>(null);
+  const [price, setPrice] = useState('');
   const [url, setUrl] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -87,7 +87,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
   const resetForm = () => {
     setItemName('');
     setStoreName('');
-    setPrice(null);
+    setPrice('');
     setUrl('');
     setEmotion('');
     setNotes('');
@@ -211,10 +211,10 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
                 <Input 
                   id="price" 
                   placeholder="Enter price" 
-                  type="number"
+                  type="text"
                   {...register('price')}
-                  value={price || ''}
-                  onChange={(e) => setPrice(e.target.value ? parseFloat(e.target.value) : null)}
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
                 />
                  {errors.price && (
                   <p className="text-red-500 text-sm">{errors.price.message}</p>
