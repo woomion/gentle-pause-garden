@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
@@ -59,13 +59,13 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
 
   return (
     <>
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-w-sm mx-auto bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20">
-          <DrawerHeader>
-            <DrawerTitle className="text-xl font-semibold text-black dark:text-[#F9F5EB]">Settings & Info</DrawerTitle>
-          </DrawerHeader>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-black dark:text-[#F9F5EB]">Settings & Info</DialogTitle>
+          </DialogHeader>
           
-          <div className="px-6 pb-12 space-y-6 max-h-[70vh] overflow-y-auto">
+          <div className="space-y-6 max-h-[70vh] overflow-y-auto">
             {/* About Pocket Pause */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">About Pocket Pause</h3>
@@ -143,8 +143,8 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
               </div>
             </div>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
 
       <FeedbackModal 
         open={showFeedbackModal} 
