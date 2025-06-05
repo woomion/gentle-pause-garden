@@ -28,6 +28,8 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
   }, [item.emotion]);
 
   const imageUrl = useMemo(() => {
+    // Priority: Supabase Storage URL > local photo data > file object > link URL
+    if (item.imageUrl && item.imageUrl.includes('supabase')) return item.imageUrl;
     if (item.photoDataUrl) return item.photoDataUrl;
     if (item.photo instanceof File) return URL.createObjectURL(item.photo);
     return item.imageUrl;

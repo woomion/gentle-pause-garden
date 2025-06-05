@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -35,6 +34,34 @@ class SupabasePausedItemsStore {
     this.loadItems();
   }
 
+  private async uploadImage(file: File): Promise<string | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('paused-items')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from('paused-items')
+        .getPublicUrl(fileName);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error in uploadImage:', error);
+      return null;
+    }
+  }
+
   private convertDbToLocal(dbItem: DbPausedItem): PausedItem {
     const pausedAt = new Date(dbItem.created_at);
     const reviewAt = new Date(dbItem.review_at);
@@ -58,7 +85,7 @@ class SupabasePausedItemsStore {
     };
   }
 
-  private convertLocalToDb(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>): Omit<DbPausedItemInsert, 'user_id'> {
+  private convertLocalToDb(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>, imageUrl?: string): Omit<DbPausedItemInsert, 'user_id'> {
     const pauseDurationDays = this.parseDurationToDays(item.duration || item.otherDuration || '24 hours');
     const reviewAt = new Date();
     reviewAt.setDate(reviewAt.getDate() + pauseDurationDays);
@@ -66,7 +93,7 @@ class SupabasePausedItemsStore {
     return {
       title: item.itemName,
       price: item.price ? parseFloat(item.price) : null,
-      url: item.link || null,
+      url: imageUrl || item.link || null,
       reason: item.emotion,
       notes: item.notes || null,
       pause_duration_days: pauseDurationDays,
@@ -137,7 +164,13 @@ class SupabasePausedItemsStore {
         return;
       }
 
-      const dbItem = this.convertLocalToDb(item);
+      // Upload image if provided
+      let imageUrl: string | null = null;
+      if (item.photo) {
+        imageUrl = await this.uploadImage(item.photo);
+      }
+
+      const dbItem = this.convertLocalToDb(item, imageUrl || undefined);
       
       const { data, error } = await supabase
         .from('paused_items')
@@ -154,6 +187,11 @@ class SupabasePausedItemsStore {
       }
 
       const newItem = this.convertDbToLocal(data);
+      // Set the uploaded image URL
+      if (imageUrl) {
+        newItem.imageUrl = imageUrl;
+      }
+      
       this.items.unshift(newItem);
       this.updateCheckInTimes();
       this.notifyListeners();

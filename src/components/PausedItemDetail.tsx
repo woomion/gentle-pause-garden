@@ -35,12 +35,9 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   };
 
   const getImageUrl = () => {
-    if (item.photoDataUrl) {
-      return item.photoDataUrl;
-    }
-    if (item.photo && item.photo instanceof File) {
-      return URL.createObjectURL(item.photo);
-    }
+    if (item.imageUrl && item.imageUrl.includes('supabase')) return item.imageUrl;
+    if (item.photoDataUrl) return item.photoDataUrl;
+    if (item.photo && item.photo instanceof File) return URL.createObjectURL(item.photo);
     return item.imageUrl;
   };
 
