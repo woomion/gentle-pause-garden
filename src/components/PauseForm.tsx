@@ -1,315 +1,440 @@
 
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from '../contexts/AuthContext';
-import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
-import ImageUpload from './ImageUpload';
-
-const formSchema = z.object({
-  itemName: z.string().min(2, {
-    message: "Item name must be at least 2 characters.",
-  }),
-  storeName: z.string().min(2, {
-    message: "Store name must be at least 2 characters.",
-  }),
-  price: z.string().optional(),
-  url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
-  emotion: z.string().min(2, {
-    message: "Please select an emotion.",
-  }),
-  notes: z.string().optional(),
-  pauseDuration: z.string().min(1, {
-    message: "Please select a pause duration.",
-  }),
-});
+import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PauseFormProps {
   onClose: () => void;
-  onShowSignup: () => void;
-  signupModalDismissed: boolean;
+  onShowSignup?: () => void;
+  signupModalDismissed?: boolean;
 }
 
-const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emotion, setEmotion] = useState('');
-  const [pauseDuration, setPauseDuration] = useState('');
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [itemName, setItemName] = useState('');
-  const [storeName, setStoreName] = useState('');
-  const [price, setPrice] = useState('');
-  const [url, setUrl] = useState('');
-  const [notes, setNotes] = useState('');
+const emotions = [
+  { name: 'bored', color: '#F6E3D5' },
+  { name: 'overwhelmed', color: '#E9E2F7' },
+  { name: 'burnt out', color: '#FBF3C2' },
+  { name: 'sad', color: '#DCE7F5' },
+  { name: 'inspired', color: '#FBE7E6' },
+  { name: 'deserving', color: '#E7D8F3' },
+  { name: 'curious', color: '#DDEEDF' },
+  { name: 'anxious', color: '#EDEAE5' },
+  { name: 'lonely', color: '#CED8E3' },
+  { name: 'celebratory', color: '#FAEED6' },
+  { name: 'resentful', color: '#EAC9C3' },
+  { name: 'something else', color: '#F0F0EC' }
+];
 
+const otherPauseLengths = [
+  '2 weeks',
+  '1 month',
+  '3 months'
+];
+
+const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
-
-  const { register, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [formData, setFormData] = useState({
+    link: '',
+    itemName: '',
+    storeName: '',
+    price: '',
+    photo: null as File | null,
+    emotion: '',
+    notes: '',
+    duration: '',
+    otherDuration: '',
+    imageUrl: '' // Add imageUrl to track parsed images
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isParsingUrl, setIsParsingUrl] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
-  const handleImageUpload = (file: File, dataUrl: string) => {
-    setPhoto(file);
-    setPhotoDataUrl(dataUrl);
-    setImageUrl(null);
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUrlChange = (url: string) => {
-    setImageUrl(url);
-    setPhoto(null);
-    setPhotoDataUrl(null);
-  };
-
-  const resetForm = () => {
-    setItemName('');
-    setStoreName('');
-    setPrice('');
-    setUrl('');
-    setEmotion('');
-    setNotes('');
-    setPauseDuration('');
-    setPhoto(null);
-    setPhotoDataUrl(null);
-    setImageUrl(null);
-  };
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLinkChange = async (value: string) => {
+    setFormData(prev => ({ ...prev, link: value }));
     
-    if (!itemName.trim() || !storeName.trim() || !emotion || !pauseDuration) {
-      return;
+    // Check if the value looks like a URL
+    if (value && (value.startsWith('http://') || value.startsWith('https://') || value.includes('.'))) {
+      setIsParsingUrl(true);
+      
+      try {
+        const productInfo = await parseProductUrl(value);
+        console.log('Parsed product info:', productInfo);
+        
+        // Only update fields that are currently empty and we found data for
+        setFormData(prev => ({
+          ...prev,
+          itemName: prev.itemName || productInfo.itemName || prev.itemName,
+          storeName: prev.storeName || productInfo.storeName || prev.storeName,
+          price: prev.price || productInfo.price || prev.price,
+          imageUrl: prev.imageUrl || productInfo.imageUrl || prev.imageUrl,
+        }));
+        
+        // Log the image URL for debugging
+        if (productInfo.imageUrl) {
+          console.log('Found product image:', productInfo.imageUrl);
+        }
+        
+      } catch (error) {
+        console.error('Error parsing product URL:', error);
+      } finally {
+        setIsParsingUrl(false);
+      }
     }
+  };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData(prev => ({ ...prev, photo: file }));
+    
+    // Create preview URL for the uploaded photo
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setPhotoPreview(previewUrl);
+      console.log('Photo selected for upload:', file.name, file.size);
+    } else {
+      setPhotoPreview(null);
+    }
+  };
+
+  // Clean up preview URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
+
+  const handleDurationSelect = (duration: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      duration: duration,
+      otherDuration: '' // Clear dropdown selection
+    }));
+  };
+
+  const handleOtherDurationSelect = (value: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      otherDuration: value,
+      duration: '' // Clear button selection
+    }));
+  };
+
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     
-    try {
-      const pauseData = {
-        itemName: itemName.trim(),
-        storeName: storeName.trim(),
-        price: price || undefined,
-        url: url || undefined,
-        emotion,
-        notes: notes.trim() || undefined,
-        duration: pauseDuration,
-        photo: photo || undefined,
-        photoDataUrl: photoDataUrl || undefined,
-        imageUrl: imageUrl || undefined
+    // Show ripple effect for 1 second
+    setTimeout(async () => {
+      console.log('Pause item data:', formData);
+      
+      const itemData = {
+        itemName: formData.itemName || 'Unnamed Item',
+        storeName: formData.storeName || 'Unknown Store',
+        price: formData.price || '0',
+        emotion: formData.emotion,
+        notes: formData.notes,
+        duration: formData.duration,
+        otherDuration: formData.otherDuration,
+        link: formData.link,
+        photo: formData.photo,
+        imageUrl: formData.imageUrl // Include parsed image URL
       };
 
+      // Use appropriate store based on authentication status
       if (user) {
-        await supabasePausedItemsStore.addItem(pauseData);
-        toast({
-          title: "Item Paused!",
-          description: "Your item has been added to the pause list.",
-        });
+        console.log('Uploading to Supabase with photo:', !!formData.photo);
+        await supabasePausedItemsStore.addItem(itemData);
       } else {
-        pausedItemsStore.addItem(pauseData);
-        toast({
-          title: "Item Paused!",
-          description: "Your item has been added to the pause list. (Guest Mode)",
-        });
-        if (!signupModalDismissed) {
-          onShowSignup();
-        }
+        pausedItemsStore.addItem(itemData);
       }
-      onClose();
-      resetForm();
-    } catch (error) {
-      console.error("Form submission error:", error);
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem submitting the form. Please try again.",
-      });
-    } finally {
+      
       setIsSubmitting(false);
-    }
+      onClose();
+      
+      // Only show signup modal if user is not authenticated AND hasn't dismissed it
+      if (!user && !signupModalDismissed && onShowSignup) {
+        onShowSignup();
+      }
+    }, 1000);
   };
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl mx-auto bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20">
-        <DialogHeader>
-          <DialogTitle className="text-black dark:text-[#F9F5EB]">Pause this decision</DialogTitle>
-          <DialogDescription className="text-gray-600 dark:text-gray-400">
-            Fill in the details below to pause your decision.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="relative">
-          <button
+    <div className="fixed inset-0 bg-cream dark:bg-[#200E3B] z-50 overflow-y-auto transition-colors duration-300">
+      <div className="min-h-screen px-6 py-8">
+        {/* Header */}
+        <header className="relative mb-8">
+          <div className="text-center">
+            <div className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2">
+              POCKET || PAUSE
+            </div>
+          </div>
+          
+          <button 
             onClick={onClose}
-            className="absolute -top-2 -right-2 p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors z-10"
-            aria-label="Close"
+            className="absolute top-6 right-0 p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
           >
-            <X size={20} />
+            <X size={24} />
           </button>
+        </header>
 
-          <form onSubmit={handleFormSubmit} className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="url" className="text-black dark:text-[#F9F5EB]">Link to product (optional)</Label>
-              <Input 
-                id="url" 
-                placeholder="Enter URL" 
-                type="url"
-                {...register('url')}
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-              {errors.url && (
-                <p className="text-red-500 text-sm">{errors.url.message}</p>
+        {/* Form */}
+        <div className="max-w-md mx-auto">
+          <h1 className="text-2xl font-semibold text-dark-gray dark:text-[#F9F5EB] text-center mb-8">
+            Add Something to Pause
+          </h1>
+
+          {/* Guest mode banner */}
+          {!user && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
+              <p className="text-amber-800 dark:text-amber-200 text-sm text-center">
+                <strong>Guest Mode:</strong> Your paused items will be stored locally and won't sync across devices. 
+                {!signupModalDismissed && (
+                  <button 
+                    onClick={onShowSignup}
+                    className="underline hover:no-underline ml-1"
+                  >
+                    Sign up to sync!
+                  </button>
+                )}
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {/* Link Field */}
+            <div className="space-y-1">
+              <Label htmlFor="link" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Link (paste a product URL)
+              </Label>
+              <div className="relative">
+                <Input
+                  id="link"
+                  type="url"
+                  placeholder="www.example.com/item"
+                  value={formData.link}
+                  onChange={(e) => handleLinkChange(e.target.value)}
+                  className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
+                />
+                {isParsingUrl && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-lavender border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </div>
+              {formData.imageUrl && !formData.photo && (
+                <div className="mt-2">
+                  <p className="text-sm text-green-600 dark:text-green-400">✓ Found product image automatically</p>
+                </div>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="itemName" className="text-black dark:text-[#F9F5EB]">Item name</Label>
-                <Input 
-                  id="itemName" 
-                  placeholder="Enter item name" 
-                  type="text" 
-                  {...register('itemName')}
-                  value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                />
-                {errors.itemName && (
-                  <p className="text-red-500 text-sm">{errors.itemName.message}</p>
-                )}
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="storeName" className="text-black dark:text-[#F9F5EB]">Store name</Label>
-                <Input 
-                  id="storeName" 
-                  placeholder="Enter store name" 
-                  type="text" 
-                  {...register('storeName')}
-                  value={storeName}
-                  onChange={(e) => setStoreName(e.target.value)}
-                />
-                {errors.storeName && (
-                  <p className="text-red-500 text-sm">{errors.storeName.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="price" className="text-black dark:text-[#F9F5EB]">Price (optional)</Label>
-              <Input 
-                id="price" 
-                placeholder="Enter price" 
+            {/* Item Name Field */}
+            <div className="space-y-1">
+              <Label htmlFor="itemName" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Item Name
+              </Label>
+              <Input
+                id="itemName"
                 type="text"
-                {...register('price')}
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                placeholder="What are you thinking of buying?"
+                value={formData.itemName}
+                onChange={(e) => handleInputChange('itemName', e.target.value)}
+                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
               />
-               {errors.price && (
-                <p className="text-red-500 text-sm">{errors.price.message}</p>
+            </div>
+
+            {/* Store Name Field */}
+            <div className="space-y-1">
+              <Label htmlFor="storeName" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Store Name
+              </Label>
+              <Input
+                id="storeName"
+                type="text"
+                placeholder="Where is this item from?"
+                value={formData.storeName}
+                onChange={(e) => handleInputChange('storeName', e.target.value)}
+                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
+              />
+            </div>
+
+            {/* Price Field */}
+            <div className="space-y-1">
+              <Label htmlFor="price" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Price
+              </Label>
+              <Input
+                id="price"
+                type="number"
+                placeholder="0.00"
+                value={formData.price}
+                onChange={(e) => handleInputChange('price', e.target.value)}
+                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
+              />
+            </div>
+
+            {/* Photo Upload Field */}
+            <div className="space-y-1">
+              <Label htmlFor="photo" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Photo (optional)
+              </Label>
+              <input
+                id="photo"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full text-sm text-gray-500 dark:text-gray-300
+                           file:py-2 file:px-4
+                           file:rounded-xl file:border-0
+                           file:text-sm file:font-medium
+                           file:bg-lavender file:text-dark-gray
+                           hover:file:bg-lavender/90
+                           rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 h-12
+                           overflow-hidden"
+              />
+              {photoPreview && (
+                <div className="mt-2">
+                  <img 
+                    src={photoPreview} 
+                    alt="Photo preview" 
+                    className="w-20 h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                  />
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">✓ Photo ready to upload</p>
+                </div>
               )}
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="emotion" className="text-black dark:text-[#F9F5EB]">I'm feeling</Label>
-              <Select onValueChange={(value) => setEmotion(value)}>
-                <SelectTrigger className="bg-white/60 dark:bg-white/10 border border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]">
-                  <SelectValue placeholder="Select an emotion" />
+            {/* Emotion Selection */}
+            <div className="space-y-1">
+              <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                How are you feeling right now?
+              </Label>
+              <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
+                <SelectTrigger className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 dark:text-[#F9F5EB]">
+                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base" />
                 </SelectTrigger>
-                <SelectContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]">
-                  <SelectItem value="bored">Bored</SelectItem>
-                  <SelectItem value="overwhelmed">Overwhelmed</SelectItem>
-                  <SelectItem value="burnt out">Burnt out</SelectItem>
-                  <SelectItem value="sad">Sad</SelectItem>
-                  <SelectItem value="inspired">Inspired</SelectItem>
-                  <SelectItem value="deserving">Deserving</SelectItem>
-                  <SelectItem value="curious">Curious</SelectItem>
-                  <SelectItem value="anxious">Anxious</SelectItem>
-                  <SelectItem value="lonely">Lonely</SelectItem>
-                  <SelectItem value="celebratory">Celebratory</SelectItem>
-                  <SelectItem value="resentful">Resentful</SelectItem>
-                  <SelectItem value="something else">Something else</SelectItem>
+                <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-xl max-h-60 overflow-y-auto">
+                  {emotions.map((emotion) => (
+                    <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1 dark:text-[#F9F5EB] dark:focus:bg-white/10">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: emotion.color }}
+                        />
+                        <span className="capitalize">{emotion.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              {errors.emotion && (
-                <p className="text-red-500 text-sm">{errors.emotion.message}</p>
-              )}
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="notes" className="text-black dark:text-[#F9F5EB]">Notes (optional)</Label>
+            {/* Notes Field */}
+            <div className="space-y-1">
+              <Label htmlFor="notes" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Notes (optional)
+              </Label>
               <Textarea
                 id="notes"
-                placeholder="Add any additional notes here."
-                className="resize-none bg-white/60 dark:bg-white/10 border border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Why do you want this item?"
+                value={formData.notes}
+                onChange={(e) => handleInputChange('notes', e.target.value)}
+                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
               />
-              {errors.notes && (
-                <p className="text-red-500 text-sm">{errors.notes.message}</p>
-              )}
             </div>
 
-            <div className="grid gap-2">
-              <Label className="text-black dark:text-[#F9F5EB]">Pause duration</Label>
-              <ToggleGroup 
-                type="single" 
-                value={pauseDuration} 
-                onValueChange={(value) => setPauseDuration(value || '')}
-                className="justify-start"
+            {/* Pause Duration */}
+            <div className="space-y-2">
+              <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Pause for
+              </Label>
+              
+              {/* Row of three buttons */}
+              <div className="grid grid-cols-3 gap-2">
+                {['24 hours', '3 days', '1 week'].map((duration) => (
+                  <button
+                    key={duration}
+                    onClick={() => handleDurationSelect(duration)}
+                    className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
+                      formData.duration === duration
+                        ? 'bg-lavender border-lavender text-dark-gray'
+                        : 'bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-dark-gray dark:text-[#F9F5EB] hover:border-lavender/50'
+                    }`}
+                  >
+                    {duration}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Other pause lengths dropdown */}
+              <Select 
+                value={formData.otherDuration} 
+                onValueChange={handleOtherDurationSelect}
               >
-                <ToggleGroupItem value="24 hours" aria-label="24 hours">
-                  24 hours
-                </ToggleGroupItem>
-                <ToggleGroupItem value="1 day" aria-label="1 day">
-                  1 day
-                </ToggleGroupItem>
-                <ToggleGroupItem value="3 days" aria-label="3 days">
-                  3 days
-                </ToggleGroupItem>
-              </ToggleGroup>
-              {errors.pauseDuration && (
-                <p className="text-red-500 text-sm">{errors.pauseDuration.message}</p>
-              )}
+                <SelectTrigger className={`bg-white dark:bg-white/10 border-2 rounded-xl py-3 px-4 transition-all dark:text-[#F9F5EB] ${
+                  formData.otherDuration ? 'border-lavender bg-lavender dark:bg-lavender text-dark-gray' : 'border-gray-200 dark:border-gray-600 hover:border-lavender/50'
+                }`}>
+                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-xl">
+                  {otherPauseLengths.map((duration) => (
+                    <SelectItem key={duration} value={duration} className="rounded-lg my-1 dark:text-[#F9F5EB] dark:focus:bg-white/10">
+                      {duration}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            <ImageUpload 
-              onImageUpload={handleImageUpload} 
-              onImageUrlChange={handleImageUrlChange}
-            />
-
-            <div className="flex gap-2 pt-2">
-              <Button 
-                type="button" 
-                variant="outline" 
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-6">
+              <Button
+                variant="outline"
                 onClick={onClose}
-                className="flex-1"
+                className="flex-1 bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-dark-gray dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting} 
-                className="bg-[#CAB6F7] hover:bg-[#B8A3F0] text-black flex-1"
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`flex-1 bg-lavender text-dark-gray hover:bg-lavender/90 rounded-xl py-3 relative overflow-hidden ${
+                  isSubmitting ? 'pointer-events-none' : ''
+                }`}
               >
-                {isSubmitting ? "Starting Pause..." : "Start Pause"}
+                {isSubmitting && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-dark-gray/20 rounded-full animate-ripple"></div>
+                  </div>
+                )}
+                Start Pause
               </Button>
             </div>
-          </form>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* Footer */}
+        <div className="mt-16 text-center text-xs space-y-1" style={{ color: '#A6A1AD' }}>
+          <p>|| Pocket Pause—your conscious spending companion</p>
+          <div className="flex justify-center gap-4">
+            <button className="hover:text-taupe transition-colors">Privacy Policy</button>
+            <button className="hover:text-taupe transition-colors">About</button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

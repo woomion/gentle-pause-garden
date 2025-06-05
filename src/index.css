@@ -181,18 +181,6 @@
     background-color: #C8B6E2 !important;
     color: #2B2B2B !important;
   }
-
-  /* Dark mode text on light purple backgrounds - override to use dark text */
-  .dark [style*="background-color: #F2E8FF"] .text-black,
-  .dark [style*="background-color: #F2E8FF"] p,
-  .dark [style*="background-color: #F2E8FF"] span,
-  .dark [style*="background-color: #F2E8FF"] button {
-    color: #2B2B2B !important;
-  }
-
-  .dark [style*="background-color: #F2E8FF"] button:hover {
-    color: #6B4C9A !important;
-  }
 }
 
 @layer utilities {

@@ -1,23 +1,27 @@
 
-import { useState } from 'react';
-import { X, Timer, ExternalLink, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Timer, ExternalLink } from 'lucide-react';
+import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
+import { pauseLogStore } from '../stores/pauseLogStore';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PausedItem } from '../stores/pausedItemsStore';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PausedItemDetailProps {
-  item: PausedItem | any;
+  item: PausedItem;
   isOpen: boolean;
   onClose: () => void;
   onDelete: (id: string) => void;
 }
 
 const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailProps) => {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
 
-  const emotionColor = (() => {
-    const emotionColors: Record<string, string> = {
+  const getEmotionColor = (emotion: string) => {
+    const emotionColors: { [key: string]: string } = {
       'bored': '#F6E3D5',
       'overwhelmed': '#E9E2F7',
       'burnt out': '#FBF3C2',
@@ -31,171 +35,283 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
       'resentful': '#EAC9C3',
       'something else': '#F0F0EC'
     };
-    return emotionColors[item.emotion] || '#F0F0EC';
-  })();
+    return emotionColors[emotion] || '#F0F0EC';
+  };
 
-  const imageUrl = (() => {
-    if (item.imageUrl) {
-      if (item.imageUrl.includes('supabase')) {
-        return item.imageUrl;
-      } else {
-        try {
-          new URL(item.imageUrl);
-          return item.imageUrl;
-        } catch {
-          return null;
-        }
-      }
+  const getImageUrl = () => {
+    // Debug logging
+    console.log('Getting image URL for item:', {
+      itemId: item.id,
+      imageUrl: item.imageUrl,
+      photoDataUrl: item.photoDataUrl,
+      hasPhoto: !!item.photo
+    });
+    
+    if (item.imageUrl && item.imageUrl.includes('supabase')) {
+      console.log('Using Supabase image URL:', item.imageUrl);
+      return item.imageUrl;
     }
     if (item.photoDataUrl) {
+      console.log('Using photo data URL');
       return item.photoDataUrl;
     }
-    if (item.photo instanceof File) {
+    if (item.photo && item.photo instanceof File) {
+      console.log('Creating object URL from file');
       return URL.createObjectURL(item.photo);
     }
-    return null;
-  })();
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    target.style.display = 'none';
-    if (target.parentElement) {
-      target.parentElement.innerHTML = '<div class="w-full h-full bg-gray-300 dark:bg-gray-600 rounded-xl flex items-center justify-center"><div class="w-8 h-8 bg-gray-400 dark:bg-gray-500 rounded-full opacity-50" aria-hidden="true"></div></div>';
+    if (item.imageUrl) {
+      console.log('Using regular image URL:', item.imageUrl);
+      return item.imageUrl;
     }
+    console.log('No image URL found');
+    return null;
   };
+
+  const imageUrl = getImageUrl();
 
   const handleDelete = () => {
     onDelete(item.id);
-    setShowDeleteDialog(false);
     onClose();
   };
 
-  const formattedPrice = item.price ? `$${item.price}` : '';
+  const handleLetGo = async () => {
+    // Use appropriate pause log store based on authentication
+    if (user) {
+      await supabasePauseLogStore.addItem({
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
+        status: 'let-go',
+        notes: item.notes
+      });
+    } else {
+      pauseLogStore.addItem({
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
+        status: 'let-go',
+        notes: item.notes
+      });
+    }
+    
+    // Remove from paused items
+    onDelete(item.id);
+    onClose();
+    
+    // Show success toast
+    toast({
+      title: "Item released",
+      description: `"${item.itemName}" has been moved to your pause log.`,
+    });
+  };
 
-  // Check if notes exist and are meaningful (not just placeholder text, empty, or null values)
-  const hasValidNotes = item.notes && 
-    item.notes.trim() && 
-    !item.notes.match(/^[a-z]{8,}$/) && 
-    item.notes !== 'undefined' && 
-    item.notes !== 'null';
+  const handleBought = async () => {
+    // Use appropriate pause log store based on authentication
+    if (user) {
+      await supabasePauseLogStore.addItem({
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
+        status: 'purchased',
+        notes: item.notes
+      });
+    } else {
+      pauseLogStore.addItem({
+        itemName: item.itemName,
+        emotion: item.emotion,
+        storeName: item.storeName,
+        status: 'purchased',
+        notes: item.notes
+      });
+    }
+    
+    // Remove from paused items
+    onDelete(item.id);
+    onClose();
+    
+    // Show success toast that auto-dismisses
+    const toastInstance = toast({
+      title: "Great, you made a conscious choice!",
+      description: "We've moved this thoughtful decision to your Pause Log for future reference.",
+    });
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      toastInstance.dismiss();
+    }, 3000);
+  };
+
+  const handleKeepPaused = () => {
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20">
-        <div className="relative">
-          <button
-            onClick={onClose}
-            className="absolute -top-2 -right-2 p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors z-10"
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-
-          <div className="pt-6">
-            <div className="flex gap-4 mb-4">
-              <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                {imageUrl ? (
-                  <img 
-                    src={imageUrl} 
-                    alt={item.itemName}
-                    className="w-full h-full object-cover"
-                    onError={handleImageError}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50" aria-hidden="true" />
-                )}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start mb-2">
-                  <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] break-words">
-                    {item.itemName}
-                  </h2>
-                  {formattedPrice && (
-                    <span className="text-black dark:text-[#F9F5EB] font-medium ml-2 flex-shrink-0">
-                      {formattedPrice}
-                    </span>
-                  )}
-                </div>
-                
-                <p className="text-black dark:text-[#F9F5EB] mb-3">
-                  {item.storeName}
-                </p>
-                
-                <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
-                  <span>Paused while feeling </span>
-                  <span 
-                    className="inline-block px-2 py-1 rounded text-xs font-medium"
-                    style={{ 
-                      backgroundColor: emotionColor,
-                      color: '#000'
-                    }}
-                  >
-                    {item.emotion}
-                  </span>
-                </div>
-              </div>
+      <DialogContent 
+        className="max-w-sm mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600"
+      >
+        <DialogHeader>
+          <DialogTitle className="sr-only">Item Details</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-6">
+          {/* Product image */}
+          <div className="relative">
+            <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center overflow-hidden">
+              {imageUrl ? (
+                <img 
+                  src={imageUrl} 
+                  alt={item.itemName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error('Image failed to load:', imageUrl);
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>';
+                  }}
+                  onLoad={() => {
+                    console.log('Image loaded successfully:', imageUrl);
+                  }}
+                />
+              ) : (
+                <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>
+              )}
             </div>
 
-            {hasValidNotes && (
-              <div className="mb-4">
-                <h3 className="text-sm font-medium text-black dark:text-[#F9F5EB] mb-2">Notes</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm bg-white/40 dark:bg-white/5 rounded-lg p-3">
+            {/* Pause Duration Banner - touching bottom of image */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 py-2 px-4 rounded-b-2xl text-center text-xs font-medium flex items-center justify-center gap-2"
+              style={{ 
+                backgroundColor: '#E7D9FA',
+                color: '#000'
+              }}
+            >
+              <Timer size={14} />
+              {item.checkInTime}
+            </div>
+          </div>
+
+          {/* Item details */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-start">
+              <h3 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-tight">{item.itemName}</h3>
+              {item.price && (
+                <span className="text-xl font-bold text-black dark:text-[#F9F5EB] ml-2">${item.price}</span>
+              )}
+            </div>
+            
+            <p className="text-gray-600 dark:text-gray-300 text-base">{item.storeName}</p>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600 dark:text-gray-300 text-sm">Paused while feeling</span>
+              <span 
+                className="inline-block px-4 py-2 rounded-full text-sm font-medium"
+                style={{ 
+                  backgroundColor: getEmotionColor(item.emotion),
+                  color: '#000'
+                }}
+              >
+                {item.emotion}
+              </span>
+            </div>
+
+            {/* Only show notes if they exist and aren't empty */}
+            {item.notes && item.notes.trim() && (
+              <div className="pt-2">
+                <p className="text-gray-600 dark:text-gray-300 text-sm">
                   {item.notes}
                 </p>
               </div>
             )}
+          </div>
 
-            <div className="bg-[#E7D9FA] rounded-2xl p-4 mb-6">
-              <div className="flex items-center justify-center gap-2 text-black">
-                <Timer size={16} aria-hidden="true" />
-                <span className="text-sm font-medium">{item.checkInTime}</span>
-              </div>
-            </div>
+          {/* Let it go button */}
+          <div className="pt-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 dark:hover:bg-lavender/20 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+                  Let This Item Go
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Let go of this item?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                    This will move "{item.itemName}" to your pause log. You can always see what you've let go of in your pause log section.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLetGo} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
+                    Let it go
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
 
-            <div className="flex gap-3">
-              {item.url && (
-                <Button 
-                  onClick={() => window.open(item.url, '_blank')}
-                  className="flex-1 bg-[#CAB6F7] hover:bg-[#B8A3F0] text-black border border-gray-200 dark:border-white/20"
-                >
-                  <ExternalLink size={16} className="mr-2" />
-                  View Item
+          {/* I bought this button */}
+          <div className="text-center">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 underline">
+                  I Purchased This
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Mark as purchased?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                    This will move "{item.itemName}" to your Pause Log as a thoughtful purchase decision.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleBought} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
+                    Yes, I bought it
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+
+          {/* Footer actions */}
+          <div className="pt-2 flex items-center justify-between">
+            {item.link ? (
+              <a 
+                href={item.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1"
+              >
+                <ExternalLink size={14} />
+                View item
+              </a>
+            ) : (
+              <div></div>
+            )}
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 text-sm">
+                  Delete item
                 </Button>
-              )}
-              
-              <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="outline"
-                    className="bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800"
-                  >
-                    <Trash2 size={16} className="mr-2" />
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                    This will permanently delete "{item.itemName}" from your paused items. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="rounded-2xl bg-red-500 hover:bg-red-600 text-white">
                     Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Delete Paused Item</AlertDialogTitle>
-                    <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
-                      Are you sure you want to delete "{item.itemName}"? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-white/80 dark:hover:bg-white/20">
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={handleDelete}
-                      className="bg-red-600 hover:bg-red-700 text-white border border-red-600 dark:border-red-500"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </DialogContent>

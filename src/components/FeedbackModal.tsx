@@ -77,7 +77,7 @@ const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-[#CAB6F7] hover:bg-[#B8A3F0] text-black border border-gray-200 dark:border-white/20"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Sending...' : 'Send Feedback'}
