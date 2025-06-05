@@ -9,7 +9,7 @@ const GreaterJoyDonation = () => {
   return (
     <>
       <div className="mt-12 pt-8">
-        <div className="bg-purple-50 dark:bg-purple-950/20 rounded-2xl p-6 border border-lavender/30 dark:border-gray-600 max-w-sm mx-auto md:mx-0">
+        <div className="rounded-2xl p-6 max-w-sm mx-auto md:mx-0" style={{ backgroundColor: '#F2E8FF' }}>
           <div className="space-y-1 text-left">
             <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
               Pocket Pause is independently made and still growing. To help support its next chapter:
