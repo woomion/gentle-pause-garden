@@ -6,22 +6,67 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import IntentionSection from '../components/IntentionSection';
 import ReflectionTab from '../components/ReflectionTab';
 import StatsTab from '../components/StatsTab';
+import { usePausedItems } from '../hooks/usePausedItems';
 
 const GreaterJoyFund = () => {
   const [intention, setIntention] = useState('');
+  const [reflection, setReflection] = useState('');
+  const { items } = usePausedItems();
 
   const handleSaveIntention = (newIntention: string) => {
     setIntention(newIntention);
     localStorage.setItem('greaterJoyIntention', newIntention);
   };
 
-  // Load intention on component mount
+  // Load intention and reflection on component mount
   useEffect(() => {
     const savedIntention = localStorage.getItem('greaterJoyIntention');
+    const savedReflection = localStorage.getItem('greaterJoyReflection');
     if (savedIntention) {
       setIntention(savedIntention);
     }
+    if (savedReflection) {
+      setReflection(savedReflection);
+    }
   }, []);
+
+  // Save reflection to localStorage when it changes
+  useEffect(() => {
+    if (reflection) {
+      localStorage.setItem('greaterJoyReflection', reflection);
+    }
+  }, [reflection]);
+
+  // Calculate stats from items
+  const stats = {
+    totalPauses: items.length,
+    weeklyPauses: items.filter(item => {
+      const itemDate = new Date(item.pausedAt);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return itemDate >= weekAgo;
+    }).length,
+    monthlyPauses: items.filter(item => {
+      const itemDate = new Date(item.pausedAt);
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      return itemDate >= monthAgo;
+    }).length,
+    totalAmount: items.reduce((sum, item) => sum + (Number(item.price) || 0), 0),
+    weeklyAmount: items.filter(item => {
+      const itemDate = new Date(item.pausedAt);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return itemDate >= weekAgo;
+    }).reduce((sum, item) => sum + (Number(item.price) || 0), 0),
+    monthlyAmount: items.filter(item => {
+      const itemDate = new Date(item.pausedAt);
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      return itemDate >= monthAgo;
+    }).reduce((sum, item) => sum + (Number(item.price) || 0), 0),
+    topEmotion: items.length > 0 ? (items[0].emotion || 'curious') : 'curious'
+  };
 
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
@@ -42,11 +87,11 @@ const GreaterJoyFund = () => {
           </TabsList>
           
           <TabsContent value="reflection">
-            <ReflectionTab />
+            <ReflectionTab reflection={reflection} setReflection={setReflection} />
           </TabsContent>
           
           <TabsContent value="stats">
-            <StatsTab />
+            <StatsTab stats={stats} />
           </TabsContent>
         </Tabs>
       </div>
