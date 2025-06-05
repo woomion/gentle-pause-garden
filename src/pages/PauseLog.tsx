@@ -1,14 +1,15 @@
 
 import { useState, useMemo } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { usePauseLog } from '../hooks/usePauseLog';
 import PauseHeader from '../components/PauseHeader';
 import FooterLinks from '../components/FooterLinks';
 
 const PauseLog = () => {
-  const { items } = usePauseLog();
+  const { items, deleteItem } = usePauseLog();
   const [emotionFilter, setEmotionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -43,6 +44,10 @@ const PauseLog = () => {
       'something else': '#F0F0EC'
     };
     return emotionColors[emotion] || '#F0F0EC';
+  };
+
+  const handleDeleteItem = (id: string) => {
+    deleteItem(id);
   };
 
   return (
@@ -107,8 +112,30 @@ const PauseLog = () => {
             filteredItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600"
+                className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600 relative"
               >
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
+                      <X size={16} />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete from Pause Log</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{item.itemName}" from your Pause Log? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteItem(item.id)}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
                 <div className="mb-3">
                   <h3 className="text-black dark:text-[#F9F5EB] text-lg">
                     <span className="font-medium">{item.itemName}</span>

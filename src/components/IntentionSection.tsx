@@ -14,7 +14,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
   const [editValue, setEditValue] = useState(intention);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  const displayText = intention || "Enter a title for your joy fund (ex: More peace in my day)";
+  const displayText = intention || 'Give your Joy Fund a name — like "More calm, less clutter" or "Aligned with my values"';
   const isPlaceholder = !intention;
 
   useEffect(() => {
@@ -50,14 +50,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
   };
   
   return (
-    <div className="mb-8 mt-12">
-      <h1 className="text-xl font-medium text-black dark:text-[#F9F5EB] mb-2">
-        Your Greater Joy Fund
-      </h1>
-      <p className="text-sm text-gray-600 dark:text-gray-300 mb-8">
-        A growing reflection of your mindful choices
-      </p>
-      
+    <div className="mb-8">
       <div className="mb-3">
         {isEditing ? (
           <div className="space-y-3">
@@ -66,7 +59,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter a title for your joy fund (ex: More peace in my day)"
+              placeholder='Give your Joy Fund a name — like "More calm, less clutter" or "Aligned with my values"'
               className="text-xl font-bold leading-relaxed resize-none min-h-[60px] bg-transparent border-2 border-gray-300 dark:border-gray-600 focus:border-[#CAB6F7] dark:focus:border-[#CAB6F7] text-black dark:text-[#F9F5EB]"
             />
             <div className="flex gap-2">
@@ -113,7 +106,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
         )}
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
-        A place to remember what you're reaching for
+        A phrase to come back to when a decision feels cloudy — to help you choose with clarity and care.
       </p>
     </div>
   );

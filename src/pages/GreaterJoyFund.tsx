@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import IntentionSection from '../components/IntentionSection';
 import ReflectionTab from '../components/ReflectionTab';
@@ -72,6 +74,21 @@ const GreaterJoyFund = () => {
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
       <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
         <PauseHeader />
+
+        <div className="mt-8 mb-8">
+          <Link 
+            to="/"
+            className="inline-flex items-center text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors mb-4"
+          >
+            <ArrowLeft size={20} className="mr-2" />
+            <span className="text-sm">Back to home</span>
+          </Link>
+          
+          <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Greater Joy Fund</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-8">
+            A growing reflection of your mindful choices
+          </p>
+        </div>
 
         <IntentionSection intention={intention} onSave={handleSaveIntention} />
 
