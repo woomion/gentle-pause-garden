@@ -3,14 +3,29 @@ import { useState } from 'react';
 import { ArrowLeft, Heart, Gift, Users, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DonationModal from '../components/DonationModal';
-import GreaterJoyHeader from '../components/GreaterJoyHeader';
+import IntentionSection from '../components/IntentionSection';
 
 const GreaterJoyFund = () => {
   const [showDonationModal, setShowDonationModal] = useState(false);
+  const [intention, setIntention] = useState('');
 
   const handleDonateClick = () => {
     setShowDonationModal(true);
   };
+
+  const handleSaveIntention = (newIntention: string) => {
+    setIntention(newIntention);
+    // Here you could save to localStorage or a database
+    localStorage.setItem('greaterJoyIntention', newIntention);
+  };
+
+  // Load intention on component mount
+  useState(() => {
+    const savedIntention = localStorage.getItem('greaterJoyIntention');
+    if (savedIntention) {
+      setIntention(savedIntention);
+    }
+  });
 
   return (
     <>
@@ -23,7 +38,7 @@ const GreaterJoyFund = () => {
             <h1 className="text-2xl font-semibold text-taupe dark:text-cream">Greater Joy Fund</h1>
           </div>
 
-          <GreaterJoyHeader />
+          <IntentionSection intention={intention} onSave={handleSaveIntention} />
 
           <div className="space-y-6">
             <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
