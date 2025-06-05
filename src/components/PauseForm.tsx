@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,7 +56,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
+  const { register, formState: { errors } } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
@@ -96,7 +97,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
     setImageUrl(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!itemName.trim() || !storeName.trim() || !emotion || !pauseDuration) {
@@ -115,8 +116,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
         price: price || undefined,
         url: url || undefined,
         emotion,
-        notes: cleanNotes, // Use cleaned notes
-        pauseDuration,
+        notes: cleanNotes,
+        duration: pauseDuration, // Map pauseDuration to duration for the store
         photo: photo || undefined,
         photoDataUrl: photoDataUrl || undefined,
         imageUrl: imageUrl || undefined
@@ -171,7 +172,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed }: PauseFormPro
             <X size={20} />
           </button>
 
-          <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+          <form onSubmit={handleFormSubmit} className="grid gap-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="itemName" className="text-black dark:text-[#F9F5EB]">Item name</Label>
