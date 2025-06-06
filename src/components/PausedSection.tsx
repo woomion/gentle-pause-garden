@@ -2,16 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore, PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
-import PausedItemCard from './PausedItemCard';
 import PausedItemDetail from './PausedItemDetail';
 import ItemReviewModal from './ItemReviewModal';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from '@/components/ui/carousel';
+import ReviewBanner from './ReviewBanner';
+import GuestModeIndicator from './GuestModeIndicator';
+import PausedItemsCarousel from './PausedItemsCarousel';
+import PausedSectionEmpty from './PausedSectionEmpty';
+import PausedSectionLoading from './PausedSectionLoading';
 
 const PausedSection = () => {
   const [pausedItems, setPausedItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
   const [itemsForReview, setItemsForReview] = useState<(PausedItem | LocalPausedItem)[]>([]);
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
   const [selectedItem, setSelectedItem] = useState<PausedItem | LocalPausedItem | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
@@ -70,21 +71,6 @@ const PausedSection = () => {
     };
   }, [sortItemsByDate, user]);
 
-  useEffect(() => {
-    if (!api) return;
-
-    const updateCurrent = () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-    };
-
-    setCurrent(api.selectedScrollSnap() + 1);
-    api.on('select', updateCurrent);
-
-    return () => {
-      api.off('select', updateCurrent);
-    };
-  }, [api]);
-
   const handleItemClick = useCallback((item: PausedItem | LocalPausedItem) => {
     setSelectedItem(item);
   }, []);
@@ -126,41 +112,9 @@ const PausedSection = () => {
     setCurrentReviewIndex(prev => prev + 1);
   }, []);
 
-  // Loading states
-  if (user && isLoading) {
-    return (
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-          Paused for now
-        </h2>
-        <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
-          You haven't decided yet—and that's okay
-        </p>
-        <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
-          <p className="text-gray-500 dark:text-gray-400">
-            Loading your paused items...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user && isLoading) {
-    return (
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-          Paused for now
-        </h2>
-        <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
-          You haven't decided yet—and that's okay
-        </p>
-        <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
-          <p className="text-gray-500 dark:text-gray-400">
-            Loading your paused items...
-          </p>
-        </div>
-      </div>
-    );
+  // Loading state
+  if (isLoading) {
+    return <PausedSectionLoading />;
   }
 
   const activeItems = pausedItems.filter(item => !itemsForReview.some(reviewItem => reviewItem.id === item.id));
@@ -175,25 +129,9 @@ const PausedSection = () => {
         <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
           You haven't decided yet—and that's okay
         </p>
-        <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
-          <p className="text-gray-500 dark:text-gray-400">
-            {!user 
-              ? "No paused items yet. Add something to get started! (Guest mode - items stored locally)"
-              : "No paused items yet. Add something to get started!"
-            }
-          </p>
-        </div>
+        <PausedSectionEmpty isGuest={!user} hasReviewItems={false} />
       </div>
     );
-  }
-
-  const totalItems = activeItems.length;
-  const isSingleItem = totalItems === 1;
-  
-  // Group items into pairs for desktop view
-  const groupedItems = [];
-  for (let i = 0; i < activeItems.length; i += 2) {
-    groupedItems.push(activeItems.slice(i, i + 2));
   }
 
   return (
@@ -205,125 +143,23 @@ const PausedSection = () => {
         You haven't decided yet—and that's okay
       </p>
       
-      {/* Review banner - only show if there are items for review */}
-      {itemsForReview.length > 0 && (
-        <div className="bg-gradient-to-r from-[#E7D9FA] to-[#F3E8FF] rounded-2xl p-4 mb-4 border border-lavender/30">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-black mb-1">
-                {itemsForReview.length} item{itemsForReview.length === 1 ? '' : 's'} ready for review
-              </h3>
-              <p className="text-gray-700 text-sm">
-                {itemsForReview.length === 1 
-                  ? "Your pause period is complete. Time to decide!" 
-                  : "Your pause periods are complete. Let's review them."}
-              </p>
-            </div>
-            <button 
-              onClick={handleStartReview}
-              className="bg-white hover:bg-gray-50 text-black font-medium py-2 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm whitespace-nowrap"
-            >
-              Review Now
-            </button>
-          </div>
-        </div>
-      )}
+      <ReviewBanner 
+        itemsCount={itemsForReview.length}
+        onStartReview={handleStartReview}
+      />
 
-      {/* Guest mode indicator */}
-      {!user && (activeItems.length > 0 || itemsForReview.length > 0) && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-4">
-          <p className="text-amber-800 dark:text-amber-200 text-sm text-center">
-            <strong>Guest Mode:</strong> Items stored locally only
-          </p>
-        </div>
-      )}
+      <GuestModeIndicator 
+        show={!user && (activeItems.length > 0 || itemsForReview.length > 0)}
+      />
 
       {/* Paused items display */}
-      {activeItems.length > 0 && (
-        <>
-          {isSingleItem ? (
-            <>
-              <div className="md:max-w-md md:mx-auto lg:max-w-md lg:mx-auto">
-                <PausedItemCard 
-                  item={activeItems[0]} 
-                  onClick={() => handleItemClick(activeItems[0])} 
-                />
-              </div>
-              <div className="flex justify-center mt-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400">1 item</span>
-              </div>
-            </>
-          ) : (
-            <div className="relative">
-              {/* Mobile: single column carousel */}
-              <div className="block md:hidden">
-                <Carousel className="w-full" setApi={setApi}>
-                  <CarouselContent>
-                    {activeItems.map((item) => (
-                      <CarouselItem key={item.id}>
-                        <PausedItemCard 
-                          item={item} 
-                          onClick={() => handleItemClick(item)} 
-                        />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              </div>
-
-              {/* Desktop: two column carousel */}
-              <div className="hidden md:block">
-                <Carousel className="w-full" setApi={setApi}>
-                  <CarouselContent>
-                    {groupedItems.map((group, groupIndex) => (
-                      <CarouselItem key={groupIndex}>
-                        <div className="grid grid-cols-2 gap-4">
-                          {group.map((item) => (
-                            <PausedItemCard 
-                              key={item.id}
-                              item={item} 
-                              onClick={() => handleItemClick(item)} 
-                            />
-                          ))}
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  
-                  <div className="flex items-center justify-center mt-4 gap-4">
-                    <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400 px-4">
-                      {totalItems} {totalItems === 1 ? 'item' : 'items'}
-                    </span>
-                    <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
-                  </div>
-                </Carousel>
-              </div>
-              
-              <div className="flex md:hidden justify-center mt-2">
-                <div className="bg-white dark:bg-white/10 rounded-full px-3 py-1 flex items-center gap-2 border border-gray-200 dark:border-gray-600">
-                  <div className="flex items-center gap-1" aria-hidden="true">
-                    <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                    <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                    <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                  </div>
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                    {totalItems} {totalItems === 1 ? 'item' : 'items'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Empty state for when there are only review items and no active items */}
-      {activeItems.length === 0 && itemsForReview.length > 0 && (
-        <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-6 text-center border border-lavender/30 dark:border-gray-600">
-          <p className="text-gray-500 dark:text-gray-400">
-            All your paused items are ready for review!
-          </p>
-        </div>
+      {activeItems.length > 0 ? (
+        <PausedItemsCarousel 
+          items={activeItems}
+          onItemClick={handleItemClick}
+        />
+      ) : (
+        <PausedSectionEmpty isGuest={!user} hasReviewItems={true} />
       )}
 
       {selectedItem && (
