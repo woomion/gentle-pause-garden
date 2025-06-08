@@ -49,37 +49,6 @@ const About = () => {
               </div>
             </div>
           </div>
-
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-taupe dark:text-cream">Our Philosophy</h2>
-            <p className="mb-4">
-              We believe that the most beautiful purchases are the ones that align with who you truly are. 
-              By creating space between impulse and action, you give yourself the gift of clarity.
-            </p>
-            <p>
-              This isn't about restriction or deprivation—it's about intention and joy. When you do choose 
-              to buy something after a pause, it often feels more meaningful and satisfying.
-            </p>
-          </div>
-
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-taupe dark:text-cream">Privacy & Your Data</h2>
-            <p className="mb-4">
-              Your pause journey is deeply personal. We use minimal data collection and never sell your information. 
-              Everything you share stays private and is used only to help you reflect and grow.
-            </p>
-            <p>
-              You can view our full <Link to="/privacy-policy" className="text-purple hover:underline">Privacy Policy</Link> for complete details.
-            </p>
-          </div>
-
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6 text-center">
-            <h2 className="text-xl font-semibold mb-4 text-taupe dark:text-cream">Made with 💜</h2>
-            <p>
-              Pocket Pause was created with love for anyone seeking a more mindful relationship with their purchases. 
-              We hope it brings you clarity, peace, and joy in your journey toward conscious living.
-            </p>
-          </div>
         </div>
       </div>
     </div>
