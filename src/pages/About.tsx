@@ -10,19 +10,27 @@ const About = () => {
           <Link to="/" className="mr-4">
             <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />
           </Link>
-          <h1 className="text-2xl font-semibold text-taupe dark:text-cream">About Pocket Pause</h1>
+          <h1 className="text-2xl font-semibold text-taupe dark:text-cream">Pocket Pause</h1>
+                      <p className="mb-4">
+              A gentle practice for navigating the noise
+            </p>
         </div>
 
         <div className="space-y-6 text-dark-gray dark:text-cream">
           <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-taupe dark:text-cream">What is Pocket Pause?</h2>
             <p className="mb-4">
-              Pocket Pause is your gentle companion for more conscious spending. Instead of rushing into purchases, 
-              we help you create space—a pause—to reflect on what truly matters to you.
+              In a world of endless scrolls, constant offers, and split-second decisions, Pocket Pause invites you to do something revolutionary: slow down. This is a space to notice what you’re reaching for — and why.
             </p>
             <p>
-              Think of it as a digital garden where your wants can grow into deeper understanding about your 
-              values, needs, and what brings you genuine joy.
+              Here, small pauses become portals. You track not just what you chose or passed on, but what moved you in the moment — emotions, impulses, longing, joy. Over time, a pattern begins to emerge. A rhythm that’s more yours than the one the world tries to impose.
+            </p>
+            <p>
+              Pocket Pause isn’t about perfection or rigid budgeting. It’s about presence. About making room for intention, reflection, and the clarity that emerges when you’re not rushed.
+            </p>
+            <p>
+              It’s a tool. A mirror. A friend in your pocket.
+And maybe, a tiny rebellion in the direction of your truest self.
             </p>
           </div>
 
