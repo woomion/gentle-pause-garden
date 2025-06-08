@@ -19,15 +19,17 @@ const About = () => {
             <p className="mb-4">
               In a world of endless scrolls, constant offers, and split-second decisions, Pocket Pause invites you to do something revolutionary: slow down. This is a space to notice what you're reaching for — and why.
             </p>
-            <p>
+            <p className="mb-4">
               Here, small pauses become portals. You track not just what you chose or passed on, but what moved you in the moment — emotions, impulses, longing, joy. Over time, a pattern begins to emerge. A rhythm that's more yours than the one the world tries to impose.
             </p>
-            <p>
+            <p className="mb-4">
               Pocket Pause isn't about perfection or rigid budgeting. It's about presence. About making room for intention, reflection, and the clarity that emerges when you're not rushed.
             </p>
-            <p>
+            <p className="mb-4">
               It's a tool. A mirror. A friend in your pocket.
-And maybe, a tiny rebellion in the direction of your truest self.
+            </p>
+            <p>
+              And maybe, a tiny rebellion in the direction of your truest self.
             </p>
           </div>
 
