@@ -10,15 +10,12 @@ const About = () => {
           <Link to="/" className="mr-4">
             <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />
           </Link>
-          <h1 className="text-2xl font-semibold text-taupe dark:text-cream">Pocket Pause</h1>
-                      <p className="mb-4">
-              A gentle practice for navigating the noise
-            </p>
+          <h1 className="text-2xl font-semibold text-taupe dark:text-cream">About Pocket Pause</h1>
         </div>
 
         <div className="space-y-6 text-dark-gray dark:text-cream">
           <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-taupe dark:text-cream">What is Pocket Pause?</h2>
+            <h2 className="text-xl font-semibold mb-4 text-taupe dark:text-cream">Pocket Pause: <i>A gentle practice for navigating the noise</i></h2>
             <p className="mb-4">
               In a world of endless scrolls, constant offers, and split-second decisions, Pocket Pause invites you to do something revolutionary: slow down. This is a space to notice what you’re reaching for — and why.
             </p>
