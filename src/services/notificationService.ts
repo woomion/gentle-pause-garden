@@ -24,21 +24,38 @@ export class NotificationService {
     }
 
     if (Notification.permission !== 'denied') {
-      const permission = await Notification.requestPermission();
-      this.isEnabled = permission === 'granted';
-      return this.isEnabled;
+      try {
+        const permission = await Notification.requestPermission();
+        this.isEnabled = permission === 'granted';
+        return this.isEnabled;
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        return false;
+      }
     }
 
     return false;
   }
 
   showNotification(title: string, options: NotificationOptions = {}) {
-    if (this.isEnabled && Notification.permission === 'granted') {
+    if (!this.isEnabled || Notification.permission !== 'granted') {
+      console.log('Notifications not enabled or permission not granted');
+      return;
+    }
+
+    try {
+      // Try to use the standard Notification constructor
       return new Notification(title, {
         icon: '/favicon.ico',
         badge: '/favicon.ico',
         ...options
       });
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      // If the constructor fails (like on some mobile browsers), 
+      // we'll just log the notification instead of crashing
+      console.log(`Notification would show: ${title}`, options);
+      return null;
     }
   }
 
