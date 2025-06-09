@@ -23,14 +23,18 @@ const Index = () => {
   const [signupModalDismissed, setSignupModalDismissed] = useState(false);
   const [userName, setUserName] = useState('');
 
-  const { user } = useAuth();
-  const { notificationsEnabled } = useUserSettings();
+  const { user, loading: authLoading } = useAuth();
+  const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
+
+  console.log('Index page render - Auth loading:', authLoading, 'Settings loading:', settingsLoading, 'User:', !!user);
 
   // Initialize notifications
   useNotifications(notificationsEnabled);
 
   // Check if this is the user's first visit or get user's name
   useEffect(() => {
+    console.log('Index useEffect triggered - User:', !!user, 'Auth loading:', authLoading);
+    
     if (user) {
       // Get user's first name from user metadata or profile
       const firstName = user.user_metadata?.first_name || '';
@@ -42,7 +46,7 @@ const Index = () => {
         setShowWelcomeModal(true);
       }
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const handleWelcomeComplete = (name: string) => {
     setUserName(name);
@@ -74,6 +78,18 @@ const Index = () => {
     setShowSignupModal(false);
     setSignupModalDismissed(true);
   };
+
+  // Show loading screen if auth is still loading
+  if (authLoading) {
+    console.log('Showing auth loading screen');
+    return (
+      <div className="min-h-screen bg-cream dark:bg-[#200E3B] flex items-center justify-center">
+        <div className="text-black dark:text-[#F9F5EB]">Loading...</div>
+      </div>
+    );
+  }
+
+  console.log('Rendering main Index content');
 
   return (
     <>
