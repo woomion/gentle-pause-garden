@@ -1,12 +1,13 @@
-
 import { useState } from 'react';
 import { Timer, ExternalLink } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
+import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ItemReviewModalProps {
   items: PausedItem[];
@@ -19,6 +20,7 @@ interface ItemReviewModalProps {
 
 const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, onNext }: ItemReviewModalProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [showConfirmDialog, setShowConfirmDialog] = useState<'let-go' | 'purchased' | null>(null);
 
   const currentItem = items[currentIndex];
@@ -50,16 +52,48 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
     return currentItem.imageUrl;
   };
 
-  const handleDecision = (action: 'let-go' | 'purchased') => {
+  const handleDecision = async (action: 'let-go' | 'purchased') => {
     const status = action === 'let-go' ? 'let-go' : 'purchased';
     
-    pauseLogStore.addItem({
+    console.log('📝 Adding item to pause log:', {
       itemName: currentItem.itemName,
       emotion: currentItem.emotion,
       storeName: currentItem.storeName,
       status,
-      notes: currentItem.notes
+      notes: currentItem.notes,
+      user: user ? 'authenticated' : 'guest'
     });
+
+    // Use appropriate pause log store based on authentication
+    try {
+      if (user) {
+        await supabasePauseLogStore.addItem({
+          itemName: currentItem.itemName,
+          emotion: currentItem.emotion,
+          storeName: currentItem.storeName,
+          status,
+          notes: currentItem.notes
+        });
+        console.log('✅ Item added to Supabase pause log');
+      } else {
+        pauseLogStore.addItem({
+          itemName: currentItem.itemName,
+          emotion: currentItem.emotion,
+          storeName: currentItem.storeName,
+          status,
+          notes: currentItem.notes
+        });
+        console.log('✅ Item added to local pause log');
+      }
+    } catch (error) {
+      console.error('❌ Error adding item to pause log:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save decision. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     onItemDecided(currentItem.id);
     

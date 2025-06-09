@@ -1,4 +1,3 @@
-
 import { Timer, ExternalLink } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
@@ -75,70 +74,110 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   };
 
   const handleLetGo = async () => {
-    // Use appropriate pause log store based on authentication
-    if (user) {
-      await supabasePauseLogStore.addItem({
-        itemName: item.itemName,
-        emotion: item.emotion,
-        storeName: item.storeName,
-        status: 'let-go',
-        notes: item.notes
+    console.log('📝 Adding item to pause log (let go):', {
+      itemName: item.itemName,
+      emotion: item.emotion,
+      storeName: item.storeName,
+      status: 'let-go',
+      notes: item.notes,
+      user: user ? 'authenticated' : 'guest'
+    });
+
+    try {
+      // Use appropriate pause log store based on authentication
+      if (user) {
+        await supabasePauseLogStore.addItem({
+          itemName: item.itemName,
+          emotion: item.emotion,
+          storeName: item.storeName,
+          status: 'let-go',
+          notes: item.notes
+        });
+        console.log('✅ Item added to Supabase pause log');
+      } else {
+        pauseLogStore.addItem({
+          itemName: item.itemName,
+          emotion: item.emotion,
+          storeName: item.storeName,
+          status: 'let-go',
+          notes: item.notes
+        });
+        console.log('✅ Item added to local pause log');
+      }
+      
+      // Remove from paused items
+      onDelete(item.id);
+      onClose();
+      
+      // Show success toast
+      toast({
+        title: "Item released",
+        description: `"${item.itemName}" has been moved to your pause log.`,
       });
-    } else {
-      pauseLogStore.addItem({
-        itemName: item.itemName,
-        emotion: item.emotion,
-        storeName: item.storeName,
-        status: 'let-go',
-        notes: item.notes
+    } catch (error) {
+      console.error('❌ Error adding item to pause log:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save decision. Please try again.",
+        variant: "destructive"
       });
     }
-    
-    // Remove from paused items
-    onDelete(item.id);
-    onClose();
-    
-    // Show success toast
-    toast({
-      title: "Item released",
-      description: `"${item.itemName}" has been moved to your pause log.`,
-    });
   };
 
   const handleBought = async () => {
-    // Use appropriate pause log store based on authentication
-    if (user) {
-      await supabasePauseLogStore.addItem({
-        itemName: item.itemName,
-        emotion: item.emotion,
-        storeName: item.storeName,
-        status: 'purchased',
-        notes: item.notes
+    console.log('📝 Adding item to pause log (purchased):', {
+      itemName: item.itemName,
+      emotion: item.emotion,
+      storeName: item.storeName,
+      status: 'purchased',
+      notes: item.notes,
+      user: user ? 'authenticated' : 'guest'
+    });
+
+    try {
+      // Use appropriate pause log store based on authentication
+      if (user) {
+        await supabasePauseLogStore.addItem({
+          itemName: item.itemName,
+          emotion: item.emotion,
+          storeName: item.storeName,
+          status: 'purchased',
+          notes: item.notes
+        });
+        console.log('✅ Item added to Supabase pause log');
+      } else {
+        pauseLogStore.addItem({
+          itemName: item.itemName,
+          emotion: item.emotion,
+          storeName: item.storeName,
+          status: 'purchased',
+          notes: item.notes
+        });
+        console.log('✅ Item added to local pause log');
+      }
+      
+      // Remove from paused items
+      onDelete(item.id);
+      onClose();
+      
+      // Show success toast that auto-dismisses
+      const toastInstance = toast({
+        title: "Great, you made a conscious choice!",
+        description: "We've moved this thoughtful decision to your Pause Log for future reference.",
       });
-    } else {
-      pauseLogStore.addItem({
-        itemName: item.itemName,
-        emotion: item.emotion,
-        storeName: item.storeName,
-        status: 'purchased',
-        notes: item.notes
+      
+      // Auto-dismiss after 3 seconds
+      setTimeout(() => {
+        toastInstance.dismiss();
+      }, 3000);
+    } catch (error) {
+      console.error('❌ Error adding item to pause log:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save decision. Please try again.",
+        variant: "destructive"
       });
     }
-    
-    // Remove from paused items
-    onDelete(item.id);
-    onClose();
-    
-    // Show success toast that auto-dismisses
-    const toastInstance = toast({
-      title: "Great, you made a conscious choice!",
-      description: "We've moved this thoughtful decision to your Pause Log for future reference.",
-    });
-    
-    // Auto-dismiss after 3 seconds
-    setTimeout(() => {
-      toastInstance.dismiss();
-    }, 3000);
   };
 
   const handleKeepPaused = () => {
