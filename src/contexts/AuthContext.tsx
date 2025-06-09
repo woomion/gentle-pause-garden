@@ -33,77 +33,104 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('AuthProvider: Mobile check - Screen size:', window.innerWidth, 'x', window.innerHeight);
     
     let mounted = true;
+    let timeoutId: NodeJS.Timeout;
     
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('AuthProvider: Auth state changed', event, !!session);
+    try {
+      // Set up auth state listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          console.log('AuthProvider: Auth state changed', event, !!session);
+          if (mounted) {
+            setSession(session);
+            setUser(session?.user ?? null);
+            if (timeoutId) clearTimeout(timeoutId);
+            setLoading(false);
+          }
+        }
+      );
+
+      // Get initial session with better error handling
+      console.log('AuthProvider: Getting initial session');
+      supabase.auth.getSession()
+        .then(({ data: { session }, error }) => {
+          console.log('AuthProvider: Initial session loaded', !!session, 'Error:', error);
+          if (mounted) {
+            setSession(session);
+            setUser(session?.user ?? null);
+            if (timeoutId) clearTimeout(timeoutId);
+            setLoading(false);
+          }
+        })
+        .catch((error) => {
+          console.error('AuthProvider: Error getting initial session:', error);
+          if (mounted) {
+            if (timeoutId) clearTimeout(timeoutId);
+            setLoading(false);
+          }
+        });
+
+      // Shorter timeout for mobile - 5 seconds
+      timeoutId = setTimeout(() => {
+        console.log('AuthProvider: Timeout reached, forcing loading to false');
         if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
           setLoading(false);
         }
-      }
-    );
+      }, 5000);
 
-    // Get initial session
-    console.log('AuthProvider: Getting initial session');
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('AuthProvider: Initial session loaded', !!session, 'Error:', error);
-      if (mounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    }).catch((error) => {
-      console.error('AuthProvider: Error getting initial session:', error);
+      return () => {
+        console.log('AuthProvider: Cleaning up auth listener');
+        mounted = false;
+        if (timeoutId) clearTimeout(timeoutId);
+        subscription.unsubscribe();
+      };
+    } catch (error) {
+      console.error('AuthProvider: Error in useEffect:', error);
       if (mounted) {
         setLoading(false);
       }
-    });
-
-    // Fallback timeout to prevent infinite loading on mobile
-    const timeout = setTimeout(() => {
-      console.log('AuthProvider: Timeout reached, forcing loading to false');
-      if (mounted) {
-        setLoading(false);
-      }
-    }, 10000); // 10 second timeout
-
-    return () => {
-      console.log('AuthProvider: Cleaning up auth listener');
-      mounted = false;
-      clearTimeout(timeout);
-      subscription.unsubscribe();
-    };
+    }
   }, []);
 
   const signUp = async (email: string, password: string, firstName?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          first_name: firstName
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: firstName
+          }
         }
-      }
-    });
-    return { error };
+      });
+      return { error };
+    } catch (error) {
+      console.error('AuthProvider: Error in signUp:', error);
+      return { error };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      return { error };
+    } catch (error) {
+      console.error('AuthProvider: Error in signIn:', error);
+      return { error };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('AuthProvider: Error in signOut:', error);
+    }
   };
 
   const value = {
