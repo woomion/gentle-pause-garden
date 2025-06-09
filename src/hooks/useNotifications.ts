@@ -1,5 +1,5 @@
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { notificationService } from '../services/notificationService';
@@ -7,6 +7,8 @@ import { useAuth } from '../contexts/AuthContext';
 
 export const useNotifications = (enabled: boolean) => {
   const { user } = useAuth();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastNotificationCountRef = useRef<number>(0);
 
   // Sync notification service with settings when enabled state changes
   useEffect(() => {
@@ -36,8 +38,10 @@ export const useNotifications = (enabled: boolean) => {
         : pausedItemsStore.getItemsForReview();
       
       console.log('Checking for ready items:', itemsForReview.length, 'items found');
+      console.log('Last notification count:', lastNotificationCountRef.current);
       
-      if (itemsForReview.length > 0) {
+      // Only send notification if there are items AND the count has changed (or it's the first check)
+      if (itemsForReview.length > 0 && itemsForReview.length !== lastNotificationCountRef.current) {
         const title = itemsForReview.length === 1 
           ? 'Time to review your paused item!'
           : `Time to review ${itemsForReview.length} paused items!`;
@@ -50,32 +54,58 @@ export const useNotifications = (enabled: boolean) => {
 
         notificationService.showNotification(title, {
           body,
-          tag: 'pocket-pause-review',
+          tag: `pocket-pause-review-${Date.now()}`, // Unique tag to prevent suppression
           requireInteraction: false
         });
-      } else {
+
+        lastNotificationCountRef.current = itemsForReview.length;
+      } else if (itemsForReview.length === 0) {
+        lastNotificationCountRef.current = 0;
         console.log('No items ready for review');
+      } else {
+        console.log('Item count unchanged, skipping notification');
       }
     } catch (error) {
       console.error('Error in checkForReadyItems:', error);
     }
   }, [enabled, user]);
 
+  // Set up notifications and intervals
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      // Clear interval if notifications are disabled
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
 
     try {
-      // Check immediately when enabled
       console.log('Setting up notifications - checking immediately');
-      checkForReadyItems();
+      
+      // Check immediately, but with a small delay to ensure everything is initialized
+      const immediateCheck = setTimeout(() => {
+        checkForReadyItems();
+      }, 1000);
 
       // Set up interval to check every 30 minutes
-      const interval = setInterval(() => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      intervalRef.current = setInterval(() => {
         console.log('30-minute interval check triggered');
         checkForReadyItems();
       }, 30 * 60 * 1000);
 
-      return () => clearInterval(interval);
+      return () => {
+        clearTimeout(immediateCheck);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
     } catch (error) {
       console.error('Error setting up notifications:', error);
     }
@@ -96,7 +126,7 @@ export const useNotifications = (enabled: boolean) => {
       if (notificationService.getEnabled()) {
         notificationService.showNotification('Test Notification', {
           body: 'This is a test to make sure notifications are working!',
-          tag: 'pocket-pause-test'
+          tag: `pocket-pause-test-${Date.now()}`
         });
       } else {
         console.log('Notifications not enabled, would show: Test Notification');
