@@ -1,13 +1,14 @@
+
 import { useState } from 'react';
 import { Timer, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
-import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
-import { pauseLogStore } from '../stores/pauseLogStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePauseLog } from '../hooks/usePauseLog';
+import { useSupabasePauseLog } from '../hooks/useSupabasePauseLog';
 
 interface ItemReviewModalProps {
   items: PausedItem[];
@@ -23,6 +24,12 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
   const { user } = useAuth();
   const [showConfirmDialog, setShowConfirmDialog] = useState<'let-go' | 'purchased' | null>(null);
   const [localCurrentIndex, setLocalCurrentIndex] = useState(currentIndex);
+
+  // Use appropriate hook based on authentication
+  const localPauseLog = usePauseLog();
+  const supabasePauseLog = useSupabasePauseLog();
+  
+  const { addItem: addPauseLogItem } = user ? supabasePauseLog : localPauseLog;
 
   const currentItem = items[localCurrentIndex];
   const isLastItem = localCurrentIndex === items.length - 1;
@@ -67,30 +74,16 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
     });
 
     try {
-      // Use the correct pause log store based on authentication
-      if (user) {
-        console.log('✅ Using Supabase pause log store for authenticated user');
-        await supabasePauseLogStore.addItem({
-          itemName: currentItem.itemName,
-          emotion: currentItem.emotion,
-          storeName: currentItem.storeName,
-          status,
-          notes: currentItem.notes
-        });
-        console.log('✅ Item added to Supabase pause log');
-        // Force reload of pause log items to ensure UI updates
-        await supabasePauseLogStore.loadItems();
-      } else {
-        console.log('✅ Using local pause log store for guest user');
-        pauseLogStore.addItem({
-          itemName: currentItem.itemName,
-          emotion: currentItem.emotion,
-          storeName: currentItem.storeName,
-          status,
-          notes: currentItem.notes
-        });
-        console.log('✅ Item added to local pause log');
-      }
+      // Use the hook-based approach to ensure correct store is used
+      await addPauseLogItem({
+        itemName: currentItem.itemName,
+        emotion: currentItem.emotion,
+        storeName: currentItem.storeName,
+        status,
+        notes: currentItem.notes
+      });
+      
+      console.log('✅ Item added to pause log via hooks');
     } catch (error) {
       console.error('❌ Error adding item to pause log:', error);
       toast({
