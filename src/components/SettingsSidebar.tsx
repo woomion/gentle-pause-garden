@@ -29,9 +29,9 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
     console.log('🔔 Current permission:', Notification.permission);
     
     if (checked) {
-      console.log('🔔 Requesting notification permission directly...');
+      console.log('🔔 User wants to enable notifications');
       
-      // Check if notifications are supported
+      // Check if notifications are supported first
       if (!('Notification' in window)) {
         console.log('❌ Notifications not supported');
         toast({
@@ -42,40 +42,60 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
         return;
       }
 
-      // Request permission directly here with immediate user interaction
-      let permission = Notification.permission;
-      
-      if (permission === 'default') {
-        console.log('🔔 Requesting permission...');
-        try {
-          permission = await Notification.requestPermission();
-          console.log('🔔 Permission request result:', permission);
-        } catch (error) {
-          console.error('❌ Error requesting permission:', error);
-          toast({
-            title: "Permission error",
-            description: "There was an error requesting notification permission.",
-            variant: "destructive"
-          });
-          return;
-        }
-      }
-      
-      if (permission === 'granted') {
+      // If permission is already granted, just enable
+      if (Notification.permission === 'granted') {
+        console.log('✅ Permission already granted, enabling service');
         notificationService.setEnabled(true);
         const success = await updateNotificationSetting(true);
         if (success) {
-          console.log('✅ Successfully enabled notifications in settings');
           toast({
             title: "Notifications enabled",
             description: "We'll gently remind you when items are ready for review.",
           });
         }
-      } else {
-        console.log('❌ Permission denied, not saving setting');
+        return;
+      }
+
+      // If permission is denied, show message
+      if (Notification.permission === 'denied') {
+        console.log('❌ Permission previously denied');
         toast({
-          title: "Permission denied",
-          description: "Please allow notifications in your browser settings to receive reminders.",
+          title: "Permission blocked",
+          description: "Please reset notification permissions in your browser settings and try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Request permission (only when permission is 'default')
+      console.log('🔔 Requesting permission immediately...');
+      try {
+        const permission = await Notification.requestPermission();
+        console.log('🔔 Permission result:', permission);
+        
+        if (permission === 'granted') {
+          notificationService.setEnabled(true);
+          const success = await updateNotificationSetting(true);
+          if (success) {
+            console.log('✅ Successfully enabled notifications');
+            toast({
+              title: "Notifications enabled",
+              description: "We'll gently remind you when items are ready for review.",
+            });
+          }
+        } else {
+          console.log('❌ Permission denied by user');
+          toast({
+            title: "Permission denied",
+            description: "Notifications won't work without browser permission.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error requesting permission:', error);
+        toast({
+          title: "Permission error", 
+          description: "There was an error requesting notification permission.",
           variant: "destructive"
         });
       }
