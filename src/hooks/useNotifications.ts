@@ -8,8 +8,22 @@ import { useAuth } from '../contexts/AuthContext';
 export const useNotifications = (enabled: boolean) => {
   const { user } = useAuth();
 
+  // Sync notification service with settings when enabled state changes
+  useEffect(() => {
+    if (enabled && Notification.permission === 'granted') {
+      notificationService.setEnabled(true);
+      console.log('Notification service enabled via settings sync');
+    } else if (!enabled) {
+      notificationService.setEnabled(false);
+      console.log('Notification service disabled via settings sync');
+    }
+  }, [enabled]);
+
   const checkForReadyItems = useCallback(() => {
-    if (!enabled || !notificationService.getEnabled()) return;
+    if (!enabled || !notificationService.getEnabled()) {
+      console.log('Skipping notification check - enabled:', enabled, 'service enabled:', notificationService.getEnabled());
+      return;
+    }
 
     // Use the correct store based on authentication status
     const itemsForReview = user 
@@ -42,11 +56,15 @@ export const useNotifications = (enabled: boolean) => {
   useEffect(() => {
     if (!enabled) return;
 
-    // Check immediately
+    // Check immediately when enabled
+    console.log('Setting up notifications - checking immediately');
     checkForReadyItems();
 
     // Set up interval to check every 30 minutes
-    const interval = setInterval(checkForReadyItems, 30 * 60 * 1000);
+    const interval = setInterval(() => {
+      console.log('30-minute interval check triggered');
+      checkForReadyItems();
+    }, 30 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [enabled, checkForReadyItems]);
