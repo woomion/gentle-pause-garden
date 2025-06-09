@@ -38,10 +38,15 @@ export const useSupabasePauseLog = () => {
     await supabasePauseLogStore.deleteItem(id);
   };
 
+  const loadItems = async () => {
+    await supabasePauseLogStore.loadItems();
+  };
+
   return {
     items,
     loading,
     addItem,
-    deleteItem
+    deleteItem,
+    loadItems
   };
 };

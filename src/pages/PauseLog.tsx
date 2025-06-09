@@ -16,21 +16,21 @@ const PauseLog = () => {
   const localPauseLog = usePauseLog();
   const supabasePauseLog = useSupabasePauseLog();
   
-  const { items, deleteItem } = user ? supabasePauseLog : localPauseLog;
+  const { items, deleteItem, loadItems } = user ? supabasePauseLog : localPauseLog;
   
   const [emotionFilter, setEmotionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Force refresh pause log items when component mounts
   useEffect(() => {
-    if (user && supabasePauseLog) {
+    if (user && loadItems) {
       // Force reload to ensure we have the latest data
       const reloadData = async () => {
-        await supabasePauseLog.loadItems?.();
+        await loadItems();
       };
       reloadData();
     }
-  }, [user, supabasePauseLog]);
+  }, [user, loadItems]);
 
   // Get unique emotions from items
   const uniqueEmotions = useMemo(() => {
