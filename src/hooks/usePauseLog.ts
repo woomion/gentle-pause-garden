@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { pauseLogStore, PauseLogItem } from '../stores/pauseLogStore';
 
@@ -27,10 +26,18 @@ export const usePauseLog = () => {
     pauseLogStore.deleteItem(id);
   };
 
+  const loadItems = async () => {
+    // For local storage, we don't need to do anything async
+    // but we keep the same interface as useSupabasePauseLog
+    const allItems = pauseLogStore.getItems();
+    setItems(allItems);
+  };
+
   return {
     items,
     loading,
     addItem,
-    deleteItem
+    deleteItem,
+    loadItems
   };
 };
