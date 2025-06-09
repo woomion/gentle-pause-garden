@@ -1,13 +1,22 @@
 
 import { useEffect, useCallback } from 'react';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
+import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { notificationService } from '../services/notificationService';
+import { useAuth } from '../contexts/AuthContext';
 
 export const useNotifications = (enabled: boolean) => {
+  const { user } = useAuth();
+
   const checkForReadyItems = useCallback(() => {
     if (!enabled || !notificationService.getEnabled()) return;
 
-    const itemsForReview = pausedItemsStore.getItemsForReview();
+    // Use the correct store based on authentication status
+    const itemsForReview = user 
+      ? supabasePausedItemsStore.getItemsForReview()
+      : pausedItemsStore.getItemsForReview();
+    
+    console.log('Checking for ready items:', itemsForReview.length, 'items found');
     
     if (itemsForReview.length > 0) {
       const title = itemsForReview.length === 1 
@@ -18,13 +27,17 @@ export const useNotifications = (enabled: boolean) => {
         ? `"${itemsForReview[0].itemName}" is ready for a thoughtful decision.`
         : 'Some of your paused items are ready for thoughtful decisions.';
 
+      console.log('Showing notification:', title, body);
+
       notificationService.showNotification(title, {
         body,
         tag: 'pocket-pause-review',
         requireInteraction: false
       });
+    } else {
+      console.log('No items ready for review');
     }
-  }, [enabled]);
+  }, [enabled, user]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -42,5 +55,15 @@ export const useNotifications = (enabled: boolean) => {
     return await notificationService.requestPermission();
   };
 
-  return { enableNotifications };
+  // Add a manual test function
+  const testNotification = () => {
+    if (notificationService.getEnabled()) {
+      notificationService.showNotification('Test Notification', {
+        body: 'This is a test to make sure notifications are working!',
+        tag: 'pocket-pause-test'
+      });
+    }
+  };
+
+  return { enableNotifications, testNotification };
 };

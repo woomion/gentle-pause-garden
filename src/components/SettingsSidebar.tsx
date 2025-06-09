@@ -1,7 +1,9 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '../hooks/useNotifications';
@@ -20,7 +22,7 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
 
-  const { enableNotifications } = useNotifications(notificationsEnabled);
+  const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
 
   const handleNotificationToggle = async (checked: boolean) => {
     if (checked) {
@@ -50,6 +52,14 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
         });
       }
     }
+  };
+
+  const handleTestNotification = () => {
+    testNotification();
+    toast({
+      title: "Test notification sent",
+      description: "If notifications are working, you should see a test notification now.",
+    });
   };
 
   const handleFeedbackClick = () => {
@@ -130,7 +140,7 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
             {/* Notifications */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Pause Notifications</h3>
-              <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
+              <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-black dark:text-[#F9F5EB] font-medium">Gentle Reminders</span>
@@ -143,6 +153,17 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
                     className="ml-4"
                   />
                 </div>
+                
+                {notificationsEnabled && (
+                  <Button
+                    onClick={handleTestNotification}
+                    variant="outline"
+                    size="sm"
+                    className="w-full bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 border-gray-300 dark:border-gray-600 text-black dark:text-[#F9F5EB]"
+                  >
+                    Test Notification
+                  </Button>
+                )}
               </div>
             </div>
           </div>
