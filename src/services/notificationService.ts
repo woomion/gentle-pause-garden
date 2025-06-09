@@ -52,7 +52,6 @@ export class NotificationService {
 
     try {
       console.log('🚀 Creating notification...');
-      // Try to use the standard Notification constructor
       const notification = new Notification(title, {
         icon: '/favicon.ico',
         badge: '/favicon.ico',
@@ -61,7 +60,6 @@ export class NotificationService {
       
       console.log('✅ Notification created successfully:', notification);
       
-      // Add event listeners for debugging
       notification.onshow = () => console.log('📱 Notification shown');
       notification.onclick = () => console.log('👆 Notification clicked');
       notification.onclose = () => console.log('❌ Notification closed');
@@ -70,8 +68,6 @@ export class NotificationService {
       return notification;
     } catch (error) {
       console.error('❌ Error creating notification:', error);
-      // If the constructor fails (like on some mobile browsers), 
-      // we'll just log the notification instead of crashing
       console.log(`📱 Notification would show: ${title}`, options);
       return null;
     }
@@ -79,7 +75,17 @@ export class NotificationService {
 
   setEnabled(enabled: boolean) {
     console.log('🔔 Setting notification service enabled to:', enabled);
-    this.isEnabled = enabled;
+    // Only enable if we actually have permission
+    if (enabled && Notification.permission === 'granted') {
+      this.isEnabled = true;
+      console.log('✅ Notification service enabled');
+    } else if (!enabled) {
+      this.isEnabled = false;
+      console.log('❌ Notification service disabled');
+    } else {
+      console.log('⚠️ Cannot enable notifications - permission not granted');
+      this.isEnabled = false;
+    }
   }
 
   getEnabled(): boolean {

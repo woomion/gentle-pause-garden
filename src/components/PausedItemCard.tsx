@@ -1,3 +1,4 @@
+
 import { Timer } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { PausedItem } from '../stores/pausedItemsStore';
@@ -27,47 +28,32 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
   }, [item.emotion]);
 
   const imageUrl = useMemo(() => {
-    console.log('PausedItemCard - Getting image for item:', {
-      id: item.id,
-      imageUrl: item.imageUrl,
-      photoDataUrl: item.photoDataUrl,
-      hasPhoto: !!item.photo,
-      itemName: item.itemName
-    });
-
     // Priority: Supabase Storage URL > photoDataUrl > file object
     if (item.imageUrl) {
       // Check if this is a Supabase Storage URL (contains supabase)
       if (item.imageUrl.includes('supabase')) {
-        console.log('Using Supabase Storage URL:', item.imageUrl);
         return item.imageUrl;
       } else {
         // This might be a product URL - only use if it's a valid image URL
         try {
           new URL(item.imageUrl);
-          console.log('Using external image URL:', item.imageUrl);
           return item.imageUrl;
         } catch {
-          console.log('Invalid image URL, skipping:', item.imageUrl);
           return null;
         }
       }
     }
     if (item.photoDataUrl) {
-      console.log('Using photoDataUrl (local storage)');
       return item.photoDataUrl;
     }
     if (item.photo instanceof File) {
-      console.log('Creating object URL from file');
       return URL.createObjectURL(item.photo);
     }
     
-    console.log('No valid image URL found for item:', item.id);
     return null;
   }, [item.photoDataUrl, item.photo, item.imageUrl, item.id]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    console.error('Image failed to load:', imageUrl, 'for item:', item.id);
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
     if (target.parentElement) {
@@ -75,22 +61,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
     }
   };
 
-  const handleImageLoad = () => {
-    console.log('Image loaded successfully:', imageUrl, 'for item:', item.id);
-  };
-
   const formattedPrice = item.price ? `$${item.price}` : '';
-
-  // DEBUG: Log the notes value to help track down the issue
-  console.log('DEBUG - PausedItemCard notes for item:', {
-    itemId: item.id,
-    itemName: item.itemName,
-    notes: item.notes,
-    notesType: typeof item.notes,
-    notesLength: item.notes?.length,
-    trimmedNotes: item.notes?.trim(),
-    hasNotes: !!(item.notes && item.notes.trim())
-  });
 
   return (
     <div 
@@ -115,7 +86,6 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
                 alt={item.itemName}
                 className="w-full h-full object-cover"
                 onError={handleImageError}
-                onLoad={handleImageLoad}
                 loading="lazy"
               />
             ) : (
