@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -25,27 +24,37 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
 
   const handleNotificationToggle = async (checked: boolean) => {
+    console.log('🔔 Settings toggle clicked - checked:', checked);
+    console.log('🔔 Current permission:', Notification.permission);
+    
     if (checked) {
+      console.log('🔔 Requesting notification permission...');
       const granted = await enableNotifications();
+      console.log('🔔 Permission request result:', granted);
+      
       if (granted) {
         const success = await updateNotificationSetting(true);
         if (success) {
-          notificationService.setEnabled(true);
+          console.log('✅ Successfully enabled notifications in settings');
           toast({
             title: "Notifications enabled",
             description: "We'll gently remind you when items are ready for review.",
           });
         }
       } else {
+        console.log('❌ Permission denied, not saving setting');
         toast({
           title: "Permission denied",
           description: "Please allow notifications in your browser settings to receive reminders.",
+          variant: "destructive"
         });
       }
     } else {
+      console.log('🔔 Disabling notifications...');
       const success = await updateNotificationSetting(false);
       if (success) {
         notificationService.setEnabled(false);
+        console.log('✅ Successfully disabled notifications');
         toast({
           title: "Notifications disabled",
           description: "You won't receive review reminders anymore.",
@@ -55,6 +64,7 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   };
 
   const handleTestNotification = () => {
+    console.log('🧪 Test notification clicked');
     testNotification();
     toast({
       title: "Test notification sent",
