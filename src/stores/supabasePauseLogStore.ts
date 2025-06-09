@@ -95,13 +95,17 @@ class SupabasePauseLogStore {
 
   async addItem(item: Omit<PauseLogItem, 'id' | 'letGoDate'>): Promise<void> {
     try {
-      console.log('Adding item to pause log:', item);
+      console.log('Adding item to pause log with status:', item.status);
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('User not authenticated');
         return;
       }
+
+      // Ensure the status is exactly what we expect
+      const dbStatus = item.status === 'purchased' ? 'purchased' : 'let-go';
+      console.log('DB status being saved:', dbStatus);
 
       const { data, error } = await supabase
         .from('paused_items')
@@ -110,7 +114,7 @@ class SupabasePauseLogStore {
           title: item.itemName,
           reason: item.emotion,
           notes: item.notes || null,
-          status: item.status,
+          status: dbStatus,
           price: null,
           url: null,
           pause_duration_days: 1,
@@ -121,7 +125,7 @@ class SupabasePauseLogStore {
 
       if (error) {
         console.error('Error adding pause log item to database:', error);
-        return;
+        throw error;
       }
 
       console.log('Successfully added pause log item to database:', data);
@@ -131,6 +135,7 @@ class SupabasePauseLogStore {
       this.notifyListeners();
     } catch (error) {
       console.error('Error in addItem:', error);
+      throw error;
     }
   }
 
