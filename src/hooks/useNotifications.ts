@@ -13,12 +13,13 @@ export const useNotifications = (enabled: boolean) => {
   // Sync notification service with settings when enabled state changes
   useEffect(() => {
     try {
+      console.log('🔔 Settings sync - enabled:', enabled, 'permission:', Notification.permission);
       if (enabled && Notification.permission === 'granted') {
         notificationService.setEnabled(true);
-        console.log('Notification service enabled via settings sync');
+        console.log('✅ Notification service enabled via settings sync');
       } else if (enabled === false) { // Only disable if explicitly false, not undefined/loading
         notificationService.setEnabled(false);
-        console.log('Notification service disabled via settings sync');
+        console.log('❌ Notification service disabled via settings sync');
       }
       // If enabled is undefined/loading, don't change the service state
     } catch (error) {
@@ -28,8 +29,11 @@ export const useNotifications = (enabled: boolean) => {
 
   const checkForReadyItems = useCallback(() => {
     try {
+      console.log('🔍 Starting notification check...');
+      console.log('🔔 enabled:', enabled, 'service enabled:', notificationService.getEnabled());
+      
       if (!enabled || !notificationService.getEnabled()) {
-        console.log('Skipping notification check - enabled:', enabled, 'service enabled:', notificationService.getEnabled());
+        console.log('⏭️ Skipping notification check - enabled:', enabled, 'service enabled:', notificationService.getEnabled());
         return;
       }
 
@@ -38,8 +42,9 @@ export const useNotifications = (enabled: boolean) => {
         ? supabasePausedItemsStore.getItemsForReview()
         : pausedItemsStore.getItemsForReview();
       
-      console.log('Checking for ready items:', itemsForReview.length, 'items found');
-      console.log('Last notification count:', lastNotificationCountRef.current);
+      console.log('📋 Items for review found:', itemsForReview.length);
+      console.log('📋 Items details:', itemsForReview.map(item => ({ name: item.itemName, id: item.id })));
+      console.log('📋 Last notification count:', lastNotificationCountRef.current);
       
       // Only send notification if there are items AND the count has changed (or it's the first check)
       if (itemsForReview.length > 0 && itemsForReview.length !== lastNotificationCountRef.current) {
@@ -51,23 +56,28 @@ export const useNotifications = (enabled: boolean) => {
           ? `"${itemsForReview[0].itemName}" is ready for a thoughtful decision.`
           : 'Some of your paused items are ready for thoughtful decisions.';
 
-        console.log('Showing notification:', title, body);
+        console.log('🚀 Attempting to show notification...');
+        console.log('📧 Title:', title);
+        console.log('📧 Body:', body);
+        console.log('🔔 Browser notification permission:', Notification.permission);
 
-        notificationService.showNotification(title, {
+        const notification = notificationService.showNotification(title, {
           body,
           tag: `pocket-pause-review-${Date.now()}`, // Unique tag to prevent suppression
           requireInteraction: false
         });
 
+        console.log('📱 Notification object created:', notification);
+
         lastNotificationCountRef.current = itemsForReview.length;
       } else if (itemsForReview.length === 0) {
         lastNotificationCountRef.current = 0;
-        console.log('No items ready for review');
+        console.log('📭 No items ready for review');
       } else {
-        console.log('Item count unchanged, skipping notification');
+        console.log('🔄 Item count unchanged, skipping notification');
       }
     } catch (error) {
-      console.error('Error in checkForReadyItems:', error);
+      console.error('❌ Error in checkForReadyItems:', error);
     }
   }, [enabled, user]);
 
