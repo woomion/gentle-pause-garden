@@ -27,6 +27,8 @@ const Index = () => {
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
 
   console.log('Index page render - Auth loading:', authLoading, 'Settings loading:', settingsLoading, 'User:', !!user);
+  console.log('Mobile check - User agent:', navigator.userAgent);
+  console.log('Mobile check - Screen size:', window.innerWidth, 'x', window.innerHeight);
 
   // Initialize notifications
   useNotifications(notificationsEnabled);
@@ -83,8 +85,11 @@ const Index = () => {
   if (authLoading) {
     console.log('Showing auth loading screen');
     return (
-      <div className="min-h-screen bg-cream dark:bg-[#200E3B] flex items-center justify-center">
-        <div className="text-black dark:text-[#F9F5EB]">Loading...</div>
+      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="text-black dark:text-[#F9F5EB] text-lg">Loading...</div>
+          <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">Please wait</div>
+        </div>
       </div>
     );
   }
@@ -93,8 +98,8 @@ const Index = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
-        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-6 py-8">
+      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300">
+        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           <AddPauseButton onAddPause={handleAddPause} />

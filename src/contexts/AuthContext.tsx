@@ -29,6 +29,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log('AuthProvider: Setting up auth state listener');
+    console.log('AuthProvider: Mobile check - User agent:', navigator.userAgent);
+    console.log('AuthProvider: Mobile check - Screen size:', window.innerWidth, 'x', window.innerHeight);
     
     let mounted = true;
     
@@ -46,18 +48,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Get initial session
     console.log('AuthProvider: Getting initial session');
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('AuthProvider: Initial session loaded', !!session);
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log('AuthProvider: Initial session loaded', !!session, 'Error:', error);
       if (mounted) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       }
+    }).catch((error) => {
+      console.error('AuthProvider: Error getting initial session:', error);
+      if (mounted) {
+        setLoading(false);
+      }
     });
+
+    // Fallback timeout to prevent infinite loading on mobile
+    const timeout = setTimeout(() => {
+      console.log('AuthProvider: Timeout reached, forcing loading to false');
+      if (mounted) {
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
 
     return () => {
       console.log('AuthProvider: Cleaning up auth listener');
       mounted = false;
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
