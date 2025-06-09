@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { Timer, ExternalLink } from 'lucide-react';
+import { Timer, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
 import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
@@ -22,9 +23,11 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
   const { toast } = useToast();
   const { user } = useAuth();
   const [showConfirmDialog, setShowConfirmDialog] = useState<'let-go' | 'purchased' | null>(null);
+  const [localCurrentIndex, setLocalCurrentIndex] = useState(currentIndex);
 
-  const currentItem = items[currentIndex];
-  const isLastItem = currentIndex === items.length - 1;
+  const currentItem = items[localCurrentIndex];
+  const isLastItem = localCurrentIndex === items.length - 1;
+  const isFirstItem = localCurrentIndex === 0;
 
   if (!currentItem) return null;
 
@@ -64,7 +67,6 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
       user: user ? 'authenticated' : 'guest'
     });
 
-    // Use appropriate pause log store based on authentication
     try {
       if (user) {
         await supabasePauseLogStore.addItem({
@@ -75,6 +77,8 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
           notes: currentItem.notes
         });
         console.log('✅ Item added to Supabase pause log');
+        // Force reload of pause log items to ensure UI updates
+        await supabasePauseLogStore.loadItems();
       } else {
         pauseLogStore.addItem({
           itemName: currentItem.itemName,
@@ -115,6 +119,20 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
     if (isLastItem) {
       onClose();
     } else {
+      handleNext();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (!isFirstItem) {
+      setLocalCurrentIndex(localCurrentIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (!isLastItem) {
+      setLocalCurrentIndex(localCurrentIndex + 1);
+    } else {
       onNext();
     }
   };
@@ -130,9 +148,29 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
               Time to Review
             </DialogTitle>
             {items.length > 1 && (
-              <p className="text-center text-sm text-gray-600 dark:text-gray-300">
-                Item {currentIndex + 1} of {items.length}
-              </p>
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePrevious}
+                  disabled={isFirstItem}
+                  className="text-black dark:text-[#F9F5EB]"
+                >
+                  <ChevronLeft size={16} />
+                </Button>
+                <p className="text-center text-sm text-gray-600 dark:text-gray-300">
+                  Item {localCurrentIndex + 1} of {items.length}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNext}
+                  disabled={isLastItem}
+                  className="text-black dark:text-[#F9F5EB]"
+                >
+                  <ChevronRight size={16} />
+                </Button>
+              </div>
             )}
           </DialogHeader>
           

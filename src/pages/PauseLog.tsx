@@ -1,5 +1,4 @@
-
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,6 +20,17 @@ const PauseLog = () => {
   
   const [emotionFilter, setEmotionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  // Force refresh pause log items when component mounts
+  useEffect(() => {
+    if (user && supabasePauseLog) {
+      // Force reload to ensure we have the latest data
+      const reloadData = async () => {
+        await supabasePauseLog.loadItems?.();
+      };
+      reloadData();
+    }
+  }, [user, supabasePauseLog]);
 
   // Get unique emotions from items
   const uniqueEmotions = useMemo(() => {
