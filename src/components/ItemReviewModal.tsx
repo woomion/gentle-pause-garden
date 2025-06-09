@@ -68,6 +68,7 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
     });
 
     try {
+      // Use appropriate pause log store based on authentication
       if (user) {
         await supabasePauseLogStore.addItem({
           itemName: currentItem.itemName,
