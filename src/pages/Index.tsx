@@ -35,7 +35,7 @@ const Index = () => {
   useEffect(() => {
     console.log('Index useEffect triggered - User:', !!user, 'Auth loading:', authLoading);
     
-    if (user) {
+    if (user && !authLoading) {
       // Get user's first name from user metadata or profile
       const firstName = user.user_metadata?.first_name || '';
       setUserName(firstName);
@@ -79,7 +79,7 @@ const Index = () => {
     setSignupModalDismissed(true);
   };
 
-  // Show loading screen if auth is still loading
+  // Show loading screen while auth is loading
   if (authLoading) {
     console.log('Showing auth loading screen');
     return (
