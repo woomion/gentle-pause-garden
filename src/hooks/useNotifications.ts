@@ -31,6 +31,7 @@ export const useNotifications = (enabled: boolean) => {
     try {
       console.log('🔍 Starting notification check...');
       console.log('🔔 enabled:', enabled, 'service enabled:', notificationService.getEnabled());
+      console.log('🔔 user authenticated:', !!user);
       
       if (!enabled || !notificationService.getEnabled()) {
         console.log('⏭️ Skipping notification check - enabled:', enabled, 'service enabled:', notificationService.getEnabled());
@@ -43,8 +44,25 @@ export const useNotifications = (enabled: boolean) => {
         : pausedItemsStore.getItemsForReview();
       
       console.log('📋 Items for review found:', itemsForReview.length);
-      console.log('📋 Items details:', itemsForReview.map(item => ({ name: item.itemName, id: item.id })));
+      console.log('📋 Items details:', itemsForReview.map(item => ({ 
+        name: item.itemName, 
+        id: item.id, 
+        checkInDate: item.checkInDate,
+        checkInTime: item.checkInTime,
+        isPastDue: item.checkInDate <= new Date()
+      })));
       console.log('📋 Last notification count:', lastNotificationCountRef.current);
+      console.log('📋 Current time:', new Date().toISOString());
+      
+      // Debug: Let's also check all items to see what we have
+      const allItems = user ? supabasePausedItemsStore.getItems() : pausedItemsStore.getItems();
+      console.log('📋 All paused items:', allItems.length);
+      console.log('📋 All items details:', allItems.map(item => ({
+        name: item.itemName,
+        checkInDate: item.checkInDate,
+        checkInTime: item.checkInTime,
+        isPastDue: item.checkInDate <= new Date()
+      })));
       
       // Only send notification if there are items AND the count has changed (or it's the first check)
       if (itemsForReview.length > 0 && itemsForReview.length !== lastNotificationCountRef.current) {
@@ -97,6 +115,7 @@ export const useNotifications = (enabled: boolean) => {
       
       // Check immediately, but with a small delay to ensure everything is initialized
       const immediateCheck = setTimeout(() => {
+        console.log('🕐 Immediate check triggered after enabling notifications');
         checkForReadyItems();
       }, 1000);
 
@@ -134,11 +153,21 @@ export const useNotifications = (enabled: boolean) => {
   // Add a manual test function
   const testNotification = () => {
     try {
+      console.log('🧪 Test notification triggered');
+      console.log('🧪 Service enabled:', notificationService.getEnabled());
+      console.log('🧪 Permission:', Notification.permission);
+      
       if (notificationService.getEnabled()) {
-        notificationService.showNotification('Test Notification', {
+        console.log('🧪 Showing test notification...');
+        const notification = notificationService.showNotification('Test Notification', {
           body: 'This is a test to make sure notifications are working!',
           tag: `pocket-pause-test-${Date.now()}`
         });
+        console.log('🧪 Test notification created:', notification);
+        
+        // Also trigger a check for real items
+        console.log('🧪 Also checking for real items...');
+        checkForReadyItems();
       } else {
         console.log('Notifications not enabled, would show: Test Notification');
       }
