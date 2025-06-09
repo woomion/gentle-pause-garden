@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -42,33 +41,8 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
         return;
       }
 
-      // If permission is already granted, just enable
-      if (Notification.permission === 'granted') {
-        console.log('✅ Permission already granted, enabling service');
-        notificationService.setEnabled(true);
-        const success = await updateNotificationSetting(true);
-        if (success) {
-          toast({
-            title: "Notifications enabled",
-            description: "We'll gently remind you when items are ready for review.",
-          });
-        }
-        return;
-      }
-
-      // If permission is denied, show message
-      if (Notification.permission === 'denied') {
-        console.log('❌ Permission previously denied');
-        toast({
-          title: "Permission blocked",
-          description: "Please reset notification permissions in your browser settings and try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Request permission (only when permission is 'default')
-      console.log('🔔 Requesting permission immediately...');
+      // Always try to get permission, regardless of current state
+      console.log('🔔 Requesting permission...');
       try {
         const permission = await Notification.requestPermission();
         console.log('🔔 Permission result:', permission);
@@ -83,11 +57,18 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
               description: "We'll gently remind you when items are ready for review.",
             });
           }
-        } else {
+        } else if (permission === 'denied') {
           console.log('❌ Permission denied by user');
           toast({
             title: "Permission denied",
-            description: "Notifications won't work without browser permission.",
+            description: "Please enable notifications in your browser settings to receive reminders.",
+            variant: "destructive"
+          });
+        } else {
+          console.log('❌ Permission not granted:', permission);
+          toast({
+            title: "Permission required",
+            description: "Notifications need browser permission to work.",
             variant: "destructive"
           });
         }

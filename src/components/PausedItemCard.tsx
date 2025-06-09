@@ -1,4 +1,3 @@
-
 import { Timer } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { PausedItem } from '../stores/pausedItemsStore';
@@ -153,15 +152,11 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
               </span>
             </div>
 
-            {/* Notes section with debug info */}
+            {/* Notes section */}
             {item.notes && item.notes.trim() && (
               <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
                 <p className="text-gray-600 dark:text-gray-300 text-sm">
                   <strong>Note:</strong> {item.notes}
-                </p>
-                {/* Temporary debug display */}
-                <p className="text-red-500 text-xs mt-1">
-                  DEBUG: "{item.notes}" (length: {item.notes.length})
                 </p>
               </div>
             )}
