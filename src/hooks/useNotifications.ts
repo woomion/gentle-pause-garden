@@ -16,10 +16,11 @@ export const useNotifications = (enabled: boolean) => {
       if (enabled && Notification.permission === 'granted') {
         notificationService.setEnabled(true);
         console.log('Notification service enabled via settings sync');
-      } else if (!enabled) {
+      } else if (enabled === false) { // Only disable if explicitly false, not undefined/loading
         notificationService.setEnabled(false);
         console.log('Notification service disabled via settings sync');
       }
+      // If enabled is undefined/loading, don't change the service state
     } catch (error) {
       console.error('Error syncing notification service:', error);
     }
