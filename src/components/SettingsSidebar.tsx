@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -28,11 +29,40 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
     console.log('🔔 Current permission:', Notification.permission);
     
     if (checked) {
-      console.log('🔔 Requesting notification permission...');
-      const granted = await enableNotifications();
-      console.log('🔔 Permission request result:', granted);
+      console.log('🔔 Requesting notification permission directly...');
       
-      if (granted) {
+      // Check if notifications are supported
+      if (!('Notification' in window)) {
+        console.log('❌ Notifications not supported');
+        toast({
+          title: "Not supported",
+          description: "Your browser doesn't support notifications.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Request permission directly here with immediate user interaction
+      let permission = Notification.permission;
+      
+      if (permission === 'default') {
+        console.log('🔔 Requesting permission...');
+        try {
+          permission = await Notification.requestPermission();
+          console.log('🔔 Permission request result:', permission);
+        } catch (error) {
+          console.error('❌ Error requesting permission:', error);
+          toast({
+            title: "Permission error",
+            description: "There was an error requesting notification permission.",
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+      
+      if (permission === 'granted') {
+        notificationService.setEnabled(true);
         const success = await updateNotificationSetting(true);
         if (success) {
           console.log('✅ Successfully enabled notifications in settings');
