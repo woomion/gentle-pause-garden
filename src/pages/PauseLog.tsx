@@ -1,7 +1,9 @@
+
 import { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, ArrowDown, ArrowUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { usePauseLog } from '../hooks/usePauseLog';
 import { useSupabasePauseLog } from '../hooks/useSupabasePauseLog';
@@ -20,6 +22,7 @@ const PauseLog = () => {
   
   const [emotionFilter, setEmotionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   // Force refresh pause log items when component mounts
   useEffect(() => {
@@ -38,14 +41,28 @@ const PauseLog = () => {
     return [...new Set(emotions)];
   }, [items]);
 
-  // Filter items based on selected filters
+  // Filter and sort items based on selected filters and sort order
   const filteredItems = useMemo(() => {
-    return items.filter(item => {
+    let filtered = items.filter(item => {
       const emotionMatch = emotionFilter === 'all' || item.emotion === emotionFilter;
       const statusMatch = statusFilter === 'all' || item.status === statusFilter;
       return emotionMatch && statusMatch;
     });
-  }, [items, emotionFilter, statusFilter]);
+
+    // Sort by date decided (letGoDate)
+    filtered = filtered.sort((a, b) => {
+      const dateA = new Date(a.letGoDate);
+      const dateB = new Date(b.letGoDate);
+      
+      if (sortOrder === 'newest') {
+        return dateB.getTime() - dateA.getTime(); // Newest first
+      } else {
+        return dateA.getTime() - dateB.getTime(); // Oldest first
+      }
+    });
+
+    return filtered;
+  }, [items, emotionFilter, statusFilter, sortOrder]);
 
   const getEmotionColor = (emotion: string): string => {
     const emotionColors: Record<string, string> = {
@@ -67,6 +84,10 @@ const PauseLog = () => {
 
   const handleDeleteItem = (id: string) => {
     deleteItem(id);
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(current => current === 'newest' ? 'oldest' : 'newest');
   };
 
   return (
@@ -94,13 +115,12 @@ const PauseLog = () => {
             </div>
           )}
           
-          {/* Filter label */}
+          {/* Filter and sort controls */}
           <div className="mb-2">
-            <span className="text-sm text-black dark:text-cream">Filter for:</span>
+            <span className="text-sm text-black dark:text-cream">Filter and sort:</span>
           </div>
 
-          {/* Filter dropdowns */}
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4 items-center">
             <Select value={emotionFilter} onValueChange={setEmotionFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="All emotions" />
@@ -123,6 +143,25 @@ const PauseLog = () => {
                 <SelectItem value="let-go">Let go</SelectItem>
               </SelectContent>
             </Select>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleSortOrder}
+              className="flex items-center gap-2 rounded-2xl border-gray-200 dark:border-gray-600"
+            >
+              {sortOrder === 'newest' ? (
+                <>
+                  <ArrowDown size={16} />
+                  Newest first
+                </>
+              ) : (
+                <>
+                  <ArrowUp size={16} />
+                  Oldest first
+                </>
+              )}
+            </Button>
           </div>
         </div>
 

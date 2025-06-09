@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Timer, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PausedItem } from '../stores/pausedItemsStore';
@@ -68,8 +67,9 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
     });
 
     try {
-      // Use appropriate pause log store based on authentication
+      // Use the correct pause log store based on authentication
       if (user) {
+        console.log('✅ Using Supabase pause log store for authenticated user');
         await supabasePauseLogStore.addItem({
           itemName: currentItem.itemName,
           emotion: currentItem.emotion,
@@ -81,6 +81,7 @@ const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, 
         // Force reload of pause log items to ensure UI updates
         await supabasePauseLogStore.loadItems();
       } else {
+        console.log('✅ Using local pause log store for guest user');
         pauseLogStore.addItem({
           itemName: currentItem.itemName,
           emotion: currentItem.emotion,
