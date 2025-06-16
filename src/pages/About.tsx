@@ -8,14 +8,14 @@ const About = () => {
       <div className="max-w-md md:max-w-2xl lg:max-w-4xl mx-auto px-6 py-8">
         <div className="flex items-center mb-6">
           <Link to="/" className="mr-4">
-            <ArrowLeft className="w-6 h-6 text-taupe dark:text-cream" />
+            <ArrowLeft className="w-6 h-6 text-black dark:text-cream" />
           </Link>
-          <h1 className="text-2xl font-semibold text-taupe dark:text-cream">About Pocket Pause</h1>
+          <h1 className="text-2xl font-semibold text-black dark:text-cream">About Pocket Pause</h1>
         </div>
 
         <div className="space-y-6 text-dark-gray dark:text-cream">
           <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-taupe dark:text-cream">Pocket Pause: <i>A gentle practice for navigating the noise</i></h2>
+            <h2 className="text-xl font-semibold mb-4 text-black dark:text-cream">Pocket Pause: <i>A gentle practice for navigating the noise</i></h2>
             <p className="mb-4">
               In a world of endless scrolls, constant offers, and split-second decisions, Pocket Pause invites you to do something revolutionary: slow down. This is a space to notice what you're reaching for — and why.
             </p>
@@ -34,37 +34,37 @@ const About = () => {
           </div>
 
           <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-taupe dark:text-cream">How it works</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black dark:text-cream">How it works</h2>
             <div className="space-y-4">
               <p className="mb-4">
                 Pocket Pause is a gentle space to notice the moment before a decision—especially the kind that asks:
               </p>
               <div className="pl-4 border-l-2 border-lavender/30 dark:border-gray-600">
-                <p className="italic text-taupe dark:text-cream">Do I really need this?</p>
-                <p className="italic text-taupe dark:text-cream">Will this bring me closer to who I want to be?</p>
-                <p className="italic text-taupe dark:text-cream">What am I feeling right now?</p>
+                <p className="italic text-[#6B4C9A] dark:text-cream">Do I really need this?</p>
+                <p className="italic text-[#6B4C9A] dark:text-cream">Will this bring me closer to who I want to be?</p>
+                <p className="italic text-[#6B4C9A] dark:text-cream">What am I feeling right now?</p>
               </div>
               
-              <p className="font-medium text-taupe dark:text-cream mt-6 mb-4">Here's how it flows:</p>
+              <p className="font-medium text-black dark:text-cream mt-6 mb-4">Here's how it flows:</p>
               
               <div className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-taupe dark:text-cream mb-2">1. Add a Pause</h3>
+                  <h3 className="font-semibold text-black dark:text-cream mb-2">1. Add a Pause</h3>
                   <p>When you feel the pull to buy something (or say yes to something, or reach for something), open Pocket Pause. Instead of acting on impulse, you log the item, name the emotion, and take a breath.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-taupe dark:text-cream mb-2">2. Set a Soft Intention</h3>
+                  <h3 className="font-semibold text-black dark:text-cream mb-2">2. Set a Soft Intention</h3>
                   <p>Write a quiet note to yourself—a reason, a reminder, or a simple reflection. This helps root the moment in awareness instead of automaticity.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-taupe dark:text-cream mb-2">3. Come Back Later</h3>
+                  <h3 className="font-semibold text-black dark:text-cream mb-2">3. Come Back Later</h3>
                   <p>Return when you're ready. Whether you buy the item or not, you'll do it with clarity. Each decision adds to your Greater Joy Fund—a gentle log of the mindful, aligned choices you've made.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-taupe dark:text-cream mb-2">4. See the Patterns</h3>
+                  <h3 className="font-semibold text-black dark:text-cream mb-2">4. See the Patterns</h3>
                   <p>Over time, you'll notice trends: what emotions often lead to impulse, what kinds of things you pass on, and what you truly value. Awareness becomes your compass.</p>
                 </div>
               </div>
@@ -74,8 +74,8 @@ const About = () => {
                   Pocket Pause isn't here to shame or restrict you. It's here to return your choices to you—softly, quietly, with care.
                 </p>
                 <div className="pl-4 border-l-2 border-lavender/30 dark:border-gray-600">
-                  <p className="italic text-taupe dark:text-cream">Let it be a pocket-sized practice in remembering:</p>
-                  <p className="italic text-taupe dark:text-cream">You already have enough. You already are enough.</p>
+                  <p className="italic text-[#6B4C9A] dark:text-cream">Let it be a pocket-sized practice in remembering:</p>
+                  <p className="italic text-[#6B4C9A] dark:text-cream">You already have enough. You already are enough.</p>
                 </div>
               </div>
             </div>
