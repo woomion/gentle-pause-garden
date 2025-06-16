@@ -61,7 +61,15 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
     }
   };
 
-  const formattedPrice = item.price ? `$${item.price}` : '';
+  const formattedPrice = useMemo(() => {
+    if (!item.price) return '';
+    
+    const price = parseFloat(item.price);
+    if (isNaN(price)) return '';
+    
+    // Always show two decimal places
+    return `$${price.toFixed(2)}`;
+  }, [item.price]);
 
   return (
     <div 

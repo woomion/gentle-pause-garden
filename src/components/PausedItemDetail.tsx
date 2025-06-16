@@ -7,6 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMemo } from 'react';
 
 interface PausedItemDetailProps {
   item: PausedItem;
@@ -67,6 +68,16 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   };
 
   const imageUrl = getImageUrl();
+
+  const formattedPrice = useMemo(() => {
+    if (!item.price) return '';
+    
+    const price = parseFloat(item.price);
+    if (isNaN(price)) return '';
+    
+    // Always show two decimal places
+    return `$${price.toFixed(2)}`;
+  }, [item.price]);
 
   const handleDelete = () => {
     onDelete(item.id);
@@ -234,8 +245,8 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           <div className="space-y-2">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-tight">{item.itemName}</h3>
-              {item.price && (
-                <span className="text-xl font-bold text-black dark:text-[#F9F5EB] ml-2">${item.price}</span>
+              {formattedPrice && (
+                <span className="text-xl font-bold text-black dark:text-[#F9F5EB] ml-2">{formattedPrice}</span>
               )}
             </div>
             
