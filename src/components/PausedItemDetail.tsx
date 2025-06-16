@@ -32,6 +32,15 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     onClose();
   };
 
+  // Debug the link data
+  console.log('🔍 PausedItemDetail render:', {
+    itemId: item.id,
+    itemName: item.itemName,
+    link: item.link,
+    hasLink: !!item.link,
+    linkType: typeof item.link
+  });
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
@@ -126,8 +135,14 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           <div className="pt-2 flex items-center justify-between">
             {item.link && item.link.trim() ? (
               <button 
-                onClick={() => handleViewItem(item)}
-                className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🖱️ View item button clicked manually');
+                  handleViewItem(item);
+                }}
+                className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1 bg-transparent border-none cursor-pointer"
+                type="button"
               >
                 <ExternalLink size={14} />
                 View item
