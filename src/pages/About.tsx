@@ -14,7 +14,7 @@ const About = () => {
         </div>
 
         <div className="space-y-6 text-dark-gray dark:text-cream">
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
+          <div className="p-6">
             <h2 className="text-xl font-semibold mb-4 text-black dark:text-cream">Pocket Pause: <i>A gentle practice for navigating the noise</i></h2>
             <p className="mb-4">
               In a world of endless scrolls, constant offers, and split-second decisions, Pocket Pause invites you to do something revolutionary: slow down. This is a space to notice what you're reaching for — and why.
@@ -33,7 +33,7 @@ const About = () => {
             </p>
           </div>
 
-          <div className="bg-white/60 dark:bg-white/10 rounded-lg p-6">
+          <div className="p-6">
             <h2 className="text-xl font-semibold mb-4 text-black dark:text-cream">How it works</h2>
             <div className="space-y-4">
               <p className="mb-4">
