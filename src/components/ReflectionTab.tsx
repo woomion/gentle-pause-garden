@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Edit2, Check } from 'lucide-react';
+import { Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -55,7 +55,7 @@ const ReflectionTab = ({ reflection, setReflection }: ReflectionTabProps) => {
             <p className="mb-4">What are you tending to instead of spending? What feeling are you hoping for? What really matters right now?</p>
           </div>
 
-          <div className="relative">
+          <div className="space-y-3">
             <Textarea
               value={reflection}
               onChange={(e) => setReflection(e.target.value)}
@@ -64,13 +64,14 @@ const ReflectionTab = ({ reflection, setReflection }: ReflectionTabProps) => {
               autoFocus
             />
             {reflection.trim() && (
-              <Button
-                onClick={handleCompleteReflection}
-                className="absolute top-2 right-2 h-8 w-8 p-0 bg-[#CAB6F7] hover:bg-[#B8A6D2] text-black"
-                size="icon"
-              >
-                <Check size={16} />
-              </Button>
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleCompleteReflection}
+                  className="bg-[#CAB6F7] hover:bg-[#B8A6D2] text-black font-medium px-6 py-2"
+                >
+                  Done
+                </Button>
+              </div>
             )}
           </div>
         </>
