@@ -84,6 +84,24 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     onClose();
   };
 
+  const handleViewItem = () => {
+    console.log('View item clicked:', {
+      itemId: item.id,
+      itemName: item.itemName,
+      link: item.link
+    });
+    
+    if (item.link) {
+      // Ensure the URL has a protocol
+      let url = item.link;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      console.log('Opening URL:', url);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   const handleLetGo = async () => {
     console.log('📝 Adding item to pause log (let go):', {
       itemName: item.itemName,
@@ -328,15 +346,13 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           {/* Footer actions */}
           <div className="pt-2 flex items-center justify-between">
             {item.link ? (
-              <a 
-                href={item.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <button 
+                onClick={handleViewItem}
                 className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1"
               >
                 <ExternalLink size={14} />
                 View item
-              </a>
+              </button>
             ) : (
               <div></div>
             )}
