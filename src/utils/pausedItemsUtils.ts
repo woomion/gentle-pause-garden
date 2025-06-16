@@ -39,3 +39,42 @@ export const calculateCheckInTimeDisplay = (checkInDate: Date): string => {
   
   return `Checking-in in ${diffDays} days`;
 };
+
+export const extractStoreNameFromNotes = (notes: string | null): string => {
+  if (!notes) return 'Unknown Store';
+  
+  if (notes.includes('STORE:')) {
+    const storeMatch = notes.match(/STORE:([^|]*)/);
+    if (storeMatch) {
+      return storeMatch[1].trim();
+    }
+  }
+  
+  return 'Unknown Store';
+};
+
+export const extractActualNotes = (notes: string | null): string | undefined => {
+  if (!notes) return undefined;
+  
+  if (notes.includes('STORE:')) {
+    const actualNotes = notes.replace(/STORE:[^|]*\|?/, '').trim();
+    return actualNotes === '' ? undefined : actualNotes;
+  }
+  
+  return notes;
+};
+
+export const formatNotesWithStore = (storeName: string, notes?: string): string | null => {
+  let notesWithStore = '';
+  
+  if (storeName && storeName !== 'Unknown Store') {
+    notesWithStore = `STORE:${storeName}`;
+    if (notes && notes.trim()) {
+      notesWithStore += `|${notes}`;
+    }
+  } else if (notes && notes.trim()) {
+    notesWithStore = notes;
+  }
+  
+  return notesWithStore || null;
+};

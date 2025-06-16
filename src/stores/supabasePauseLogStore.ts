@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
+import { convertDbToPauseLogItem, convertPauseLogItemToDb } from '@/utils/pauseLogConverters';
 
 export interface PauseLogItem {
   id: string;
@@ -12,9 +13,6 @@ export interface PauseLogItem {
   originalPausedItem?: any;
 }
 
-type DbPausedItem = Database['public']['Tables']['paused_items']['Row'];
-type DbPausedItemInsert = Database['public']['Tables']['paused_items']['Insert'];
-
 type Listener = () => void;
 
 class SupabasePauseLogStore {
@@ -24,71 +22,6 @@ class SupabasePauseLogStore {
 
   constructor() {
     this.loadItems();
-  }
-
-  private convertDbToLocal(dbItem: DbPausedItem): PauseLogItem {
-    console.log('Converting DB item to local for pause log:', dbItem);
-    
-    // Use the store name from notes if it was stored there, otherwise try to extract from URL
-    let storeName = 'Unknown Store';
-    
-    // Check if store name was stored in notes (new format)
-    if (dbItem.notes && dbItem.notes.includes('STORE:')) {
-      const storeMatch = dbItem.notes.match(/STORE:([^|]*)/);
-      if (storeMatch) {
-        storeName = storeMatch[1].trim();
-      }
-    } else if (dbItem.url) {
-      // Fallback to extracting from URL (old format)
-      storeName = this.extractStoreName(dbItem.url);
-    }
-    
-    // Extract actual notes (remove store name if it was stored there)
-    let actualNotes = dbItem.notes;
-    if (actualNotes && actualNotes.includes('STORE:')) {
-      actualNotes = actualNotes.replace(/STORE:[^|]*\|?/, '').trim();
-      if (actualNotes === '') {
-        actualNotes = undefined;
-      }
-    }
-    
-    // Ensure status mapping is correct
-    let status: 'purchased' | 'let-go' = 'let-go';
-    if (dbItem.status === 'purchased') {
-      status = 'purchased';
-    } else if (dbItem.status === 'let-go') {
-      status = 'let-go';
-    }
-    
-    console.log('Status conversion:', { dbStatus: dbItem.status, localStatus: status });
-    console.log('Store name conversion:', { 
-      originalNotes: dbItem.notes, 
-      extractedStoreName: storeName,
-      actualNotes: actualNotes 
-    });
-    
-    return {
-      id: dbItem.id,
-      itemName: dbItem.title,
-      storeName: storeName,
-      emotion: dbItem.reason || 'something else',
-      letGoDate: new Date(dbItem.created_at).toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      }),
-      status: status,
-      notes: actualNotes
-    };
-  }
-
-  private extractStoreName(url: string): string {
-    if (!url) return '';
-    try {
-      const hostname = new URL(url).hostname;
-      return hostname.replace('www.', '').split('.')[0];
-    } catch {
-      return '';
-    }
   }
 
   async loadItems(): Promise<void> {
@@ -124,7 +57,7 @@ class SupabasePauseLogStore {
         console.log(`Item ${index + 1}: ${item.title} - Status: ${item.status}`);
       });
       
-      this.items = data?.map(item => this.convertDbToLocal(item)) || [];
+      this.items = data?.map(item => convertDbToPauseLogItem(item)) || [];
       
       console.log('Converted pause log items:', this.items);
       console.log('Items by status:', {
@@ -149,27 +82,11 @@ class SupabasePauseLogStore {
         return;
       }
 
-      // Ensure the status is exactly what we expect and matches database values
-      const dbStatus = item.status === 'purchased' ? 'purchased' : 'let-go';
-      console.log('DB status being saved:', dbStatus);
-
-      // Store the store name in the notes field with a special format so we can retrieve it later
-      let notesWithStore = '';
-      if (item.storeName && item.storeName !== 'Unknown Store') {
-        notesWithStore = `STORE:${item.storeName}`;
-        if (item.notes && item.notes.trim()) {
-          notesWithStore += `|${item.notes}`;
-        }
-      } else if (item.notes && item.notes.trim()) {
-        notesWithStore = item.notes;
-      }
+      const convertedItem = convertPauseLogItemToDb(item);
 
       const insertData = {
         user_id: user.id,
-        title: item.itemName,
-        reason: item.emotion,
-        notes: notesWithStore || null,
-        status: dbStatus,
+        ...convertedItem,
         price: null,
         url: null,
         pause_duration_days: 1,
@@ -191,7 +108,7 @@ class SupabasePauseLogStore {
 
       console.log('Successfully added pause log item to database:', data);
 
-      const newItem = this.convertDbToLocal(data);
+      const newItem = convertDbToPauseLogItem(data);
       console.log('Converted new item for local state:', newItem);
       
       this.items.unshift(newItem);
