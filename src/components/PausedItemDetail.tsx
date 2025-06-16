@@ -38,8 +38,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     itemName: item.itemName,
     link: item.link,
     hasLink: !!item.link,
-    linkType: typeof item.link,
-    renderTime: new Date().toISOString()
+    linkType: typeof item.link
   });
 
   return (
@@ -139,17 +138,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('🖱️ View item button clicked - BUTTON DEBUG:', {
-                    itemId: item.id,
-                    itemName: item.itemName,
-                    link: item.link,
-                    clickTime: new Date().toISOString(),
-                    eventType: e.type,
-                    isTrusted: e.isTrusted,
-                    screenX: e.screenX,
-                    screenY: e.screenY,
-                    userAgent: navigator.userAgent
-                  });
+                  console.log('🖱️ View item button clicked manually');
                   handleViewItem(item);
                 }}
                 className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1 bg-transparent border-none cursor-pointer"
