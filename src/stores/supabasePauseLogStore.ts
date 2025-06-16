@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -32,6 +33,16 @@ class SupabasePauseLogStore {
     // Extract store name from URL or use a fallback
     const storeName = this.extractStoreName(dbItem.url || '') || 'Unknown Store';
     
+    // Ensure status mapping is correct
+    let status: 'purchased' | 'let-go' = 'let-go';
+    if (dbItem.status === 'purchased') {
+      status = 'purchased';
+    } else if (dbItem.status === 'let-go') {
+      status = 'let-go';
+    }
+    
+    console.log('Status conversion:', { dbStatus: dbItem.status, localStatus: status });
+    
     return {
       id: dbItem.id,
       itemName: dbItem.title,
@@ -41,7 +52,7 @@ class SupabasePauseLogStore {
         month: 'short', 
         day: 'numeric' 
       }),
-      status: dbItem.status === 'purchased' ? 'purchased' : 'let-go',
+      status: status,
       notes: dbItem.notes || undefined
     };
   }
@@ -69,6 +80,7 @@ class SupabasePauseLogStore {
         return;
       }
 
+      // Load both 'purchased' and 'let-go' items
       const { data, error } = await supabase
         .from('paused_items')
         .select('*')
@@ -81,10 +93,20 @@ class SupabasePauseLogStore {
       }
 
       console.log('Raw pause log data from Supabase:', data);
+      console.log('Number of items loaded:', data?.length || 0);
+      
+      // Log the status of each item
+      data?.forEach((item, index) => {
+        console.log(`Item ${index + 1}: ${item.title} - Status: ${item.status}`);
+      });
       
       this.items = data?.map(item => this.convertDbToLocal(item)) || [];
       
       console.log('Converted pause log items:', this.items);
+      console.log('Items by status:', {
+        purchased: this.items.filter(item => item.status === 'purchased').length,
+        letGo: this.items.filter(item => item.status === 'let-go').length
+      });
       
       this.isLoaded = true;
       this.notifyListeners();
@@ -103,23 +125,27 @@ class SupabasePauseLogStore {
         return;
       }
 
-      // Ensure the status is exactly what we expect
+      // Ensure the status is exactly what we expect and matches database values
       const dbStatus = item.status === 'purchased' ? 'purchased' : 'let-go';
       console.log('DB status being saved:', dbStatus);
 
+      const insertData = {
+        user_id: user.id,
+        title: item.itemName,
+        reason: item.emotion,
+        notes: item.notes || null,
+        status: dbStatus,
+        price: null,
+        url: null,
+        pause_duration_days: 1,
+        review_at: new Date().toISOString()
+      };
+
+      console.log('Insert data being sent to database:', insertData);
+
       const { data, error } = await supabase
         .from('paused_items')
-        .insert({
-          user_id: user.id,
-          title: item.itemName,
-          reason: item.emotion,
-          notes: item.notes || null,
-          status: dbStatus,
-          price: null,
-          url: null,
-          pause_duration_days: 1,
-          review_at: new Date().toISOString()
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -131,6 +157,8 @@ class SupabasePauseLogStore {
       console.log('Successfully added pause log item to database:', data);
 
       const newItem = this.convertDbToLocal(data);
+      console.log('Converted new item for local state:', newItem);
+      
       this.items.unshift(newItem);
       this.notifyListeners();
     } catch (error) {
