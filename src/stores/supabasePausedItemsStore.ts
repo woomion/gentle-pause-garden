@@ -129,13 +129,34 @@ class SupabasePausedItemsStore {
     console.log('Converting DB item to local:', {
       id: dbItem.id,
       title: dbItem.title,
+      notes: dbItem.notes,
       url: dbItem.url,
       reason: dbItem.reason,
       rawItem: dbItem
     });
     
-    // Extract store name from URL if available
-    const storeName = dbItem.url ? this.extractStoreName(dbItem.url) : 'Unknown Store';
+    // Use the store name from notes if it was stored there, otherwise try to extract from URL
+    let storeName = 'Unknown Store';
+    
+    // Check if store name was stored in notes (new format)
+    if (dbItem.notes && dbItem.notes.includes('STORE:')) {
+      const storeMatch = dbItem.notes.match(/STORE:([^|]*)/);
+      if (storeMatch) {
+        storeName = storeMatch[1].trim();
+      }
+    } else if (dbItem.url) {
+      // Fallback to extracting from URL (old format)
+      storeName = this.extractStoreName(dbItem.url);
+    }
+    
+    // Extract actual notes (remove store name if it was stored there)
+    let actualNotes = dbItem.notes;
+    if (actualNotes && actualNotes.includes('STORE:')) {
+      actualNotes = actualNotes.replace(/STORE:[^|]*\|?/, '').trim();
+      if (actualNotes === '') {
+        actualNotes = undefined;
+      }
+    }
     
     return {
       id: dbItem.id,
@@ -144,7 +165,7 @@ class SupabasePausedItemsStore {
       price: dbItem.price?.toString() || '',
       imageUrl: dbItem.url || undefined,
       emotion: dbItem.reason || 'something else',
-      notes: dbItem.notes || undefined,
+      notes: actualNotes || undefined,
       duration: `${dbItem.pause_duration_days} days`,
       otherDuration: undefined,
       link: dbItem.url || undefined,
@@ -184,12 +205,23 @@ class SupabasePausedItemsStore {
       console.log('Using product link:', item.link);
     }
     
+    // Store the store name in the notes field with a special format so we can retrieve it later
+    let notesWithStore = '';
+    if (item.storeName && item.storeName !== 'Unknown Store') {
+      notesWithStore = `STORE:${item.storeName}`;
+      if (item.notes && item.notes.trim()) {
+        notesWithStore += `|${item.notes}`;
+      }
+    } else if (item.notes && item.notes.trim()) {
+      notesWithStore = item.notes;
+    }
+    
     console.log('Converting local to DB:', {
       itemName: item.itemName,
       emotion: item.emotion,
       storeName: item.storeName,
       finalUrl,
-      notes: item.notes,
+      notesWithStore,
       hasUploadedImage: !!imageUrl,
       hasProductLink: !!item.link
     });
@@ -199,7 +231,7 @@ class SupabasePausedItemsStore {
       price: item.price ? parseFloat(item.price) : null,
       url: finalUrl,
       reason: item.emotion,
-      notes: item.notes || null,
+      notes: notesWithStore || null,
       pause_duration_days: pauseDurationDays,
       review_at: reviewAt.toISOString(),
       status: 'paused'
@@ -289,8 +321,8 @@ class SupabasePausedItemsStore {
 
       console.log('1. Adding item for user:', user.id, 'with data:', {
         itemName: item.itemName,
-        emotion: item.emotion,
         storeName: item.storeName,
+        emotion: item.emotion,
         hasPhoto: !!item.photo,
         hasImageUrl: !!item.imageUrl,
         hasLink: !!item.link,
@@ -348,8 +380,8 @@ class SupabasePausedItemsStore {
       
       console.log('5. ✅ Item successfully added with final data:', {
         id: newItem.id,
-        imageUrl: newItem.imageUrl,
         storeName: newItem.storeName,
+        imageUrl: newItem.imageUrl,
         emotion: newItem.emotion
       });
       

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -30,8 +29,28 @@ class SupabasePauseLogStore {
   private convertDbToLocal(dbItem: DbPausedItem): PauseLogItem {
     console.log('Converting DB item to local for pause log:', dbItem);
     
-    // Extract store name from URL or use a fallback
-    const storeName = this.extractStoreName(dbItem.url || '') || 'Unknown Store';
+    // Use the store name from notes if it was stored there, otherwise try to extract from URL
+    let storeName = 'Unknown Store';
+    
+    // Check if store name was stored in notes (new format)
+    if (dbItem.notes && dbItem.notes.includes('STORE:')) {
+      const storeMatch = dbItem.notes.match(/STORE:([^|]*)/);
+      if (storeMatch) {
+        storeName = storeMatch[1].trim();
+      }
+    } else if (dbItem.url) {
+      // Fallback to extracting from URL (old format)
+      storeName = this.extractStoreName(dbItem.url);
+    }
+    
+    // Extract actual notes (remove store name if it was stored there)
+    let actualNotes = dbItem.notes;
+    if (actualNotes && actualNotes.includes('STORE:')) {
+      actualNotes = actualNotes.replace(/STORE:[^|]*\|?/, '').trim();
+      if (actualNotes === '') {
+        actualNotes = undefined;
+      }
+    }
     
     // Ensure status mapping is correct
     let status: 'purchased' | 'let-go' = 'let-go';
@@ -42,6 +61,11 @@ class SupabasePauseLogStore {
     }
     
     console.log('Status conversion:', { dbStatus: dbItem.status, localStatus: status });
+    console.log('Store name conversion:', { 
+      originalNotes: dbItem.notes, 
+      extractedStoreName: storeName,
+      actualNotes: actualNotes 
+    });
     
     return {
       id: dbItem.id,
@@ -53,7 +77,7 @@ class SupabasePauseLogStore {
         day: 'numeric' 
       }),
       status: status,
-      notes: dbItem.notes || undefined
+      notes: actualNotes
     };
   }
 
@@ -129,11 +153,22 @@ class SupabasePauseLogStore {
       const dbStatus = item.status === 'purchased' ? 'purchased' : 'let-go';
       console.log('DB status being saved:', dbStatus);
 
+      // Store the store name in the notes field with a special format so we can retrieve it later
+      let notesWithStore = '';
+      if (item.storeName && item.storeName !== 'Unknown Store') {
+        notesWithStore = `STORE:${item.storeName}`;
+        if (item.notes && item.notes.trim()) {
+          notesWithStore += `|${item.notes}`;
+        }
+      } else if (item.notes && item.notes.trim()) {
+        notesWithStore = item.notes;
+      }
+
       const insertData = {
         user_id: user.id,
         title: item.itemName,
         reason: item.emotion,
-        notes: item.notes || null,
+        notes: notesWithStore || null,
         status: dbStatus,
         price: null,
         url: null,
