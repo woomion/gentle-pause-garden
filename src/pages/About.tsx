@@ -5,14 +5,20 @@ import { Link } from 'react-router-dom';
 const About = () => {
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
-      <div className="max-w-md md:max-w-2xl lg:max-w-4xl mx-auto px-6 py-8">
-        <div className="flex items-center mb-6">
-          <Link to="/" className="mr-4">
-            <ArrowLeft className="w-6 h-6 text-black dark:text-cream" />
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 text-taupe dark:text-[#F9F5EB] hover:text-black dark:hover:text-white transition-colors mb-6"
+          >
+            <ArrowLeft size={20} />
+            Back to Home
           </Link>
-          <h1 className="text-2xl font-semibold text-black dark:text-cream">About Pocket Pause</h1>
+          <h1 className="text-3xl font-bold text-black dark:text-[#F9F5EB] mb-2">About Pocket Pause</h1>
         </div>
 
+        {/* Content */}
         <div className="space-y-6 text-dark-gray dark:text-cream">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4 text-black dark:text-cream">Pocket Pause: <i>A gentle practice for navigating the noise</i></h2>
