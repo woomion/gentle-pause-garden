@@ -1,13 +1,15 @@
-import { Timer, ExternalLink } from 'lucide-react';
+
+import { ExternalLink } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
-import { pauseLogStore } from '../stores/pauseLogStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
 import { useMemo } from 'react';
+import { formatPrice } from '../utils/priceFormatter';
+import { useItemActions } from '../hooks/useItemActions';
+import ItemImage from './ItemImage';
+import PauseDurationBanner from './PauseDurationBanner';
+import EmotionBadge from './EmotionBadge';
 
 interface PausedItemDetailProps {
   item: PausedItem;
@@ -17,207 +19,13 @@ interface PausedItemDetailProps {
 }
 
 const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailProps) => {
-  const { toast } = useToast();
-  const { user } = useAuth();
+  const { handleViewItem, handleLetGo, handleBought } = useItemActions();
 
-  const getEmotionColor = (emotion: string) => {
-    const emotionColors: { [key: string]: string } = {
-      'bored': '#F6E3D5',
-      'overwhelmed': '#E9E2F7',
-      'burnt out': '#FBF3C2',
-      'sad': '#DCE7F5',
-      'inspired': '#FBE7E6',
-      'deserving': '#E7D8F3',
-      'curious': '#DDEEDF',
-      'anxious': '#EDEAE5',
-      'lonely': '#CED8E3',
-      'celebratory': '#FAEED6',
-      'resentful': '#EAC9C3',
-      'something else': '#F0F0EC'
-    };
-    return emotionColors[emotion] || '#F0F0EC';
-  };
-
-  const getImageUrl = () => {
-    // Debug logging
-    console.log('Getting image URL for item:', {
-      itemId: item.id,
-      imageUrl: item.imageUrl,
-      photoDataUrl: item.photoDataUrl,
-      hasPhoto: !!item.photo
-    });
-    
-    if (item.imageUrl && item.imageUrl.includes('supabase')) {
-      console.log('Using Supabase image URL:', item.imageUrl);
-      return item.imageUrl;
-    }
-    if (item.photoDataUrl) {
-      console.log('Using photo data URL');
-      return item.photoDataUrl;
-    }
-    if (item.photo && item.photo instanceof File) {
-      console.log('Creating object URL from file');
-      return URL.createObjectURL(item.photo);
-    }
-    if (item.imageUrl) {
-      console.log('Using regular image URL:', item.imageUrl);
-      return item.imageUrl;
-    }
-    console.log('No image URL found');
-    return null;
-  };
-
-  const imageUrl = getImageUrl();
-
-  const formattedPrice = useMemo(() => {
-    if (!item.price) return '';
-    
-    const price = parseFloat(item.price);
-    if (isNaN(price)) return '';
-    
-    // Always show two decimal places
-    return `$${price.toFixed(2)}`;
-  }, [item.price]);
+  const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
 
   const handleDelete = () => {
     onDelete(item.id);
     onClose();
-  };
-
-  const handleViewItem = () => {
-    console.log('🔗 View item clicked:', {
-      itemId: item.id,
-      itemName: item.itemName,
-      link: item.link,
-      hasLink: !!item.link
-    });
-    
-    if (item.link && item.link.trim()) {
-      // Ensure the URL has a protocol
-      let url = item.link.trim();
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
-      console.log('🌐 Opening URL:', url);
-      
-      // Force navigation to the URL
-      try {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      } catch (error) {
-        console.error('❌ Error opening URL:', error);
-        // Fallback: try direct assignment
-        window.location.href = url;
-      }
-    } else {
-      console.warn('⚠️ No link available for item:', item.itemName);
-    }
-  };
-
-  const handleLetGo = async () => {
-    console.log('📝 Adding item to pause log (let go):', {
-      itemName: item.itemName,
-      emotion: item.emotion,
-      storeName: item.storeName,
-      status: 'let-go',
-      notes: item.notes,
-      user: user ? 'authenticated' : 'guest'
-    });
-
-    try {
-      // Use appropriate pause log store based on authentication
-      if (user) {
-        await supabasePauseLogStore.addItem({
-          itemName: item.itemName,
-          emotion: item.emotion,
-          storeName: item.storeName,
-          status: 'let-go',
-          notes: item.notes
-        });
-        console.log('✅ Item added to Supabase pause log');
-      } else {
-        pauseLogStore.addItem({
-          itemName: item.itemName,
-          emotion: item.emotion,
-          storeName: item.storeName,
-          status: 'let-go',
-          notes: item.notes
-        });
-        console.log('✅ Item added to local pause log');
-      }
-      
-      // Remove from paused items
-      onDelete(item.id);
-      onClose();
-      
-      // Show success toast
-      toast({
-        title: "Item released",
-        description: `"${item.itemName}" has been moved to your pause log.`,
-      });
-    } catch (error) {
-      console.error('❌ Error adding item to pause log:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save decision. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleBought = async () => {
-    console.log('📝 Adding item to pause log (purchased):', {
-      itemName: item.itemName,
-      emotion: item.emotion,
-      storeName: item.storeName,
-      status: 'purchased',
-      notes: item.notes,
-      user: user ? 'authenticated' : 'guest'
-    });
-
-    try {
-      // Use appropriate pause log store based on authentication
-      if (user) {
-        await supabasePauseLogStore.addItem({
-          itemName: item.itemName,
-          emotion: item.emotion,
-          storeName: item.storeName,
-          status: 'purchased',
-          notes: item.notes
-        });
-        console.log('✅ Item added to Supabase pause log');
-      } else {
-        pauseLogStore.addItem({
-          itemName: item.itemName,
-          emotion: item.emotion,
-          storeName: item.storeName,
-          status: 'purchased',
-          notes: item.notes
-        });
-        console.log('✅ Item added to local pause log');
-      }
-      
-      // Remove from paused items
-      onDelete(item.id);
-      onClose();
-      
-      // Show success toast that auto-dismisses
-      const toastInstance = toast({
-        title: "Great, you made a conscious choice!",
-        description: "We've moved this thoughtful decision to your Pause Log for future reference.",
-      });
-      
-      // Auto-dismiss after 3 seconds
-      setTimeout(() => {
-        toastInstance.dismiss();
-      }, 3000);
-    } catch (error) {
-      console.error('❌ Error adding item to pause log:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save decision. Please try again.",
-        variant: "destructive"
-      });
-    }
   };
 
   const handleKeepPaused = () => {
@@ -236,38 +44,9 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
         <div className="space-y-6">
           {/* Product image */}
           <div className="relative">
-            <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center overflow-hidden">
-              {imageUrl ? (
-                <img 
-                  src={imageUrl} 
-                  alt={item.itemName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error('Image failed to load:', imageUrl);
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>';
-                  }}
-                  onLoad={() => {
-                    console.log('Image loaded successfully:', imageUrl);
-                  }}
-                />
-              ) : (
-                <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>
-              )}
-            </div>
-
+            <ItemImage item={item} />
             {/* Pause Duration Banner - touching bottom of image */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 py-2 px-4 rounded-b-2xl text-center text-xs font-medium flex items-center justify-center gap-2"
-              style={{ 
-                backgroundColor: '#E7D9FA',
-                color: '#000'
-              }}
-            >
-              <Timer size={14} />
-              {item.checkInTime}
-            </div>
+            <PauseDurationBanner checkInTime={item.checkInTime} />
           </div>
 
           {/* Item details */}
@@ -281,18 +60,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             
             <p className="text-gray-600 dark:text-gray-300 text-base">{item.storeName}</p>
             
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600 dark:text-gray-300 text-sm">Paused while feeling</span>
-              <span 
-                className="inline-block px-4 py-2 rounded-full text-sm font-medium"
-                style={{ 
-                  backgroundColor: getEmotionColor(item.emotion),
-                  color: '#000'
-                }}
-              >
-                {item.emotion}
-              </span>
-            </div>
+            <EmotionBadge emotion={item.emotion} />
 
             {/* Only show notes if they exist and aren't empty */}
             {item.notes && item.notes.trim() && (
@@ -321,7 +89,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLetGo} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
+                  <AlertDialogAction onClick={() => handleLetGo(item, onDelete, onClose)} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
                     Let it go
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -346,7 +114,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleBought} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
+                  <AlertDialogAction onClick={() => handleBought(item, onDelete, onClose)} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
                     Yes, I bought it
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -358,7 +126,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
           <div className="pt-2 flex items-center justify-between">
             {item.link && item.link.trim() ? (
               <button 
-                onClick={handleViewItem}
+                onClick={() => handleViewItem(item)}
                 className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1"
               >
                 <ExternalLink size={14} />
