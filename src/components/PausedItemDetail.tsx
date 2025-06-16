@@ -85,20 +85,31 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   };
 
   const handleViewItem = () => {
-    console.log('View item clicked:', {
+    console.log('🔗 View item clicked:', {
       itemId: item.id,
       itemName: item.itemName,
-      link: item.link
+      link: item.link,
+      hasLink: !!item.link
     });
     
-    if (item.link) {
+    if (item.link && item.link.trim()) {
       // Ensure the URL has a protocol
-      let url = item.link;
+      let url = item.link.trim();
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
       }
-      console.log('Opening URL:', url);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      console.log('🌐 Opening URL:', url);
+      
+      // Force navigation to the URL
+      try {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch (error) {
+        console.error('❌ Error opening URL:', error);
+        // Fallback: try direct assignment
+        window.location.href = url;
+      }
+    } else {
+      console.warn('⚠️ No link available for item:', item.itemName);
     }
   };
 
@@ -345,7 +356,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
 
           {/* Footer actions */}
           <div className="pt-2 flex items-center justify-between">
-            {item.link ? (
+            {item.link && item.link.trim() ? (
               <button 
                 onClick={handleViewItem}
                 className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1"
