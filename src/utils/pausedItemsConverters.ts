@@ -38,17 +38,43 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     }
   }
   
+  // Parse the notes to extract link and imageUrl separately
+  let productLink = undefined;
+  let imageUrl = undefined;
+  
+  if (actualNotes && actualNotes.includes('LINK:')) {
+    const linkMatch = actualNotes.match(/LINK:([^|]*)/);
+    if (linkMatch) {
+      productLink = linkMatch[1].trim();
+    }
+    actualNotes = actualNotes.replace(/LINK:[^|]*\|?/, '').trim();
+    if (actualNotes === '') {
+      actualNotes = undefined;
+    }
+  }
+  
+  // Determine if the URL is an uploaded image or product link
+  if (dbItem.url) {
+    if (dbItem.url.includes('supabase.co/storage')) {
+      // This is an uploaded image
+      imageUrl = dbItem.url;
+    } else {
+      // This is a product link
+      productLink = dbItem.url;
+    }
+  }
+  
   return {
     id: dbItem.id,
     itemName: dbItem.title,
     storeName: storeName,
     price: dbItem.price?.toString() || '',
-    imageUrl: dbItem.url || undefined,
+    imageUrl: imageUrl,
     emotion: dbItem.reason || 'something else',
     notes: actualNotes || undefined,
     duration: `${dbItem.pause_duration_days} days`,
     otherDuration: undefined,
-    link: dbItem.url || undefined,
+    link: productLink,
     photo: null,
     photoDataUrl: undefined,
     pausedAt,
@@ -65,38 +91,51 @@ export const convertLocalToDb = (
   const reviewAt = new Date();
   reviewAt.setDate(reviewAt.getDate() + pauseDurationDays);
 
-  // For authenticated users, prioritize uploaded images over product links
+  // Store the store name and product link in the notes field with a special format
+  let notesWithMetadata = '';
+  
+  if (item.storeName && item.storeName !== 'Unknown Store') {
+    notesWithMetadata = `STORE:${item.storeName}`;
+  }
+  
+  // Store the product link separately from the uploaded image
+  if (item.link && item.link.trim()) {
+    if (notesWithMetadata) {
+      notesWithMetadata += `|LINK:${item.link}`;
+    } else {
+      notesWithMetadata = `LINK:${item.link}`;
+    }
+  }
+  
+  if (item.notes && item.notes.trim()) {
+    if (notesWithMetadata) {
+      notesWithMetadata += `|${item.notes}`;
+    } else {
+      notesWithMetadata = item.notes;
+    }
+  }
+  
+  // Determine what goes in the URL field
   let finalUrl = null;
   
   if (imageUrl) {
-    // This is an uploaded image URL from Supabase Storage
+    // If we have an uploaded image, store that in the URL field
     finalUrl = imageUrl;
-    console.log('Using uploaded image URL:', imageUrl);
-  } else if (item.link && !item.photo) {
-    // This is a product link without an uploaded image
+    console.log('Using uploaded image URL in database:', imageUrl);
+  } else if (item.link && item.link.trim()) {
+    // If no uploaded image but we have a product link, store the product link
     finalUrl = item.link;
-    console.log('Using product link:', item.link);
-  }
-  
-  // Store the store name in the notes field with a special format so we can retrieve it later
-  let notesWithStore = '';
-  if (item.storeName && item.storeName !== 'Unknown Store') {
-    notesWithStore = `STORE:${item.storeName}`;
-    if (item.notes && item.notes.trim()) {
-      notesWithStore += `|${item.notes}`;
-    }
-  } else if (item.notes && item.notes.trim()) {
-    notesWithStore = item.notes;
+    console.log('Using product link in database:', item.link);
   }
   
   console.log('Converting local to DB:', {
     itemName: item.itemName,
     emotion: item.emotion,
     storeName: item.storeName,
+    productLink: item.link,
+    uploadedImageUrl: imageUrl,
     finalUrl,
-    notesWithStore,
-    hasUploadedImage: !!imageUrl,
-    hasProductLink: !!item.link
+    notesWithMetadata
   });
 
   return {
@@ -104,7 +143,7 @@ export const convertLocalToDb = (
     price: item.price ? parseFloat(item.price) : null,
     url: finalUrl,
     reason: item.emotion,
-    notes: notesWithStore || null,
+    notes: notesWithMetadata || null,
     pause_duration_days: pauseDurationDays,
     review_at: reviewAt.toISOString(),
     status: 'paused'
