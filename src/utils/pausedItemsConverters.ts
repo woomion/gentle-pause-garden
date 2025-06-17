@@ -1,86 +1,96 @@
 
-import { Database } from '@/integrations/supabase/types';
 import { PausedItem } from '@/stores/supabasePausedItemsStore';
-import { extractStoreName, parseDurationToDays, calculateCheckInTimeDisplay } from './pausedItemsUtils';
-
-export type DbPausedItem = Database['public']['Tables']['paused_items']['Row'];
-export type DbPausedItemInsert = Database['public']['Tables']['paused_items']['Insert'];
+import { DbPausedItem, DbPausedItemInsert, extractStoreName, parseDurationToDays, calculateCheckInTimeDisplay } from './pausedItemsUtils';
+import { 
+  extractStoreNameFromNotes, 
+  extractProductLinkFromNotes, 
+  extractActualNotes, 
+  formatNotesWithMetadata 
+} from './notesMetadataUtils';
+import { processUrls, determineFinalUrl } from './urlProcessingUtils';
 
 export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
-  console.log('🔄 Converting DB item to local:', {
+  const pausedAt = new Date(dbItem.created_at);
+  const reviewAt = new Date(dbItem.review_at);
+  
+  console.log('Converting DB item to local:', {
     id: dbItem.id,
     title: dbItem.title,
-    created_at: dbItem.created_at,
-    review_at: dbItem.review_at,
-    created_at_type: typeof dbItem.created_at,
-    review_at_type: typeof dbItem.review_at
+    notes: dbItem.notes,
+    url: dbItem.url,
+    reason: dbItem.reason,
+    rawItem: dbItem
   });
-
-  // Ensure proper date conversion - review_at is when they should check in
-  const pausedAt = new Date(dbItem.created_at);
-  const checkInDate = new Date(dbItem.review_at);
   
-  console.log('🔄 Date conversion:', {
-    pausedAt_string: dbItem.created_at,
-    checkInDate_string: dbItem.review_at,
-    pausedAt_parsed: pausedAt.toISOString(),
-    checkInDate_parsed: checkInDate.toISOString(),
-    pausedAt_timestamp: pausedAt.getTime(),
-    checkInDate_timestamp: checkInDate.getTime(),
-    now_timestamp: Date.now(),
-    is_check_in_past: checkInDate.getTime() <= Date.now()
-  });
-
-  const checkInTime = calculateCheckInTimeDisplay(checkInDate);
-
-  const convertedItem: PausedItem = {
+  // Extract store name from notes or URL
+  let storeName = extractStoreNameFromNotes(dbItem.notes);
+  if (storeName === 'Unknown Store' && dbItem.url) {
+    storeName = extractStoreName(dbItem.url);
+  }
+  
+  // Extract actual notes (cleaned of metadata)
+  const actualNotes = extractActualNotes(dbItem.notes);
+  
+  // Extract product link from notes
+  const notesProductLink = extractProductLinkFromNotes(dbItem.notes);
+  
+  // Process URLs to determine image and product link
+  const { imageUrl, productLink } = processUrls(dbItem.url, notesProductLink);
+  
+  return {
     id: dbItem.id,
     itemName: dbItem.title,
-    storeName: extractStoreName(dbItem.url || ''),
+    storeName: storeName,
     price: dbItem.price?.toString() || '',
-    imageUrl: dbItem.url || undefined,
-    emotion: dbItem.reason || '',
-    notes: dbItem.notes || undefined,
+    imageUrl: imageUrl,
+    emotion: dbItem.reason || 'something else',
+    notes: actualNotes || undefined,
     duration: `${dbItem.pause_duration_days} days`,
-    link: dbItem.url || undefined,
+    otherDuration: undefined,
+    link: productLink,
+    photo: null,
+    photoDataUrl: undefined,
     pausedAt,
-    checkInTime,
-    checkInDate
+    checkInTime: calculateCheckInTimeDisplay(reviewAt),
+    checkInDate: reviewAt
   };
-
-  console.log('🔄 Final converted item:', {
-    id: convertedItem.id,
-    itemName: convertedItem.itemName,
-    checkInDate: convertedItem.checkInDate.toISOString(),
-    checkInTime: convertedItem.checkInTime,
-    is_ready: convertedItem.checkInDate.getTime() <= Date.now()
-  });
-
-  return convertedItem;
 };
 
 export const convertLocalToDb = (
-  item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>,
+  item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>, 
   imageUrl?: string
 ): Omit<DbPausedItemInsert, 'user_id'> => {
-  const durationDays = parseDurationToDays(item.duration);
-  const now = new Date();
-  const reviewAt = new Date(now.getTime() + (durationDays * 24 * 60 * 60 * 1000));
+  const pauseDurationDays = parseDurationToDays(item.duration || item.otherDuration || '24 hours');
+  const reviewAt = new Date();
+  reviewAt.setDate(reviewAt.getDate() + pauseDurationDays);
 
-  console.log('🔄 Converting local to DB:', {
-    duration: item.duration,
-    durationDays,
-    now: now.toISOString(),
-    reviewAt: reviewAt.toISOString()
+  // Format notes with metadata
+  const notesWithMetadata = formatNotesWithMetadata(
+    item.storeName, 
+    item.link, 
+    item.notes
+  );
+  
+  // Determine final URL for database storage
+  const finalUrl = determineFinalUrl(imageUrl, item.link);
+  
+  console.log('Converting local to DB:', {
+    itemName: item.itemName,
+    emotion: item.emotion,
+    storeName: item.storeName,
+    productLink: item.link,
+    uploadedImageUrl: imageUrl,
+    finalUrl,
+    notesWithMetadata
   });
 
   return {
     title: item.itemName,
-    url: item.link || imageUrl || null,
-    reason: item.emotion,
-    notes: item.notes || null,
     price: item.price ? parseFloat(item.price) : null,
-    pause_duration_days: durationDays,
+    url: finalUrl,
+    reason: item.emotion,
+    notes: notesWithMetadata,
+    pause_duration_days: pauseDurationDays,
     review_at: reviewAt.toISOString(),
     status: 'paused'
   };
