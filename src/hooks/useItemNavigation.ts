@@ -6,11 +6,16 @@ export const useItemNavigation = () => {
   const { toast } = useToast();
 
   const handleViewItem = (item: PausedItem) => {
-    console.log('🔗 View item clicked:', {
+    console.log('🔍 DEBUG: handleViewItem called with item:', {
       itemId: item.id,
       itemName: item.itemName,
       link: item.link,
+      imageUrl: item.imageUrl,
+      photoDataUrl: item.photoDataUrl,
       hasLink: !!item.link,
+      hasImageUrl: !!item.imageUrl,
+      hasPhotoDataUrl: !!item.photoDataUrl,
+      linkType: typeof item.link,
       linkLength: item.link?.length,
       userAgent: navigator.userAgent
     });
@@ -27,18 +32,25 @@ export const useItemNavigation = () => {
 
     // Clean and validate the URL
     let url = item.link.trim();
-    console.log('🌐 Original URL:', url);
+    console.log('🌐 DEBUG: Original URL from item.link:', url);
+    
+    // Check if this looks like an image URL
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+    const isImageUrl = imageExtensions.some(ext => url.toLowerCase().includes(ext));
+    console.log('🖼️ DEBUG: URL appears to be image?', isImageUrl);
     
     // Ensure the URL has a protocol
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = 'https://' + url;
     }
     
-    console.log('🌐 Final URL to open:', url);
+    console.log('🌐 DEBUG: Final URL to open:', url);
+    console.log('📱 DEBUG: User agent:', navigator.userAgent);
     
     try {
       // For mobile devices, use a more direct approach
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      console.log('📱 DEBUG: Is mobile device?', isMobile);
       
       if (isMobile) {
         console.log('📱 Mobile device detected, using direct navigation');
