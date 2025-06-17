@@ -1,17 +1,15 @@
 
-import { useState } from 'react';
-import { Timer, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
-import { PausedItem } from '../stores/pausedItemsStore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { usePauseLog } from '../hooks/usePauseLog';
-import { useSupabasePauseLog } from '../hooks/useSupabasePauseLog';
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
+import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
+import { formatPrice } from '../utils/priceFormatter';
+import { useItemNavigation } from '../hooks/useItemNavigation';
+import { emotionColors } from '../utils/emotionColors';
+import { useItemActions } from '../hooks/useItemActions';
 
 interface ItemReviewModalProps {
-  items: PausedItem[];
+  items: (PausedItem | LocalPausedItem)[];
   currentIndex: number;
   isOpen: boolean;
   onClose: () => void;
@@ -19,284 +17,241 @@ interface ItemReviewModalProps {
   onNext: () => void;
 }
 
-const ItemReviewModal = ({ items, currentIndex, isOpen, onClose, onItemDecided, onNext }: ItemReviewModalProps) => {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const [showConfirmDialog, setShowConfirmDialog] = useState<'let-go' | 'purchased' | null>(null);
-  const [localCurrentIndex, setLocalCurrentIndex] = useState(currentIndex);
+const ItemReviewModal = ({
+  items,
+  currentIndex,
+  isOpen,
+  onClose,
+  onItemDecided,
+  onNext
+}: ItemReviewModalProps) => {
+  const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [notes, setNotes] = useState('');
 
-  // Use appropriate hook based on authentication
-  const localPauseLog = usePauseLog();
-  const supabasePauseLog = useSupabasePauseLog();
-  
-  const { addItem: addPauseLogItem } = user ? supabasePauseLog : localPauseLog;
+  const { handleViewItem } = useItemNavigation();
+  const { handleItemPurchased, handleItemLetGo } = useItemActions();
 
-  const currentItem = items[localCurrentIndex];
-  const isLastItem = localCurrentIndex === items.length - 1;
-  const isFirstItem = localCurrentIndex === 0;
+  const currentItem = items[currentIndex];
+  const isLastItem = currentIndex >= items.length - 1;
 
-  if (!currentItem) return null;
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedDecision(null);
+      setShowFeedback(false);
+      setNotes('');
+    }
+  }, [isOpen, currentIndex]);
 
-  const getEmotionColor = (emotion: string) => {
-    const emotionColors: { [key: string]: string } = {
-      'bored': '#F6E3D5',
-      'overwhelmed': '#E9E2F7',
-      'burnt out': '#FBF3C2',
-      'sad': '#DCE7F5',
-      'inspired': '#FBE7E6',
-      'deserving': '#E7D8F3',
-      'curious': '#DDEEDF',
-      'anxious': '#EDEAE5',
-      'lonely': '#CED8E3',
-      'celebratory': '#FAEED6',
-      'resentful': '#EAC9C3',
-      'something else': '#F0F0EC'
-    };
-    return emotionColors[emotion] || '#F0F0EC';
+  if (!isOpen || !currentItem) return null;
+
+  const handleDecision = async (decision: 'purchase' | 'let-go') => {
+    setSelectedDecision(decision);
+    setShowFeedback(true);
   };
 
-  const getImageUrl = () => {
-    if (currentItem.photoDataUrl) return currentItem.photoDataUrl;
-    if (currentItem.photo instanceof File) return URL.createObjectURL(currentItem.photo);
-    return currentItem.imageUrl;
-  };
-
-  const handleDecision = async (action: 'let-go' | 'purchased') => {
-    const status = action === 'let-go' ? 'let-go' : 'purchased';
-    
-    console.log('📝 Adding item to pause log:', {
-      itemName: currentItem.itemName,
-      emotion: currentItem.emotion,
-      storeName: currentItem.storeName,
-      status,
-      notes: currentItem.notes,
-      user: user ? 'authenticated' : 'guest'
-    });
+  const handleSubmitDecision = async () => {
+    if (!selectedDecision) return;
 
     try {
-      // Use the hook-based approach to ensure correct store is used
-      await addPauseLogItem({
-        itemName: currentItem.itemName,
-        emotion: currentItem.emotion,
-        storeName: currentItem.storeName,
-        status,
-        notes: currentItem.notes
-      });
-      
-      console.log('✅ Item added to pause log via hooks');
+      if (selectedDecision === 'purchase') {
+        await handleItemPurchased(currentItem, notes);
+      } else {
+        await handleItemLetGo(currentItem, notes);
+      }
+
+      onItemDecided(currentItem.id);
+
+      if (isLastItem) {
+        onClose();
+      } else {
+        setSelectedDecision(null);
+        setShowFeedback(false);
+        setNotes('');
+        onNext();
+      }
     } catch (error) {
-      console.error('❌ Error adding item to pause log:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save decision. Please try again.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    onItemDecided(currentItem.id);
-    
-    const toastMessage = action === 'let-go' 
-      ? `"${currentItem.itemName}" has been moved to your paused decision log.`
-      : "We've moved this thoughtful decision to your Paused Decision Log for future reference.";
-    
-    const toastTitle = action === 'let-go' 
-      ? "Item released" 
-      : "Great, you made a conscious choice!";
-
-    toast({
-      title: toastTitle,
-      description: toastMessage,
-    });
-
-    setShowConfirmDialog(null);
-
-    if (isLastItem) {
-      onClose();
-    } else {
-      handleNext();
+      console.error('Error submitting decision:', error);
     }
   };
 
-  const handlePrevious = () => {
-    if (!isFirstItem) {
-      setLocalCurrentIndex(localCurrentIndex - 1);
+  const emotionColor = emotionColors[currentItem.emotion] || '#F0F0EC';
+
+  const imageUrl = (() => {
+    if (currentItem.imageUrl) {
+      if (currentItem.imageUrl.includes('supabase')) {
+        return currentItem.imageUrl;
+      } else {
+        try {
+          new URL(currentItem.imageUrl);
+          return currentItem.imageUrl;
+        } catch {
+          return null;
+        }
+      }
+    }
+    if (currentItem.photoDataUrl) {
+      return currentItem.photoDataUrl;
+    }
+    if (currentItem.photo instanceof File) {
+      return URL.createObjectURL(currentItem.photo);
+    }
+    return null;
+  })();
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    target.style.display = 'none';
+    if (target.parentElement) {
+      target.parentElement.innerHTML = '<div class="w-20 h-20 bg-gray-300 dark:bg-gray-600 rounded-xl opacity-50 flex items-center justify-center" aria-hidden="true"><div class="w-8 h-8 bg-gray-400 dark:bg-gray-500 rounded-full"></div></div>';
     }
   };
-
-  const handleNext = () => {
-    if (!isLastItem) {
-      setLocalCurrentIndex(localCurrentIndex + 1);
-    } else {
-      onNext();
-    }
-  };
-
-  const imageUrl = getImageUrl();
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-sm mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600">
-          <DialogHeader>
-            <DialogTitle className="text-center text-lg font-semibold text-black dark:text-[#F9F5EB] mb-2">
-              Time to Review
-            </DialogTitle>
-            {items.length > 1 && (
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handlePrevious}
-                  disabled={isFirstItem}
-                  className="text-black dark:text-[#F9F5EB]"
-                >
-                  <ChevronLeft size={16} />
-                </Button>
-                <p className="text-center text-sm text-gray-600 dark:text-gray-300">
-                  Item {localCurrentIndex + 1} of {items.length}
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleNext}
-                  disabled={isLastItem}
-                  className="text-black dark:text-[#F9F5EB]"
-                >
-                  <ChevronRight size={16} />
-                </Button>
-              </div>
-            )}
-          </DialogHeader>
-          
-          <div className="space-y-6">
-            {/* Product image */}
-            <div className="relative">
-              <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center overflow-hidden">
-                {imageUrl ? (
-                  <img 
-                    src={imageUrl} 
-                    alt={currentItem.itemName}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>';
-                    }}
-                  />
-                ) : (
-                  <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>
-                )}
-              </div>
-
-              {/* Ready to review banner */}
-              <div className="absolute bottom-0 left-0 right-0 py-2 px-4 rounded-b-2xl text-center text-xs font-medium flex items-center justify-center gap-2 bg-[#E7D9FA]" style={{ color: '#000' }}>
-                <Timer size={14} />
-                Ready to review
-              </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-cream dark:bg-[#200E3B] rounded-2xl w-full max-w-md mx-auto border border-lavender/30 dark:border-gray-600 relative max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="p-6 border-b border-lavender/30 dark:border-gray-600">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
+                Ready to decide?
+              </h2>
+              <p className="text-black dark:text-[#F9F5EB] text-sm mt-1">
+                {currentIndex + 1} of {items.length}
+              </p>
             </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-lavender/20 dark:hover:bg-gray-700 rounded-full transition-colors"
+            >
+              <X size={20} className="text-black dark:text-[#F9F5EB]" />
+            </button>
+          </div>
+        </div>
 
-            {/* Item details */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-start">
-                <h3 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-tight">{currentItem.itemName}</h3>
-                {currentItem.price && (
-                  <span className="text-xl font-bold text-black dark:text-[#F9F5EB] ml-2">${currentItem.price}</span>
-                )}
+        {/* Content */}
+        <div className="p-6">
+          {!showFeedback ? (
+            <>
+              {/* Item Details */}
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {imageUrl ? (
+                    <img 
+                      src={imageUrl} 
+                      alt={currentItem.itemName}
+                      className="w-full h-full object-cover"
+                      onError={handleImageError}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50" aria-hidden="true" />
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate pr-2">
+                      {currentItem.itemName}
+                    </h3>
+                    {currentItem.price && (
+                      <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0">
+                        {formatPrice(currentItem.price)}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <p className="text-black dark:text-[#F9F5EB] text-sm mb-2">
+                    {currentItem.storeName}
+                  </p>
+                  
+                  <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
+                    <span>Paused while feeling </span>
+                    <span 
+                      className="inline-block px-2 py-1 rounded text-xs font-medium"
+                      style={{ 
+                        backgroundColor: emotionColor,
+                        color: '#000'
+                      }}
+                    >
+                      {currentItem.emotion}
+                    </span>
+                  </div>
+
+                  {/* Notes section */}
+                  {currentItem.notes && currentItem.notes.trim() && (
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-600 mb-3">
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">
+                        <strong>Note:</strong> {currentItem.notes}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* View Link CTA */}
+                  {currentItem.link && currentItem.link.trim() && (
+                    <div className="pt-2">
+                      <button
+                        onClick={() => handleViewItem(currentItem)}
+                        className="text-black dark:text-[#F9F5EB] text-sm underline hover:no-underline transition-all duration-200"
+                      >
+                        view link
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              
-              <p className="text-gray-600 dark:text-gray-300 text-base">{currentItem.storeName}</p>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600 dark:text-gray-300 text-sm">Paused while feeling</span>
-                <span 
-                  className="inline-block px-4 py-2 rounded-full text-sm font-medium"
-                  style={{ 
-                    backgroundColor: getEmotionColor(currentItem.emotion),
-                    color: '#000'
-                  }}
-                >
-                  {currentItem.emotion}
-                </span>
-              </div>
-            </div>
 
-            {/* Decision buttons */}
-            <div className="space-y-3">
-              <button 
-                onClick={() => setShowConfirmDialog('let-go')}
-                className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 dark:hover:bg-lavender/20 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Let This Item Go
-              </button>
-
-              <div className="text-center">
-                <button 
-                  onClick={() => setShowConfirmDialog('purchased')}
-                  className="text-black dark:text-[#F9F5EB] hover:text-gray-700 dark:hover:text-gray-300 underline underline-offset-4 transition-colors duration-200 text-base font-medium"
+              {/* Decision Buttons */}
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleDecision('purchase')}
+                  className="w-full py-3 px-4 bg-[#CAB6F7] hover:bg-[#B5A0F2] text-black font-medium rounded-xl transition-colors"
                 >
-                  I'm Purchasing this Item
+                  I want to buy this
+                </button>
+                <button
+                  onClick={() => handleDecision('let-go')}
+                  className="w-full py-3 px-4 bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 text-black dark:text-[#F9F5EB] font-medium rounded-xl border border-lavender/30 dark:border-gray-600 transition-colors"
+                >
+                  I'm ready to let this go
                 </button>
               </div>
-            </div>
-
-            {/* Footer */}
-            {currentItem.link && (
-              <div className="pt-2 text-center">
-                <a 
-                  href={currentItem.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center justify-center gap-1"
-                >
-                  <ExternalLink size={14} />
-                  View item
-                </a>
+            </>
+          ) : (
+            <>
+              {/* Feedback Form */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-4">
+                  {selectedDecision === 'purchase' ? 'Great choice!' : 'Good for you!'}
+                </h3>
+                <p className="text-black dark:text-[#F9F5EB] text-sm mb-4">
+                  {selectedDecision === 'purchase' 
+                    ? 'Any thoughts about this purchase?'
+                    : 'What helped you decide to let this go?'
+                  }
+                </p>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Optional reflection..."
+                  className="w-full p-3 border border-lavender/30 dark:border-gray-600 rounded-xl bg-white/60 dark:bg-white/10 text-black dark:text-[#F9F5EB] placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#CAB6F7]"
+                  rows={4}
+                />
               </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Confirmation dialogs */}
-      <AlertDialog open={showConfirmDialog === 'let-go'} onOpenChange={() => setShowConfirmDialog(null)}>
-        <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Let go of this item?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-              This will move "{currentItem.itemName}" to your paused decision log.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDecision('let-go')} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
-              Let it go
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={showConfirmDialog === 'purchased'} onOpenChange={() => setShowConfirmDialog(null)}>
-        <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Mark as purchased?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-              This will move "{currentItem.itemName}" to your Paused Decision Log as a thoughtful purchase decision.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDecision('purchased')} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
-              Yes, I bought it
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+              {/* Submit Button */}
+              <button
+                onClick={handleSubmitDecision}
+                className="w-full py-3 px-4 bg-[#CAB6F7] hover:bg-[#B5A0F2] text-black font-medium rounded-xl transition-colors"
+              >
+                {isLastItem ? 'Finish' : 'Continue'}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
