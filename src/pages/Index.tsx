@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
 import AddPauseButton from '../components/AddPauseButton';
+import InStoreModeButton from '../components/InStoreModeButton';
 import PausedSection from '../components/PausedSection';
 import PauseLogSection from '../components/PauseLogSection';
 import GreaterJoyFundCTA from '../components/GreaterJoyFundCTA';
@@ -102,6 +103,7 @@ const Index = () => {
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           <AddPauseButton onAddPause={handleAddPause} />
+          <InStoreModeButton />
           <PausedSection />
           <GreaterJoyFundCTA />
           <PauseLogSection />
