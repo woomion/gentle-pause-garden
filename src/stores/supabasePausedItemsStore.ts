@@ -176,21 +176,22 @@ class SupabasePausedItemsStore {
     const reviewItems = this.items.filter(item => {
       const checkInTimestamp = item.checkInDate.getTime();
       const nowTimestamp = now.getTime();
-      const isReady = checkInTimestamp <= nowTimestamp;
-      const timeDiffMs = checkInTimestamp - nowTimestamp;
-      const timeDiffMinutes = Math.round(timeDiffMs / (1000 * 60));
-      const timeDiffHours = Math.round(timeDiffMs / (1000 * 60 * 60));
+      
+      // Use the same logic as calculateCheckInTimeDisplay for consistency
+      const diffMs = checkInTimestamp - nowTimestamp;
+      const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+      const isReady = diffHours <= 0;
       
       console.log(`🔍 Item "${item.itemName}":`, {
         checkInDate: item.checkInDate.toISOString(),
         checkInTimestamp,
         nowTimestamp,
-        timeDiffMs,
-        timeDiffMinutes,
-        timeDiffHours,
+        diffMs,
+        diffHours,
         isReady: isReady ? '✅ READY' : '❌ NOT READY',
-        comparison: `${checkInTimestamp} <= ${nowTimestamp} = ${isReady}`
+        checkInTime: item.checkInTime
       });
+      
       return isReady;
     });
     
