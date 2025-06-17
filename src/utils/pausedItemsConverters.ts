@@ -7,10 +7,30 @@ export type DbPausedItem = Database['public']['Tables']['paused_items']['Row'];
 export type DbPausedItemInsert = Database['public']['Tables']['paused_items']['Insert'];
 
 export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
+  console.log('🔄 Converting DB item to local:', {
+    id: dbItem.id,
+    title: dbItem.title,
+    created_at: dbItem.created_at,
+    review_at: dbItem.review_at,
+    created_at_type: typeof dbItem.created_at,
+    review_at_type: typeof dbItem.review_at
+  });
+
   // Ensure proper date conversion - review_at is when they should check in
   const pausedAt = new Date(dbItem.created_at);
   const checkInDate = new Date(dbItem.review_at);
   
+  console.log('🔄 Date conversion:', {
+    pausedAt_string: dbItem.created_at,
+    checkInDate_string: dbItem.review_at,
+    pausedAt_parsed: pausedAt.toISOString(),
+    checkInDate_parsed: checkInDate.toISOString(),
+    pausedAt_timestamp: pausedAt.getTime(),
+    checkInDate_timestamp: checkInDate.getTime(),
+    now_timestamp: Date.now(),
+    is_check_in_past: checkInDate.getTime() <= Date.now()
+  });
+
   const checkInTime = calculateCheckInTimeDisplay(checkInDate);
 
   const convertedItem: PausedItem = {
@@ -27,6 +47,14 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     checkInTime,
     checkInDate
   };
+
+  console.log('🔄 Final converted item:', {
+    id: convertedItem.id,
+    itemName: convertedItem.itemName,
+    checkInDate: convertedItem.checkInDate.toISOString(),
+    checkInTime: convertedItem.checkInTime,
+    is_ready: convertedItem.checkInDate.getTime() <= Date.now()
+  });
 
   return convertedItem;
 };
