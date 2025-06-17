@@ -1,6 +1,15 @@
 
 import { useEffect } from 'react';
 
+// Extend the Window interface to include eruda
+declare global {
+  interface Window {
+    eruda?: {
+      init: () => void;
+    };
+  }
+}
+
 const MobileDebugger = () => {
   useEffect(() => {
     // Only load Eruda on mobile devices or when specifically needed
