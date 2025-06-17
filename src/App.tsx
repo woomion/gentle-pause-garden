@@ -16,6 +16,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import AuthGuard from "./components/AuthGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
+import MobileDebugger from "./components/MobileDebugger";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => {
         <AuthProvider>
           <ThemeProvider>
             <TooltipProvider>
+              <MobileDebugger />
               <Toaster />
               <Sonner />
               <BrowserRouter>
