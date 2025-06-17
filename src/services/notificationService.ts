@@ -1,4 +1,3 @@
-
 export class NotificationService {
   private static instance: NotificationService;
   private isEnabled = false;
@@ -59,7 +58,6 @@ export class NotificationService {
         badge: '/favicon.ico',
         requireInteraction: false,
         silent: false,
-        vibrate: [200, 100, 200],
         ...options
       });
       
