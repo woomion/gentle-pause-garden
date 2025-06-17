@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
@@ -142,9 +141,18 @@ const ItemReviewModal = ({
               <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
                 Ready to decide?
               </h2>
-              <p className="text-black dark:text-[#F9F5EB] text-sm mt-1">
-                {activeIndex + 1} of {items.length}
-              </p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-black dark:text-[#F9F5EB] text-sm">
+                  {activeIndex + 1} of {items.length}
+                </p>
+                {/* Carousel Navigation - Top Position */}
+                {items.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <CarouselPrevious className="relative left-0 top-0 translate-y-0 static h-6 w-6" />
+                    <CarouselNext className="relative right-0 top-0 translate-y-0 static h-6 w-6" />
+                  </div>
+                )}
+              </div>
             </div>
             <button
               onClick={onClose}
@@ -164,7 +172,27 @@ const ItemReviewModal = ({
                   <ItemContent 
                     item={item}
                     emotionColor={getEmotionColor(item.emotion)}
-                    imageUrl={imageUrl}
+                    imageUrl={(() => {
+                      if (item.imageUrl) {
+                        if (item.imageUrl.includes('supabase')) {
+                          return item.imageUrl;
+                        } else {
+                          try {
+                            new URL(item.imageUrl);
+                            return item.imageUrl;
+                          } catch {
+                            return null;
+                          }
+                        }
+                      }
+                      if (item.photoDataUrl) {
+                        return item.photoDataUrl;
+                      }
+                      if (item.photo instanceof File) {
+                        return URL.createObjectURL(item.photo);
+                      }
+                      return null;
+                    })()}
                     handleImageError={handleImageError}
                     handleViewItem={handleViewItem}
                     showFeedback={showFeedback}
@@ -178,8 +206,6 @@ const ItemReviewModal = ({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="left-4" />
-            <CarouselNext className="right-4" />
           </Carousel>
         ) : (
           <ItemContent 
