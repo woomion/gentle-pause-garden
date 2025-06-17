@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
 import { useItemNavigation } from '../hooks/useItemNavigation';
-import { emotionColors } from '../utils/emotionColors';
+import { getEmotionColor } from '../utils/emotionColors';
 import { useItemActions } from '../hooks/useItemActions';
 
 interface ItemReviewModalProps {
@@ -30,7 +29,7 @@ const ItemReviewModal = ({
   const [notes, setNotes] = useState('');
 
   const { handleViewItem } = useItemNavigation();
-  const { handleItemPurchased, handleItemLetGo } = useItemActions();
+  const { handleBought, handleLetGo } = useItemActions();
 
   const currentItem = items[currentIndex];
   const isLastItem = currentIndex >= items.length - 1;
@@ -55,12 +54,10 @@ const ItemReviewModal = ({
 
     try {
       if (selectedDecision === 'purchase') {
-        await handleItemPurchased(currentItem, notes);
+        await handleBought(currentItem, onItemDecided, onClose);
       } else {
-        await handleItemLetGo(currentItem, notes);
+        await handleLetGo(currentItem, onItemDecided, onClose);
       }
-
-      onItemDecided(currentItem.id);
 
       if (isLastItem) {
         onClose();
@@ -75,7 +72,7 @@ const ItemReviewModal = ({
     }
   };
 
-  const emotionColor = emotionColors[currentItem.emotion] || '#F0F0EC';
+  const emotionColor = getEmotionColor(currentItem.emotion);
 
   const imageUrl = (() => {
     if (currentItem.imageUrl) {
