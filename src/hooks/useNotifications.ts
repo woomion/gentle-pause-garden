@@ -60,6 +60,14 @@ export const useNotifications = (enabled: boolean) => {
       const shouldNotifyForNewItems = itemsForReview.length > 0 && itemsForReview.length !== lastNotificationCountRef.current;
       const shouldRemindAfterDelay = itemsForReview.length > 0 && timeSinceLastCheck > 2 * 60 * 60 * 1000; // 2 hours
       
+      console.log('🔔 Notification decision:', {
+        itemCount: itemsForReview.length,
+        lastCount: lastNotificationCountRef.current,
+        timeSinceLastCheck: Math.round(timeSinceLastCheck / (1000 * 60)), // minutes
+        shouldNotifyForNewItems,
+        shouldRemindAfterDelay
+      });
+      
       if (shouldNotifyForNewItems || shouldRemindAfterDelay) {
         const title = itemsForReview.length === 1 
           ? 'Time to review your paused item!'

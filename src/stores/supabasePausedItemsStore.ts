@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { uploadImage } from '@/services/imageUploadService';
 import { convertDbToLocal, convertLocalToDb } from '@/utils/pausedItemsConverters';
@@ -168,7 +167,30 @@ class SupabasePausedItemsStore {
 
   getItemsForReview(): PausedItem[] {
     const now = new Date();
-    return this.items.filter(item => item.checkInDate <= now);
+    console.log('🔍 getItemsForReview DEBUG:');
+    console.log('🔍 Current time:', now.toISOString());
+    console.log('🔍 Total items:', this.items.length);
+    
+    const reviewItems = this.items.filter(item => {
+      const isReady = item.checkInDate <= now;
+      console.log(`🔍 Item "${item.itemName}":`, {
+        checkInDate: item.checkInDate.toISOString(),
+        isReady,
+        timeDiff: item.checkInDate.getTime() - now.getTime(),
+        hoursUntilReady: Math.round((item.checkInDate.getTime() - now.getTime()) / (1000 * 60 * 60))
+      });
+      return isReady;
+    });
+    
+    console.log('🔍 Items ready for review:', reviewItems.length);
+    console.log('🔍 Review items:', reviewItems.map(item => ({
+      id: item.id,
+      itemName: item.itemName,
+      checkInDate: item.checkInDate.toISOString(),
+      checkInTime: item.checkInTime
+    })));
+    
+    return reviewItems;
   }
 
   async removeItem(id: string): Promise<void> {
