@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { uploadImage } from '@/services/imageUploadService';
 import { convertDbToLocal, convertLocalToDb } from '@/utils/pausedItemsConverters';
@@ -167,17 +168,28 @@ class SupabasePausedItemsStore {
 
   getItemsForReview(): PausedItem[] {
     const now = new Date();
-    console.log('🔍 getItemsForReview DEBUG:');
+    console.log('🔍 getItemsForReview DETAILED DEBUG:');
     console.log('🔍 Current time:', now.toISOString());
+    console.log('🔍 Current timestamp:', now.getTime());
     console.log('🔍 Total items:', this.items.length);
     
     const reviewItems = this.items.filter(item => {
-      const isReady = item.checkInDate <= now;
+      const checkInTimestamp = item.checkInDate.getTime();
+      const nowTimestamp = now.getTime();
+      const isReady = checkInTimestamp <= nowTimestamp;
+      const timeDiffMs = checkInTimestamp - nowTimestamp;
+      const timeDiffMinutes = Math.round(timeDiffMs / (1000 * 60));
+      const timeDiffHours = Math.round(timeDiffMs / (1000 * 60 * 60));
+      
       console.log(`🔍 Item "${item.itemName}":`, {
         checkInDate: item.checkInDate.toISOString(),
-        isReady,
-        timeDiff: item.checkInDate.getTime() - now.getTime(),
-        hoursUntilReady: Math.round((item.checkInDate.getTime() - now.getTime()) / (1000 * 60 * 60))
+        checkInTimestamp,
+        nowTimestamp,
+        timeDiffMs,
+        timeDiffMinutes,
+        timeDiffHours,
+        isReady: isReady ? '✅ READY' : '❌ NOT READY',
+        comparison: `${checkInTimestamp} <= ${nowTimestamp} = ${isReady}`
       });
       return isReady;
     });
