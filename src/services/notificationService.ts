@@ -59,7 +59,6 @@ export class NotificationService {
         badge: '/favicon.ico',
         requireInteraction: false,
         silent: false,
-        renotify: true,
         vibrate: [200, 100, 200],
         ...options
       });
