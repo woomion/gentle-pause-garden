@@ -40,6 +40,7 @@ export const calculateCheckInTimeDisplay = (checkInDate: Date): string => {
   return `Checking-in in ${diffDays} days`;
 };
 
+// Legacy functions for backward compatibility with pause log converters
 export const extractStoreNameFromNotes = (notes: string | null): string => {
   if (!notes) return 'Unknown Store';
   
@@ -56,12 +57,17 @@ export const extractStoreNameFromNotes = (notes: string | null): string => {
 export const extractActualNotes = (notes: string | null): string | undefined => {
   if (!notes) return undefined;
   
-  if (notes.includes('STORE:')) {
-    const actualNotes = notes.replace(/STORE:[^|]*\|?/, '').trim();
-    return actualNotes === '' ? undefined : actualNotes;
+  let actualNotes = notes;
+  
+  if (actualNotes.includes('STORE:')) {
+    actualNotes = actualNotes.replace(/STORE:[^|]*\|?/, '').trim();
   }
   
-  return notes;
+  if (actualNotes.includes('LINK:')) {
+    actualNotes = actualNotes.replace(/LINK:[^|]*\|?/, '').trim();
+  }
+  
+  return actualNotes === '' ? undefined : actualNotes;
 };
 
 export const formatNotesWithStore = (storeName: string, notes?: string): string | null => {
