@@ -1,7 +1,28 @@
 
-import { PausedItem, Listener } from './supabase/types';
-import { PausedItemsOperations } from './supabase/pausedItemsOperations';
-import { PausedItemsUtils } from './supabase/pausedItemsUtils';
+import { supabase } from '@/integrations/supabase/client';
+import { uploadImage } from '@/services/imageUploadService';
+import { convertDbToLocal, convertLocalToDb } from '@/utils/pausedItemsConverters';
+import { calculateCheckInTimeDisplay } from '@/utils/pausedItemsUtils';
+
+export interface PausedItem {
+  id: string;
+  itemName: string;
+  storeName: string;
+  price: string;
+  imageUrl?: string;
+  emotion: string;
+  notes?: string;
+  duration: string;
+  otherDuration?: string;
+  link?: string;
+  photo?: File | null;
+  photoDataUrl?: string;
+  pausedAt: Date;
+  checkInTime: string;
+  checkInDate: Date;
+}
+
+type Listener = () => void;
 
 class SupabasePausedItemsStore {
   private items: PausedItem[] = [];
@@ -13,12 +34,44 @@ class SupabasePausedItemsStore {
     this.loadItems();
   }
 
+  private updateCheckInTimes(): void {
+    this.items.forEach(item => {
+      item.checkInTime = calculateCheckInTimeDisplay(item.checkInDate);
+    });
+  }
+
   async loadItems(): Promise<void> {
     try {
-      const items = await PausedItemsOperations.loadItems();
-      this.items = items;
-      PausedItemsUtils.updateCheckInTimes(this.items);
+      console.log('Loading paused items from Supabase...');
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No authenticated user, skipping load');
+        this.items = [];
+        this.isLoaded = true;
+        this.notifyListeners();
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('paused_items')
+        .select('*')
+        .eq('status', 'paused')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading paused items:', error);
+        return;
+      }
+
+      console.log('Raw paused items data from Supabase:', data);
+
+      this.items = data?.map(item => convertDbToLocal(item)) || [];
+      this.updateCheckInTimes();
       this.isLoaded = true;
+      
+      console.log('Converted paused items:', this.items);
+      
       this.notifyListeners();
     } catch (error) {
       console.error('Error in loadItems:', error);
@@ -26,28 +79,148 @@ class SupabasePausedItemsStore {
   }
 
   async addItem(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>): Promise<void> {
-    const newItem = await PausedItemsOperations.addItem(item);
-    if (newItem) {
+    try {
+      console.log('=== ADD ITEM DEBUG START ===');
+      
+      // Step 1: Check authentication
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ User not authenticated');
+        return;
+      }
+
+      console.log('1. Adding item for user:', user.id, 'with data:', {
+        itemName: item.itemName,
+        storeName: item.storeName,
+        emotion: item.emotion,
+        hasPhoto: !!item.photo,
+        hasImageUrl: !!item.imageUrl,
+        hasLink: !!item.link,
+        photoSize: item.photo?.size,
+        photoName: item.photo?.name,
+        photoType: item.photo?.type
+      });
+
+      // Step 2: Handle image upload if provided
+      let uploadedImageUrl: string | null = null;
+      if (item.photo) {
+        console.log('2. Photo detected, starting upload process...');
+        uploadedImageUrl = await uploadImage(item.photo);
+        console.log('2a. Upload result:', { 
+          success: !!uploadedImageUrl, 
+          url: uploadedImageUrl 
+        });
+      } else {
+        console.log('2. No photo to upload');
+      }
+
+      // Step 3: Convert to database format
+      const dbItem = convertLocalToDb(item, uploadedImageUrl || undefined);
+      console.log('3. Database item prepared:', dbItem);
+      
+      // Step 4: Save to database
+      console.log('4. Saving to database...');
+      const { data, error } = await supabase
+        .from('paused_items')
+        .insert({
+          ...dbItem,
+          user_id: user.id
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('4a. ❌ Database save failed:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          fullError: error
+        });
+        return;
+      }
+
+      console.log('4b. ✅ Database save successful:', data);
+
+      // Step 5: Update local state
+      const newItem = convertDbToLocal(data);
       this.items.unshift(newItem);
-      PausedItemsUtils.updateCheckInTimes(this.items);
+      this.updateCheckInTimes();
       this.notifyListeners();
+      
+      console.log('5. ✅ Item successfully added with final data:', {
+        id: newItem.id,
+        storeName: newItem.storeName,
+        imageUrl: newItem.imageUrl,
+        emotion: newItem.emotion
+      });
+      
+      console.log('=== ADD ITEM DEBUG END ===');
+    } catch (error) {
+      console.error('❌ Unexpected error in addItem:', error);
     }
   }
 
   getItems(): PausedItem[] {
-    PausedItemsUtils.updateCheckInTimes(this.items);
+    this.updateCheckInTimes();
     return [...this.items];
   }
 
   getItemsForReview(): PausedItem[] {
-    return PausedItemsUtils.getItemsForReview(this.items);
+    const now = new Date();
+    console.log('🔍 getItemsForReview DETAILED DEBUG:');
+    console.log('🔍 Current time:', now.toISOString());
+    console.log('🔍 Current timestamp:', now.getTime());
+    console.log('🔍 Total items:', this.items.length);
+    
+    const reviewItems = this.items.filter(item => {
+      const checkInTimestamp = item.checkInDate.getTime();
+      const nowTimestamp = now.getTime();
+      const isReady = checkInTimestamp <= nowTimestamp;
+      const timeDiffMs = checkInTimestamp - nowTimestamp;
+      const timeDiffMinutes = Math.round(timeDiffMs / (1000 * 60));
+      const timeDiffHours = Math.round(timeDiffMs / (1000 * 60 * 60));
+      
+      console.log(`🔍 Item "${item.itemName}":`, {
+        checkInDate: item.checkInDate.toISOString(),
+        checkInTimestamp,
+        nowTimestamp,
+        timeDiffMs,
+        timeDiffMinutes,
+        timeDiffHours,
+        isReady: isReady ? '✅ READY' : '❌ NOT READY',
+        comparison: `${checkInTimestamp} <= ${nowTimestamp} = ${isReady}`
+      });
+      return isReady;
+    });
+    
+    console.log('🔍 Items ready for review:', reviewItems.length);
+    console.log('🔍 Review items:', reviewItems.map(item => ({
+      id: item.id,
+      itemName: item.itemName,
+      checkInDate: item.checkInDate.toISOString(),
+      checkInTime: item.checkInTime
+    })));
+    
+    return reviewItems;
   }
 
   async removeItem(id: string): Promise<void> {
-    const success = await PausedItemsOperations.removeItem(id);
-    if (success) {
+    try {
+      const { error } = await supabase
+        .from('paused_items')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error removing paused item:', error);
+        return;
+      }
+
       this.items = this.items.filter(item => item.id !== id);
       this.notifyListeners();
+    } catch (error) {
+      console.error('Error in removeItem:', error);
     }
   }
 
@@ -74,4 +247,3 @@ class SupabasePausedItemsStore {
 }
 
 export const supabasePausedItemsStore = new SupabasePausedItemsStore();
-export type { PausedItem };
