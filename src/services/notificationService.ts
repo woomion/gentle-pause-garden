@@ -44,6 +44,8 @@ export class NotificationService {
     console.log('🔔 showNotification called with:', { title, options });
     console.log('🔔 Service enabled:', this.isEnabled);
     console.log('🔔 Browser permission:', Notification.permission);
+    console.log('🔔 Page visibility:', document.visibilityState);
+    console.log('🔔 User agent:', navigator.userAgent);
     
     if (!this.isEnabled || Notification.permission !== 'granted') {
       console.log('❌ Notifications not enabled or permission not granted');
@@ -55,13 +57,29 @@ export class NotificationService {
       const notification = new Notification(title, {
         icon: '/favicon.ico',
         badge: '/favicon.ico',
+        requireInteraction: false,
+        silent: false,
+        renotify: true,
+        vibrate: [200, 100, 200],
         ...options
       });
       
       console.log('✅ Notification created successfully:', notification);
       
-      notification.onshow = () => console.log('📱 Notification shown');
-      notification.onclick = () => console.log('👆 Notification clicked');
+      notification.onshow = () => {
+        console.log('📱 Notification shown');
+        // Auto-close after 10 seconds to prevent notification spam
+        setTimeout(() => {
+          if (notification) {
+            notification.close();
+          }
+        }, 10000);
+      };
+      notification.onclick = () => {
+        console.log('👆 Notification clicked');
+        window.focus();
+        notification.close();
+      };
       notification.onclose = () => console.log('❌ Notification closed');
       notification.onerror = (error) => console.log('❌ Notification error:', error);
       
@@ -75,7 +93,6 @@ export class NotificationService {
 
   setEnabled(enabled: boolean) {
     console.log('🔔 Setting notification service enabled to:', enabled);
-    // Only enable if we actually have permission
     if (enabled && Notification.permission === 'granted') {
       this.isEnabled = true;
       console.log('✅ Notification service enabled');
