@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
@@ -142,9 +141,18 @@ const ItemReviewModal = ({
               <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
                 Ready to decide?
               </h2>
-              <p className="text-black dark:text-[#F9F5EB] text-sm mt-1">
-                {activeIndex + 1} of {items.length}
-              </p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-black dark:text-[#F9F5EB] text-sm">
+                  {activeIndex + 1} of {items.length}
+                </p>
+                {/* Carousel Navigation - Top Position */}
+                {items.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <CarouselPrevious className="relative left-0 top-0 translate-y-0 static h-6 w-6" />
+                    <CarouselNext className="relative right-0 top-0 translate-y-0 static h-6 w-6" />
+                  </div>
+                )}
+              </div>
             </div>
             <button
               onClick={onClose}
@@ -157,35 +165,48 @@ const ItemReviewModal = ({
 
         {/* Carousel for multiple items */}
         {items.length > 1 ? (
-          <div className="relative">
-            <Carousel className="w-full" opts={{ startIndex: activeIndex }}>
-              <CarouselContent>
-                {items.map((item, index) => (
-                  <CarouselItem key={item.id}>
-                    <ItemContent 
-                      item={item}
-                      emotionColor={getEmotionColor(item.emotion)}
-                      imageUrl={imageUrl}
-                      handleImageError={handleImageError}
-                      handleViewItem={handleViewItem}
-                      showFeedback={showFeedback}
-                      selectedDecision={selectedDecision}
-                      notes={notes}
-                      setNotes={setNotes}
-                      handleDecision={handleDecision}
-                      handleSubmitDecision={handleSubmitDecision}
-                      isLastItem={index >= items.length - 1}
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-            {/* Navigation arrows positioned at bottom */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
-              <CarouselPrevious className="relative left-0 top-0 translate-y-0" />
-              <CarouselNext className="relative right-0 top-0 translate-y-0" />
-            </div>
-          </div>
+          <Carousel className="w-full" opts={{ startIndex: activeIndex }}>
+            <CarouselContent>
+              {items.map((item, index) => (
+                <CarouselItem key={item.id}>
+                  <ItemContent 
+                    item={item}
+                    emotionColor={getEmotionColor(item.emotion)}
+                    imageUrl={(() => {
+                      if (item.imageUrl) {
+                        if (item.imageUrl.includes('supabase')) {
+                          return item.imageUrl;
+                        } else {
+                          try {
+                            new URL(item.imageUrl);
+                            return item.imageUrl;
+                          } catch {
+                            return null;
+                          }
+                        }
+                      }
+                      if (item.photoDataUrl) {
+                        return item.photoDataUrl;
+                      }
+                      if (item.photo instanceof File) {
+                        return URL.createObjectURL(item.photo);
+                      }
+                      return null;
+                    })()}
+                    handleImageError={handleImageError}
+                    handleViewItem={handleViewItem}
+                    showFeedback={showFeedback}
+                    selectedDecision={selectedDecision}
+                    notes={notes}
+                    setNotes={setNotes}
+                    handleDecision={handleDecision}
+                    handleSubmitDecision={handleSubmitDecision}
+                    isLastItem={index >= items.length - 1}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         ) : (
           <ItemContent 
             item={currentItem}
