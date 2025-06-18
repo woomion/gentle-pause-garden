@@ -1,15 +1,15 @@
 
 import { X, ExternalLink } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PauseLogItem as PauseLogItemType } from '../stores/pauseLogStore';
+import { PauseLogItem } from '../stores/pauseLogStore';
 
-interface PauseLogItemProps {
-  item: PauseLogItemType;
+interface PauseLogItemCardProps {
+  item: PauseLogItem;
   onDelete: (id: string) => void;
-  onViewLink: (item: PauseLogItemType) => void;
+  onViewLink: (item: PauseLogItem) => void;
 }
 
-const PauseLogItem = ({ item, onDelete, onViewLink }: PauseLogItemProps) => {
+const PauseLogItemCard = ({ item, onDelete, onViewLink }: PauseLogItemCardProps) => {
   const getEmotionColor = (emotion: string): string => {
     const emotionColors: Record<string, string> = {
       'bored': '#F6E3D5',
@@ -132,4 +132,4 @@ const PauseLogItem = ({ item, onDelete, onViewLink }: PauseLogItemProps) => {
   );
 };
 
-export default PauseLogItem;
+export default PauseLogItemCard;

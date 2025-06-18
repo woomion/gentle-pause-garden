@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PauseLogItem } from '../stores/pauseLogStore';
 import PauseLogHeader from '../components/PauseLogHeader';
 import PauseLogFilterControls from '../components/PauseLogFilterControls';
-import PauseLogItem from '../components/PauseLogItem';
+import PauseLogItemCard from '../components/PauseLogItemCard';
 import PauseLogEmptyState from '../components/PauseLogEmptyState';
 import FooterLinks from '../components/FooterLinks';
 
@@ -157,7 +157,7 @@ const PauseLog = () => {
             <PauseLogEmptyState />
           ) : (
             filteredItems.map((item) => (
-              <PauseLogItem
+              <PauseLogItemCard
                 key={item.id}
                 item={item}
                 onDelete={handleDeleteItem}
