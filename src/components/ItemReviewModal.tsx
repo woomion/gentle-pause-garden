@@ -157,30 +157,35 @@ const ItemReviewModal = ({
 
         {/* Carousel for multiple items */}
         {items.length > 1 ? (
-          <Carousel className="w-full" opts={{ startIndex: activeIndex }}>
-            <CarouselContent>
-              {items.map((item, index) => (
-                <CarouselItem key={item.id}>
-                  <ItemContent 
-                    item={item}
-                    emotionColor={getEmotionColor(item.emotion)}
-                    imageUrl={imageUrl}
-                    handleImageError={handleImageError}
-                    handleViewItem={handleViewItem}
-                    showFeedback={showFeedback}
-                    selectedDecision={selectedDecision}
-                    notes={notes}
-                    setNotes={setNotes}
-                    handleDecision={handleDecision}
-                    handleSubmitDecision={handleSubmitDecision}
-                    isLastItem={index >= items.length - 1}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-4" />
-            <CarouselNext className="right-4" />
-          </Carousel>
+          <div className="relative">
+            <Carousel className="w-full" opts={{ startIndex: activeIndex }}>
+              <CarouselContent>
+                {items.map((item, index) => (
+                  <CarouselItem key={item.id}>
+                    <ItemContent 
+                      item={item}
+                      emotionColor={getEmotionColor(item.emotion)}
+                      imageUrl={imageUrl}
+                      handleImageError={handleImageError}
+                      handleViewItem={handleViewItem}
+                      showFeedback={showFeedback}
+                      selectedDecision={selectedDecision}
+                      notes={notes}
+                      setNotes={setNotes}
+                      handleDecision={handleDecision}
+                      handleSubmitDecision={handleSubmitDecision}
+                      isLastItem={index >= items.length - 1}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+            {/* Navigation arrows positioned at bottom */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
+              <CarouselPrevious className="relative left-0 top-0 translate-y-0" />
+              <CarouselNext className="relative right-0 top-0 translate-y-0" />
+            </div>
+          </div>
         ) : (
           <ItemContent 
             item={currentItem}
