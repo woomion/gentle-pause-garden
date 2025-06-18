@@ -1,0 +1,113 @@
+
+import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
+import { formatPrice } from '../utils/priceFormatter';
+import { getEmotionColor } from '../utils/emotionColors';
+
+interface ItemReviewDetailsProps {
+  item: PausedItem | LocalPausedItem;
+  onViewItem: (item: PausedItem | LocalPausedItem) => void;
+}
+
+const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
+  const emotionColor = getEmotionColor(item.emotion);
+
+  const imageUrl = (() => {
+    if (item.imageUrl) {
+      if (item.imageUrl.includes('supabase')) {
+        return item.imageUrl;
+      } else {
+        try {
+          new URL(item.imageUrl);
+          return item.imageUrl;
+        } catch {
+          return null;
+        }
+      }
+    }
+    if (item.photoDataUrl) {
+      return item.photoDataUrl;
+    }
+    if (item.photo instanceof File) {
+      return URL.createObjectURL(item.photo);
+    }
+    return null;
+  })();
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    target.style.display = 'none';
+    if (target.parentElement) {
+      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-400 dark:bg-gray-500 rounded-full"></div>';
+    }
+  };
+
+  return (
+    <div className="flex items-start gap-4 mb-6">
+      <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={item.itemName}
+            className="w-full h-full object-cover"
+            onError={handleImageError}
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50" aria-hidden="true" />
+        )}
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate pr-2">
+            {item.itemName}
+          </h3>
+          {item.price && (
+            <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0">
+              {formatPrice(item.price)}
+            </span>
+          )}
+        </div>
+        
+        <p className="text-black dark:text-[#F9F5EB] text-sm mb-2">
+          {item.storeName}
+        </p>
+        
+        <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
+          <span>Paused while feeling </span>
+          <span 
+            className="inline-block px-2 py-1 rounded text-xs font-medium"
+            style={{ 
+              backgroundColor: emotionColor,
+              color: '#000'
+            }}
+          >
+            {item.emotion}
+          </span>
+        </div>
+
+        {item.notes && item.notes.trim() && (
+          <div className="pt-2 border-t border-gray-200 dark:border-gray-600 mb-3">
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              <strong>Note:</strong> {item.notes}
+            </p>
+          </div>
+        )}
+
+        {item.link && item.link.trim() && (
+          <div className="pt-2">
+            <button
+              onClick={() => onViewItem(item)}
+              className="text-black dark:text-[#F9F5EB] text-sm underline hover:no-underline transition-all duration-200"
+            >
+              view link
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ItemReviewDetails;
