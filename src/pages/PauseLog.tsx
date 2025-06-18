@@ -1,15 +1,14 @@
 
 import { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, X, ArrowDown, ArrowUp, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { usePauseLog } from '../hooks/usePauseLog';
 import { useSupabasePauseLog } from '../hooks/useSupabasePauseLog';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import PauseHeader from '../components/PauseHeader';
+import { PauseLogItem } from '../stores/pauseLogStore';
+import PauseLogHeader from '../components/PauseLogHeader';
+import PauseLogFilterControls from '../components/PauseLogFilterControls';
+import PauseLogItem from '../components/PauseLogItem';
+import PauseLogEmptyState from '../components/PauseLogEmptyState';
 import FooterLinks from '../components/FooterLinks';
 
 const PauseLog = () => {
@@ -66,24 +65,6 @@ const PauseLog = () => {
     return filtered;
   }, [items, emotionFilter, statusFilter, sortOrder]);
 
-  const getEmotionColor = (emotion: string): string => {
-    const emotionColors: Record<string, string> = {
-      'bored': '#F6E3D5',
-      'overwhelmed': '#E9E2F7',
-      'burnt out': '#FBF3C2',
-      'sad': '#DCE7F5',
-      'inspired': '#FBE7E6',
-      'deserving': '#E7D8F3',
-      'curious': '#DDEEDF',
-      'anxious': '#EDEAE5',
-      'lonely': '#CED8E3',
-      'celebratory': '#FAEED6',
-      'resentful': '#EAC9C3',
-      'something else': '#F0F0EC'
-    };
-    return emotionColors[emotion] || '#F0F0EC';
-  };
-
   const handleDeleteItem = (id: string) => {
     deleteItem(id);
   };
@@ -92,7 +73,7 @@ const PauseLog = () => {
     setSortOrder(current => current === 'newest' ? 'oldest' : 'newest');
   };
 
-  const handleViewLink = (item: any) => {
+  const handleViewLink = (item: PauseLogItem) => {
     // Check multiple possible locations for the link
     const link = item.originalPausedItem?.link || 
                  item.originalPausedItem?.url || 
@@ -156,195 +137,33 @@ const PauseLog = () => {
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
       <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
-        <PauseHeader />
+        <PauseLogHeader itemCount={items.length} />
         
-        <div className="mb-6 mt-8">
-          <Link 
-            to="/"
-            className="inline-flex items-center text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors mb-4"
-          >
-            <ArrowLeft size={20} className="mr-2" />
-            <span className="text-sm">Back to home</span>
-          </Link>
-          
-          <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Paused Decision Log</h1>
-          
-          {/* Show auth status for debugging */}
-          {!user && items.length > 0 && (
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-4">
-              <p className="text-amber-800 dark:text-amber-200 text-sm text-center">
-                <strong>Guest Mode:</strong> Items stored locally only
-              </p>
-            </div>
-          )}
-          
-          {/* Filter and sort controls */}
-          <div className="mb-2">
-            <span className="text-sm text-black dark:text-cream">Filter and sort:</span>
-          </div>
-
-          <div className="flex flex-wrap gap-4 items-center">
-            <Select value={emotionFilter} onValueChange={setEmotionFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="All emotions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All emotions</SelectItem>
-                {uniqueEmotions.map(emotion => (
-                  <SelectItem key={emotion} value={emotion}>{emotion}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="All outcomes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All outcomes</SelectItem>
-                <SelectItem value="purchased">Purchased</SelectItem>
-                <SelectItem value="let-go">Let go</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleSortOrder}
-              className="flex items-center gap-2 rounded-2xl border-gray-200 dark:border-gray-600"
-            >
-              {sortOrder === 'newest' ? (
-                <>
-                  <ArrowDown size={16} />
-                  Newest first
-                </>
-              ) : (
-                <>
-                  <ArrowUp size={16} />
-                  Oldest first
-                </>
-              )}
-            </Button>
-          </div>
+        <div className="mb-6">
+          <PauseLogFilterControls
+            emotionFilter={emotionFilter}
+            statusFilter={statusFilter}
+            sortOrder={sortOrder}
+            uniqueEmotions={uniqueEmotions}
+            onEmotionFilterChange={setEmotionFilter}
+            onStatusFilterChange={setStatusFilter}
+            onSortOrderToggle={toggleSortOrder}
+          />
         </div>
 
         {/* Items List */}
         <div className="space-y-4">
           {filteredItems.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-taupe dark:text-cream mb-2">No items found</p>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
-                Try adjusting your filters or add some paused items first
-              </p>
-            </div>
+            <PauseLogEmptyState />
           ) : (
-            filteredItems.map((item) => {
-              // Check only the originalPausedItem for links
-              const hasLink = Boolean(
-                item.originalPausedItem?.link || 
-                item.originalPausedItem?.url
-              );
-              
-              return (
-                <div
-                  key={item.id}
-                  className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600 relative"
-                >
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
-                        <X size={16} />
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete from Paused Decision Log</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{item.itemName}" from your Paused Decision Log? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteItem(item.id)}>
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-
-                  <div className="mb-3">
-                    <h3 className="text-black dark:text-[#F9F5EB] text-lg">
-                      <span className="font-medium">{item.itemName}</span>
-                      <span className="font-normal"> from {item.storeName}</span>
-                    </h3>
-                  </div>
-                  
-                  <div className="mb-2">
-                    <span className="text-black dark:text-[#F9F5EB] text-sm">
-                      Paused while feeling{' '}
-                    </span>
-                    <span 
-                      className="inline-block px-2 py-1 rounded text-xs font-medium"
-                      style={{ 
-                        backgroundColor: getEmotionColor(item.emotion),
-                        color: '#000'
-                      }}
-                    >
-                      {item.emotion}
-                    </span>
-                  </div>
-                  
-                  {item.notes && item.notes.trim() && (
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-                      {item.notes}
-                    </p>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      {item.status === 'purchased' 
-                        ? `Purchased on ${item.letGoDate}`
-                        : `Let go of on ${item.letGoDate}`
-                      }
-                    </p>
-                    
-                    {hasLink && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <button className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors p-1">
-                            <ExternalLink size={16} />
-                          </button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">
-                              View item link?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-                              {item.status === 'purchased' 
-                                ? `Are you sure you want to go to this link? You already purchased this item.`
-                                : `Are you sure you want to go to this link? You already let this item go.`
-                              }
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">
-                              Nevermind
-                            </AlertDialogCancel>
-                            <AlertDialogAction 
-                              onClick={() => handleViewLink(item)}
-                              className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black"
-                            >
-                              Yes, take me to the link
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
-                  </div>
-                </div>
-              );
-            })
+            filteredItems.map((item) => (
+              <PauseLogItem
+                key={item.id}
+                item={item}
+                onDelete={handleDeleteItem}
+                onViewLink={handleViewLink}
+              />
+            ))
           )}
         </div>
 
