@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
@@ -12,6 +13,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  CarouselApi
 } from "@/components/ui/carousel"
 
 interface ItemReviewModalProps {
@@ -35,12 +37,28 @@ const ItemReviewModal = ({
   const [showFeedback, setShowFeedback] = useState(false);
   const [notes, setNotes] = useState('');
   const [activeIndex, setActiveIndex] = useState(currentIndex);
+  const [api, setApi] = useState<CarouselApi>();
 
   const { handleViewItem } = useItemNavigation();
   const { handleBought, handleLetGo } = useItemActions();
 
   const currentItem = items[activeIndex];
   const isLastItem = activeIndex >= items.length - 1;
+
+  useEffect(() => {
+    if (!api) return;
+
+    const onSelect = () => {
+      const selectedIndex = api.selectedScrollSnap();
+      setActiveIndex(selectedIndex);
+      setSelectedDecision(null);
+      setShowFeedback(false);
+      setNotes('');
+    };
+
+    api.on('select', onSelect);
+    return () => api.off('select', onSelect);
+  }, [api]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -53,7 +71,10 @@ const ItemReviewModal = ({
 
   useEffect(() => {
     setActiveIndex(currentIndex);
-  }, [currentIndex]);
+    if (api) {
+      api.scrollTo(currentIndex);
+    }
+  }, [currentIndex, api]);
 
   if (!isOpen || !currentItem) return null;
 
@@ -83,6 +104,9 @@ const ItemReviewModal = ({
         const nextIndex = activeIndex + 1;
         if (nextIndex < items.length) {
           setActiveIndex(nextIndex);
+          if (api) {
+            api.scrollTo(nextIndex);
+          }
         } else {
           onClose();
         }
@@ -124,13 +148,6 @@ const ItemReviewModal = ({
     }
   };
 
-  const handleCarouselSelect = (index: number) => {
-    setActiveIndex(index);
-    setSelectedDecision(null);
-    setShowFeedback(false);
-    setNotes('');
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-cream dark:bg-[#200E3B] rounded-2xl w-full max-w-md mx-auto border border-lavender/30 dark:border-gray-600 relative max-h-[90vh] overflow-y-auto">
@@ -141,18 +158,9 @@ const ItemReviewModal = ({
               <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
                 Ready to decide?
               </h2>
-              <div className="flex items-center justify-between mt-1">
-                <p className="text-black dark:text-[#F9F5EB] text-sm">
-                  {activeIndex + 1} of {items.length}
-                </p>
-                {/* Carousel Navigation - Top Position */}
-                {items.length > 1 && (
-                  <div className="flex items-center gap-2">
-                    <CarouselPrevious className="relative left-0 top-0 translate-y-0 static h-6 w-6" />
-                    <CarouselNext className="relative right-0 top-0 translate-y-0 static h-6 w-6" />
-                  </div>
-                )}
-              </div>
+              <p className="text-black dark:text-[#F9F5EB] text-sm mt-1">
+                {activeIndex + 1} of {items.length}
+              </p>
             </div>
             <button
               onClick={onClose}
@@ -165,7 +173,7 @@ const ItemReviewModal = ({
 
         {/* Carousel for multiple items */}
         {items.length > 1 ? (
-          <Carousel className="w-full" opts={{ startIndex: activeIndex }}>
+          <Carousel className="w-full" setApi={setApi} opts={{ startIndex: activeIndex }}>
             <CarouselContent>
               {items.map((item, index) => (
                 <CarouselItem key={item.id}>
@@ -206,6 +214,15 @@ const ItemReviewModal = ({
                 </CarouselItem>
               ))}
             </CarouselContent>
+            
+            {/* Carousel Navigation at Bottom */}
+            <div className="flex items-center justify-center pb-4 gap-4">
+              <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
+              <span className="text-sm text-gray-600 dark:text-gray-400 px-4">
+                Swipe or use arrows to navigate
+              </span>
+              <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
+            </div>
           </Carousel>
         ) : (
           <ItemContent 
