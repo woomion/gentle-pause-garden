@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
@@ -57,7 +56,9 @@ const ItemReviewModal = ({
     };
 
     api.on('select', onSelect);
-    return () => api.off('select', onSelect);
+    return () => {
+      api.off('select', onSelect);
+    };
   }, [api]);
 
   useEffect(() => {
