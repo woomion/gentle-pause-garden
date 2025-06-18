@@ -93,7 +93,12 @@ const PauseLog = () => {
   };
 
   const handleViewLink = (item: any) => {
-    const link = item.originalPausedItem?.link || item.originalPausedItem?.url || '';
+    // Check multiple possible locations for the link
+    const link = item.originalPausedItem?.link || 
+                 item.originalPausedItem?.url || 
+                 item.link || 
+                 item.url || 
+                 '';
     
     if (!link || !link.trim()) {
       console.warn('⚠️ No link available for item:', item.itemName);
@@ -236,7 +241,13 @@ const PauseLog = () => {
             </div>
           ) : (
             filteredItems.map((item) => {
-              const hasLink = item.originalPausedItem?.link || item.originalPausedItem?.url;
+              // Check all possible locations for a link
+              const hasLink = Boolean(
+                item.originalPausedItem?.link || 
+                item.originalPausedItem?.url || 
+                item.link || 
+                item.url
+              );
               
               return (
                 <div
