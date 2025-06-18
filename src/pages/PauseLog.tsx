@@ -96,8 +96,6 @@ const PauseLog = () => {
     // Check multiple possible locations for the link
     const link = item.originalPausedItem?.link || 
                  item.originalPausedItem?.url || 
-                 item.link || 
-                 item.url || 
                  '';
     
     if (!link || !link.trim()) {
@@ -241,12 +239,10 @@ const PauseLog = () => {
             </div>
           ) : (
             filteredItems.map((item) => {
-              // Check all possible locations for a link
+              // Check only the originalPausedItem for links
               const hasLink = Boolean(
                 item.originalPausedItem?.link || 
-                item.originalPausedItem?.url || 
-                item.link || 
-                item.url
+                item.originalPausedItem?.url
               );
               
               return (
