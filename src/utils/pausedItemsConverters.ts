@@ -73,7 +73,8 @@ export const convertLocalToDb = (
   );
   
   // Determine final URL for database storage
-  const finalUrl = determineFinalUrl(imageUrl, item.link);
+  // Priority: uploaded image > auto-parsed image > product link
+  const finalUrl = determineFinalUrl(imageUrl || item.imageUrl, item.link);
   
   console.log('Converting local to DB:', {
     itemName: item.itemName,
@@ -81,6 +82,7 @@ export const convertLocalToDb = (
     storeName: item.storeName,
     productLink: item.link,
     uploadedImageUrl: imageUrl,
+    autoParsedImageUrl: item.imageUrl,
     finalUrl,
     notesWithMetadata
   });
