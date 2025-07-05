@@ -10,7 +10,7 @@ import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { useAuth } from '@/contexts/AuthContext';
-import { TagInput } from '@/components/ui/tag-input';
+import { SimpleTagInput } from '@/components/ui/simple-tag-input';
 
 interface PauseFormProps {
   onClose: () => void;
@@ -366,11 +366,10 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Tags (optional)
               </Label>
-            <TagInput
+            <SimpleTagInput
               value={formData.tags}
               onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
               placeholder="Add tags like 'apartment', 'clothes', 'fall wardrobe'..."
-              suggestions={existingTags}
               className="w-full"
             />
             </div>
