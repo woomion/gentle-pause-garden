@@ -341,6 +341,18 @@ const extractPrice = (doc: Document): string | undefined => {
     'meta[property="product:price"]',
     'meta[name="price"]',
     
+    // Shopify-specific selectors (high priority for Shopify stores)
+    '.price--highlight .price-item--regular',
+    '.price--highlight .price-item--sale',
+    '.price .price-item--regular',
+    '.price .price-item',
+    '.price__regular .price-item',
+    '.price__sale .price-item',
+    '.product-form__cart-submit [data-price]',
+    '[data-product-price]',
+    '.product__price .price',
+    '.product-price-value',
+    
     // Store-specific selectors
     '.a-price-whole', // Amazon whole price
     '.a-price .a-offscreen', // Amazon full price
@@ -380,12 +392,14 @@ const extractPrice = (doc: Document): string | undefined => {
                      element.textContent;
       
       if (content && content.trim()) {
+        console.log(`Checking price element "${selector}": "${content.trim()}"`);
+        
         // Multiple regex patterns to catch different price formats
         const pricePatterns = [
           /[\$£€¥₹₽¢]\s*[\d,]+\.?\d*/g, // Currency symbol first
           /[\d,]+\.?\d*\s*[\$£€¥₹₽¢]/g, // Currency symbol last
           /[\d,]+\.\d{2}/g, // Decimal prices without currency
-          /[\d,]{3,}/g // Large numbers (likely prices)
+          /\b[\d,]{2,}\b/g // Numbers (likely prices) - more flexible
         ];
         
         for (const pattern of pricePatterns) {
@@ -395,11 +409,13 @@ const extractPrice = (doc: Document): string | undefined => {
               // Clean up the price string
               let price = match
                 .replace(/[£€¥₹₽¢\$,\s]/g, '') // Remove currency symbols and formatting
+                .replace(/[^\d.]/g, '') // Keep only digits and decimal points
                 .trim();
               
               // Ensure it's a valid number and reasonable price range
               const numPrice = parseFloat(price);
-              if (!isNaN(numPrice) && numPrice > 0.01 && numPrice < 100000) {
+              if (!isNaN(numPrice) && numPrice > 0.50 && numPrice < 100000) {
+                console.log(`Found valid price: ${numPrice}`);
                 // Return the cleaned numeric price
                 return numPrice.toFixed(2);
               }
@@ -410,14 +426,45 @@ const extractPrice = (doc: Document): string | undefined => {
     }
   }
   
-  // Fallback: look for any number that looks like a price in the page
+  // Enhanced fallback: look for JSON-LD structured data (common in Shopify)
+  const jsonLdElements = doc.querySelectorAll('script[type="application/ld+json"]');
+  for (const element of jsonLdElements) {
+    try {
+      const jsonData = JSON.parse(element.textContent || '');
+      if (jsonData['@type'] === 'Product' && jsonData.offers) {
+        const offers = Array.isArray(jsonData.offers) ? jsonData.offers[0] : jsonData.offers;
+        if (offers.price) {
+          const price = parseFloat(offers.price);
+          if (!isNaN(price) && price > 0.50) {
+            console.log(`Found price in JSON-LD: ${price}`);
+            return price.toFixed(2);
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore JSON parsing errors
+    }
+  }
+  
+  // Final fallback: look for any number that looks like a price in the visible text
   const bodyText = doc.body?.textContent || '';
-  const fallbackMatch = bodyText.match(/[\$£€¥]\s*[\d,]+\.?\d{2}/);
-  if (fallbackMatch) {
-    const price = fallbackMatch[0].replace(/[£€¥\$,\s]/g, '');
-    const numPrice = parseFloat(price);
-    if (!isNaN(numPrice) && numPrice > 0.01 && numPrice < 10000) {
-      return numPrice.toFixed(2);
+  const fallbackPatterns = [
+    /[\$£€¥]\s*[\d,]+\.?\d{2}/g, // Currency with decimals
+    /[\$£€¥]\s*[\d,]+/g, // Currency without decimals
+    /\b[\d,]+\.\d{2}\b/g // Decimal numbers (likely prices)
+  ];
+  
+  for (const pattern of fallbackPatterns) {
+    const matches = bodyText.match(pattern);
+    if (matches) {
+      for (const match of matches) {
+        const price = match.replace(/[£€¥\$,\s]/g, '');
+        const numPrice = parseFloat(price);
+        if (!isNaN(numPrice) && numPrice > 5 && numPrice < 10000) {
+          console.log(`Found fallback price: ${numPrice}`);
+          return numPrice.toFixed(2);
+        }
+      }
     }
   }
   
