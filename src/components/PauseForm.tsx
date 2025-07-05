@@ -310,20 +310,47 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               <Label htmlFor="photo" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Photo (optional)
               </Label>
-              <input
-                id="photo"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-full text-sm text-gray-500 dark:text-gray-300
-                           file:py-2 file:px-4
-                           file:rounded-xl file:border-0
-                           file:text-sm file:font-medium
-                           file:bg-lavender file:text-dark-gray
-                           hover:file:bg-lavender/90
-                           rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 h-12
-                           overflow-hidden"
-              />
+              
+              {formData.imageUrl && !formData.photo ? (
+                <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-center">
+                  <p className="text-green-600 dark:text-green-400 text-sm font-medium">
+                    ✓ Product image already grabbed automatically
+                  </p>
+                  <p className="text-green-600 dark:text-green-400 text-xs mt-1">
+                    You can still upload a different photo if you prefer
+                  </p>
+                  <input
+                    id="photo"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full text-sm text-gray-500 dark:text-gray-300 mt-2
+                               file:py-2 file:px-4
+                               file:rounded-lg file:border-0
+                               file:text-sm file:font-medium
+                               file:bg-green-100 file:text-green-700
+                               hover:file:bg-green-200 dark:file:bg-green-800 dark:file:text-green-200
+                               rounded-lg border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/10 h-10
+                               overflow-hidden"
+                  />
+                </div>
+              ) : (
+                <input
+                  id="photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full text-sm text-gray-500 dark:text-gray-300
+                             file:py-2 file:px-4
+                             file:rounded-xl file:border-0
+                             file:text-sm file:font-medium
+                             file:bg-lavender file:text-dark-gray
+                             hover:file:bg-lavender/90
+                             rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 h-12
+                             overflow-hidden"
+                />
+              )}
+              
               {photoPreview && (
                 <div className="mt-2">
                   <img 
