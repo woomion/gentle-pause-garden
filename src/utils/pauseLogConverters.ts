@@ -46,7 +46,8 @@ export const convertDbToPauseLogItem = (dbItem: DbPausedItem): PauseLogItem => {
       day: 'numeric' 
     }),
     status: status,
-    notes: actualNotes
+    notes: actualNotes,
+    tags: dbItem.tags || []
   };
 };
 
@@ -71,6 +72,7 @@ export const convertPauseLogItemToDb = (
     title: item.itemName,
     reason: item.emotion,
     notes: notesWithStore,
-    status: dbStatus
+    status: dbStatus,
+    tags: item.tags || []
   };
 };

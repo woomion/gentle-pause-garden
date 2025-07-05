@@ -80,6 +80,20 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink }: PauseLogItemCardProps)
         </span>
       </div>
       
+      {/* Tags section */}
+      {item.tags && item.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {item.tags.map((tag, index) => (
+            <span 
+              key={index}
+              className="inline-block px-2 py-1 bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] rounded text-xs border border-lavender/30"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+      
       {item.notes && item.notes.trim() && (
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
           {item.notes}

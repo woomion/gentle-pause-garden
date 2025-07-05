@@ -10,6 +10,7 @@ import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { useAuth } from '@/contexts/AuthContext';
+import { TagInput } from '@/components/ui/tag-input';
 
 interface PauseFormProps {
   onClose: () => void;
@@ -50,11 +51,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     notes: '',
     duration: '',
     otherDuration: '',
-    imageUrl: '' // Add imageUrl to track parsed images
+    imageUrl: '', // Add imageUrl to track parsed images
+    tags: [] as string[]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingUrl, setIsParsingUrl] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [existingTags, setExistingTags] = useState<string[]>([]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -107,14 +110,30 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     }
   };
 
-  // Clean up preview URL when component unmounts
+  // Load existing tags and clean up preview URL when component unmounts
   useEffect(() => {
+    const loadExistingTags = async () => {
+      if (user) {
+        const items = supabasePausedItemsStore.getItems();
+        const allTags = items.flatMap(item => item.tags || []);
+        const uniqueTags = Array.from(new Set(allTags));
+        setExistingTags(uniqueTags);
+      } else {
+        const items = pausedItemsStore.getItems();
+        const allTags = items.flatMap(item => item.tags || []);
+        const uniqueTags = Array.from(new Set(allTags));
+        setExistingTags(uniqueTags);
+      }
+    };
+    
+    loadExistingTags();
+    
     return () => {
       if (photoPreview) {
         URL.revokeObjectURL(photoPreview);
       }
     };
-  }, [photoPreview]);
+  }, [photoPreview, user]);
 
   const handleDurationSelect = (duration: string) => {
     setFormData(prev => ({ 
@@ -149,7 +168,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         otherDuration: formData.otherDuration,
         link: formData.link,
         photo: formData.photo,
-        imageUrl: formData.imageUrl // Include parsed image URL
+        imageUrl: formData.imageUrl, // Include parsed image URL
+        tags: formData.tags
       };
 
       // Use appropriate store based on authentication status
@@ -339,6 +359,20 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Tags Field */}
+            <div className="space-y-1">
+              <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+                Tags (optional)
+              </Label>
+              <TagInput
+                value={formData.tags}
+                onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                placeholder="Add tags like 'apartment', 'clothes', 'fall wardrobe'..."
+                suggestions={existingTags}
+                className="w-full"
+              />
             </div>
 
             {/* Notes Field */}

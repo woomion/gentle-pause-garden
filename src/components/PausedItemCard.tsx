@@ -162,6 +162,20 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
               </span>
             </div>
 
+            {/* Tags section */}
+            {item.tags && item.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {item.tags.map((tag, index) => (
+                  <span 
+                    key={index}
+                    className="inline-block px-2 py-1 bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] rounded text-xs border border-lavender/30"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Notes section */}
             {item.notes && item.notes.trim() && (
               <div className="pt-2 border-t border-gray-200 dark:border-gray-600">

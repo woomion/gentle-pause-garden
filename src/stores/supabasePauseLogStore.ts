@@ -10,6 +10,7 @@ export interface PauseLogItem {
   letGoDate: string;
   status: 'purchased' | 'let-go';
   notes?: string;
+  tags?: string[];
   originalPausedItem?: any;
 }
 

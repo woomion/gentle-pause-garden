@@ -19,6 +19,7 @@ export type Database = {
           reason: string | null
           review_at: string
           status: string
+          tags: string[] | null
           title: string
           url: string | null
           user_id: string
@@ -32,6 +33,7 @@ export type Database = {
           reason?: string | null
           review_at: string
           status?: string
+          tags?: string[] | null
           title: string
           url?: string | null
           user_id: string
@@ -45,6 +47,7 @@ export type Database = {
           reason?: string | null
           review_at?: string
           status?: string
+          tags?: string[] | null
           title?: string
           url?: string | null
           user_id?: string

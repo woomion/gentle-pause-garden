@@ -12,6 +12,7 @@ export interface PausedItem {
   link?: string;
   photo?: File | null;
   photoDataUrl?: string;
+  tags?: string[];
   pausedAt: Date;
   checkInTime: string;
   checkInDate: Date;

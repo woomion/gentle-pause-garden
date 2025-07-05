@@ -50,6 +50,7 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     link: productLink,
     photo: null,
     photoDataUrl: undefined,
+    tags: dbItem.tags || [],
     pausedAt,
     checkInTime: calculateCheckInTimeDisplay(reviewAt),
     checkInDate: reviewAt
@@ -92,6 +93,7 @@ export const convertLocalToDb = (
     notes: notesWithMetadata,
     pause_duration_days: pauseDurationDays,
     review_at: reviewAt.toISOString(),
-    status: 'paused'
+    status: 'paused',
+    tags: item.tags || []
   };
 };
