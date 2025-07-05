@@ -66,12 +66,34 @@ class SupabasePausedItemsStore {
       }
 
       console.log('Raw paused items data from Supabase:', data);
+      
+      // Debug tags from database
+      data?.forEach((item, index) => {
+        console.log(`🏷️ DB Item ${index + 1} (${item.title}):`, {
+          id: item.id,
+          tags: item.tags,
+          tagsType: typeof item.tags,
+          tagsIsArray: Array.isArray(item.tags),
+          tagsLength: item.tags?.length || 0
+        });
+      });
 
       this.items = data?.map(item => convertDbToLocal(item)) || [];
       this.updateCheckInTimes();
       this.isLoaded = true;
       
       console.log('Converted paused items:', this.items);
+      
+      // Debug converted tags
+      this.items.forEach((item, index) => {
+        console.log(`🏷️ Converted Item ${index + 1} (${item.itemName}):`, {
+          id: item.id,
+          tags: item.tags,
+          tagsType: typeof item.tags,
+          tagsIsArray: Array.isArray(item.tags),
+          tagsLength: item.tags?.length || 0
+        });
+      });
       
       this.notifyListeners();
     } catch (error) {
@@ -120,15 +142,29 @@ class SupabasePausedItemsStore {
       // Step 3: Convert to database format
       const dbItem = convertLocalToDb(item, uploadedImageUrl || undefined);
       console.log('3. Database item prepared:', dbItem);
+      console.log('3a. Tags specifically:', { 
+        originalTags: item.tags, 
+        dbItemTags: dbItem.tags,
+        tagsType: typeof dbItem.tags,
+        tagsIsArray: Array.isArray(dbItem.tags)
+      });
       
       // Step 4: Save to database
       console.log('4. Saving to database...');
+      const insertData = {
+        ...dbItem,
+        user_id: user.id
+      };
+      console.log('4a. Final insert data:', insertData);
+      console.log('4b. Insert data tags:', { 
+        tags: insertData.tags, 
+        tagsType: typeof insertData.tags,
+        tagsIsArray: Array.isArray(insertData.tags)
+      });
+      
       const { data, error } = await supabase
         .from('paused_items')
-        .insert({
-          ...dbItem,
-          user_id: user.id
-        })
+        .insert(insertData)
         .select()
         .single();
 
