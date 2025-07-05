@@ -38,9 +38,18 @@ export const TagInput: React.FC<TagInputProps> = ({
   }, [inputValue, suggestions, value]);
 
   const addTag = (tag: string) => {
+    console.log('🏷️ TAG INPUT: addTag called with:', tag);
+    console.log('🏷️ TAG INPUT: current value:', value);
     const trimmedTag = tag.trim();
+    console.log('🏷️ TAG INPUT: trimmed tag:', trimmedTag);
+    console.log('🏷️ TAG INPUT: tag already exists?', value.includes(trimmedTag));
+    
     if (trimmedTag && !value.includes(trimmedTag)) {
-      onChange([...value, trimmedTag]);
+      const newTags = [...value, trimmedTag];
+      console.log('🏷️ TAG INPUT: calling onChange with:', newTags);
+      onChange(newTags);
+    } else {
+      console.log('🏷️ TAG INPUT: tag not added - empty or duplicate');
     }
     setInputValue('');
     setShowSuggestions(false);
