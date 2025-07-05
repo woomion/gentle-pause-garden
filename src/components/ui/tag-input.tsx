@@ -60,12 +60,20 @@ export const TagInput: React.FC<TagInputProps> = ({
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent) => {
+    console.log('🏷️ TAG INPUT: key pressed:', e.key);
+    console.log('🏷️ TAG INPUT: current inputValue:', inputValue);
+    
     if (e.key === 'Enter' || e.key === ',') {
+      console.log('🏷️ TAG INPUT: Enter or comma detected');
       e.preventDefault();
       if (inputValue.trim()) {
+        console.log('🏷️ TAG INPUT: calling addTag with inputValue');
         addTag(inputValue);
+      } else {
+        console.log('🏷️ TAG INPUT: inputValue is empty, not adding tag');
       }
     } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
+      console.log('🏷️ TAG INPUT: backspace pressed, removing last tag');
       removeTag(value[value.length - 1]);
     }
   };
