@@ -1,7 +1,7 @@
 
 import { Timer } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { PausedItem } from '../stores/pausedItemsStore';
+import { PausedItem } from '../stores/supabasePausedItemsStore';
 
 interface PausedItemCardProps {
   item: PausedItem;
@@ -28,37 +28,68 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
   }, [item.emotion]);
 
   const imageUrl = useMemo(() => {
-    // Priority: Supabase Storage URL > photoDataUrl > file object
+    console.log('🖼️ PausedItemCard - Processing image for item:', {
+      itemId: item.id,
+      itemName: item.itemName,
+      imageUrl: item.imageUrl,
+      photoDataUrl: item.photoDataUrl,
+      hasPhoto: !!item.photo
+    });
+
+    // Priority order for image sources:
+    // 1. Supabase Storage URL (uploaded images)
+    // 2. photoDataUrl (base64 data)
+    // 3. File object (create object URL)
+    
     if (item.imageUrl) {
-      // Check if this is a Supabase Storage URL (contains supabase)
-      if (item.imageUrl.includes('supabase')) {
+      // Check if this is a Supabase Storage URL
+      if (item.imageUrl.includes('supabase.co/storage') || item.imageUrl.includes('supabase')) {
+        console.log('🖼️ Using Supabase storage URL:', item.imageUrl);
         return item.imageUrl;
-      } else {
-        // This might be a product URL - only use if it's a valid image URL
-        try {
-          new URL(item.imageUrl);
-          return item.imageUrl;
-        } catch {
-          return null;
-        }
+      }
+      // Check if it's a valid external URL
+      try {
+        new URL(item.imageUrl);
+        console.log('🖼️ Using external image URL:', item.imageUrl);
+        return item.imageUrl;
+      } catch {
+        console.log('🖼️ Invalid URL format:', item.imageUrl);
       }
     }
+    
     if (item.photoDataUrl) {
+      console.log('🖼️ Using photo data URL');
       return item.photoDataUrl;
     }
+    
     if (item.photo instanceof File) {
+      console.log('🖼️ Creating object URL from file');
       return URL.createObjectURL(item.photo);
     }
     
+    console.log('🖼️ No valid image found');
     return null;
-  }, [item.photoDataUrl, item.photo, item.imageUrl, item.id]);
+  }, [item.imageUrl, item.photoDataUrl, item.photo, item.id]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('🖼️ Image failed to load:', {
+      src: e.currentTarget.src,
+      itemId: item.id,
+      itemName: item.itemName
+    });
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
     if (target.parentElement) {
       target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50" aria-hidden="true"></div>';
     }
+  };
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.log('🖼️ Image loaded successfully:', {
+      src: e.currentTarget.src,
+      itemId: item.id,
+      itemName: item.itemName
+    });
   };
 
   const formattedPrice = useMemo(() => {
@@ -94,6 +125,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
                 alt={item.itemName}
                 className="w-full h-full object-cover"
                 onError={handleImageError}
+                onLoad={handleImageLoad}
                 loading="lazy"
               />
             ) : (

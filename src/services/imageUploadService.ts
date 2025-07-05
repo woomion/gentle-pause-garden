@@ -82,6 +82,7 @@ export const uploadImage = async (file: File): Promise<string | null> => {
     }
 
     console.log('=== IMAGE UPLOAD DEBUG END ===');
+    console.log('🎯 Final URL being returned:', urlData.publicUrl);
     return urlData.publicUrl;
   } catch (error) {
     console.error('❌ Unexpected error in uploadImage:', error);
