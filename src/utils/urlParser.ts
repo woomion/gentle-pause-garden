@@ -79,6 +79,18 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
         if (scrapedPrice && !productInfo.price) {
           productInfo.price = scrapedPrice;
           console.log('Extracted price:', scrapedPrice);
+        } else {
+          console.log('Price extraction failed - no price found');
+          // Debug: log some elements to see what we're working with
+          const priceElements = doc.querySelectorAll('[class*="price"], [class*="Price"], .money, [data-price]');
+          console.log(`Found ${priceElements.length} potential price elements:`, 
+            Array.from(priceElements).slice(0, 5).map(el => ({
+              tagName: el.tagName,
+              className: el.className,
+              textContent: el.textContent?.trim().substring(0, 50),
+              innerHTML: el.innerHTML?.substring(0, 100)
+            }))
+          );
         }
         
         // Extract image URL with improved selectors
@@ -443,6 +455,32 @@ const extractPrice = (doc: Document): string | undefined => {
       }
     } catch (e) {
       // Ignore JSON parsing errors
+    }
+  }
+  
+  // Shopify-specific: look for product data in script tags
+  const scriptElements = doc.querySelectorAll('script');
+  for (const script of scriptElements) {
+    const content = script.textContent || '';
+    
+    // Look for Shopify product JSON
+    const shopifyProductMatch = content.match(/window\.ShopifyAnalytics\s*=.*?product['"]:.*?price['"]:.*?(\d+)/);
+    if (shopifyProductMatch) {
+      const price = parseFloat(shopifyProductMatch[1]) / 100; // Shopify prices are in cents
+      if (!isNaN(price) && price > 0.50) {
+        console.log(`Found Shopify product price: ${price}`);
+        return price.toFixed(2);
+      }
+    }
+    
+    // Look for product data variable
+    const productDataMatch = content.match(/(?:product|item).*?['":].*?(\d+\.\d{2})/i);
+    if (productDataMatch) {
+      const price = parseFloat(productDataMatch[1]);
+      if (!isNaN(price) && price > 0.50 && price < 10000) {
+        console.log(`Found product data price: ${price}`);
+        return price.toFixed(2);
+      }
     }
   }
   
