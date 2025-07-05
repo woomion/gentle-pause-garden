@@ -107,8 +107,14 @@ const extractStoreName = (hostname: string): string => {
     'amazon.ca': 'Amazon Canada',
     'amazon.de': 'Amazon Germany',
     'amazon.fr': 'Amazon France',
+    'amazon.it': 'Amazon Italy',
+    'amazon.es': 'Amazon Spain',
+    'amazon.in': 'Amazon India',
+    'amazon.co.jp': 'Amazon Japan',
     'ebay.com': 'eBay',
     'ebay.co.uk': 'eBay UK',
+    'ebay.de': 'eBay Germany',
+    'ebay.fr': 'eBay France',
     'etsy.com': 'Etsy',
     'target.com': 'Target',
     'walmart.com': 'Walmart',
@@ -128,8 +134,28 @@ const extractStoreName = (hostname: string): string => {
     'zara.com': 'Zara',
     'hm.com': 'H&M',
     'uniqlo.com': 'Uniqlo',
+    'gap.com': 'Gap',
+    'oldnavy.com': 'Old Navy',
+    'forever21.com': 'Forever 21',
+    'urbanoutfitters.com': 'Urban Outfitters',
+    'anthropologie.com': 'Anthropologie',
+    'freepeople.com': 'Free People',
+    'victoriassecret.com': "Victoria's Secret",
+    'williams-sonoma.com': 'Williams Sonoma',
+    'crateandbarrel.com': 'Crate & Barrel',
+    'cb2.com': 'CB2',
+    'westelm.com': 'West Elm',
+    'potterybarn.com': 'Pottery Barn',
+    'ikea.com': 'IKEA',
     'shopify.com': 'Shopify Store',
-    'bigcommerce.com': 'BigCommerce Store'
+    'bigcommerce.com': 'BigCommerce Store',
+    'squarespace.com': 'Squarespace Store',
+    'wix.com': 'Wix Store',
+    'poshmark.com': 'Poshmark',
+    'mercari.com': 'Mercari',
+    'depop.com': 'Depop',
+    'thredup.com': 'ThredUp',
+    'realreal.com': 'The RealReal'
   };
   
   for (const [domain, name] of Object.entries(storeMap)) {
@@ -146,21 +172,34 @@ const extractStoreName = (hostname: string): string => {
 const extractItemName = (doc: Document): string | undefined => {
   // Try various selectors for product titles in order of preference
   const selectors = [
+    // Meta tags (highest priority)
     'meta[property="og:title"]',
     'meta[name="twitter:title"]',
+    'meta[property="product:title"]',
     'meta[name="title"]',
-    '[data-automation-id="product-title"]',
+    
+    // Store-specific selectors
+    '#productTitle', // Amazon
+    '.x-item-title-label', // eBay
+    '[data-automation-id="product-title"]', // Target
     '[data-testid="product-title"]',
     '.product-title',
     '#product-title',
     '.pdp-product-name',
+    '.product-name',
+    '.item-title',
+    '.listing-page-title',
+    '.product-details-product-title',
+    '[class*="ProductTitle"]',
+    '[class*="product-title"]',
+    '[class*="item-title"]',
+    
+    // Generic headings
     'h1[class*="title"]',
     'h1[class*="product"]',
     'h1[class*="name"]',
-    '.product-name',
-    '.item-title',
-    '[class*="ProductTitle"]',
-    '[class*="product-title"]',
+    '.page-title h1',
+    'main h1',
     'h1'
   ];
   
@@ -168,60 +207,122 @@ const extractItemName = (doc: Document): string | undefined => {
     const element = doc.querySelector(selector);
     if (element) {
       const content = element.getAttribute('content') || element.textContent;
-      if (content && content.trim() && content.length > 5 && content.length < 200) {
-        return content.trim().substring(0, 100); // Limit length
+      if (content && content.trim() && content.length > 3 && content.length < 300) {
+        // Clean up the title
+        let cleanTitle = content.trim()
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .replace(/^\||\|$/g, '') // Remove leading/trailing pipes
+          .trim();
+        
+        return cleanTitle.substring(0, 150);
       }
     }
   }
   
   // Try title tag as last resort
   const title = doc.title;
-  if (title && title.length > 5) {
-    // Remove common e-commerce suffixes
-    const cleanTitle = title.replace(/ - (Amazon|eBay|Target|Walmart|Best Buy|Shop|Store).*$/i, '').trim();
-    return cleanTitle.substring(0, 100);
+  if (title && title.length > 3) {
+    // Remove common e-commerce suffixes and clean up
+    const cleanTitle = title
+      .replace(/ - (Amazon\.com|Amazon|eBay|Target|Walmart|Best Buy|Shop|Store|Buy Online).*$/i, '')
+      .replace(/ \| .*$/i, '') // Remove everything after pipe
+      .replace(/ :: .*$/i, '') // Remove everything after double colon
+      .trim();
+    
+    if (cleanTitle.length > 3) {
+      return cleanTitle.substring(0, 150);
+    }
   }
   
   return undefined;
 };
 
 const extractPrice = (doc: Document): string | undefined => {
-  // Try various selectors for price
+  // Try various selectors for price in order of preference
   const selectors = [
+    // Meta tags (most reliable)
     'meta[property="product:price:amount"]',
     'meta[property="og:price:amount"]',
+    'meta[property="product:price"]',
     'meta[name="price"]',
-    '[data-automation-id="product-price"]',
+    
+    // Store-specific selectors
+    '.a-price-whole', // Amazon whole price
+    '.a-price .a-offscreen', // Amazon full price
+    '#priceblock_dealprice', // Amazon deal price
+    '#priceblock_saleprice', // Amazon sale price
+    '#price_inside_buybox', // Amazon buybox price
+    '.notranslate', // eBay price
+    '.u-flL.condText', // eBay price
+    '.display-price', // Best Buy
+    '[data-automation-id="product-price"]', // Target
     '[data-testid="price"]',
-    '[class*="price"]:not([class*="original"]):not([class*="was"]):not([class*="msrp"])',
+    '.price-current',
     '.current-price',
     '.sale-price',
     '.regular-price',
-    '.price-current',
     '.price-now',
-    '[class*="current"]',
-    '.a-price-whole', // Amazon specific
-    '.display-price', // Best Buy specific
-    '[class*="Price"]',
-    '[id*="price"]'
+    '.final-price',
+    '.product-price',
+    '.price-value',
+    '.price-amount',
+    
+    // Generic price selectors
+    '[class*="price"]:not([class*="original"]):not([class*="was"]):not([class*="msrp"]):not([class*="list"])',
+    '[class*="Price"]:not([class*="Original"]):not([class*="Was"]):not([class*="List"])',
+    '[id*="price"]',
+    '[data-price]',
+    '.money',
+    '.cost',
+    '.amount'
   ];
   
   for (const selector of selectors) {
     const elements = doc.querySelectorAll(selector);
     for (const element of elements) {
-      const content = element.getAttribute('content') || element.textContent;
+      const content = element.getAttribute('content') || 
+                     element.getAttribute('data-price') || 
+                     element.textContent;
+      
       if (content && content.trim()) {
-        // Extract numeric price from text
-        const priceMatch = content.match(/[\$£€¥]?[\d,]+\.?\d*/);
-        if (priceMatch) {
-          let price = priceMatch[0].replace(/[£€¥\$,]/g, '');
-          // Ensure it's a valid number and reasonable price range
-          const numPrice = parseFloat(price);
-          if (!isNaN(numPrice) && numPrice > 0 && numPrice < 100000) {
-            return price;
+        // Multiple regex patterns to catch different price formats
+        const pricePatterns = [
+          /[\$£€¥₹₽¢]\s*[\d,]+\.?\d*/g, // Currency symbol first
+          /[\d,]+\.?\d*\s*[\$£€¥₹₽¢]/g, // Currency symbol last
+          /[\d,]+\.\d{2}/g, // Decimal prices without currency
+          /[\d,]{3,}/g // Large numbers (likely prices)
+        ];
+        
+        for (const pattern of pricePatterns) {
+          const matches = content.match(pattern);
+          if (matches) {
+            for (const match of matches) {
+              // Clean up the price string
+              let price = match
+                .replace(/[£€¥₹₽¢\$,\s]/g, '') // Remove currency symbols and formatting
+                .trim();
+              
+              // Ensure it's a valid number and reasonable price range
+              const numPrice = parseFloat(price);
+              if (!isNaN(numPrice) && numPrice > 0.01 && numPrice < 100000) {
+                // Return the cleaned numeric price
+                return numPrice.toFixed(2);
+              }
+            }
           }
         }
       }
+    }
+  }
+  
+  // Fallback: look for any number that looks like a price in the page
+  const bodyText = doc.body?.textContent || '';
+  const fallbackMatch = bodyText.match(/[\$£€¥]\s*[\d,]+\.?\d{2}/);
+  if (fallbackMatch) {
+    const price = fallbackMatch[0].replace(/[£€¥\$,\s]/g, '');
+    const numPrice = parseFloat(price);
+    if (!isNaN(numPrice) && numPrice > 0.01 && numPrice < 10000) {
+      return numPrice.toFixed(2);
     }
   }
   
@@ -231,55 +332,104 @@ const extractPrice = (doc: Document): string | undefined => {
 const extractImageUrl = (doc: Document, origin: string): string | undefined => {
   // Try various selectors for product images with improved priority
   const selectors = [
+    // Meta tags (most reliable)
     'meta[property="og:image"]',
     'meta[name="twitter:image"]',
     'meta[property="og:image:url"]',
-    '[data-automation-id="product-image"] img',
+    'meta[property="product:image"]',
+    
+    // Store-specific high-quality image selectors
+    '#landingImage', // Amazon main product image
+    '.a-dynamic-image', // Amazon dynamic image
+    '#imgBlkFront', // eBay main image
+    '.ux-image-carousel-item img', // eBay carousel
+    '[data-automation-id="product-image"] img', // Target
     '[data-testid="product-image"] img',
+    '.product-hero-image img',
+    '.product-media img',
+    '.pdp-image img',
+    '.main-product-image img',
+    
+    // Generic product image selectors
     '.product-image img',
     '#product-image img',
     '.hero-image img',
     '.main-image img',
+    '.primary-image img',
+    '.featured-image img',
     '[class*="ProductImage"] img',
     '[class*="product-image"] img',
     '[class*="hero"] img',
     '[class*="main"] img',
+    '[class*="primary"] img',
+    
+    // Alt text based selectors
     'img[alt*="product" i]',
     'img[alt*="item" i]',
+    'img[alt*="buy" i]',
+    'img[alt*="shop" i]',
+    
+    // Source-based selectors
     'img[src*="product"]',
-    'img[class*="product"]'
+    'img[src*="item"]',
+    'img[src*="catalog"]',
+    'img[class*="product"]',
+    
+    // Fallback: any reasonably sized image
+    'img[width]:not([width="1"]):not([width="0"])',
+    'main img',
+    '.content img'
   ];
   
   for (const selector of selectors) {
-    const element = doc.querySelector(selector);
-    if (element) {
-      const src = element.getAttribute('content') || element.getAttribute('src');
+    const elements = doc.querySelectorAll(selector);
+    
+    for (const element of elements) {
+      const src = element.getAttribute('content') || 
+                  element.getAttribute('src') || 
+                  element.getAttribute('data-src') || 
+                  element.getAttribute('data-lazy-src');
+      
       if (src && src.trim() && !src.includes('data:image') && src.length > 10) {
-        // Skip obvious placeholder or icon images
-        if (src.includes('placeholder') || src.includes('icon') || src.includes('logo') || 
-            src.includes('spinner') || src.includes('loading')) {
+        // Skip obvious non-product images
+        const skipPatterns = [
+          'placeholder', 'icon', 'logo', 'spinner', 'loading', 'pixel',
+          'blank', 'spacer', 'arrow', 'button', 'social', 'banner',
+          'nav', 'menu', 'footer', 'header', 'ad', 'promo'
+        ];
+        
+        if (skipPatterns.some(pattern => src.toLowerCase().includes(pattern))) {
           continue;
         }
         
-        // Check if element is an img tag and has size constraints
+        // Check image dimensions if available
         if (element.tagName === 'IMG') {
           const imgElement = element as HTMLImageElement;
-          // Skip very small images (likely icons)
-          if (imgElement.naturalWidth > 0 && imgElement.naturalWidth < 100) continue;
-          if (imgElement.naturalHeight > 0 && imgElement.naturalHeight < 100) continue;
+          const width = imgElement.naturalWidth || parseInt(element.getAttribute('width') || '0');
+          const height = imgElement.naturalHeight || parseInt(element.getAttribute('height') || '0');
+          
+          // Skip very small images (likely icons) or very thin images (likely decorative)
+          if ((width > 0 && width < 100) || (height > 0 && height < 100)) continue;
+          if ((width > 0 && height > 0) && (width / height > 10 || height / width > 10)) continue;
         }
         
         // Convert relative URLs to absolute
         try {
           const imageUrl = new URL(src, origin).href;
-          // Basic validation that it's likely a product image
-          if (imageUrl.match(/\.(jpg|jpeg|png|webp|gif)($|\?)/i) || 
-              imageUrl.includes('images') || imageUrl.includes('media')) {
+          
+          // Validate that it's likely a product image
+          const validImageExtensions = /\.(jpg|jpeg|png|webp|gif|avif)($|\?)/i;
+          const hasImagePath = /\/(images?|media|photos?|pics?|assets|cdn|static)/i.test(imageUrl);
+          const hasProductPath = /\/(product|item|catalog|listing)/i.test(imageUrl);
+          
+          if (validImageExtensions.test(imageUrl) || hasImagePath || hasProductPath) {
+            console.log('Found product image candidate:', imageUrl);
             return imageUrl;
           }
         } catch {
           // If URL construction fails, try returning the src as-is if it looks like a URL
-          if (src.startsWith('http')) {
+          if (src.startsWith('http') && src.includes('.')) {
+            console.log('Using fallback image URL:', src);
             return src;
           }
         }
