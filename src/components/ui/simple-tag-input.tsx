@@ -36,7 +36,24 @@ export const SimpleTagInput: React.FC<SimpleTagInputProps> = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+    const newValue = e.target.value;
+    // Check if user typed a comma
+    if (newValue.includes(',')) {
+      const parts = newValue.split(',');
+      const tagToAdd = parts[0].trim();
+      if (tagToAdd && !value.includes(tagToAdd)) {
+        onChange([...value, tagToAdd]);
+      }
+      setInputValue('');
+    } else {
+      setInputValue(newValue);
+    }
+  };
+
+  const handleBlur = () => {
+    if (inputValue.trim()) {
+      addTag();
+    }
   };
 
   return (
@@ -62,13 +79,14 @@ export const SimpleTagInput: React.FC<SimpleTagInputProps> = ({
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyPress}
+          onBlur={handleBlur}
           placeholder={value.length === 0 ? placeholder : ""}
           className="flex-1 min-w-[120px] bg-transparent border-0 outline-none text-dark-gray dark:text-[#F9F5EB] placeholder:text-gray-400"
         />
       </div>
       {inputValue && (
         <div className="text-xs text-gray-500 mt-1">
-          Press Enter or comma to add tag
+          Press Enter, comma, or tap away to add tag
         </div>
       )}
     </div>
