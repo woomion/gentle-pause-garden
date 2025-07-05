@@ -37,6 +37,13 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
   // Process URLs to determine image and product link
   const { imageUrl, productLink } = processUrls(dbItem.url, notesProductLink);
   
+  console.log('🖼️ Image URL processing in convertDbToLocal:', {
+    dbUrl: dbItem.url,
+    notesProductLink,
+    processedImageUrl: imageUrl,
+    processedProductLink: productLink
+  });
+  
   return {
     id: dbItem.id,
     itemName: dbItem.title,

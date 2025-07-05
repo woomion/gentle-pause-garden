@@ -118,6 +118,7 @@ class SupabasePausedItemsStore {
         emotion: item.emotion,
         hasPhoto: !!item.photo,
         hasImageUrl: !!item.imageUrl,
+        imageUrlValue: item.imageUrl,
         hasLink: !!item.link,
         photoSize: item.photo?.size,
         photoName: item.photo?.name,
