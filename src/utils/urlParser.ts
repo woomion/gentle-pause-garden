@@ -24,16 +24,48 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     };
     
     try {
-      // Use a CORS proxy to fetch the page content
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      // Try multiple CORS proxy services for better reliability
+      const proxyServices = [
+        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+      ];
+      
       console.log('Fetching product info from:', url);
       
-      const response = await fetch(proxyUrl);
-      const data = await response.json();
+      let htmlContent = null;
       
-      if (data.contents) {
+      // Try each proxy service
+      for (const proxyUrl of proxyServices) {
+        try {
+          console.log('Trying proxy:', proxyUrl.split('?')[0]);
+          const response = await fetch(proxyUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.contents) {
+              htmlContent = data.contents;
+              console.log('Successfully fetched content via proxy');
+              break;
+            } else if (typeof data === 'string' && data.includes('<html')) {
+              htmlContent = data;
+              console.log('Successfully fetched content via proxy (direct HTML)');
+              break;
+            }
+          }
+        } catch (proxyError) {
+          console.log('Proxy failed, trying next:', proxyError.message);
+          continue;
+        }
+      }
+      
+      if (htmlContent) {
         const parser = new DOMParser();
-        const doc = parser.parseFromString(data.contents, 'text/html');
+        const doc = parser.parseFromString(htmlContent, 'text/html');
         
         // Extract item name from various meta tags and title
         const scrapedName = extractItemName(doc);
@@ -55,9 +87,11 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
           productInfo.imageUrl = scrapedImage;
           console.log('Extracted image URL:', scrapedImage);
         }
+      } else {
+        console.log('All proxy services failed, using URL-based extraction only');
       }
     } catch (fetchError) {
-      console.log('Could not fetch page content, using URL-based extraction only');
+      console.log('Could not fetch page content, using URL-based extraction only:', fetchError.message);
     }
     
     return productInfo;
@@ -90,6 +124,67 @@ const extractFromUrlStructure = (url: string, hostname: string): Partial<Product
       const titlePart = match[1];
       const decodedTitle = decodeURIComponent(titlePart.replace(/-/g, ' '));
       info.itemName = decodedTitle.split(' ').slice(0, 8).join(' '); // Limit length
+    }
+  }
+  
+  // Shopify store URL parsing (like sculpd.com)
+  if (url.includes('/products/')) {
+    const match = url.match(/\/products\/([^\/\?]+)/);
+    if (match) {
+      const productSlug = decodeURIComponent(match[1]);
+      // Convert slug to readable title
+      const readableTitle = productSlug
+        .replace(/-/g, ' ')
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      info.itemName = readableTitle;
+      console.log('Extracted Shopify product name from URL:', readableTitle);
+    }
+  }
+  
+  // Etsy specific URL parsing
+  if (hostname.includes('etsy')) {
+    const match = url.match(/\/listing\/\d+\/([^\/\?]+)/);
+    if (match) {
+      const titlePart = decodeURIComponent(match[1]);
+      const readableTitle = titlePart
+        .replace(/-/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      info.itemName = readableTitle;
+    }
+  }
+  
+  // Generic product URL parsing for other e-commerce sites
+  if (!info.itemName) {
+    // Try to extract from common patterns like /product/, /item/, /p/
+    const patterns = [
+      /\/product\/([^\/\?]+)/i,
+      /\/item\/([^\/\?]+)/i,
+      /\/p\/([^\/\?]+)/i,
+      /\/shop\/([^\/\?]+)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        const productSlug = decodeURIComponent(match[1]);
+        const readableTitle = productSlug
+          .replace(/[-_]/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ')
+          .substring(0, 100); // Limit length
+        
+        if (readableTitle.length > 3) {
+          info.itemName = readableTitle;
+          console.log('Extracted product name from generic URL pattern:', readableTitle);
+          break;
+        }
+      }
     }
   }
   
