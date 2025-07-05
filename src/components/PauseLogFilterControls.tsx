@@ -6,20 +6,26 @@ import { Button } from '@/components/ui/button';
 interface PauseLogFilterControlsProps {
   emotionFilter: string;
   statusFilter: string;
+  tagFilter: string;
   sortOrder: 'newest' | 'oldest';
   uniqueEmotions: string[];
+  uniqueTags: string[];
   onEmotionFilterChange: (value: string) => void;
   onStatusFilterChange: (value: string) => void;
+  onTagFilterChange: (value: string) => void;
   onSortOrderToggle: () => void;
 }
 
 const PauseLogFilterControls = ({
   emotionFilter,
   statusFilter,
+  tagFilter,
   sortOrder,
   uniqueEmotions,
+  uniqueTags,
   onEmotionFilterChange,
   onStatusFilterChange,
+  onTagFilterChange,
   onSortOrderToggle
 }: PauseLogFilterControlsProps) => {
   return (
@@ -49,6 +55,18 @@ const PauseLogFilterControls = ({
             <SelectItem value="all">All outcomes</SelectItem>
             <SelectItem value="purchased">Purchased</SelectItem>
             <SelectItem value="let-go">Let go</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={tagFilter} onValueChange={onTagFilterChange}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="All tags" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All tags</SelectItem>
+            {uniqueTags.map(tag => (
+              <SelectItem key={tag} value={tag}>{tag}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
 

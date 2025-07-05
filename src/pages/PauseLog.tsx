@@ -23,6 +23,7 @@ const PauseLog = () => {
   
   const [emotionFilter, setEmotionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   // Force refresh pause log items when component mounts
@@ -36,10 +37,15 @@ const PauseLog = () => {
     }
   }, [user, loadItems]);
 
-  // Get unique emotions from items
+  // Get unique emotions and tags from items
   const uniqueEmotions = useMemo(() => {
     const emotions = items.map(item => item.emotion).filter(Boolean);
     return [...new Set(emotions)];
+  }, [items]);
+
+  const uniqueTags = useMemo(() => {
+    const allTags = items.flatMap(item => item.tags || []);
+    return [...new Set(allTags)];
   }, [items]);
 
   // Filter and sort items based on selected filters and sort order
@@ -47,7 +53,8 @@ const PauseLog = () => {
     let filtered = items.filter(item => {
       const emotionMatch = emotionFilter === 'all' || item.emotion === emotionFilter;
       const statusMatch = statusFilter === 'all' || item.status === statusFilter;
-      return emotionMatch && statusMatch;
+      const tagMatch = tagFilter === 'all' || (item.tags && item.tags.includes(tagFilter));
+      return emotionMatch && statusMatch && tagMatch;
     });
 
     // Sort by date decided (letGoDate)
@@ -63,7 +70,7 @@ const PauseLog = () => {
     });
 
     return filtered;
-  }, [items, emotionFilter, statusFilter, sortOrder]);
+  }, [items, emotionFilter, statusFilter, tagFilter, sortOrder]);
 
   const handleDeleteItem = (id: string) => {
     deleteItem(id);
@@ -143,10 +150,13 @@ const PauseLog = () => {
           <PauseLogFilterControls
             emotionFilter={emotionFilter}
             statusFilter={statusFilter}
+            tagFilter={tagFilter}
             sortOrder={sortOrder}
             uniqueEmotions={uniqueEmotions}
+            uniqueTags={uniqueTags}
             onEmotionFilterChange={setEmotionFilter}
             onStatusFilterChange={setStatusFilter}
+            onTagFilterChange={setTagFilter}
             onSortOrderToggle={toggleSortOrder}
           />
         </div>
