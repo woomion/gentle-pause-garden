@@ -76,6 +76,20 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             
             <EmotionBadge emotion={item.emotion} />
 
+            {/* Tags section */}
+            {item.tags && item.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 pt-2">
+                {item.tags.map((tag, index) => (
+                  <span 
+                    key={index}
+                    className="inline-block px-2 py-1 bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] rounded text-xs border border-lavender/30"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Only show notes if they exist and aren't empty */}
             {item.notes && item.notes.trim() && (
               <div className="pt-2">

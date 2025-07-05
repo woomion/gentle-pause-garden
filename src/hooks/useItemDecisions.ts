@@ -27,7 +27,8 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'let-go',
-          notes: item.notes
+          notes: item.notes,
+          tags: item.tags
         });
         console.log('✅ Item added to Supabase pause log');
       } else {
@@ -36,7 +37,8 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'let-go',
-          notes: item.notes
+          notes: item.notes,
+          tags: item.tags
         });
         console.log('✅ Item added to local pause log');
       }
@@ -78,7 +80,8 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'purchased',
-          notes: item.notes
+          notes: item.notes,
+          tags: item.tags
         });
         console.log('✅ Item added to Supabase pause log');
       } else {
@@ -87,7 +90,8 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'purchased',
-          notes: item.notes
+          notes: item.notes,
+          tags: item.tags
         });
         console.log('✅ Item added to local pause log');
       }
