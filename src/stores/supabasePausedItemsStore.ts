@@ -99,7 +99,9 @@ class SupabasePausedItemsStore {
         hasLink: !!item.link,
         photoSize: item.photo?.size,
         photoName: item.photo?.name,
-        photoType: item.photo?.type
+        photoType: item.photo?.type,
+        tags: item.tags,
+        tagsLength: item.tags?.length || 0
       });
 
       // Step 2: Handle image upload if provided
@@ -153,7 +155,9 @@ class SupabasePausedItemsStore {
         id: newItem.id,
         storeName: newItem.storeName,
         imageUrl: newItem.imageUrl,
-        emotion: newItem.emotion
+        emotion: newItem.emotion,
+        tags: newItem.tags,
+        tagsLength: newItem.tags?.length || 0
       });
       
       console.log('=== ADD ITEM DEBUG END ===');

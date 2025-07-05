@@ -162,8 +162,8 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
               </span>
             </div>
 
-            {/* Tags section */}
-            {item.tags && item.tags.length > 0 && (
+            {/* Tags section - Enhanced with debug */}
+            {item.tags && item.tags.length > 0 ? (
               <div className="flex flex-wrap gap-1 mb-2">
                 {item.tags.map((tag, index) => (
                   <span 
@@ -174,6 +174,9 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
                   </span>
                 ))}
               </div>
+            ) : (
+              console.log('🏷️ No tags to display for item:', item.id, 'Tags:', item.tags),
+              null
             )}
 
             {/* Notes section */}
