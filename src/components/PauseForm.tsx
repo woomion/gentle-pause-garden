@@ -157,7 +157,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     // Show ripple effect for 1 second
     setTimeout(async () => {
       console.log('Pause item data:', formData);
-      console.log('🏷️ FORM SUBMIT: Tags being submitted:', formData.tags);
       
       const itemData = {
         itemName: formData.itemName || 'Unnamed Item',
@@ -172,8 +171,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         imageUrl: formData.imageUrl, // Include parsed image URL
         tags: formData.tags
       };
-
-      console.log('🏷️ FORM SUBMIT: itemData.tags:', itemData.tags);
 
       // Use appropriate store based on authentication status
       if (user) {
@@ -371,10 +368,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               </Label>
             <TagInput
               value={formData.tags}
-              onChange={(tags) => {
-                console.log('🏷️ FORM: Tags updated to:', tags);
-                setFormData(prev => ({ ...prev, tags }));
-              }}
+              onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
               placeholder="Add tags like 'apartment', 'clothes', 'fall wardrobe'..."
               suggestions={existingTags}
               className="w-full"

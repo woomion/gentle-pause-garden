@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Tag } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
 interface TagInputProps {
@@ -38,18 +37,9 @@ export const TagInput: React.FC<TagInputProps> = ({
   }, [inputValue, suggestions, value]);
 
   const addTag = (tag: string) => {
-    console.log('🏷️ TAG INPUT: addTag called with:', tag);
-    console.log('🏷️ TAG INPUT: current value:', value);
     const trimmedTag = tag.trim();
-    console.log('🏷️ TAG INPUT: trimmed tag:', trimmedTag);
-    console.log('🏷️ TAG INPUT: tag already exists?', value.includes(trimmedTag));
-    
     if (trimmedTag && !value.includes(trimmedTag)) {
-      const newTags = [...value, trimmedTag];
-      console.log('🏷️ TAG INPUT: calling onChange with:', newTags);
-      onChange(newTags);
-    } else {
-      console.log('🏷️ TAG INPUT: tag not added - empty or duplicate');
+      onChange([...value, trimmedTag]);
     }
     setInputValue('');
     setShowSuggestions(false);
@@ -59,21 +49,13 @@ export const TagInput: React.FC<TagInputProps> = ({
     onChange(value.filter(tag => tag !== tagToRemove));
   };
 
-  const handleInputKeyDown = (e: React.KeyboardEvent) => {
-    console.log('🏷️ TAG INPUT: key pressed:', e.key);
-    console.log('🏷️ TAG INPUT: current inputValue:', inputValue);
-    
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' || e.key === ',') {
-      console.log('🏷️ TAG INPUT: Enter or comma detected');
       e.preventDefault();
       if (inputValue.trim()) {
-        console.log('🏷️ TAG INPUT: calling addTag with inputValue');
         addTag(inputValue);
-      } else {
-        console.log('🏷️ TAG INPUT: inputValue is empty, not adding tag');
       }
     } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
-      console.log('🏷️ TAG INPUT: backspace pressed, removing last tag');
       removeTag(value[value.length - 1]);
     }
   };
@@ -103,16 +85,16 @@ export const TagInput: React.FC<TagInputProps> = ({
             </button>
           </Badge>
         ))}
-        <Input
+        <input
           ref={inputRef}
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleInputKeyDown}
+          onKeyDown={handleKeyDown}
           onFocus={() => inputValue && setShowSuggestions(filteredSuggestions.length > 0)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           placeholder={value.length === 0 ? placeholder : ""}
-          className="flex-1 border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 dark:text-[#F9F5EB]"
+          className="flex-1 border-0 bg-transparent p-0 outline-none placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 dark:text-[#F9F5EB]"
         />
       </div>
       
