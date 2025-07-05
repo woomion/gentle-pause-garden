@@ -24,16 +24,57 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     };
     
     try {
-      // Try multiple CORS proxy services for better reliability
+      // Try multiple approaches for better reliability
+      let htmlContent = null;
+      
+      // First, try Shopify product API if it's a Shopify store
+      if (hostname.includes('shopify') || url.includes('/products/')) {
+        try {
+          // Try Shopify's product JSON API
+          const productApiUrl = url.replace(/\?.*$/, '') + '.json';
+          console.log('Trying Shopify product API:', productApiUrl);
+          
+          const apiResponse = await fetch(productApiUrl);
+          if (apiResponse.ok) {
+            const productData = await apiResponse.json();
+            if (productData.product) {
+              console.log('Got Shopify product data:', productData.product.title);
+              
+              // Extract product info from API response
+              if (productData.product.title && !productInfo.itemName) {
+                productInfo.itemName = productData.product.title;
+                console.log('Extracted item name from API:', productData.product.title);
+              }
+              
+              // Get price from variants
+              if (productData.product.variants && productData.product.variants.length > 0) {
+                const variant = productData.product.variants[0];
+                if (variant.price) {
+                  productInfo.price = parseFloat(variant.price).toFixed(2);
+                  console.log('Extracted price from API:', productInfo.price);
+                }
+              }
+              
+              // Get image from API
+              if (productData.product.images && productData.product.images.length > 0) {
+                productInfo.imageUrl = productData.product.images[0].src;
+                console.log('Extracted image from API:', productInfo.imageUrl);
+              }
+              
+              return productInfo; // Return early if API worked
+            }
+          }
+        } catch (apiError) {
+          console.log('Shopify API failed, trying proxy services:', apiError.message);
+        }
+      }
+      
+      // Fallback to proxy services
       const proxyServices = [
         `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
         `https://corsproxy.io/?${encodeURIComponent(url)}`,
         `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
       ];
-      
-      console.log('Fetching product info from:', url);
-      
-      let htmlContent = null;
       
       // Try each proxy service
       for (const proxyUrl of proxyServices) {
