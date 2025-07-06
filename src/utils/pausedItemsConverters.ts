@@ -35,7 +35,17 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
   const notesProductLink = extractProductLinkFromNotes(dbItem.notes);
   
   // Process URLs to determine image and product link
-  const { imageUrl, productLink } = processUrls(dbItem.url, notesProductLink);
+  // Special case: preserve cart-placeholder for cart items
+  let imageUrl: string | undefined;
+  let productLink: string | undefined;
+  
+  if (dbItem.title === 'Cart' && dbItem.url === 'cart-placeholder') {
+    imageUrl = 'cart-placeholder';
+  } else {
+    const processed = processUrls(dbItem.url, notesProductLink);
+    imageUrl = processed.imageUrl;
+    productLink = processed.productLink;
+  }
   
   console.log('🖼️ Image URL processing in convertDbToLocal:', {
     dbUrl: dbItem.url,
@@ -83,7 +93,13 @@ export const convertLocalToDb = (
   
   // Determine final URL for database storage
   // Priority: uploaded image > auto-parsed image > product link
-  const finalUrl = determineFinalUrl(imageUrl || item.imageUrl, item.link);
+  // Special case: preserve cart-placeholder for cart items
+  let finalUrl: string | null;
+  if (item.isCart && item.imageUrl === 'cart-placeholder') {
+    finalUrl = 'cart-placeholder';
+  } else {
+    finalUrl = determineFinalUrl(imageUrl || item.imageUrl, item.link);
+  }
   
   console.log('Converting local to DB:', {
     itemName: item.itemName,
