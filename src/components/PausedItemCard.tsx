@@ -146,19 +146,11 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
           
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate">
-                  {item.itemName}
-                </h3>
-                {item.isCart && (
-                  <div className="flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full flex items-center gap-1">
-                    <ShoppingCart size={12} className="text-blue-600 dark:text-blue-400" />
-                    <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">Cart</span>
-                  </div>
-                )}
-              </div>
+              <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate pr-2">
+                {item.itemName}
+              </h3>
               {formattedPrice && (
-                <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0 ml-2">
+                <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0">
                   {formattedPrice}
                 </span>
               )}

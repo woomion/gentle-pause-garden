@@ -317,6 +317,31 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               )}
             </div>
 
+            {/* Cart Checkbox */}
+            <div className="flex items-center space-x-3 -mt-2 mb-4">
+              <Checkbox
+                id="isCart"
+                checked={formData.isCart}
+                onCheckedChange={(checked) => {
+                  const isChecked = checked === true;
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    isCart: isChecked,
+                    itemType: isChecked ? 'cart' : 'item',
+                    itemName: isChecked && !prev.itemName ? 'Cart' : prev.itemName,
+                    imageUrl: isChecked && !prev.imageUrl && !prev.photo ? 'cart-placeholder' : prev.imageUrl
+                  }));
+                }}
+                className="h-5 w-5"
+              />
+              <Label htmlFor="isCart" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart size={16} />
+                  Mark as Cart (saving multiple items)
+                </div>
+              </Label>
+            </div>
+
             {/* Item Name Field */}
             <div className="space-y-1">
               <Label htmlFor="itemName" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
@@ -428,38 +453,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   />
                   <p className="text-sm text-green-600 dark:text-green-400 mt-1">✓ Photo ready to upload</p>
                 </div>
-              )}
-            </div>
-
-            {/* Cart Checkbox */}
-            <div className="space-y-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id="isCart"
-                  checked={formData.isCart}
-                  onCheckedChange={(checked) => {
-                    const isChecked = checked === true;
-                    setFormData(prev => ({ 
-                      ...prev, 
-                      isCart: isChecked,
-                      itemType: isChecked ? 'cart' : 'item',
-                      itemName: isChecked && !prev.itemName ? 'Cart' : prev.itemName,
-                      imageUrl: isChecked && !prev.imageUrl && !prev.photo ? 'cart-placeholder' : prev.imageUrl
-                    }));
-                  }}
-                  className="h-5 w-5"
-                />
-                <Label htmlFor="isCart" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <ShoppingCart size={16} />
-                    Mark as Cart (saving multiple items)
-                  </div>
-                </Label>
-              </div>
-              {formData.isCart && (
-                <p className="text-blue-600 dark:text-blue-400 text-sm">
-                  ✓ Cart mode enabled - Item name auto-filled with "Cart" and will attempt to extract total price from URL
-                </p>
               )}
             </div>
 
