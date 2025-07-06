@@ -10,13 +10,13 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
   if (itemsCount === 0) return null;
 
   return (
-    <div className="bg-gradient-to-r from-[#E7D9FA] to-[#F3E8FF] rounded-2xl p-4 mb-4 border border-lavender/30">
+    <div className="bg-gradient-to-r from-[#E7D9FA] to-[#F3E8FF] dark:from-[#4A1D6B] dark:to-[#5C2D7A] rounded-2xl p-4 mb-4 border border-lavender/30 dark:border-gray-600">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-black mb-1">
+          <h3 className="text-lg font-semibold text-black dark:text-[#F9F5EB] mb-1">
             {itemsCount} item{itemsCount === 1 ? '' : 's'} ready for review
           </h3>
-          <p className="text-gray-700 text-sm">
+          <p className="text-gray-700 dark:text-gray-300 text-sm">
             {itemsCount === 1 
               ? "Your pause period is complete. Time to decide!" 
               : "Your pause periods are complete. Let's review them."}
@@ -24,7 +24,7 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
         </div>
         <button 
           onClick={onStartReview}
-          className="bg-white hover:bg-gray-50 text-black font-medium py-2 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm whitespace-nowrap"
+          className="bg-white hover:bg-gray-50 dark:bg-white/10 dark:hover:bg-white/20 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm whitespace-nowrap border border-gray-200 dark:border-gray-600"
         >
           Review Now
         </button>
