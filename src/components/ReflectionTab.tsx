@@ -67,7 +67,7 @@ const ReflectionTab = ({ reflection, setReflection }: ReflectionTabProps) => {
               <div className="flex justify-end">
                 <Button
                   onClick={handleCompleteReflection}
-                  className="bg-[#CAB6F7] hover:bg-[#B8A6D2] text-black font-medium px-6 py-2"
+                  className="bg-lavender hover:bg-lavender/90 text-black font-medium px-6 py-2 rounded-2xl"
                 >
                   Done
                 </Button>
