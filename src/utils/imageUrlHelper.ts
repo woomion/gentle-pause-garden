@@ -7,8 +7,15 @@ export const getImageUrl = (item: PausedItem): string | null => {
     itemName: item.itemName,
     imageUrl: item.imageUrl,
     photoDataUrl: item.photoDataUrl,
-    hasPhoto: !!item.photo
+    hasPhoto: !!item.photo,
+    isCart: item.isCart
   });
+  
+  // Handle cart placeholder first
+  if (item.imageUrl === 'cart-placeholder') {
+    console.log('📸 Using cart placeholder');
+    return 'cart-placeholder';
+  }
   
   // Priority order:
   // 1. Supabase Storage URL (contains supabase)
