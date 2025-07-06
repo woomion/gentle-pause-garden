@@ -226,16 +226,4 @@
       background-position: 0% 50%;
     }
   }
-
-  .review-banner-gradient {
-    background: linear-gradient(-45deg, #F9F5EB, #9DC183, #F9F5EB, #9DC183);
-    background-size: 400% 400%;
-    animation: gradient-shift 8s ease infinite;
-  }
-
-  .dark .review-banner-gradient {
-    background: linear-gradient(-45deg, #200E3B, #9DC183, #200E3B, #9DC183);
-    background-size: 400% 400%;
-    animation: gradient-shift 8s ease infinite;
-  }
 }
