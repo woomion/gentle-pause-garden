@@ -10,7 +10,7 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
   if (itemsCount === 0) return null;
 
   return (
-    <div className="bg-gradient-to-r from-[#E7D9FA] to-[#F3E8FF] dark:from-[#4A1D6B] dark:to-[#5C2D7A] rounded-2xl px-4 py-1 mb-4 border border-lavender/30 dark:border-gray-600">
+    <div className="bg-gradient-to-r from-[#E7D9FA] to-[#F3E8FF] dark:from-[#4A1D6B] dark:to-[#5C2D7A] rounded-2xl px-4 py-0.5 mb-4 border border-lavender/30 dark:border-gray-600">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-base font-medium text-black dark:text-[#F9F5EB]">
