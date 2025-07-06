@@ -167,7 +167,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 type="button"
               >
                 <ExternalLink size={14} />
-                View item
+                {item.isCart ? 'View cart' : 'View item'}
               </button>
             ) : (
               <div></div>

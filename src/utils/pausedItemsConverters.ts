@@ -41,6 +41,8 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
   
   if (dbItem.title === 'Cart' && dbItem.url === 'cart-placeholder') {
     imageUrl = 'cart-placeholder';
+    // For cart items, the product link should come from notes
+    productLink = notesProductLink;
   } else {
     const processed = processUrls(dbItem.url, notesProductLink);
     imageUrl = processed.imageUrl;
