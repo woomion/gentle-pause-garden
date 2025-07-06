@@ -7,9 +7,10 @@ interface PauseLogItemCardProps {
   item: PauseLogItem;
   onDelete: (id: string) => void;
   onViewLink: (item: PauseLogItem) => void;
+  onClick: (item: PauseLogItem) => void;
 }
 
-const PauseLogItemCard = ({ item, onDelete, onViewLink }: PauseLogItemCardProps) => {
+const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemCardProps) => {
   const getEmotionColor = (emotion: string): string => {
     const emotionColors: Record<string, string> = {
       'bored': '#F6E3D5',
@@ -35,10 +36,16 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink }: PauseLogItemCardProps)
   );
 
   return (
-    <div className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600 relative">
+    <div 
+      className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600 relative cursor-pointer hover:bg-white/70 dark:hover:bg-white/15 transition-colors"
+      onClick={() => onClick(item)}
+    >
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <button className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors">
+          <button 
+            className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
             <X size={16} />
           </button>
         </AlertDialogTrigger>
@@ -97,11 +104,6 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink }: PauseLogItemCardProps)
         null
       )}
       
-      {item.notes && item.notes.trim() && (
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-          {item.notes}
-        </p>
-      )}
       
       <div className="flex items-center justify-between">
         <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -114,7 +116,10 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink }: PauseLogItemCardProps)
         {hasLink && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors p-1">
+              <button 
+                className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors p-1"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <ExternalLink size={16} />
               </button>
             </AlertDialogTrigger>

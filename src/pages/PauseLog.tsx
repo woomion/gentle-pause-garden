@@ -8,6 +8,7 @@ import { PauseLogItem } from '../stores/pauseLogStore';
 import PauseLogHeader from '../components/PauseLogHeader';
 import PauseLogFilterControls from '../components/PauseLogFilterControls';
 import PauseLogItemCard from '../components/PauseLogItemCard';
+import PauseLogItemDetail from '../components/PauseLogItemDetail';
 import PauseLogEmptyState from '../components/PauseLogEmptyState';
 import FooterLinks from '../components/FooterLinks';
 
@@ -25,6 +26,8 @@ const PauseLog = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [tagFilter, setTagFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [selectedItem, setSelectedItem] = useState<PauseLogItem | null>(null);
+  const [showItemDetail, setShowItemDetail] = useState(false);
 
   // Force refresh pause log items when component mounts
   useEffect(() => {
@@ -74,6 +77,16 @@ const PauseLog = () => {
 
   const handleDeleteItem = (id: string) => {
     deleteItem(id);
+  };
+
+  const handleItemClick = (item: PauseLogItem) => {
+    setSelectedItem(item);
+    setShowItemDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setShowItemDetail(false);
+    setSelectedItem(null);
   };
 
   const toggleSortOrder = () => {
@@ -172,6 +185,7 @@ const PauseLog = () => {
                 item={item}
                 onDelete={handleDeleteItem}
                 onViewLink={handleViewLink}
+                onClick={handleItemClick}
               />
             ))
           )}
@@ -179,6 +193,13 @@ const PauseLog = () => {
 
         <FooterLinks />
       </div>
+
+      <PauseLogItemDetail
+        item={selectedItem}
+        isOpen={showItemDetail}
+        onClose={handleCloseDetail}
+        onViewLink={handleViewLink}
+      />
     </div>
   );
 };
