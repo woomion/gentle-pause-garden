@@ -30,11 +30,6 @@ export default {
 				purple: '#6B4C9A',
 				'dark-gray': '#2B2B2B',
 				
-				// Green accent colors
-				'cta-green': '#9DC183',
-				'sage': '#BBB791', 
-				'warm-micro': '#8F9779',
-				
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
