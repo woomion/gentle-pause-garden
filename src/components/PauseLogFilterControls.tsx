@@ -79,12 +79,7 @@ const PauseLogFilterControls = ({
                 <span>All types</span>
               </div>
             </SelectItem>
-            <SelectItem value="cart">
-              <div className="flex items-center gap-2">
-                <Plus size={14} />
-                <span>Cart only</span>
-              </div>
-            </SelectItem>
+            <SelectItem value="cart">Cart only</SelectItem>
             <SelectItem value="item">Item only</SelectItem>
           </SelectContent>
         </Select>
