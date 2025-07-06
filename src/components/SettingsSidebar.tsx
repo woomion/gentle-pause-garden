@@ -8,6 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
 import { notificationService } from '../services/notificationService';
+import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
+import { pausedItemsStore } from '../stores/pausedItemsStore';
+import { useAuth } from '../contexts/AuthContext';
 import FeedbackModal from './FeedbackModal';
 
 interface SettingsSidebarProps {
@@ -20,6 +23,7 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const { toast } = useToast();
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
+  const { user } = useAuth();
 
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
 
@@ -95,8 +99,53 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   };
 
   const handleTestNotification = () => {
-    console.log('🧪 Test notification clicked');
+    console.log('🧪 Test notification button clicked');
+    console.log('🧪 Current state:', {
+      notificationsEnabled,
+      browserPermission: Notification.permission,
+      serviceEnabled: notificationService.getEnabled(),
+      userAgent: navigator.userAgent,
+      isVisible: document.visibilityState
+    });
+    
+    // Force enable the service if permissions are correct
+    if (Notification.permission === 'granted') {
+      notificationService.setEnabled(true);
+      console.log('🧪 Force enabled notification service');
+    }
+    
     testNotification();
+    
+    // Also manually test the notification check
+    console.log('🧪 Manually triggering item check...');
+    setTimeout(() => {
+      // Force a check regardless of timing
+      const now = Date.now();
+      const items = user 
+        ? supabasePausedItemsStore.getItemsForReview()
+        : pausedItemsStore.getItemsForReview();
+      
+      console.log('🧪 Manual check results:', {
+        itemCount: items.length,
+        items: items.map(item => ({
+          name: item.itemName,
+          checkInDate: item.checkInDate,
+          isReady: item.checkInDate <= new Date()
+        }))
+      });
+      
+      if (items.length > 0 && notificationService.getEnabled()) {
+        console.log('🧪 Showing notification for ready items...');
+        notificationService.showNotification(
+          `🧪 Test: ${items.length} item${items.length === 1 ? '' : 's'} ready!`,
+          {
+            body: 'This is a test notification for your ready items.',
+            tag: 'pocket-pause-test-ready'
+          }
+        );
+      }
+    }, 2000);
+    
     toast({
       title: "Test notification sent",
       description: "If notifications are working, you should see a test notification now.",

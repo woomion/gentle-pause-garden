@@ -16,10 +16,26 @@ export const useNotifications = (enabled: boolean) => {
   useEffect(() => {
     try {
       console.log('🔔 Settings sync - enabled:', enabled, 'permission:', Notification.permission);
-      if (enabled && Notification.permission === 'granted') {
-        notificationService.setEnabled(true);
-        console.log('✅ Notification service enabled via settings sync');
-      } else if (enabled === false) {
+      if (enabled) {
+        // If notifications are enabled in settings but browser permission isn't granted, request it
+        if (Notification.permission === 'default') {
+          console.log('🔔 Requesting notification permission...');
+          Notification.requestPermission().then(permission => {
+            console.log('🔔 Permission result:', permission);
+            if (permission === 'granted') {
+              notificationService.setEnabled(true);
+              console.log('✅ Notification service enabled after permission grant');
+            } else {
+              console.log('❌ Notification permission denied');
+            }
+          });
+        } else if (Notification.permission === 'granted') {
+          notificationService.setEnabled(true);
+          console.log('✅ Notification service enabled via settings sync');
+        } else {
+          console.log('❌ Notification permission denied, cannot enable service');
+        }
+      } else {
         notificationService.setEnabled(false);
         console.log('❌ Notification service disabled via settings sync');
       }
@@ -57,11 +73,26 @@ export const useNotifications = (enabled: boolean) => {
       console.log('🔍 Starting notification check at:', new Date(now).toISOString());
       console.log('🔔 enabled:', enabled, 'service enabled:', notificationService.getEnabled());
       console.log('🔔 user authenticated:', !!user);
+      console.log('🔔 browser permission:', Notification.permission);
       console.log('🔔 time since last check:', now - lastCheckTimeRef.current, 'ms');
       
-      if (!enabled || !notificationService.getEnabled()) {
-        console.log('⏭️ Skipping notification check - enabled:', enabled, 'service enabled:', notificationService.getEnabled());
+      if (!enabled) {
+        console.log('⏭️ Skipping notification check - notifications disabled in settings');
         return;
+      }
+      
+      if (Notification.permission !== 'granted') {
+        console.log('⏭️ Skipping notification check - browser permission denied');
+        return;
+      }
+      
+      if (!notificationService.getEnabled()) {
+        console.log('⏭️ Skipping notification check - service not enabled, attempting to enable...');
+        notificationService.setEnabled(true);
+        if (!notificationService.getEnabled()) {
+          console.log('❌ Failed to enable notification service');
+          return;
+        }
       }
 
       // Use the correct store based on authentication status
@@ -107,6 +138,7 @@ export const useNotifications = (enabled: boolean) => {
         console.log('🔔 Reason:', shouldNotifyForNewItems ? 'new items' : 'reminder after delay');
 
         // Send browser notification
+        console.log('🚀 Sending browser notification...');
         const notification = notificationService.showNotification(title, {
           body,
           tag: 'pocket-pause-review',
@@ -114,6 +146,7 @@ export const useNotifications = (enabled: boolean) => {
         });
 
         // Send push notification to user's devices (for authenticated users)
+        console.log('🚀 Sending push notification...');
         await sendPushNotification(title, body, {
           action: 'review_items',
           count: itemsForReview.length
