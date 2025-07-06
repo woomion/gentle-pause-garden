@@ -203,25 +203,12 @@
     }
   }
 
-  @keyframes pulse-cycle {
-    0%, 6%, 12%, 18%, 100% {
-      color: #6B4C9A; /* purple */
+  @keyframes bg-pulse-cycle {
+    0%, 8%, 16%, 24%, 100% {
+      opacity: 1;
     }
-    3%, 9%, 15% {
-      color: #D6BBF7; /* lavender */
-    }
-  }
-
-  .dark .animate-\[pulse-cycle_13s_infinite\] {
-    animation: pulse-cycle-dark 13s infinite;
-  }
-
-  @keyframes pulse-cycle-dark {
-    0%, 6%, 12%, 18%, 100% {
-      color: #D6BBF7; /* lavender */
-    }
-    3%, 9%, 15% {
-      color: #F9F5EB; /* light cream */
+    4%, 12%, 20% {
+      opacity: 0.8;
     }
   }
 }
