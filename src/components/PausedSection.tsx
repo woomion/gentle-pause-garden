@@ -24,7 +24,10 @@ const PausedSection = () => {
       if (user) {
         // Use Supabase store for authenticated users
         const allItems = supabasePausedItemsStore.getItems();
-        setPausedItems(sortItemsByDate(allItems));
+        const reviewItems = supabasePausedItemsStore.getItemsForReview();
+        const reviewItemIds = new Set(reviewItems.map(item => item.id));
+        const nonReviewItems = allItems.filter(item => !reviewItemIds.has(item.id));
+        setPausedItems(sortItemsByDate(nonReviewItems));
         
         if (supabasePausedItemsStore.isDataLoaded()) {
           setIsLoading(false);
@@ -32,7 +35,10 @@ const PausedSection = () => {
       } else {
         // Use local store for guest users
         const allItems = pausedItemsStore.getItems();
-        setPausedItems(sortItemsByDate(allItems));
+        const reviewItems = pausedItemsStore.getItemsForReview();
+        const reviewItemIds = new Set(reviewItems.map(item => item.id));
+        const nonReviewItems = allItems.filter(item => !reviewItemIds.has(item.id));
+        setPausedItems(sortItemsByDate(nonReviewItems));
         setIsLoading(false);
       }
     };
