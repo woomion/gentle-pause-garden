@@ -1,5 +1,5 @@
 
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 
@@ -7,12 +7,14 @@ interface PauseLogFilterControlsProps {
   emotionFilter: string;
   statusFilter: string;
   tagFilter: string;
+  cartFilter: string;
   sortOrder: 'newest' | 'oldest';
   uniqueEmotions: string[];
   uniqueTags: string[];
   onEmotionFilterChange: (value: string) => void;
   onStatusFilterChange: (value: string) => void;
   onTagFilterChange: (value: string) => void;
+  onCartFilterChange: (value: string) => void;
   onSortOrderToggle: () => void;
 }
 
@@ -20,12 +22,14 @@ const PauseLogFilterControls = ({
   emotionFilter,
   statusFilter,
   tagFilter,
+  cartFilter,
   sortOrder,
   uniqueEmotions,
   uniqueTags,
   onEmotionFilterChange,
   onStatusFilterChange,
   onTagFilterChange,
+  onCartFilterChange,
   onSortOrderToggle
 }: PauseLogFilterControlsProps) => {
   return (
@@ -67,6 +71,32 @@ const PauseLogFilterControls = ({
             {uniqueTags.map(tag => (
               <SelectItem key={tag} value={tag}>{tag}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={cartFilter} onValueChange={onCartFilterChange}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder={
+              <div className="flex items-center gap-2">
+                <Plus size={14} />
+                <span>Cart</span>
+              </div>
+            } />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <div className="flex items-center gap-2">
+                <Plus size={14} />
+                <span>All types</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="cart">
+              <div className="flex items-center gap-2">
+                <Plus size={14} />
+                <span>Cart only</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="item">Item only</SelectItem>
           </SelectContent>
         </Select>
 

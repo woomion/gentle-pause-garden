@@ -25,6 +25,7 @@ const PauseLog = () => {
   const [emotionFilter, setEmotionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [tagFilter, setTagFilter] = useState<string>('all');
+  const [cartFilter, setCartFilter] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [selectedItem, setSelectedItem] = useState<PauseLogItem | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
@@ -57,7 +58,14 @@ const PauseLog = () => {
       const emotionMatch = emotionFilter === 'all' || item.emotion === emotionFilter;
       const statusMatch = statusFilter === 'all' || item.status === statusFilter;
       const tagMatch = tagFilter === 'all' || (item.tags && item.tags.includes(tagFilter));
-      return emotionMatch && statusMatch && tagMatch;
+      
+      // Cart filter logic - check if item was originally a cart
+      const isItemCart = item.originalPausedItem?.isCart || item.originalPausedItem?.itemType === 'cart' || item.itemName === 'Cart';
+      const cartMatch = cartFilter === 'all' || 
+                       (cartFilter === 'cart' && isItemCart) || 
+                       (cartFilter === 'item' && !isItemCart);
+      
+      return emotionMatch && statusMatch && tagMatch && cartMatch;
     });
 
     // Sort by date decided (letGoDate)
@@ -73,7 +81,41 @@ const PauseLog = () => {
     });
 
     return filtered;
-  }, [items, emotionFilter, statusFilter, tagFilter, sortOrder]);
+  }, [items, emotionFilter, statusFilter, tagFilter, cartFilter, sortOrder]);
+
+  // Get active filters for display
+  const activeFilters = useMemo(() => {
+    const filters = [];
+    if (emotionFilter !== 'all') filters.push({ type: 'emotion', value: emotionFilter, label: emotionFilter });
+    if (statusFilter !== 'all') filters.push({ type: 'status', value: statusFilter, label: statusFilter === 'purchased' ? 'Purchased' : 'Let go' });
+    if (tagFilter !== 'all') filters.push({ type: 'tag', value: tagFilter, label: tagFilter });
+    if (cartFilter !== 'all') filters.push({ type: 'cart', value: cartFilter, label: cartFilter === 'cart' ? 'Cart' : 'Item' });
+    return filters;
+  }, [emotionFilter, statusFilter, tagFilter, cartFilter]);
+
+  const clearAllFilters = () => {
+    setEmotionFilter('all');
+    setStatusFilter('all');
+    setTagFilter('all');
+    setCartFilter('all');
+  };
+
+  const removeFilter = (filterType: string) => {
+    switch (filterType) {
+      case 'emotion':
+        setEmotionFilter('all');
+        break;
+      case 'status':
+        setStatusFilter('all');
+        break;
+      case 'tag':
+        setTagFilter('all');
+        break;
+      case 'cart':
+        setCartFilter('all');
+        break;
+    }
+  };
 
   const handleDeleteItem = (id: string) => {
     deleteItem(id);
@@ -164,15 +206,47 @@ const PauseLog = () => {
             emotionFilter={emotionFilter}
             statusFilter={statusFilter}
             tagFilter={tagFilter}
+            cartFilter={cartFilter}
             sortOrder={sortOrder}
             uniqueEmotions={uniqueEmotions}
             uniqueTags={uniqueTags}
             onEmotionFilterChange={setEmotionFilter}
             onStatusFilterChange={setStatusFilter}
             onTagFilterChange={setTagFilter}
+            onCartFilterChange={setCartFilter}
             onSortOrderToggle={toggleSortOrder}
           />
         </div>
+
+        {/* Active Filters */}
+        {activeFilters.length > 0 && (
+          <div className="mb-4 p-4 bg-white/60 dark:bg-white/10 rounded-2xl border border-lavender/30 dark:border-gray-600">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">Active filters:</span>
+              {activeFilters.map((filter) => (
+                <div
+                  key={`${filter.type}-${filter.value}`}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] rounded-full text-sm border border-lavender/30"
+                >
+                  <span>{filter.label}</span>
+                  <button
+                    onClick={() => removeFilter(filter.type)}
+                    className="ml-1 text-dark-gray dark:text-[#F9F5EB] hover:text-red-600 dark:hover:text-red-400 text-xs font-bold"
+                    aria-label={`Remove ${filter.label} filter`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={clearAllFilters}
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-[#F9F5EB] underline"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
 
         {/* Items List */}
         <div className="space-y-4">
