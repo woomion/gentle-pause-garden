@@ -105,12 +105,14 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 dark:hover:bg-lavender/20 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
-                  Let This Item Go
+                  {item.isCart ? 'Let This Cart Go' : 'Let This Item Go'}
                 </button>
               </AlertDialogTrigger>
               <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Let go of this item?</AlertDialogTitle>
+                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">
+                    {item.isCart ? 'Let go of this cart?' : 'Let go of this item?'}
+                  </AlertDialogTitle>
                   <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
                     This will move "{item.itemName}" to your pause log. You can always see what you've let go of in your pause log section.
                   </AlertDialogDescription>
