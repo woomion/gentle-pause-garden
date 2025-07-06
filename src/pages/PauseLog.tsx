@@ -11,6 +11,7 @@ import PauseLogItemCard from '../components/PauseLogItemCard';
 import PauseLogItemDetail from '../components/PauseLogItemDetail';
 import PauseLogEmptyState from '../components/PauseLogEmptyState';
 import FooterLinks from '../components/FooterLinks';
+import { getEmotionColor } from '../utils/emotionColors';
 
 const PauseLog = () => {
   const { user } = useAuth();
@@ -22,10 +23,10 @@ const PauseLog = () => {
   
   const { items, deleteItem, loadItems } = user ? supabasePauseLog : localPauseLog;
   
-  const [emotionFilter, setEmotionFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [tagFilter, setTagFilter] = useState<string>('all');
   const [cartFilter, setCartFilter] = useState<string>('all');
+  const [emotionFilters, setEmotionFilters] = useState<string[]>([]);
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [selectedItem, setSelectedItem] = useState<PauseLogItem | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
@@ -55,9 +56,9 @@ const PauseLog = () => {
   // Filter and sort items based on selected filters and sort order
   const filteredItems = useMemo(() => {
     let filtered = items.filter(item => {
-      const emotionMatch = emotionFilter === 'all' || item.emotion === emotionFilter;
-      const statusMatch = statusFilter === 'all' || item.status === statusFilter;
-      const tagMatch = tagFilter === 'all' || (item.tags && item.tags.includes(tagFilter));
+      const emotionMatch = emotionFilters.length === 0 || emotionFilters.includes(item.emotion);
+      const statusMatch = statusFilters.length === 0 || statusFilters.includes(item.status);
+      const tagMatch = tagFilters.length === 0 || (item.tags && item.tags.some(tag => tagFilters.includes(tag)));
       
       // Cart filter logic - check if item was originally a cart
       const isItemCart = item.originalPausedItem?.isCart || item.originalPausedItem?.itemType === 'cart' || item.itemName === 'Cart';
@@ -81,35 +82,75 @@ const PauseLog = () => {
     });
 
     return filtered;
-  }, [items, emotionFilter, statusFilter, tagFilter, cartFilter, sortOrder]);
+  }, [items, emotionFilters, statusFilters, tagFilters, cartFilter, sortOrder]);
 
   // Get active filters for display
   const activeFilters = useMemo(() => {
     const filters = [];
-    if (emotionFilter !== 'all') filters.push({ type: 'emotion', value: emotionFilter, label: emotionFilter });
-    if (statusFilter !== 'all') filters.push({ type: 'status', value: statusFilter, label: statusFilter === 'purchased' ? 'Purchased' : 'Let go' });
-    if (tagFilter !== 'all') filters.push({ type: 'tag', value: tagFilter, label: tagFilter });
-    if (cartFilter !== 'all') filters.push({ type: 'cart', value: cartFilter, label: cartFilter === 'cart' ? 'Cart' : 'Item' });
+    
+    // Add emotion filters with colors
+    emotionFilters.forEach(emotion => {
+      filters.push({ 
+        type: 'emotion', 
+        value: emotion, 
+        label: emotion,
+        isEmotion: true
+      });
+    });
+    
+    // Add status filters
+    statusFilters.forEach(status => {
+      filters.push({ 
+        type: 'status', 
+        value: status, 
+        label: status === 'purchased' ? 'Purchased' : 'Let go'
+      });
+    });
+    
+    // Add tag filters
+    tagFilters.forEach(tag => {
+      filters.push({ 
+        type: 'tag', 
+        value: tag, 
+        label: tag
+      });
+    });
+    
+    // Add cart filter
+    if (cartFilter !== 'all') {
+      filters.push({ 
+        type: 'cart', 
+        value: cartFilter, 
+        label: cartFilter === 'cart' ? 'Cart' : 'Item'
+      });
+    }
+    
     return filters;
-  }, [emotionFilter, statusFilter, tagFilter, cartFilter]);
+  }, [emotionFilters, statusFilters, tagFilters, cartFilter]);
 
   const clearAllFilters = () => {
-    setEmotionFilter('all');
-    setStatusFilter('all');
-    setTagFilter('all');
+    setEmotionFilters([]);
+    setStatusFilters([]);
+    setTagFilters([]);
     setCartFilter('all');
   };
 
-  const removeFilter = (filterType: string) => {
+  const removeFilter = (filterType: string, value?: string) => {
     switch (filterType) {
       case 'emotion':
-        setEmotionFilter('all');
+        if (value) {
+          setEmotionFilters(prev => prev.filter(e => e !== value));
+        }
         break;
       case 'status':
-        setStatusFilter('all');
+        if (value) {
+          setStatusFilters(prev => prev.filter(s => s !== value));
+        }
         break;
       case 'tag':
-        setTagFilter('all');
+        if (value) {
+          setTagFilters(prev => prev.filter(t => t !== value));
+        }
         break;
       case 'cart':
         setCartFilter('all');
@@ -203,16 +244,16 @@ const PauseLog = () => {
         
         <div className="mb-6">
           <PauseLogFilterControls
-            emotionFilter={emotionFilter}
-            statusFilter={statusFilter}
-            tagFilter={tagFilter}
+            emotionFilters={emotionFilters}
+            statusFilters={statusFilters}
+            tagFilters={tagFilters}
             cartFilter={cartFilter}
             sortOrder={sortOrder}
             uniqueEmotions={uniqueEmotions}
             uniqueTags={uniqueTags}
-            onEmotionFilterChange={setEmotionFilter}
-            onStatusFilterChange={setStatusFilter}
-            onTagFilterChange={setTagFilter}
+            onEmotionFiltersChange={setEmotionFilters}
+            onStatusFiltersChange={setStatusFilters}
+            onTagFiltersChange={setTagFilters}
             onCartFilterChange={setCartFilter}
             onSortOrderToggle={toggleSortOrder}
           />
@@ -226,12 +267,22 @@ const PauseLog = () => {
               {activeFilters.map((filter) => (
                 <div
                   key={`${filter.type}-${filter.value}`}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] rounded-full text-sm border border-lavender/30"
+                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border ${
+                    filter.isEmotion 
+                      ? 'text-black' 
+                      : 'bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] border-lavender/30'
+                  }`}
+                  style={filter.isEmotion ? {
+                    backgroundColor: getEmotionColor(filter.value),
+                    borderColor: getEmotionColor(filter.value)
+                  } : undefined}
                 >
                   <span>{filter.label}</span>
                   <button
-                    onClick={() => removeFilter(filter.type)}
-                    className="ml-1 text-dark-gray dark:text-[#F9F5EB] hover:text-red-600 dark:hover:text-red-400 text-xs font-bold"
+                    onClick={() => removeFilter(filter.type, filter.value)}
+                    className={`ml-1 hover:text-red-600 dark:hover:text-red-400 text-xs font-bold ${
+                      filter.isEmotion ? 'text-black' : 'text-dark-gray dark:text-[#F9F5EB]'
+                    }`}
                     aria-label={`Remove ${filter.label} filter`}
                   >
                     ×

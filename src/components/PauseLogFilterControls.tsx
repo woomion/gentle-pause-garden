@@ -2,36 +2,64 @@
 import { ArrowDown, ArrowUp, Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { getEmotionColor } from '../utils/emotionColors';
 
 interface PauseLogFilterControlsProps {
-  emotionFilter: string;
-  statusFilter: string;
-  tagFilter: string;
+  emotionFilters: string[];
+  statusFilters: string[];
+  tagFilters: string[];
   cartFilter: string;
   sortOrder: 'newest' | 'oldest';
   uniqueEmotions: string[];
   uniqueTags: string[];
-  onEmotionFilterChange: (value: string) => void;
-  onStatusFilterChange: (value: string) => void;
-  onTagFilterChange: (value: string) => void;
+  onEmotionFiltersChange: (filters: string[]) => void;
+  onStatusFiltersChange: (filters: string[]) => void;
+  onTagFiltersChange: (filters: string[]) => void;
   onCartFilterChange: (value: string) => void;
   onSortOrderToggle: () => void;
 }
 
 const PauseLogFilterControls = ({
-  emotionFilter,
-  statusFilter,
-  tagFilter,
+  emotionFilters,
+  statusFilters,
+  tagFilters,
   cartFilter,
   sortOrder,
   uniqueEmotions,
   uniqueTags,
-  onEmotionFilterChange,
-  onStatusFilterChange,
-  onTagFilterChange,
+  onEmotionFiltersChange,
+  onStatusFiltersChange,
+  onTagFiltersChange,
   onCartFilterChange,
   onSortOrderToggle
 }: PauseLogFilterControlsProps) => {
+  
+  const handleEmotionToggle = (emotion: string) => {
+    if (emotionFilters.includes(emotion)) {
+      onEmotionFiltersChange(emotionFilters.filter(e => e !== emotion));
+    } else {
+      onEmotionFiltersChange([...emotionFilters, emotion]);
+    }
+  };
+
+  const handleStatusToggle = (status: string) => {
+    if (statusFilters.includes(status)) {
+      onStatusFiltersChange(statusFilters.filter(s => s !== status));
+    } else {
+      onStatusFiltersChange([...statusFilters, status]);
+    }
+  };
+
+  const handleTagToggle = (tag: string) => {
+    if (tagFilters.includes(tag)) {
+      onTagFiltersChange(tagFilters.filter(t => t !== tag));
+    } else {
+      onTagFiltersChange([...tagFilters, tag]);
+    }
+  };
+
   return (
     <>
       <div className="mb-2">
@@ -39,51 +67,12 @@ const PauseLogFilterControls = ({
       </div>
 
       <div className="flex flex-wrap gap-4 items-center">
-        <Select value={emotionFilter} onValueChange={onEmotionFilterChange}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="All emotions" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All emotions</SelectItem>
-            {uniqueEmotions.map(emotion => (
-              <SelectItem key={emotion} value={emotion}>{emotion}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="All outcomes" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All outcomes</SelectItem>
-            <SelectItem value="purchased">Purchased</SelectItem>
-            <SelectItem value="let-go">Let go</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={tagFilter} onValueChange={onTagFilterChange}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="All tags" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All tags</SelectItem>
-            {uniqueTags.map(tag => (
-              <SelectItem key={tag} value={tag}>{tag}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
+        {/* Cart Filter - Primary/First */}
         <Select value={cartFilter} onValueChange={onCartFilterChange}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder={
-              <div className="flex items-center gap-2">
-                <Plus size={14} />
-                <span>Cart</span>
-              </div>
-            } />
+          <SelectTrigger className="w-40 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 font-medium">
+            <SelectValue placeholder="All types" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 z-50">
             <SelectItem value="all">
               <div className="flex items-center gap-2">
                 <Plus size={14} />
@@ -100,6 +89,104 @@ const PauseLogFilterControls = ({
           </SelectContent>
         </Select>
 
+        {/* Emotions Multi-Select */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-40 justify-between">
+              {emotionFilters.length === 0 
+                ? "All emotions" 
+                : `${emotionFilters.length} emotion${emotionFilters.length > 1 ? 's' : ''}`
+              }
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-60 bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 z-50">
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {uniqueEmotions.map(emotion => (
+                <div key={emotion} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`emotion-${emotion}`}
+                    checked={emotionFilters.includes(emotion)}
+                    onCheckedChange={() => handleEmotionToggle(emotion)}
+                  />
+                  <label
+                    htmlFor={`emotion-${emotion}`}
+                    className="flex items-center gap-2 text-sm cursor-pointer flex-1"
+                  >
+                    <div 
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: getEmotionColor(emotion) }}
+                    />
+                    <span className="capitalize">{emotion}</span>
+                  </label>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Status Multi-Select */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-40 justify-between">
+              {statusFilters.length === 0 
+                ? "All outcomes" 
+                : `${statusFilters.length} selected`
+              }
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48 bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 z-50">
+            <div className="space-y-2">
+              {['purchased', 'let-go'].map(status => (
+                <div key={status} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`status-${status}`}
+                    checked={statusFilters.includes(status)}
+                    onCheckedChange={() => handleStatusToggle(status)}
+                  />
+                  <label
+                    htmlFor={`status-${status}`}
+                    className="text-sm cursor-pointer flex-1"
+                  >
+                    {status === 'purchased' ? 'Purchased' : 'Let go'}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Tags Multi-Select */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-40 justify-between">
+              {tagFilters.length === 0 
+                ? "All tags" 
+                : `${tagFilters.length} tag${tagFilters.length > 1 ? 's' : ''}`
+              }
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-60 bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 z-50">
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {uniqueTags.map(tag => (
+                <div key={tag} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`tag-${tag}`}
+                    checked={tagFilters.includes(tag)}
+                    onCheckedChange={() => handleTagToggle(tag)}
+                  />
+                  <label
+                    htmlFor={`tag-${tag}`}
+                    className="text-sm cursor-pointer flex-1"
+                  >
+                    {tag}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Sort Order */}
         <Button
           variant="outline"
           size="sm"
