@@ -1,5 +1,6 @@
 
 import { memo } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 interface ReviewBannerProps {
   itemsCount: number;
@@ -19,9 +20,10 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
         </div>
         <button 
           onClick={onStartReview}
-          className="text-purple dark:text-lavender font-medium hover:text-purple/80 dark:hover:text-lavender/80 transition-colors duration-200 whitespace-nowrap"
+          className="text-purple dark:text-lavender font-medium hover:text-purple/80 dark:hover:text-lavender/80 transition-colors duration-200 whitespace-nowrap flex items-center gap-1"
         >
           Review Now
+          <ArrowRight size={16} />
         </button>
       </div>
     </div>
