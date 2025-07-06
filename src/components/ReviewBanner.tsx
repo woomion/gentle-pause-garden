@@ -16,11 +16,6 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
           <h3 className="text-lg font-semibold text-black dark:text-[#F9F5EB] mb-1">
             {itemsCount} item{itemsCount === 1 ? '' : 's'} ready for review
           </h3>
-          <p className="text-gray-700 dark:text-gray-300 text-sm">
-            {itemsCount === 1 
-              ? "Your pause period is complete. Time to decide!" 
-              : "Your pause periods are complete. Let's review them."}
-          </p>
         </div>
         <button 
           onClick={onStartReview}
