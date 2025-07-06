@@ -72,38 +72,6 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
         </h3>
       </div>
       
-      <div className="mb-2">
-        <span className="text-black dark:text-[#F9F5EB] text-sm">
-          Paused while feeling{' '}
-        </span>
-        <span 
-          className="inline-block px-2 py-1 rounded text-xs font-medium"
-          style={{ 
-            backgroundColor: getEmotionColor(item.emotion),
-            color: '#000'
-          }}
-        >
-          {item.emotion}
-        </span>
-      </div>
-      
-      {/* Tags section - Enhanced with debug */}
-      {item.tags && item.tags.length > 0 ? (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {item.tags.map((tag, index) => (
-            <span 
-              key={index}
-              className="inline-block px-2 py-1 bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] rounded text-xs border border-lavender/30"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      ) : (
-        console.log('🏷️ No tags to display in pause log for item:', item.id, 'Tags:', item.tags),
-        null
-      )}
-      
       
       <div className="flex items-center justify-between">
         <p className="text-gray-600 dark:text-gray-400 text-sm">
