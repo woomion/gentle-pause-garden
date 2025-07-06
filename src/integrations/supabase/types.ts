@@ -146,6 +146,8 @@ export type Database = {
           created_at: string
           id: string
           notifications_enabled: boolean
+          platform: string | null
+          push_token: string | null
           theme: string
           updated_at: string
           user_id: string
@@ -154,6 +156,8 @@ export type Database = {
           created_at?: string
           id?: string
           notifications_enabled?: boolean
+          platform?: string | null
+          push_token?: string | null
           theme?: string
           updated_at?: string
           user_id: string
@@ -162,6 +166,8 @@ export type Database = {
           created_at?: string
           id?: string
           notifications_enabled?: boolean
+          platform?: string | null
+          push_token?: string | null
           theme?: string
           updated_at?: string
           user_id?: string

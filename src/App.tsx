@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,11 +18,28 @@ import { AuthProvider } from "./contexts/AuthContext";
 import AuthGuard from "./components/AuthGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import MobileDebugger from "./components/MobileDebugger";
+import { pushNotificationService } from "./services/pushNotificationService";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   console.log('App component rendering');
+  
+  // Initialize push notifications on app start
+  useEffect(() => {
+    const initializePushNotifications = async () => {
+      try {
+        const initialized = await pushNotificationService.initialize();
+        if (initialized) {
+          console.log('Push notifications initialized successfully');
+        }
+      } catch (error) {
+        console.error('Failed to initialize push notifications:', error);
+      }
+    };
+
+    initializePushNotifications();
+  }, []);
   
   return (
     <ErrorBoundary>

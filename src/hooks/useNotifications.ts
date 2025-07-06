@@ -4,6 +4,7 @@ import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { notificationService } from '../services/notificationService';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useNotifications = (enabled: boolean) => {
   const { user } = useAuth();
@@ -27,7 +28,30 @@ export const useNotifications = (enabled: boolean) => {
     }
   }, [enabled]);
 
-  const checkForReadyItems = useCallback(() => {
+  const sendPushNotification = useCallback(async (title: string, body: string, data?: Record<string, any>) => {
+    if (!user) return; // Only send push notifications to authenticated users
+    
+    try {
+      const { error } = await supabase.functions.invoke('send-push-notifications', {
+        body: { 
+          userIds: [user.id], 
+          title, 
+          body, 
+          data 
+        }
+      });
+
+      if (error) {
+        console.error('Error sending push notification:', error);
+      } else {
+        console.log('Push notification sent successfully');
+      }
+    } catch (error) {
+      console.error('Error calling send-push-notifications function:', error);
+    }
+  }, [user]);
+
+  const checkForReadyItems = useCallback(async () => {
     try {
       const now = Date.now();
       console.log('🔍 Starting notification check at:', new Date(now).toISOString());
@@ -82,10 +106,17 @@ export const useNotifications = (enabled: boolean) => {
         console.log('📧 Body:', body);
         console.log('🔔 Reason:', shouldNotifyForNewItems ? 'new items' : 'reminder after delay');
 
+        // Send browser notification
         const notification = notificationService.showNotification(title, {
           body,
           tag: 'pocket-pause-review',
           requireInteraction: false
+        });
+
+        // Send push notification to user's devices (for authenticated users)
+        await sendPushNotification(title, body, {
+          action: 'review_items',
+          count: itemsForReview.length
         });
 
         console.log('📱 Notification object created:', notification);
@@ -101,7 +132,7 @@ export const useNotifications = (enabled: boolean) => {
     } catch (error) {
       console.error('❌ Error in checkForReadyItems:', error);
     }
-  }, [enabled, user]);
+  }, [enabled, user, sendPushNotification]);
 
   // Set up notifications and intervals
   useEffect(() => {
