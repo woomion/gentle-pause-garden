@@ -21,7 +21,7 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
             {itemsCount} item{itemsCount === 1 ? '' : 's'} ready for review
           </h3>
         </div>
-        <div className="text-purple dark:text-lavender font-medium whitespace-nowrap flex items-center gap-1">
+        <div className="text-cta-green dark:text-cta-green font-medium whitespace-nowrap flex items-center gap-1">
           Review Now
           <ArrowRight size={16} />
         </div>
