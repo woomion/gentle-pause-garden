@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
@@ -52,7 +53,9 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     duration: '',
     otherDuration: '',
     imageUrl: '', // Add imageUrl to track parsed images
-    tags: [] as string[]
+    tags: [] as string[],
+    isCart: false,
+    itemType: 'item' as 'item' | 'cart'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingUrl, setIsParsingUrl] = useState(false);
@@ -63,6 +66,47 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const extractCartPrice = async (url: string): Promise<string | null> => {
+    try {
+      // Attempt to fetch the page content
+      const response = await fetch(url, {
+        mode: 'cors',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; PocketPause/1.0)'
+        }
+      });
+      
+      if (!response.ok) return null;
+      
+      const text = await response.text();
+      
+      // Common patterns for cart totals/subtotals
+      const pricePatterns = [
+        /(?:total|subtotal|grand.?total)[:\s]*\$?([0-9]+(?:\.[0-9]{2})?)/gi,
+        /\$([0-9]+(?:\.[0-9]{2})?)\s*(?:total|subtotal)/gi,
+        /"totalPrice"[:\s]*"?\$?([0-9]+(?:\.[0-9]{2})?)["']?/gi,
+        /"subtotal"[:\s]*"?\$?([0-9]+(?:\.[0-9]{2})?)["']?/gi,
+        /data-total[=:"'\s]*\$?([0-9]+(?:\.[0-9]{2})?)/gi
+      ];
+      
+      for (const pattern of pricePatterns) {
+        const matches = text.match(pattern);
+        if (matches) {
+          // Extract numeric value from the first match
+          const numericMatch = matches[0].match(/([0-9]+(?:\.[0-9]{2})?)/);
+          if (numericMatch) {
+            return numericMatch[1];
+          }
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.log('Price extraction failed (gracefully):', error);
+      return null;
+    }
+  };
+
   const handleLinkChange = async (value: string) => {
     setFormData(prev => ({ ...prev, link: value }));
     
@@ -71,15 +115,26 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       setIsParsingUrl(true);
       
       try {
+        // Try regular product parsing first
         const productInfo = await parseProductUrl(value);
         console.log('Parsed product info:', productInfo);
+        
+        // If cart mode and no price found, try cart price extraction
+        let cartPrice = null;
+        if (formData.isCart && !productInfo.price) {
+          console.log('Attempting cart price extraction...');
+          cartPrice = await extractCartPrice(value);
+          if (cartPrice) {
+            console.log('Found cart total price:', cartPrice);
+          }
+        }
         
         // Only update fields that are currently empty and we found data for
         setFormData(prev => ({
           ...prev,
           itemName: prev.itemName || productInfo.itemName || prev.itemName,
           storeName: prev.storeName || productInfo.storeName || prev.storeName,
-          price: prev.price || productInfo.price || prev.price,
+          price: prev.price || cartPrice || productInfo.price || prev.price,
           imageUrl: prev.imageUrl || productInfo.imageUrl || prev.imageUrl,
         }));
         
@@ -169,7 +224,9 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         link: formData.link,
         photo: formData.photo,
         imageUrl: formData.imageUrl, // Include parsed image URL
-        tags: formData.tags
+        tags: formData.tags,
+        isCart: formData.isCart,
+        itemType: formData.itemType
       };
 
       // Use appropriate store based on authentication status
@@ -311,11 +368,22 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                 Photo (optional)
               </Label>
               
-              {formData.imageUrl && !formData.photo ? (
+              {(formData.imageUrl && !formData.photo) || (formData.isCart && formData.imageUrl === 'cart-placeholder') ? (
                 <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-center">
-                  <p className="text-green-600 dark:text-green-400 text-sm font-medium">
-                    ✓ Product image already grabbed automatically
-                  </p>
+                  {formData.isCart && formData.imageUrl === 'cart-placeholder' ? (
+                    <div className="flex flex-col items-center gap-2 mb-3">
+                      <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                        <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <p className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                        🛒 Cart placeholder image
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-green-600 dark:text-green-400 text-sm font-medium">
+                      ✓ Product image already grabbed automatically
+                    </p>
+                  )}
                   <p className="text-green-600 dark:text-green-400 text-xs mt-1">
                     You can still upload a different photo if you prefer
                   </p>
@@ -360,6 +428,38 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   />
                   <p className="text-sm text-green-600 dark:text-green-400 mt-1">✓ Photo ready to upload</p>
                 </div>
+              )}
+            </div>
+
+            {/* Cart Checkbox */}
+            <div className="space-y-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id="isCart"
+                  checked={formData.isCart}
+                  onCheckedChange={(checked) => {
+                    const isChecked = checked === true;
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      isCart: isChecked,
+                      itemType: isChecked ? 'cart' : 'item',
+                      itemName: isChecked && !prev.itemName ? 'Cart' : prev.itemName,
+                      imageUrl: isChecked && !prev.imageUrl && !prev.photo ? 'cart-placeholder' : prev.imageUrl
+                    }));
+                  }}
+                  className="h-5 w-5"
+                />
+                <Label htmlFor="isCart" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart size={16} />
+                    Mark as Cart (saving multiple items)
+                  </div>
+                </Label>
+              </div>
+              {formData.isCart && (
+                <p className="text-blue-600 dark:text-blue-400 text-sm">
+                  ✓ Cart mode enabled - Item name auto-filled with "Cart" and will attempt to extract total price from URL
+                </p>
               )}
             </div>
 

@@ -1,5 +1,5 @@
 
-import { Timer } from 'lucide-react';
+import { Timer, ShoppingCart } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 
@@ -33,15 +33,22 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
       itemName: item.itemName,
       imageUrl: item.imageUrl,
       photoDataUrl: item.photoDataUrl,
-      hasPhoto: !!item.photo
+      hasPhoto: !!item.photo,
+      isCart: item.isCart
     });
+
+    // Handle cart placeholder
+    if (item.isCart && item.imageUrl === 'cart-placeholder') {
+      console.log('🛒 Using cart placeholder');
+      return 'cart-placeholder';
+    }
 
     // Priority order for image sources:
     // 1. Supabase Storage URL (uploaded images)
     // 2. photoDataUrl (base64 data)
     // 3. File object (create object URL)
     
-    if (item.imageUrl) {
+    if (item.imageUrl && item.imageUrl !== 'cart-placeholder') {
       // Check if this is a Supabase Storage URL
       if (item.imageUrl.includes('supabase.co/storage') || item.imageUrl.includes('supabase')) {
         console.log('🖼️ Using Supabase storage URL:', item.imageUrl);
@@ -69,7 +76,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
     
     console.log('🖼️ No valid image found');
     return null;
-  }, [item.imageUrl, item.photoDataUrl, item.photo, item.id]);
+  }, [item.imageUrl, item.photoDataUrl, item.photo, item.id, item.isCart]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     console.error('🖼️ Image failed to load:', {
@@ -119,7 +126,11 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
       <div className="p-4 pb-12">
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {imageUrl ? (
+            {imageUrl === 'cart-placeholder' ? (
+              <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
+              </div>
+            ) : imageUrl ? (
               <img 
                 src={imageUrl} 
                 alt={item.itemName}
@@ -135,11 +146,19 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
           
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate pr-2">
-                {item.itemName}
-              </h3>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate">
+                  {item.itemName}
+                </h3>
+                {item.isCart && (
+                  <div className="flex-shrink-0 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full flex items-center gap-1">
+                    <ShoppingCart size={12} className="text-blue-600 dark:text-blue-400" />
+                    <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">Cart</span>
+                  </div>
+                )}
+              </div>
               {formattedPrice && (
-                <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0">
+                <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0 ml-2">
                   {formattedPrice}
                 </span>
               )}

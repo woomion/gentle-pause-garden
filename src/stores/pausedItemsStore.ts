@@ -16,6 +16,8 @@ export interface PausedItem {
   pausedAt: Date;
   checkInTime: string;
   checkInDate: Date;
+  isCart?: boolean;
+  itemType?: 'item' | 'cart';
 }
 
 type Listener = () => void;

@@ -60,7 +60,9 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     tags: dbItem.tags || [],
     pausedAt,
     checkInTime: calculateCheckInTimeDisplay(reviewAt),
-    checkInDate: reviewAt
+    checkInDate: reviewAt,
+    isCart: dbItem.title === 'Cart' || false,
+    itemType: dbItem.title === 'Cart' ? 'cart' : 'item'
   };
 };
 
