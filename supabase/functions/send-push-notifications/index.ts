@@ -13,6 +13,80 @@ interface NotificationPayload {
   data?: Record<string, any>;
 }
 
+// Generate OAuth 2.0 access token using service account
+async function getAccessToken(serviceAccount: any): Promise<string | null> {
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const expiry = now + 3600; // 1 hour
+
+    // Create JWT header
+    const header = {
+      alg: 'RS256',
+      typ: 'JWT'
+    };
+
+    // Create JWT payload
+    const payload = {
+      iss: serviceAccount.client_email,
+      scope: 'https://www.googleapis.com/auth/firebase.messaging',
+      aud: 'https://oauth2.googleapis.com/token',
+      iat: now,
+      exp: expiry
+    };
+
+    // Encode header and payload
+    const encodedHeader = btoa(JSON.stringify(header));
+    const encodedPayload = btoa(JSON.stringify(payload));
+    const unsignedToken = `${encodedHeader}.${encodedPayload}`;
+
+    // Import private key for signing
+    const privateKey = await crypto.subtle.importKey(
+      'pkcs8',
+      new TextEncoder().encode(serviceAccount.private_key.replace(/\\n/g, '\n')),
+      {
+        name: 'RSASSA-PKCS1-v1_5',
+        hash: 'SHA-256'
+      },
+      false,
+      ['sign']
+    );
+
+    // Sign the JWT
+    const signature = await crypto.subtle.sign(
+      'RSASSA-PKCS1-v1_5',
+      privateKey,
+      new TextEncoder().encode(unsignedToken)
+    );
+
+    const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)));
+    const jwt = `${unsignedToken}.${encodedSignature}`;
+
+    // Exchange JWT for access token
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion: jwt
+      })
+    });
+
+    if (!tokenResponse.ok) {
+      const error = await tokenResponse.text();
+      console.error('Failed to get access token:', error);
+      return null;
+    }
+
+    const tokenData = await tokenResponse.json();
+    return tokenData.access_token;
+  } catch (error) {
+    console.error('Error generating access token:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -71,10 +145,10 @@ serve(async (req) => {
         );
       }
 
-      // Send notifications using FCM (Firebase Cloud Messaging)
-      const fcmServerKey = Deno.env.get('FCM_SERVER_KEY');
-      if (!fcmServerKey) {
-        console.error('FCM_SERVER_KEY not configured');
+      // Get Firebase service account credentials for HTTP v1 API
+      const serviceAccountKey = Deno.env.get('FIREBASE_SERVICE_ACCOUNT_KEY');
+      if (!serviceAccountKey) {
+        console.error('FIREBASE_SERVICE_ACCOUNT_KEY not configured');
         return new Response(
           JSON.stringify({ error: 'Push notification service not configured' }),
           { 
@@ -84,57 +158,99 @@ serve(async (req) => {
         );
       }
 
+      let serviceAccount;
+      try {
+        serviceAccount = JSON.parse(serviceAccountKey);
+      } catch (error) {
+        console.error('Invalid FIREBASE_SERVICE_ACCOUNT_KEY format:', error);
+        return new Response(
+          JSON.stringify({ error: 'Invalid service account configuration' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      // Generate OAuth 2.0 access token
+      const accessToken = await getAccessToken(serviceAccount);
+      if (!accessToken) {
+        console.error('Failed to get access token');
+        return new Response(
+          JSON.stringify({ error: 'Authentication failed' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
       const results = await Promise.allSettled(
         users.map(async (user) => {
-          const pushPayload = {
-            to: user.push_token,
-            notification: {
-              title,
-              body,
-              icon: '/favicon.ico',
-              badge: '/favicon.ico',
-              tag: 'pocket-pause-notification',
-              click_action: 'FLUTTER_NOTIFICATION_CLICK'
-            },
-            data: {
-              ...data,
-              userId: user.user_id
-            },
-            android: {
+          const message = {
+            message: {
+              token: user.push_token,
               notification: {
-                channel_id: 'pocket_pause_notifications',
-                sound: 'default',
-                priority: 'high'
-              }
-            },
-            apns: {
-              payload: {
-                aps: {
-                  alert: {
-                    title,
-                    body
-                  },
-                  badge: 1,
-                  sound: 'default'
+                title,
+                body,
+              },
+              data: {
+                ...data,
+                userId: user.user_id,
+                action: data?.action || 'review_items'
+              },
+              android: {
+                notification: {
+                  channel_id: 'pocket_pause_notifications',
+                  sound: 'default',
+                  priority: 'high',
+                  icon: 'ic_notification',
+                  color: '#6366f1'
+                }
+              },
+              apns: {
+                payload: {
+                  aps: {
+                    alert: {
+                      title,
+                      body
+                    },
+                    badge: 1,
+                    sound: 'default',
+                    category: 'pocket-pause-notification'
+                  }
+                }
+              },
+              webpush: {
+                notification: {
+                  title,
+                  body,
+                  icon: '/favicon.ico',
+                  badge: '/favicon.ico',
+                  tag: 'pocket-pause-notification',
+                  requireInteraction: false
                 }
               }
             }
           };
 
-          const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-            method: 'POST',
-            headers: {
-              'Authorization': `key=${fcmServerKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(pushPayload)
-          });
+          const response = await fetch(
+            `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(message)
+            }
+          );
 
           const result = await response.json();
           
           if (!response.ok) {
             console.error(`Failed to send notification to user ${user.user_id}:`, result);
-            throw new Error(`FCM error: ${result.error || 'Unknown error'}`);
+            throw new Error(`FCM error: ${result.error?.message || 'Unknown error'}`);
           }
 
           console.log(`Notification sent successfully to user ${user.user_id}`);
