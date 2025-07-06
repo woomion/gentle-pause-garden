@@ -127,7 +127,7 @@ const PausedSection = () => {
           Paused for now
         </h2>
         <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
-          You haven't decided yet—and that's okay
+          You haven't decided yet and that's okay
         </p>
         <PausedSectionEmpty isGuest={!user} hasReviewItems={false} />
       </div>
@@ -140,7 +140,7 @@ const PausedSection = () => {
         Paused for now
       </h2>
       <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
-        You haven't decided yet—and that's okay
+        You haven't decided yet and that's okay
       </p>
       
       <ReviewBanner 
