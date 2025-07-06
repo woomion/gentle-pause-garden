@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
 import EmotionBadge from './EmotionBadge';
 import { formatPrice } from '../utils/priceFormatter';
@@ -86,13 +87,37 @@ const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink }: PauseLogItemD
           {/* View link button */}
           {hasLink && (
             <div className="pt-2">
-              <button 
-                onClick={() => onViewLink(item)}
-                className="flex items-center gap-2 text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200"
-              >
-                <ExternalLink size={14} />
-                View original item link
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button 
+                    className="flex items-center gap-2 text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200"
+                  >
+                    <ExternalLink size={14} />
+                    View original item link
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">
+                      View item link?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                      Are you sure you want to visit this link? You already made a decision on this item.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">
+                      Nevermind
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => onViewLink(item)}
+                      className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black"
+                    >
+                      Yes, take me to the link
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           )}
         </div>
