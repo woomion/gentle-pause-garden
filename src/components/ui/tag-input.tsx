@@ -60,6 +60,23 @@ export const TagInput: React.FC<TagInputProps> = ({
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    // Handle comma input for mobile keyboards
+    if (inputValue.includes(',')) {
+      const parts = inputValue.split(',');
+      const newTag = parts[0].trim();
+      if (newTag && !value.includes(newTag)) {
+        addTag(newTag);
+      }
+      // Keep any text after the comma for continued typing
+      const remainingText = parts.slice(1).join(',');
+      setInputValue(remainingText);
+    } else {
+      setInputValue(inputValue);
+    }
+  };
+
   const handleSuggestionClick = (suggestion: string) => {
     addTag(suggestion);
     inputRef.current?.focus();
@@ -89,7 +106,7 @@ export const TagInput: React.FC<TagInputProps> = ({
           ref={inputRef}
           type="text"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue && setShowSuggestions(filteredSuggestions.length > 0)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
