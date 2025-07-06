@@ -21,6 +21,15 @@ const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink }: PauseLogItemD
 
   if (!item) return null;
 
+  console.log('🔍 DEBUG: PauseLogItemDetail - item data:', {
+    itemId: item.id,
+    itemName: item.itemName,
+    originalPausedItem: item.originalPausedItem,
+    hasOriginalPausedItem: !!item.originalPausedItem,
+    link: item.originalPausedItem?.link,
+    url: item.originalPausedItem?.url
+  });
+
   const hasLink = Boolean(
     item.originalPausedItem?.link || 
     item.originalPausedItem?.url
