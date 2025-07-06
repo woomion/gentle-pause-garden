@@ -11,7 +11,9 @@ import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { TagInput } from '@/components/ui/tag-input';
+import { getEmotionColor } from '@/utils/emotionColors';
 
 interface PauseFormProps {
   onClose: () => void;
@@ -20,18 +22,18 @@ interface PauseFormProps {
 }
 
 const emotions = [
-  { name: 'bored', color: '#F6E3D5' },
-  { name: 'overwhelmed', color: '#E9E2F7' },
-  { name: 'burnt out', color: '#FBF3C2' },
-  { name: 'sad', color: '#DCE7F5' },
-  { name: 'inspired', color: '#FBE7E6' },
-  { name: 'deserving', color: '#E7D8F3' },
-  { name: 'curious', color: '#DDEEDF' },
-  { name: 'anxious', color: '#EDEAE5' },
-  { name: 'lonely', color: '#CED8E3' },
-  { name: 'celebratory', color: '#FAEED6' },
-  { name: 'resentful', color: '#EAC9C3' },
-  { name: 'something else', color: '#F0F0EC' }
+  { name: 'bored' },
+  { name: 'overwhelmed' },
+  { name: 'burnt out' },
+  { name: 'sad' },
+  { name: 'inspired' },
+  { name: 'deserving' },
+  { name: 'curious' },
+  { name: 'anxious' },
+  { name: 'lonely' },
+  { name: 'celebratory' },
+  { name: 'resentful' },
+  { name: 'something else' }
 ];
 
 const otherPauseLengths = [
@@ -42,6 +44,7 @@ const otherPauseLengths = [
 
 const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
   const { user } = useAuth();
+  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     link: '',
     itemName: '',
@@ -471,7 +474,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: emotion.color }}
+                          style={{ backgroundColor: getEmotionColor(emotion.name, isDarkMode) }}
                         />
                         <span className="capitalize">{emotion.name}</span>
                       </div>

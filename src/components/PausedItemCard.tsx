@@ -2,6 +2,12 @@
 import { Timer, ShoppingCart } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { formatPrice } from '../utils/priceFormatter';
+import ItemImage from './ItemImage';
+import PauseDurationBanner from './PauseDurationBanner';
+import EmotionBadge from './EmotionBadge';
+import { getEmotionColor } from '../utils/emotionColors';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface PausedItemCardProps {
   item: PausedItem;
@@ -9,23 +15,8 @@ interface PausedItemCardProps {
 }
 
 const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
-  const emotionColor = useMemo(() => {
-    const emotionColors: Record<string, string> = {
-      'bored': '#F6E3D5',
-      'overwhelmed': '#E9E2F7',
-      'burnt out': '#FBF3C2',
-      'sad': '#DCE7F5',
-      'inspired': '#FBE7E6',
-      'deserving': '#E7D8F3',
-      'curious': '#DDEEDF',
-      'anxious': '#EDEAE5',
-      'lonely': '#CED8E3',
-      'celebratory': '#FAEED6',
-      'resentful': '#EAC9C3',
-      'something else': '#F0F0EC'
-    };
-    return emotionColors[item.emotion] || '#F0F0EC';
-  }, [item.emotion]);
+  const { isDarkMode } = useTheme();
+  const emotionColor = useMemo(() => getEmotionColor(item.emotion, isDarkMode), [item.emotion, isDarkMode]);
 
   const imageUrl = useMemo(() => {
     console.log('🖼️ PausedItemCard - Processing image for item:', {
