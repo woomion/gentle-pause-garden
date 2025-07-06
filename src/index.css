@@ -203,12 +203,27 @@
     }
   }
 
-  @keyframes bg-pulse-cycle {
-    0%, 8%, 16%, 24%, 100% {
-      opacity: 1;
+  .animate-gradient {
+    background: linear-gradient(-45deg, #E7D9FA, #F3E8FF, #D6BBF7, #E7D9FA);
+    background-size: 400% 400%;
+    animation: gradient-shift 8s ease infinite;
+  }
+
+  .dark .animate-gradient {
+    background: linear-gradient(-45deg, #4A1D6B, #5C2D7A, #6B4C9A, #4A1D6B);
+    background-size: 400% 400%;
+    animation: gradient-shift 8s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
     }
-    4%, 12%, 20% {
-      opacity: 0.8;
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
     }
   }
 }

@@ -13,7 +13,7 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
   return (
     <div 
       onClick={onStartReview}
-      className="bg-gradient-to-r from-[#E7D9FA] to-[#F3E8FF] dark:from-[#4A1D6B] dark:to-[#5C2D7A] rounded-2xl px-4 py-0.5 mb-4 border border-lavender/30 dark:border-gray-600 cursor-pointer hover:opacity-90 transition-opacity duration-200 animate-[bg-pulse-cycle_15s_infinite]"
+      className="animate-gradient rounded-2xl px-4 py-0.5 mb-4 border border-lavender/30 dark:border-gray-600 cursor-pointer hover:opacity-90 transition-opacity duration-200"
     >
       <div className="flex items-center justify-between">
         <div>
