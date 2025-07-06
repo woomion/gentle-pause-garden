@@ -3,6 +3,7 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
 import { getEmotionColor } from '../utils/emotionColors';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ItemReviewDetailsProps {
   item: PausedItem | LocalPausedItem;
@@ -10,7 +11,8 @@ interface ItemReviewDetailsProps {
 }
 
 const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
-  const emotionColor = getEmotionColor(item.emotion);
+  const { isDarkMode } = useTheme();
+  const emotionColor = getEmotionColor(item.emotion, isDarkMode);
 
   const imageUrl = (() => {
     if (item.imageUrl) {

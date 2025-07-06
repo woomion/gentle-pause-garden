@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { usePauseLog } from '../hooks/usePauseLog';
 import { useSupabasePauseLog } from '../hooks/useSupabasePauseLog';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
 import { PauseLogItem } from '../stores/pauseLogStore';
 import PauseLogHeader from '../components/PauseLogHeader';
@@ -15,6 +16,7 @@ import { getEmotionColor } from '../utils/emotionColors';
 
 const PauseLog = () => {
   const { user } = useAuth();
+  const { isDarkMode } = useTheme();
   const { toast } = useToast();
   
   // Use appropriate hook based on authentication
@@ -273,8 +275,8 @@ const PauseLog = () => {
                       : 'bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] border-lavender/30'
                   }`}
                   style={filter.isEmotion ? {
-                    backgroundColor: getEmotionColor(filter.value),
-                    borderColor: getEmotionColor(filter.value)
+                    backgroundColor: getEmotionColor(filter.value, isDarkMode),
+                    borderColor: getEmotionColor(filter.value, isDarkMode)
                   } : undefined}
                 >
                   <span>{filter.label}</span>

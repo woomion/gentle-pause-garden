@@ -2,6 +2,8 @@
 import { X, ExternalLink } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
+import { getEmotionColor } from '../utils/emotionColors';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface PauseLogItemCardProps {
   item: PauseLogItem;
@@ -11,23 +13,7 @@ interface PauseLogItemCardProps {
 }
 
 const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemCardProps) => {
-  const getEmotionColor = (emotion: string): string => {
-    const emotionColors: Record<string, string> = {
-      'bored': '#F6E3D5',
-      'overwhelmed': '#E9E2F7',
-      'burnt out': '#FBF3C2',
-      'sad': '#DCE7F5',
-      'inspired': '#FBE7E6',
-      'deserving': '#E7D8F3',
-      'curious': '#DDEEDF',
-      'anxious': '#EDEAE5',
-      'lonely': '#CED8E3',
-      'celebratory': '#FAEED6',
-      'resentful': '#EAC9C3',
-      'something else': '#F0F0EC'
-    };
-    return emotionColors[emotion] || '#F0F0EC';
-  };
+  const { isDarkMode } = useTheme();
 
   // Check only the originalPausedItem for links
   const hasLink = Boolean(
