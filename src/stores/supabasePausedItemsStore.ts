@@ -23,6 +23,7 @@ export interface PausedItem {
   checkInDate: Date;
   isCart?: boolean;
   itemType?: 'item' | 'cart';
+  sharedWithPartners?: string[];
 }
 
 type Listener = () => void;

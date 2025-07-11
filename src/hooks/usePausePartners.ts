@@ -1,0 +1,134 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+
+export interface Partner {
+  partner_id: string;
+  partner_email: string;
+  partner_name: string;
+}
+
+export interface PartnerInvitation {
+  id: string;
+  inviter_id: string;
+  invitee_email: string;
+  invitee_id?: string;
+  status: 'pending' | 'accepted' | 'declined';
+  created_at: string;
+}
+
+export const usePausePartners = () => {
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [invitations, setInvitations] = useState<PartnerInvitation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  const loadPartners = async () => {
+    if (!user) {
+      setPartners([]);
+      setInvitations([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Load accepted partnerships
+      const { data: partnersData, error: partnersError } = await supabase
+        .rpc('get_user_partners');
+
+      if (partnersError) {
+        console.error('Error loading partners:', partnersError);
+      } else {
+        setPartners(partnersData || []);
+      }
+
+      // Load all invitations
+      const { data: invitationsData, error: invitationsError } = await supabase
+        .from('partner_invitations')
+        .select('*')
+        .or(`inviter_id.eq.${user.id},invitee_id.eq.${user.id}`)
+        .order('created_at', { ascending: false });
+
+      if (invitationsError) {
+        console.error('Error loading invitations:', invitationsError);
+      } else {
+        setInvitations((invitationsData || []) as PartnerInvitation[]);
+      }
+    } catch (error) {
+      console.error('Error in loadPartners:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendInvite = async (email: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('partner_invitations')
+        .insert({
+          inviter_id: user.id,
+          invitee_email: email.toLowerCase()
+        });
+
+      if (error) throw error;
+      await loadPartners();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error sending invite:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const acceptInvite = async (invitationId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('partner_invitations')
+        .update({ 
+          status: 'accepted',
+          invitee_id: user.id 
+        })
+        .eq('id', invitationId);
+
+      if (error) throw error;
+      await loadPartners();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error accepting invite:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const removePartner = async (invitationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('partner_invitations')
+        .delete()
+        .eq('id', invitationId);
+
+      if (error) throw error;
+      await loadPartners();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error removing partner:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  useEffect(() => {
+    loadPartners();
+  }, [user]);
+
+  return {
+    partners,
+    invitations,
+    loading,
+    sendInvite,
+    acceptInvite,
+    removePartner,
+    reload: loadPartners
+  };
+};

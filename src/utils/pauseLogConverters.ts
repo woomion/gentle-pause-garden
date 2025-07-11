@@ -73,6 +73,7 @@ export const convertPauseLogItemToDb = (
     reason: item.emotion,
     notes: notesWithStore,
     status: dbStatus,
-    tags: item.tags || []
+    tags: item.tags || [],
+    shared_with_partners: []
   };
 };

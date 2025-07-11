@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { TagInput } from '@/components/ui/tag-input';
 import { getEmotionColor } from '@/utils/emotionColors';
+import PartnerSharingSection from './PartnerSharingSection';
 
 interface PauseFormProps {
   onClose: () => void;
@@ -58,7 +59,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     imageUrl: '', // Add imageUrl to track parsed images
     tags: [] as string[],
     isCart: false,
-    itemType: 'item' as 'item' | 'cart'
+    itemType: 'item' as 'item' | 'cart',
+    sharedWithPartners: [] as string[]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingUrl, setIsParsingUrl] = useState(false);
@@ -229,7 +231,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         imageUrl: formData.imageUrl, // Include parsed image URL
         tags: formData.tags,
         isCart: formData.isCart,
-        itemType: formData.itemType
+        itemType: formData.itemType,
+        sharedWithPartners: formData.sharedWithPartners
       };
 
       // Use appropriate store based on authentication status
@@ -497,6 +500,12 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               className="w-full"
             />
             </div>
+
+            {/* Partner Sharing */}
+            <PartnerSharingSection
+              selectedPartners={formData.sharedWithPartners}
+              onPartnersChange={(partners) => setFormData(prev => ({ ...prev, sharedWithPartners: partners }))}
+            />
 
             {/* Notes Field */}
             <div className="space-y-1">

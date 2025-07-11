@@ -74,7 +74,8 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     checkInTime: calculateCheckInTimeDisplay(reviewAt),
     checkInDate: reviewAt,
     isCart: dbItem.title === 'Cart' || false,
-    itemType: dbItem.title === 'Cart' ? 'cart' : 'item'
+    itemType: dbItem.title === 'Cart' ? 'cart' : 'item',
+    sharedWithPartners: dbItem.shared_with_partners || []
   };
 };
 
@@ -123,6 +124,7 @@ export const convertLocalToDb = (
     pause_duration_days: pauseDurationDays,
     review_at: reviewAt.toISOString(),
     status: 'paused',
-    tags: item.tags || []
+    tags: item.tags || [],
+    shared_with_partners: item.sharedWithPartners || []
   };
 };

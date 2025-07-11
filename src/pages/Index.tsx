@@ -8,6 +8,7 @@ import PausedSection from '../components/PausedSection';
 import PauseLogSection from '../components/PauseLogSection';
 import GreaterJoyFundCTA from '../components/GreaterJoyFundCTA';
 import FooterLinks from '../components/FooterLinks';
+import MainTabs from '../components/MainTabs';
 import SupportCTA from '../components/SupportCTA';
 import PauseForm from '../components/PauseForm';
 import WelcomeModal from '../components/WelcomeModal';
@@ -167,9 +168,8 @@ const Index = () => {
             onStartReview={handleStartReview}
           />
           <AddPauseButton onAddPause={handleAddPause} />
-          <PausedSection />
+          <MainTabs />
           <GreaterJoyFundCTA />
-          <PauseLogSection />
           <SupportCTA />
           <FooterLinks />
         </div>
