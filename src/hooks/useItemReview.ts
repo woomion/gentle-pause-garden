@@ -37,7 +37,7 @@ export const useItemReview = () => {
       if (unsubscribe) unsubscribe();
       if (interval) clearInterval(interval);
     };
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id, not the whole user object
 
   const handleItemDecided = async (id: string) => {
     if (user) {

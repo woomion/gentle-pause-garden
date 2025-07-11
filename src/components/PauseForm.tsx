@@ -187,13 +187,16 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     };
     
     loadExistingTags();
-    
+  }, [user?.id]); // Remove photoPreview dependency to prevent infinite loops
+
+  // Separate useEffect for cleanup
+  useEffect(() => {
     return () => {
       if (photoPreview) {
         URL.revokeObjectURL(photoPreview);
       }
     };
-  }, [photoPreview, user]);
+  }, [photoPreview]);
 
   const handleDurationSelect = (duration: string) => {
     setFormData(prev => ({ 

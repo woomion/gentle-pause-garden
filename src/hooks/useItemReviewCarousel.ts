@@ -31,11 +31,11 @@ export const useItemReviewCarousel = (
   }, [isOpen, currentIndex]);
 
   useEffect(() => {
-    setActiveIndex(currentIndex);
-    if (api) {
+    if (api && currentIndex !== activeIndex) {
+      setActiveIndex(currentIndex);
       api.scrollTo(currentIndex);
     }
-  }, [currentIndex, api]);
+  }, [currentIndex, api, activeIndex]); // Include activeIndex to prevent unnecessary updates
 
   const navigateToNext = () => {
     const nextIndex = activeIndex + 1;
