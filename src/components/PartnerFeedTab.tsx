@@ -31,14 +31,10 @@ const PartnerFeedTab = () => {
     const allItems = supabasePausedItemsStore.getItems();
     const partnerIds = partners.map(p => p.partner_id);
     
-    // Get items shared TO or FROM partners
+    // Get items that are shared with partners or where I'm included in sharing
     const sharedItems = allItems.filter(item => {
-      // Items I shared with partners
-      const sharedByMe = item.sharedWithPartners?.some(partnerId => partnerIds.includes(partnerId));
-      // Items shared with me by partners
-      const sharedWithMe = partnerIds.includes(item.id) && item.sharedWithPartners?.includes(user.id);
-      
-      return sharedByMe || sharedWithMe;
+      // Check if this item has any sharing with partners
+      return item.sharedWithPartners && item.sharedWithPartners.length > 0;
     });
 
     setPartnerItems(sortItemsByDate(sharedItems));
