@@ -10,7 +10,7 @@ const GreaterJoyFundCTA = () => {
         className="flex items-center justify-between hover:opacity-80 transition-opacity"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 flex items-center justify-center">
             <Heart className="w-4 h-4 text-black dark:text-white" />
           </div>
           <div>
