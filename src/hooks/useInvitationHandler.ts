@@ -28,11 +28,18 @@ export const useInvitationHandler = () => {
               });
             } else {
               console.error('Failed to accept invitation:', result?.error);
-              toast({
-                title: 'Failed to accept invitation',
-                description: result?.error || 'Please try again or contact support.',
-                variant: 'destructive',
-              });
+              
+              // If invitation was not found or already processed, just clear the URL silently
+              if (result?.error?.includes('not found') || result?.error?.includes('already processed')) {
+                console.log('Invitation no longer valid, clearing URL parameter');
+              } else {
+                // Only show error toast for other types of errors
+                toast({
+                  title: 'Failed to accept invitation',
+                  description: result?.error || 'Please try again or contact support.',
+                  variant: 'destructive',
+                });
+              }
             }
           } catch (error) {
             console.error('Error processing invitation:', error);
@@ -43,7 +50,7 @@ export const useInvitationHandler = () => {
             });
           }
           
-          // Remove the invite parameter from URL after processing
+          // Always remove the invite parameter from URL after processing
           searchParams.delete('invite');
           setSearchParams(searchParams, { replace: true });
         } else {
