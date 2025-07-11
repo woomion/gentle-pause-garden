@@ -11,6 +11,7 @@ import GreaterJoyFundCTA from '../components/GreaterJoyFundCTA';
 import SupportCTA from '../components/SupportCTA';
 import FooterLinks from '../components/FooterLinks';
 import PauseForm from '../components/PauseForm';
+import PartnerStatusIndicator from '../components/PartnerStatusIndicator';
 import WelcomeModal from '../components/WelcomeModal';
 import SignupModal from '../components/SignupModal';
 import ItemReviewModal from '../components/ItemReviewModal';
@@ -99,6 +100,7 @@ const Index = () => {
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
+          <PartnerStatusIndicator />
           <ReviewBanner 
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
