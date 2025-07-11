@@ -95,7 +95,7 @@ const Index = () => {
 
   return (
     <>
-      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300">
+      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 pb-32">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
@@ -103,7 +103,6 @@ const Index = () => {
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
           />
-          <AddPauseButton onAddPause={modalStates.handleAddPause} />
           <MainTabs />
           
           {/* Pause Log Section - moved outside tabs to be always visible */}
@@ -136,6 +135,13 @@ const Index = () => {
           <GreaterJoyFundCTA />
           <SupportCTA />
           <FooterLinks />
+        </div>
+      </div>
+      
+      {/* Sticky Footer with Add Pause Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-cream dark:bg-[#200E3B] border-t border-gray-200 dark:border-gray-700 px-4 pt-4 pb-8">
+        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
+          <AddPauseButton onAddPause={modalStates.handleAddPause} />
         </div>
       </div>
       
