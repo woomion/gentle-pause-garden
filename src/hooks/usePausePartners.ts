@@ -36,7 +36,6 @@ export const usePausePartners = () => {
           event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'partner_invitations',
-          filter: `inviter_id=eq.${user.id},invitee_id=eq.${user.id}`,
         },
         (payload) => {
           console.log('Real-time partner invitation change:', payload);
@@ -93,16 +92,33 @@ export const usePausePartners = () => {
     if (!user) return;
 
     try {
-      const { data: invitation, error } = await supabase
+      // Check if there's already a pending invitation to this email
+      const { data: existingInvite } = await supabase
         .from('partner_invitations')
-        .insert({
-          inviter_id: user.id,
-          invitee_email: email.toLowerCase()
-        })
-        .select()
-        .single();
+        .select('*')
+        .eq('inviter_id', user.id)
+        .eq('invitee_email', email.toLowerCase())
+        .eq('status', 'pending')
+        .maybeSingle();
 
-      if (error) throw error;
+      let invitation;
+      if (existingInvite) {
+        // Use existing invitation
+        invitation = existingInvite;
+      } else {
+        // Create new invitation
+        const { data: newInvitation, error } = await supabase
+          .from('partner_invitations')
+          .insert({
+            inviter_id: user.id,
+            invitee_email: email.toLowerCase()
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        invitation = newInvitation;
+      }
 
       // Send invitation email
       try {
@@ -161,6 +177,11 @@ export const usePausePartners = () => {
       // Check if already accepted
       if (invitation.status === 'accepted') {
         return { success: true, message: 'Invitation already accepted' };
+      }
+
+      // Check if invitation is still pending
+      if (invitation.status !== 'pending') {
+        throw new Error('This invitation is no longer valid');
       }
 
       const { error } = await supabase
