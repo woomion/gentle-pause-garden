@@ -92,7 +92,7 @@ const PausedSection = () => {
   if (pausedItems.length === 0) {
     return (
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+        <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
           Paused for now
         </h2>
         <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
@@ -105,7 +105,7 @@ const PausedSection = () => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+      <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
         Paused for now
       </h2>
       <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">

@@ -4,7 +4,7 @@ import { memo } from 'react';
 const PausedSectionLoading = memo(() => {
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+      <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
         Paused for now
       </h2>
       <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
