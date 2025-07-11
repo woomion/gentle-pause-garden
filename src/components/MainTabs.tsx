@@ -13,11 +13,12 @@ const MainTabs = () => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10" style={{ backgroundColor: '#E6DAF8' }}>
+      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#F5F2FA' }}>
         <TabsTrigger 
           value="paused" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:bg-[#E6DAF8] data-[state=active]:border-0 data-[state=active]:font-semibold data-[state=inactive]:font-normal"
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-semibold data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
+            backgroundColor: activeTab === 'paused' ? '#E6DAF8' : 'transparent',
             color: activeTab === 'paused' ? '#5C47A3' : 'inherit'
           }}
         >
@@ -26,8 +27,9 @@ const MainTabs = () => {
         </TabsTrigger>
         <TabsTrigger 
           value="partner-feed" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:bg-[#E6DAF8] data-[state=active]:border-0 data-[state=active]:font-semibold data-[state=inactive]:font-normal"
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-semibold data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
+            backgroundColor: activeTab === 'partner-feed' ? '#E6DAF8' : 'transparent',
             color: activeTab === 'partner-feed' ? '#5C47A3' : 'inherit'
           }}
         >
