@@ -94,7 +94,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             {item.notes && item.notes.trim() && (
               <div className="pt-2">
                 <p className="text-gray-600 dark:text-gray-300 text-sm">
-                  {item.notes}
+                  <strong>Note:</strong> {item.notes}
                 </p>
               </div>
             )}
