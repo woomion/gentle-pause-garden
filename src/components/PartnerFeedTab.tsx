@@ -58,7 +58,7 @@ const PartnerFeedTab = () => {
       if (unsubscribe) unsubscribe();
       if (interval) clearInterval(interval);
     };
-  }, [updatePartnerItems, user, hasPausePartnerAccess]);
+  }, [updatePartnerItems]);
 
   const handleItemClick = useCallback((item: PausedItem) => {
     setSelectedItem(item);
