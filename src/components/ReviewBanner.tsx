@@ -14,7 +14,7 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
     <div className="mb-4">
       <button 
         onClick={onStartReview}
-        className="rounded-full px-4 py-2 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+        className="rounded-full px-6 py-3 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
         style={{ backgroundColor: '#A58CF2' }}
       >
         <div className="text-base font-medium text-black dark:text-black">
