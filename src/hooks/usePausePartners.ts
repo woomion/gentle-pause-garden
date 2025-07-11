@@ -153,41 +153,31 @@ export const usePausePartners = () => {
     if (!user) return;
 
     try {
+      console.log('Starting invitation acceptance for ID:', invitationId, 'User email:', user.email);
+
       // First, check if the invitation exists and matches the user's email
       const { data: invitation, error: fetchError } = await supabase
         .from('partner_invitations')
         .select('*')
         .eq('id', invitationId)
-        .single();
+        .eq('invitee_email', user.email?.toLowerCase())
+        .eq('status', 'pending')
+        .maybeSingle();
 
       if (fetchError) {
         console.error('Error fetching invitation:', fetchError);
-        throw fetchError;
+        return { success: false, error: 'Database error while checking invitation' };
       }
 
       if (!invitation) {
-        throw new Error('Invitation not found');
+        console.log('No matching invitation found for:', invitationId, user.email);
+        return { success: false, error: 'Invitation not found or already processed' };
       }
 
-      // Check if the invitation is for this user's email
-      if (invitation.invitee_email.toLowerCase() !== user.email?.toLowerCase()) {
-        console.error('Email mismatch:', invitation.invitee_email, 'vs', user.email);
-        return { success: false, error: 'This invitation is not for your email address' };
-      }
+      console.log('Found invitation:', invitation);
 
-      // Check if already accepted
-      if (invitation.status === 'accepted') {
-        return { success: true, message: 'You are already connected as pause partners!' };
-      }
-
-      // Check if invitation is still pending
-      if (invitation.status !== 'pending') {
-        return { success: false, error: 'This invitation is no longer valid' };
-      }
-
-      console.log('Accepting invitation for user:', user.email, 'invitation:', invitation);
-
-      const { error } = await supabase
+      // Update the invitation
+      const { error: updateError } = await supabase
         .from('partner_invitations')
         .update({ 
           status: 'accepted',
@@ -196,16 +186,17 @@ export const usePausePartners = () => {
         .eq('id', invitationId)
         .eq('status', 'pending'); // Extra safety check
 
-      if (error) {
-        console.error('Database error accepting invitation:', error);
-        throw error;
+      if (updateError) {
+        console.error('Database error accepting invitation:', updateError);
+        return { success: false, error: 'Failed to accept invitation. Please try again.' };
       }
       
+      console.log('Successfully accepted invitation');
       await loadPartners();
       return { success: true, message: 'Successfully connected as pause partners!' };
     } catch (error: any) {
       console.error('Error accepting invite:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
   };
 
