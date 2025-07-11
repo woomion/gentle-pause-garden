@@ -1,6 +1,6 @@
 
 import { memo } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 
 interface ReviewBannerProps {
   itemsCount: number;
@@ -17,7 +17,8 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
         className="rounded-full px-6 py-3 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
         style={{ backgroundColor: '#A58CF2' }}
       >
-        <div className="text-base font-medium text-black dark:text-black">
+        <div className="text-base font-medium text-black flex items-center gap-2">
+          <Check size={16} className="text-black" />
           {itemsCount} item{itemsCount === 1 ? '' : 's'} ready for review
         </div>
       </button>
