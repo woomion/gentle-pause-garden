@@ -181,14 +181,6 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
               null
             )}
 
-            {/* Notes section */}
-            {item.notes && item.notes.trim() && (
-              <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
-                <p className="text-gray-600 dark:text-gray-300 text-sm">
-                  <strong>Note:</strong> {item.notes}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>
