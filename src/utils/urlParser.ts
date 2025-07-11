@@ -69,37 +69,58 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
         }
       }
       
-      // Fallback to proxy services
+      // Fallback to proxy services with more reliable options
       const proxyServices = [
         `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+        `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`,
+        // Direct fetch as backup (may work for some sites)
+        url
       ];
       
       // Try each proxy service
-      for (const proxyUrl of proxyServices) {
+      for (let i = 0; i < proxyServices.length; i++) {
+        const proxyUrl = proxyServices[i];
         try {
-          console.log('Trying proxy:', proxyUrl.split('?')[0]);
-          const response = await fetch(proxyUrl, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-          });
+          console.log('Trying fetch method:', i === proxyServices.length - 1 ? 'direct' : 'proxy');
           
-          if (response.ok) {
-            const data = await response.json();
-            if (data.contents) {
-              htmlContent = data.contents;
-              console.log('Successfully fetched content via proxy');
+          let response;
+          if (i === proxyServices.length - 1) {
+            // Last attempt: direct fetch (may work for some CORS-enabled sites)
+            response = await fetch(proxyUrl, {
+              mode: 'cors',
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+              }
+            });
+            
+            if (response.ok) {
+              htmlContent = await response.text();
+              console.log('Successfully fetched content via direct request');
               break;
-            } else if (typeof data === 'string' && data.includes('<html')) {
-              htmlContent = data;
-              console.log('Successfully fetched content via proxy (direct HTML)');
-              break;
+            }
+          } else {
+            // Proxy attempt
+            response = await fetch(proxyUrl, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data.contents) {
+                htmlContent = data.contents;
+                console.log('Successfully fetched content via proxy');
+                break;
+              } else if (typeof data === 'string' && data.includes('<html')) {
+                htmlContent = data;
+                console.log('Successfully fetched content via proxy (direct HTML)');
+                break;
+              }
             }
           }
         } catch (proxyError) {
-          console.log('Proxy failed, trying next:', proxyError.message);
+          console.log('Fetch method failed, trying next:', proxyError.message);
           continue;
         }
       }
