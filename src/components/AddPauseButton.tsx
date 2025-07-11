@@ -20,8 +20,11 @@ const AddPauseButton = ({ onAddPause }: AddPauseButtonProps) => {
   return (
     <button
       onClick={handleClick}
-      className="relative w-full bg-lavender hover:bg-lavender/80 text-black dark:text-white font-medium py-4 px-6 rounded-full transition-all duration-200 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
-      style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+      className="relative w-full text-black dark:text-white font-medium py-6 px-6 rounded-full transition-all duration-200 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98]"
+      style={{ 
+        backgroundColor: '#C9B1FF', 
+        boxShadow: '0 4px 12px rgba(201, 177, 255, 0.3), 0 2px 4px rgba(201, 177, 255, 0.2)' 
+      }}
     >
       {/* Ripple effect */}
       {showRipple && (
