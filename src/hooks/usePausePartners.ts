@@ -161,59 +161,45 @@ export const usePausePartners = () => {
       console.log('User ID:', user.id);
       console.log('User email:', user.email);
 
-      // First, let's check all invitations to see what exists
-      const { data: allInvitations, error: allError } = await supabase
-        .from('partner_invitations')
-        .select('*')
-        .eq('id', invitationId);
-
-      console.log('All invitations with this ID:', allInvitations);
-      if (allError) console.log('Error fetching all invitations:', allError);
-
-      // Now check specifically for our user's email
+      // Check if the invitation exists and is for this user
       const { data: invitation, error: fetchError } = await supabase
         .from('partner_invitations')
         .select('*')
         .eq('id', invitationId)
-        .eq('invitee_email', user.email?.toLowerCase())
-        .eq('status', 'pending')
-        .maybeSingle();
+        .single();
 
-      console.log('Filtered invitation result:', invitation);
-      console.log('Fetch error:', fetchError);
-
+      console.log('Found invitation:', invitation);
+      
       if (fetchError) {
         console.error('Error fetching invitation:', fetchError);
-        return { success: false, error: 'Database error while checking invitation' };
+        return { success: false, error: 'Invitation not found' };
       }
 
       if (!invitation) {
-        console.log('No matching invitation found');
-        console.log('Checking for any invitation with this ID...');
-        
-        const { data: anyInvitation } = await supabase
-          .from('partner_invitations')
-          .select('*')
-          .eq('id', invitationId)
-          .maybeSingle();
-          
-        if (anyInvitation) {
-          console.log('Found invitation but with different criteria:');
-          console.log('- Invitation email:', anyInvitation.invitee_email);
-          console.log('- User email:', user.email?.toLowerCase());
-          console.log('- Status:', anyInvitation.status);
-          
-          if (anyInvitation.status === 'accepted') {
-            return { success: true, message: 'You are already connected as pause partners!' };
-          }
-        }
-        
-        return { success: false, error: 'Invitation not found or already processed' };
+        return { success: false, error: 'Invitation not found' };
       }
 
-      console.log('Found invitation:', invitation);
+      // Check if this invitation is for the current user's email
+      if (invitation.invitee_email.toLowerCase() !== user.email?.toLowerCase()) {
+        console.log('Email mismatch:', invitation.invitee_email, 'vs', user.email);
+        return { success: false, error: 'This invitation is not for your email address' };
+      }
 
-      // Update the invitation
+      // Check if already accepted
+      if (invitation.status === 'accepted') {
+        console.log('Invitation already accepted');
+        await loadPartners(); // Refresh to show the partnership
+        return { success: true, message: 'You are already connected as pause partners!' };
+      }
+
+      // Check if invitation is still pending
+      if (invitation.status !== 'pending') {
+        return { success: false, error: 'This invitation is no longer valid' };
+      }
+
+      console.log('Updating invitation to accepted...');
+
+      // Update the invitation to accepted
       const { error: updateError } = await supabase
         .from('partner_invitations')
         .update({ 
@@ -221,14 +207,14 @@ export const usePausePartners = () => {
           invitee_id: user.id 
         })
         .eq('id', invitationId)
-        .eq('status', 'pending'); // Extra safety check
+        .eq('status', 'pending'); // Safety check
 
       if (updateError) {
         console.error('Database error accepting invitation:', updateError);
         return { success: false, error: 'Failed to accept invitation. Please try again.' };
       }
       
-      console.log('Successfully accepted invitation');
+      console.log('Successfully accepted invitation, reloading partners...');
       await loadPartners();
       return { success: true, message: 'Successfully connected as pause partners!' };
     } catch (error: any) {
