@@ -236,19 +236,19 @@ const PausePartnersSection = () => {
           <div className="space-y-3">
             <h4 className="font-medium">Sent Invitations</h4>
             {sentInvites.map((invitation) => (
-              <div key={invitation.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
+              <div key={invitation.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg">
+                <div className="flex items-center gap-3 flex-1">
                   <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                     <Mail className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{invitation.invitee_email}</p>
                     <p className="text-sm text-muted-foreground">
                       Sent {new Date(invitation.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 sm:flex-shrink-0">
                   <Badge variant="outline">Pending</Badge>
                   <Button
                     variant="ghost"
