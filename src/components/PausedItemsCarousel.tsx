@@ -45,7 +45,7 @@ const PausedItemsCarousel = memo(({ items, onItemClick }: PausedItemsCarouselPro
           />
         </div>
         <div className="flex justify-center mt-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400">1 item</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400">1 item</span>
         </div>
       </>
     );
@@ -90,7 +90,7 @@ const PausedItemsCarousel = memo(({ items, onItemClick }: PausedItemsCarouselPro
           
           <div className="flex items-center justify-center mt-4 gap-4">
             <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-            <span className="text-sm text-gray-600 dark:text-gray-400 px-4">
+            <span className="text-xs text-gray-600 dark:text-gray-400 px-4">
               {totalItems} {totalItems === 1 ? 'item' : 'items'}
             </span>
             <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
