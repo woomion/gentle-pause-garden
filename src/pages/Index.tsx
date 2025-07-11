@@ -95,65 +95,47 @@ const Index = () => {
 
   return (
     <>
-      {/* Mobile App-like Layout */}
-      <div className="h-screen h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 overflow-hidden flex flex-col">
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-            <PauseHeader />
-            <WelcomeMessage firstName={userName} />
-            <ReviewBanner 
-              itemsCount={itemReview.itemsForReview.length}
-              onStartReview={handleStartReview}
-            />
-            
-            {/* Main Tabs - this contains the Paused vs Partner tabs */}
-            <MainTabs />
-            
-            {/* Additional content in a more compact layout */}
-            <div className="space-y-4 mt-6">
-              {/* Pause Log Section - more compact */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                      <Timer className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300">
+        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+          <PauseHeader />
+          <WelcomeMessage firstName={userName} />
+          <ReviewBanner 
+            itemsCount={itemReview.itemsForReview.length}
+            onStartReview={handleStartReview}
+          />
+          <AddPauseButton onAddPause={modalStates.handleAddPause} />
+          <MainTabs />
+          
+          {/* Pause Log Section - moved outside tabs to be always visible */}
+          <div className="mb-8">
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-md">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                        <Timer className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Decision Log</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">View your pause history</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900 dark:text-white">Decision Log</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">View your pause history</p>
-                    </div>
+                    <Link 
+                      to="/pause-log"
+                      className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors text-sm font-medium"
+                    >
+                      View Log
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
                   </div>
-                  <Link 
-                    to="/pause-log"
-                    className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors text-sm font-medium"
-                  >
-                    View
-                    <ArrowRight className="w-3 h-3" />
-                  </Link>
                 </div>
               </div>
-              
-              {/* Compact CTAs */}
-              <div className="space-y-3">
-                <GreaterJoyFundCTA />
-                <SupportCTA />
-              </div>
-              
-              {/* Footer links at bottom of scrollable area */}
-              <FooterLinks />
-              
-              {/* Bottom padding to ensure content doesn't get hidden behind fixed button */}
-              <div className="h-20"></div>
             </div>
           </div>
-        </div>
-        
-        {/* Fixed Bottom Button - thumb-friendly zone */}
-        <div className="fixed bottom-0 left-0 right-0 bg-cream dark:bg-[#200E3B] border-t border-gray-200 dark:border-gray-700 p-4 safe-area-inset-bottom">
-          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
-            <AddPauseButton onAddPause={modalStates.handleAddPause} />
-          </div>
+          <GreaterJoyFundCTA />
+          <SupportCTA />
+          <FooterLinks />
         </div>
       </div>
       
