@@ -13,7 +13,7 @@ const MainTabs = () => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6">
+      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10" style={{ backgroundColor: '#F5F2FA' }}>
         <TabsTrigger value="paused" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
           <Timer className="h-4 w-4" />
           <span className="text-xs sm:text-sm">Paused</span>
