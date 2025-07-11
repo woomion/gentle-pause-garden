@@ -1,4 +1,5 @@
 
+import { ShoppingCart } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
@@ -15,6 +16,11 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
   const emotionColor = getEmotionColor(item.emotion, isDarkMode);
 
   const imageUrl = (() => {
+    // Handle cart placeholder case
+    if ('isCart' in item && item.isCart && item.imageUrl === 'cart-placeholder') {
+      return 'cart-placeholder';
+    }
+    
     if (item.imageUrl) {
       if (item.imageUrl.includes('supabase')) {
         return item.imageUrl;
@@ -27,10 +33,10 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
         }
       }
     }
-    if (item.photoDataUrl) {
+    if ('photoDataUrl' in item && item.photoDataUrl) {
       return item.photoDataUrl;
     }
-    if (item.photo instanceof File) {
+    if ('photo' in item && item.photo instanceof File) {
       return URL.createObjectURL(item.photo);
     }
     return null;
@@ -47,7 +53,11 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
   return (
     <div className="flex items-start gap-4 mb-6">
       <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-        {imageUrl ? (
+        {imageUrl === 'cart-placeholder' ? (
+          <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+            <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
+          </div>
+        ) : imageUrl ? (
           <img 
             src={imageUrl} 
             alt={item.itemName}
