@@ -10,7 +10,7 @@ const PauseDurationBanner = ({ checkInTime }: PauseDurationBannerProps) => {
     <div 
       className="absolute bottom-0 left-0 right-0 py-2 px-4 rounded-b-2xl text-center text-xs font-medium flex items-center justify-center gap-2"
       style={{ 
-        backgroundColor: '#EDE9F3',
+        backgroundColor: '#eeeaf8',
         color: '#000'
       }}
     >

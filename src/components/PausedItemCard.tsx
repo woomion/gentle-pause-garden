@@ -102,7 +102,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
 
   return (
     <div 
-      className="bg-white/60 dark:bg-white/10 rounded-2xl border border-lavender/30 dark:border-gray-600 cursor-pointer hover:bg-white/80 dark:hover:bg-white/20 transition-colors relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#CAB6F7] focus:ring-offset-2"
+      className="bg-white/60 dark:bg-white/10 rounded-2xl border border-lavender/30 dark:border-gray-600 cursor-pointer hover:bg-white/80 dark:hover:bg-white/20 transition-colors relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#CAB6F7] focus:ring-offset-2 shadow-sm"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -157,8 +157,8 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
       </div>
       
       <div 
-        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl bg-[#EDE9F3]"
-        style={{ color: '#000' }}
+        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl"
+        style={{ backgroundColor: '#eeeaf8', color: '#000' }}
       >
         <Timer size={14} aria-hidden="true" />
         {item.checkInTime}
