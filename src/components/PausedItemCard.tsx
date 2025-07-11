@@ -151,35 +151,6 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
               {item.storeName}
             </p>
             
-            <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
-              <span>Paused while feeling </span>
-              <span 
-                className="inline-block px-2 py-1 rounded text-xs font-medium"
-                style={{ 
-                  backgroundColor: emotionColor,
-                  color: '#000'
-                }}
-              >
-                {item.emotion}
-              </span>
-            </div>
-
-            {/* Tags section - Enhanced with debug */}
-            {item.tags && item.tags.length > 0 ? (
-              <div className="flex flex-wrap gap-1 mb-2">
-                {item.tags.map((tag, index) => (
-                  <span 
-                    key={index}
-                    className="inline-block px-2 py-1 bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] rounded text-xs border border-lavender/30"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              console.log('🏷️ No tags to display for item:', item.id, 'Tags:', item.tags),
-              null
-            )}
 
           </div>
         </div>
