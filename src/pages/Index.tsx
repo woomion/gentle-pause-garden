@@ -1,5 +1,7 @@
 
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Timer } from 'lucide-react';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
 import ReviewBanner from '../components/ReviewBanner';
@@ -103,6 +105,34 @@ const Index = () => {
           />
           <AddPauseButton onAddPause={modalStates.handleAddPause} />
           <MainTabs />
+          
+          {/* Pause Log Section - moved outside tabs to be always visible */}
+          <div className="mb-8">
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-md">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                        <Timer className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Decision Log</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">View your pause history</p>
+                      </div>
+                    </div>
+                    <Link 
+                      to="/pause-log"
+                      className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors text-sm font-medium"
+                    >
+                      View Log
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <GreaterJoyFundCTA />
           <SupportCTA />
           <FooterLinks />

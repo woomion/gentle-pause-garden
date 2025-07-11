@@ -171,18 +171,21 @@ export const usePausePartners = () => {
 
       // Check if the invitation is for this user's email
       if (invitation.invitee_email.toLowerCase() !== user.email?.toLowerCase()) {
-        throw new Error('This invitation is not for your email address');
+        console.error('Email mismatch:', invitation.invitee_email, 'vs', user.email);
+        return { success: false, error: 'This invitation is not for your email address' };
       }
 
       // Check if already accepted
       if (invitation.status === 'accepted') {
-        return { success: true, message: 'Invitation already accepted' };
+        return { success: true, message: 'You are already connected as pause partners!' };
       }
 
       // Check if invitation is still pending
       if (invitation.status !== 'pending') {
-        throw new Error('This invitation is no longer valid');
+        return { success: false, error: 'This invitation is no longer valid' };
       }
+
+      console.log('Accepting invitation for user:', user.email, 'invitation:', invitation);
 
       const { error } = await supabase
         .from('partner_invitations')
@@ -190,11 +193,16 @@ export const usePausePartners = () => {
           status: 'accepted',
           invitee_id: user.id 
         })
-        .eq('id', invitationId);
+        .eq('id', invitationId)
+        .eq('status', 'pending'); // Extra safety check
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error accepting invitation:', error);
+        throw error;
+      }
+      
       await loadPartners();
-      return { success: true };
+      return { success: true, message: 'Successfully connected as pause partners!' };
     } catch (error: any) {
       console.error('Error accepting invite:', error);
       return { success: false, error: error.message };

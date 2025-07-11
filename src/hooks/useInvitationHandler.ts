@@ -24,12 +24,13 @@ export const useInvitationHandler = () => {
             if (result?.success) {
               toast({
                 title: 'Invitation accepted!',
-                description: 'You are now connected as pause partners.',
+                description: result.message || 'You are now connected as pause partners.',
               });
             } else {
+              console.error('Failed to accept invitation:', result?.error);
               toast({
-                title: 'Invitation already processed',
-                description: 'This invitation may have already been accepted or expired.',
+                title: 'Failed to accept invitation',
+                description: result?.error || 'Please try again or contact support.',
                 variant: 'destructive',
               });
             }
