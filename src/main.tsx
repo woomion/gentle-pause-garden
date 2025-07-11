@@ -5,26 +5,14 @@ import './index.css'
 
 console.log('Main.tsx: Starting app');
 
-// Add global error handler for mobile debugging, but filter out Vite dev server issues
-window.addEventListener('error', (event) => {
-  // Filter out Vite development server connection errors
-  if (event.error?.message?.includes('Failed to fetch') && 
-      (event.error?.stack?.includes('vite/client') || event.error?.stack?.includes('@vite/client'))) {
-    event.preventDefault(); // Prevent default error handling
-    return;
-  }
-  console.error('Global error:', event.error);
-});
+// Temporarily disable all error handlers to debug the issue
+// window.addEventListener('error', (event) => {
+//   console.error('Global error:', event.error);
+// });
 
-window.addEventListener('unhandledrejection', (event) => {
-  // Filter out Vite development server connection errors
-  if (event.reason?.message?.includes('Failed to fetch') && 
-      (event.reason?.stack?.includes('vite/client') || event.reason?.stack?.includes('@vite/client'))) {
-    event.preventDefault(); // Prevent the error from propagating
-    return;
-  }
-  console.error('Unhandled promise rejection:', event.reason);
-});
+// window.addEventListener('unhandledrejection', (event) => {
+//   console.error('Unhandled promise rejection:', event.reason);
+// });
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
