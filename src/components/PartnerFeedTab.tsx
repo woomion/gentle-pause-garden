@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
 import { usePausePartners } from '@/hooks/usePausePartners';
@@ -17,8 +17,11 @@ const PartnerFeedTab = () => {
   const { partners } = usePausePartners();
   const { hasPausePartnerAccess } = useSubscription();
 
-  // Simple function to load partner items
-  const loadPartnerItems = () => {
+  const sortItemsByDate = useCallback((items: PausedItem[]) => {
+    return items.sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
+  }, []);
+
+  const updatePartnerItems = useCallback(() => {
     if (!user || !hasPausePartnerAccess) {
       setPartnerItems([]);
       setIsLoading(false);
@@ -26,44 +29,50 @@ const PartnerFeedTab = () => {
     }
 
     const allItems = supabasePausedItemsStore.getItems();
-    const sharedItems = allItems.filter(item => 
-      item.sharedWithPartners && item.sharedWithPartners.length > 0
-    );
+    const partnerIds = partners.map(p => p.partner_id);
     
-    const sortedItems = sharedItems.sort((a, b) => 
-      new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime()
-    );
+    // Get items that are shared with partners or where I'm included in sharing
+    const sharedItems = allItems.filter(item => {
+      // Check if this item has any sharing with partners
+      return item.sharedWithPartners && item.sharedWithPartners.length > 0;
+    });
 
-    setPartnerItems(sortedItems);
-    setIsLoading(false);
-  };
+    setPartnerItems(sortItemsByDate(sharedItems));
+    
+    if (supabasePausedItemsStore.isDataLoaded()) {
+      setIsLoading(false);
+    }
+  }, [user?.id, partners.length, hasPausePartnerAccess, sortItemsByDate]);
 
-  // Load data when component mounts or when access changes
   useEffect(() => {
-    loadPartnerItems();
-  }, [user?.id, hasPausePartnerAccess]);
+    updatePartnerItems();
 
-  // Set up store subscription separately
-  useEffect(() => {
-    if (!user || !hasPausePartnerAccess) return;
+    let unsubscribe: (() => void) | undefined;
+    let interval: NodeJS.Timeout | undefined;
 
-    const unsubscribe = supabasePausedItemsStore.subscribe(loadPartnerItems);
-    return () => unsubscribe();
-  }, [user?.id, hasPausePartnerAccess]);
+    if (user && hasPausePartnerAccess) {
+      unsubscribe = supabasePausedItemsStore.subscribe(updatePartnerItems);
+      interval = setInterval(updatePartnerItems, 60000);
+    }
 
-  const handleItemClick = (item: PausedItem) => {
+    return () => {
+      if (unsubscribe) unsubscribe();
+      if (interval) clearInterval(interval);
+    };
+  }, [updatePartnerItems, user, hasPausePartnerAccess]);
+
+  const handleItemClick = useCallback((item: PausedItem) => {
     setSelectedItem(item);
-  };
+  }, []);
 
-  const handleCloseDetail = () => {
+  const handleCloseDetail = useCallback(() => {
     setSelectedItem(null);
-  };
+  }, []);
 
-  const handleDeleteItem = async (id: string) => {
+  const handleDeleteItem = useCallback(async (id: string) => {
     await supabasePausedItemsStore.removeItem(id);
     setSelectedItem(null);
-    loadPartnerItems(); // Refresh the list
-  };
+  }, []);
 
   if (!hasPausePartnerAccess) {
     return (
@@ -100,7 +109,7 @@ const PartnerFeedTab = () => {
 
   return (
     <div className="mb-8 space-y-6">
-      {/* Partner Management Section */}
+      {/* Partner Management Section - Always show when user has access */}
       <PausePartnersSection />
       
       {/* Partner Feed Section */}

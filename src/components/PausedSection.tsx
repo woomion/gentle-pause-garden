@@ -15,6 +15,10 @@ const PausedSection = () => {
 
   const { user } = useAuth();
 
+  const sortItemsByDate = useCallback((items: (PausedItem | LocalPausedItem)[]) => {
+    return items.sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
+  }, []);
+
   useEffect(() => {
     const updateItems = () => {
       if (user) {
@@ -23,12 +27,7 @@ const PausedSection = () => {
         const reviewItems = supabasePausedItemsStore.getItemsForReview();
         const reviewItemIds = new Set(reviewItems.map(item => item.id));
         const nonReviewItems = allItems.filter(item => !reviewItemIds.has(item.id));
-        
-        // Sort items directly here instead of using callback
-        const sortedItems = nonReviewItems.sort((a, b) => 
-          new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime()
-        );
-        setPausedItems(sortedItems);
+        setPausedItems(sortItemsByDate(nonReviewItems));
         
         if (supabasePausedItemsStore.isDataLoaded()) {
           setIsLoading(false);
@@ -39,12 +38,7 @@ const PausedSection = () => {
         const reviewItems = pausedItemsStore.getItemsForReview();
         const reviewItemIds = new Set(reviewItems.map(item => item.id));
         const nonReviewItems = allItems.filter(item => !reviewItemIds.has(item.id));
-        
-        // Sort items directly here instead of using callback
-        const sortedItems = nonReviewItems.sort((a, b) => 
-          new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime()
-        );
-        setPausedItems(sortedItems);
+        setPausedItems(sortItemsByDate(nonReviewItems));
         setIsLoading(false);
       }
     };
@@ -70,7 +64,7 @@ const PausedSection = () => {
       if (unsubscribe) unsubscribe();
       if (interval) clearInterval(interval);
     };
-  }, [user?.id]); // Only depend on user.id, not sortItemsByDate
+  }, [sortItemsByDate, user]);
 
   const handleItemClick = useCallback((item: PausedItem | LocalPausedItem) => {
     setSelectedItem(item);
