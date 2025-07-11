@@ -12,9 +12,7 @@ const PausedSectionEmpty = memo(({ isGuest, hasReviewItems }: PausedSectionEmpty
       return "All your paused items are ready for review!";
     }
     
-    return isGuest 
-      ? "Nothing paused right now. Your clarity is clear. (Guest mode - items stored locally)"
-      : "Nothing paused right now. Your clarity is clear.";
+    return "Nothing paused right now. Your clarity is clear.";
   };
 
   return (
@@ -22,6 +20,11 @@ const PausedSectionEmpty = memo(({ isGuest, hasReviewItems }: PausedSectionEmpty
       <p className="text-gray-500 dark:text-gray-400">
         {getMessage()}
       </p>
+      {isGuest && !hasReviewItems && (
+        <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+          Guest mode - items stored locally
+        </p>
+      )}
     </div>
   );
 });
