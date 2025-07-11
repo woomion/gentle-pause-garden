@@ -17,10 +17,6 @@ const PartnerFeedTab = () => {
   const { partners } = usePausePartners();
   const { hasPausePartnerAccess } = useSubscription();
 
-  const sortItemsByDate = useCallback((items: PausedItem[]) => {
-    return items.sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
-  }, []);
-
   const updatePartnerItems = useCallback(() => {
     if (!user || !hasPausePartnerAccess) {
       setPartnerItems([]);
@@ -35,12 +31,17 @@ const PartnerFeedTab = () => {
       return item.sharedWithPartners && item.sharedWithPartners.length > 0;
     });
 
-    setPartnerItems(sortItemsByDate(sharedItems));
+    // Sort items by date directly here
+    const sortedItems = sharedItems.sort((a, b) => 
+      new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime()
+    );
+
+    setPartnerItems(sortedItems);
     
     if (supabasePausedItemsStore.isDataLoaded()) {
       setIsLoading(false);
     }
-  }, [user?.id, hasPausePartnerAccess, sortItemsByDate]);
+  }, [user?.id, hasPausePartnerAccess]);
 
   useEffect(() => {
     updatePartnerItems();
