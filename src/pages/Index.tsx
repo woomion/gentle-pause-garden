@@ -105,7 +105,16 @@ const Index = () => {
           />
           <MainTabs />
           
-          {/* Pause Log Section - moved outside tabs to be always visible */}
+          {/* Greater Joy Fund Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-md">
+                <GreaterJoyFundCTA />
+              </div>
+            </div>
+          </div>
+          
+          {/* Pause Log Section */}
           <div className="mb-8">
             <div className="flex items-center justify-center">
               <div className="w-full max-w-md">
@@ -132,7 +141,6 @@ const Index = () => {
               </div>
             </div>
           </div>
-          <GreaterJoyFundCTA />
           <SupportCTA />
           <FooterLinks />
         </div>
