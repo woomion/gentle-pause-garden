@@ -65,14 +65,38 @@ export const usePausePartners = () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      const { data: invitation, error } = await supabase
         .from('partner_invitations')
         .insert({
           inviter_id: user.id,
           invitee_email: email.toLowerCase()
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Send invitation email
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', user.id)
+          .single();
+
+        await supabase.functions.invoke('send-invitation-email', {
+          body: {
+            inviterName: profile?.first_name || 'A PocketPause user',
+            inviterEmail: user.email || '',
+            inviteeEmail: email.toLowerCase(),
+            invitationId: invitation.id
+          }
+        });
+      } catch (emailError) {
+        console.error('Failed to send invitation email:', emailError);
+        // Don't fail the whole operation if email fails
+      }
+
       await loadPartners();
       return { success: true };
     } catch (error: any) {
