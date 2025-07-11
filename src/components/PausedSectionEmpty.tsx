@@ -12,7 +12,7 @@ const PausedSectionEmpty = memo(({ isGuest, hasReviewItems }: PausedSectionEmpty
       return "All your paused items are ready for review!";
     }
     
-    return "Nothing paused right now. Your clarity is clear.";
+    return "Your pause list is clear, how lovely";
   };
 
   return (
