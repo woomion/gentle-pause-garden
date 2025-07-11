@@ -4,7 +4,7 @@ interface WelcomeMessageProps {
 }
 
 const WelcomeMessage = ({ firstName }: WelcomeMessageProps) => {
-  const displayName = firstName || "there";
+  const displayName = firstName?.trim() || "there";
   
   return (
     <div className="mb-8 mt-16">
