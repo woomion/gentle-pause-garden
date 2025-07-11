@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, UserPlus, Users, Mail } from 'lucide-react';
+import { Trash2, UserPlus, Users, Mail, RotateCcw } from 'lucide-react';
 import { usePausePartners } from '@/hooks/usePausePartners';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const PausePartnersSection = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
-  const { partners, invitations, loading, sendInvite, acceptInvite, removePartner } = usePausePartners();
+  const { partners, invitations, loading, sendInvite, acceptInvite, removePartner, resendInvite } = usePausePartners();
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -68,6 +68,23 @@ const PausePartnersSection = () => {
       toast({
         title: 'Error removing partner',
         description: result?.error || 'Failed to remove partner',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleResendInvite = async (invitationId: string, email: string) => {
+    const result = await resendInvite(invitationId, email);
+    
+    if (result?.success) {
+      toast({
+        title: 'Invite resent!',
+        description: `Invitation resent to ${email}`,
+      });
+    } else {
+      toast({
+        title: 'Error resending invite',
+        description: result?.error || 'Failed to resend invitation',
         variant: 'destructive',
       });
     }
@@ -236,7 +253,16 @@ const PausePartnersSection = () => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => handleResendInvite(invitation.id, invitation.invitee_email)}
+                    title="Resend invitation"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleRemovePartner(invitation.id, invitation.invitee_email)}
+                    title="Delete invitation"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

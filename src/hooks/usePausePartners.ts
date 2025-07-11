@@ -142,6 +142,34 @@ export const usePausePartners = () => {
     }
   };
 
+  const resendInvite = async (invitationId: string, email: string) => {
+    if (!user) return;
+
+    try {
+      // Get user profile for invitation email
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name')
+        .eq('id', user.id)
+        .single();
+
+      // Send invitation email
+      await supabase.functions.invoke('send-invitation-email', {
+        body: {
+          inviterName: profile?.first_name || 'A PocketPause user',
+          inviterEmail: user.email || '',
+          inviteeEmail: email.toLowerCase(),
+          invitationId: invitationId
+        }
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error resending invite:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   useEffect(() => {
     loadPartners();
   }, [user]);
@@ -153,6 +181,7 @@ export const usePausePartners = () => {
     sendInvite,
     acceptInvite,
     removePartner,
+    resendInvite,
     reload: loadPartners
   };
 };
