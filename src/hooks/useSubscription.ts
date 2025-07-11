@@ -13,11 +13,9 @@ export const useSubscription = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  const hasPausePartnerAccess = () => {
-    // Temporarily allow free tier for testing
-    return true;
-    // return subscription?.tier === 'premium' || subscription?.tier === 'pause_partner';
-  };
+  // Make this a computed value, not a function
+  const hasPausePartnerAccess = true; // Temporarily allow free tier for testing
+  // const hasPausePartnerAccess = subscription?.tier === 'premium' || subscription?.tier === 'pause_partner';
 
   const loadSubscription = async () => {
     if (!user) {
@@ -50,12 +48,12 @@ export const useSubscription = () => {
 
   useEffect(() => {
     loadSubscription();
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id, not the whole user object
 
   return {
     subscription,
     loading,
-    hasPausePartnerAccess,
+    hasPausePartnerAccess, // This is now a stable boolean value
     reload: loadSubscription
   };
 };
