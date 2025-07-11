@@ -15,11 +15,12 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
       <button 
         onClick={onStartReview}
         className="rounded-full px-6 py-3 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
-        style={{ backgroundColor: '#6EE7B7' }}
+        style={{ backgroundColor: '#A58CF2' }}
       >
         <div className="text-base font-medium text-black flex items-center gap-2">
           <Search size={16} className="text-black" />
           {itemsCount} item{itemsCount === 1 ? '' : 's'} ready for review
+          <ArrowRight size={16} className="text-black" />
         </div>
       </button>
     </div>
