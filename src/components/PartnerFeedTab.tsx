@@ -17,13 +17,8 @@ const PartnerFeedTab = () => {
   const { partners } = usePausePartners();
   const { hasPausePartnerAccess } = useSubscription();
 
+  // Stable reference for updating items - no dependencies that change
   const updatePartnerItems = useCallback(() => {
-    if (!user || !hasPausePartnerAccess) {
-      setPartnerItems([]);
-      setIsLoading(false);
-      return;
-    }
-
     const allItems = supabasePausedItemsStore.getItems();
     
     // Get items that are shared with partners
@@ -37,28 +32,29 @@ const PartnerFeedTab = () => {
     );
 
     setPartnerItems(sortedItems);
-    
-    if (supabasePausedItemsStore.isDataLoaded()) {
-      setIsLoading(false);
-    }
-  }, [user?.id, hasPausePartnerAccess]);
+    setIsLoading(false);
+  }, []); // Empty dependencies - stable reference
 
+  // Load initial data and set up subscriptions - runs only when user/access changes
   useEffect(() => {
+    if (!user || !hasPausePartnerAccess) {
+      setPartnerItems([]);
+      setIsLoading(false);
+      return;
+    }
+
+    // Load initial data
     updatePartnerItems();
 
-    let unsubscribe: (() => void) | undefined;
-    let interval: NodeJS.Timeout | undefined;
-
-    if (user && hasPausePartnerAccess) {
-      unsubscribe = supabasePausedItemsStore.subscribe(updatePartnerItems);
-      interval = setInterval(updatePartnerItems, 60000);
-    }
+    // Set up subscription and interval
+    const unsubscribe = supabasePausedItemsStore.subscribe(updatePartnerItems);
+    const interval = setInterval(updatePartnerItems, 60000);
 
     return () => {
-      if (unsubscribe) unsubscribe();
-      if (interval) clearInterval(interval);
+      unsubscribe();
+      clearInterval(interval);
     };
-  }, [updatePartnerItems]);
+  }, [user?.id, hasPausePartnerAccess]); // Only these dependencies - no updatePartnerItems
 
   const handleItemClick = useCallback((item: PausedItem) => {
     setSelectedItem(item);
