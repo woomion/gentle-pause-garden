@@ -23,6 +23,34 @@ export const usePausePartners = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
+  // Set up real-time subscriptions
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to changes in partner_invitations table
+    const channel = supabase
+      .channel('partner-invitations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'partner_invitations',
+          filter: `inviter_id=eq.${user.id},invitee_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Real-time partner invitation change:', payload);
+          // Reload partners and invitations when any change occurs
+          loadPartners();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const loadPartners = async () => {
     if (!user) {
       setPartners([]);

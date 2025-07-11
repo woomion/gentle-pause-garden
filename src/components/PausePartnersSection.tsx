@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, UserPlus, Users, Mail, RotateCcw } from 'lucide-react';
+import { Trash2, UserPlus, Users, Mail, RotateCcw, CheckCircle } from 'lucide-react';
 import { usePausePartners } from '@/hooks/usePausePartners';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
@@ -166,10 +166,10 @@ const PausePartnersSection = () => {
               );
               
               return (
-                <div key={partner.partner_id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={partner.partner_id} className="flex items-center justify-between p-3 border rounded-lg bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Users className="h-4 w-4 text-primary" />
+                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center">
+                      <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
                       <p className="font-medium">{partner.partner_name}</p>
@@ -177,7 +177,9 @@ const PausePartnersSection = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Connected</Badge>
+                    <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
+                      ✓ Connected
+                    </Badge>
                     {invitation && (
                       <Button
                         variant="ghost"
@@ -249,7 +251,9 @@ const PausePartnersSection = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:flex-shrink-0">
-                  <Badge variant="outline">Pending</Badge>
+                  <Badge variant="outline" className="text-yellow-600 border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20">
+                    ⏳ Pending
+                  </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
