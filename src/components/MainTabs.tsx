@@ -13,12 +13,24 @@ const MainTabs = () => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10" style={{ backgroundColor: '#F5F2FA' }}>
-        <TabsTrigger value="paused" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10" style={{ backgroundColor: '#E6DAF8' }}>
+        <TabsTrigger 
+          value="paused" 
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:bg-[#E6DAF8] data-[state=active]:border-0 data-[state=active]:font-semibold data-[state=inactive]:font-normal"
+          style={{ 
+            color: activeTab === 'paused' ? '#5C47A3' : 'inherit'
+          }}
+        >
           <Timer className="h-4 w-4" />
           <span className="text-xs sm:text-sm">Paused</span>
         </TabsTrigger>
-        <TabsTrigger value="partner-feed" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+        <TabsTrigger 
+          value="partner-feed" 
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:bg-[#E6DAF8] data-[state=active]:border-0 data-[state=active]:font-semibold data-[state=inactive]:font-normal"
+          style={{ 
+            color: activeTab === 'partner-feed' ? '#5C47A3' : 'inherit'
+          }}
+        >
           <Users className="h-4 w-4" />
           <span className="text-xs sm:text-sm">Partners</span>
         </TabsTrigger>
