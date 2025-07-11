@@ -8,15 +8,18 @@ console.log('Main.tsx: Starting app');
 // Add global error handler for mobile debugging, but filter out Vite dev server issues
 window.addEventListener('error', (event) => {
   // Filter out Vite development server connection errors
-  if (event.error?.message?.includes('Failed to fetch') && event.error?.stack?.includes('vite/client')) {
-    return; // Ignore Vite dev server connection errors
+  if (event.error?.message?.includes('Failed to fetch') && 
+      (event.error?.stack?.includes('vite/client') || event.error?.stack?.includes('@vite/client'))) {
+    event.preventDefault(); // Prevent default error handling
+    return;
   }
   console.error('Global error:', event.error);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
   // Filter out Vite development server connection errors
-  if (event.reason?.message?.includes('Failed to fetch') && event.reason?.stack?.includes('vite/client')) {
+  if (event.reason?.message?.includes('Failed to fetch') && 
+      (event.reason?.stack?.includes('vite/client') || event.reason?.stack?.includes('@vite/client'))) {
     event.preventDefault(); // Prevent the error from propagating
     return;
   }
