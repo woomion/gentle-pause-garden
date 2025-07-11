@@ -109,6 +109,32 @@ export const usePausePartners = () => {
     if (!user) return;
 
     try {
+      // First, check if the invitation exists and matches the user's email
+      const { data: invitation, error: fetchError } = await supabase
+        .from('partner_invitations')
+        .select('*')
+        .eq('id', invitationId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching invitation:', fetchError);
+        throw fetchError;
+      }
+
+      if (!invitation) {
+        throw new Error('Invitation not found');
+      }
+
+      // Check if the invitation is for this user's email
+      if (invitation.invitee_email.toLowerCase() !== user.email?.toLowerCase()) {
+        throw new Error('This invitation is not for your email address');
+      }
+
+      // Check if already accepted
+      if (invitation.status === 'accepted') {
+        return { success: true, message: 'Invitation already accepted' };
+      }
+
       const { error } = await supabase
         .from('partner_invitations')
         .update({ 

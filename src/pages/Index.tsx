@@ -19,6 +19,7 @@ import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore, PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
+import { useInvitationHandler } from '../hooks/useInvitationHandler';
 
 const Index = () => {
   const [showForm, setShowForm] = useState(false);
@@ -32,6 +33,9 @@ const Index = () => {
 
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
+  
+  // Handle invitation acceptance from URL
+  useInvitationHandler();
 
   console.log('Index page render - Auth loading:', authLoading, 'Settings loading:', settingsLoading, 'User:', !!user);
   console.log('Mobile check - User agent:', navigator.userAgent);
