@@ -1,16 +1,13 @@
 
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
 import ReviewBanner from '../components/ReviewBanner';
 import AddPauseButton from '../components/AddPauseButton';
-import PausedSection from '../components/PausedSection';
-import PauseLogSection from '../components/PauseLogSection';
-import GreaterJoyFundCTA from '../components/GreaterJoyFundCTA';
-import FooterLinks from '../components/FooterLinks';
 import MainTabs from '../components/MainTabs';
+import GreaterJoyFundCTA from '../components/GreaterJoyFundCTA';
 import SupportCTA from '../components/SupportCTA';
+import FooterLinks from '../components/FooterLinks';
 import PauseForm from '../components/PauseForm';
 import WelcomeModal from '../components/WelcomeModal';
 import SignupModal from '../components/SignupModal';
@@ -18,37 +15,26 @@ import ItemReviewModal from '../components/ItemReviewModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../contexts/AuthContext';
-import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
-import { pausedItemsStore, PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useInvitationHandler } from '../hooks/useInvitationHandler';
+import { useModalStates } from '../hooks/useModalStates';
+import { useItemReview } from '../hooks/useItemReview';
+import { useIndexRedirects } from '../hooks/useIndexRedirects';
+import { useWelcomeFlow } from '../hooks/useWelcomeFlow';
 
 const Index = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const [showForm, setShowForm] = useState(false);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-  const [signupModalDismissed, setSignupModalDismissed] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [itemsForReview, setItemsForReview] = useState<(PausedItem | LocalPausedItem)[]>([]);
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
-
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
   
+  // Custom hooks for managing different aspects of the page
+  const modalStates = useModalStates();
+  const itemReview = useItemReview();
+  const { userName, handleWelcomeComplete, shouldShowWelcomeModal } = useWelcomeFlow();
+  
   // Handle invitation acceptance from URL
   useInvitationHandler();
-
-  // Redirect to auth page if user has invitation but isn't logged in
-  useEffect(() => {
-    const inviteId = searchParams.get('invite');
-    const pendingInvitation = localStorage.getItem('pendingInvitation');
-    
-    if ((inviteId || pendingInvitation) && !user && !authLoading) {
-      navigate('/auth');
-    }
-  }, [searchParams, user, authLoading, navigate]);
+  
+  // Handle redirects for invitations
+  useIndexRedirects();
 
   console.log('Index page render - Auth loading:', authLoading, 'Settings loading:', settingsLoading, 'User:', !!user);
   console.log('Mobile check - User agent:', navigator.userAgent);
@@ -57,106 +43,37 @@ const Index = () => {
   // Initialize notifications
   useNotifications(notificationsEnabled);
 
-  // Check if this is the user's first visit or get user's name
+  // Update welcome modal visibility when user state changes
   useEffect(() => {
-    console.log('Index useEffect triggered - User:', !!user, 'Auth loading:', authLoading);
-    
     if (user && !authLoading) {
-      // Get user's first name from user metadata or profile
       const firstName = user.user_metadata?.first_name || '';
-      setUserName(firstName);
-      
-      // Check if user needs welcome flow
       const hasCompletedWelcome = localStorage.getItem(`hasCompletedWelcome_${user.id}`);
       if (!hasCompletedWelcome && !firstName) {
-        setShowWelcomeModal(true);
+        modalStates.setShowWelcomeModal(true);
       }
     }
-  }, [user, authLoading]);
-
-  // Track items for review
-  useEffect(() => {
-    const updateItemsForReview = () => {
-      if (user) {
-        const reviewItems = supabasePausedItemsStore.getItemsForReview();
-        setItemsForReview(reviewItems);
-      } else {
-        const reviewItems = pausedItemsStore.getItemsForReview();
-        setItemsForReview(reviewItems);
-      }
-    };
-
-    updateItemsForReview();
-
-    let unsubscribe: (() => void) | undefined;
-    let interval: NodeJS.Timeout | undefined;
-
-    if (user) {
-      unsubscribe = supabasePausedItemsStore.subscribe(updateItemsForReview);
-      interval = setInterval(updateItemsForReview, 60000);
-    } else {
-      unsubscribe = pausedItemsStore.subscribe(updateItemsForReview);
-      interval = setInterval(updateItemsForReview, 60000);
-    }
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-      if (interval) clearInterval(interval);
-    };
-  }, [user]);
+  }, [user, authLoading, modalStates]);
 
   const handleStartReview = () => {
-    setCurrentReviewIndex(0);
-    setShowReviewModal(true);
+    itemReview.resetReviewIndex();
+    modalStates.handleStartReview();
   };
 
   const handleCloseReview = () => {
-    setShowReviewModal(false);
-    setCurrentReviewIndex(0);
+    modalStates.handleCloseReview();
+    itemReview.resetReviewIndex();
   };
 
-  const handleItemDecided = async (id: string) => {
-    if (user) {
-      await supabasePausedItemsStore.removeItem(id);
-    } else {
-      pausedItemsStore.removeItem(id);
-    }
-    setItemsForReview(prev => prev.filter(item => item.id !== id));
+  const handleWelcomeCompleteInternal = (name: string) => {
+    handleWelcomeComplete(name);
+    modalStates.setShowWelcomeModal(false);
   };
 
-  const handleNextReview = () => {
-    setCurrentReviewIndex(prev => prev + 1);
-  };
-
-  const handleWelcomeComplete = (name: string) => {
-    setUserName(name);
-    if (user) {
-      localStorage.setItem(`hasCompletedWelcome_${user.id}`, 'true');
-    }
-    setShowWelcomeModal(false);
-  };
-
-  const handleAddPause = () => {
-    // Delay to allow ripple animation to complete
-    setTimeout(() => {
-      setShowForm(true);
-    }, 650);
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
-  };
-
-  const handleShowSignup = () => {
+  const handleShowSignupInternal = () => {
     // Only show signup modal if user is not authenticated AND hasn't dismissed it
-    if (!user && !signupModalDismissed) {
-      setShowSignupModal(true);
+    if (!user && !modalStates.signupModalDismissed) {
+      modalStates.handleShowSignup();
     }
-  };
-
-  const handleCloseSignup = () => {
-    setShowSignupModal(false);
-    setSignupModalDismissed(true);
   };
 
   // Show loading screen while auth is loading
@@ -181,10 +98,10 @@ const Index = () => {
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           <ReviewBanner 
-            itemsCount={itemsForReview.length}
+            itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
           />
-          <AddPauseButton onAddPause={handleAddPause} />
+          <AddPauseButton onAddPause={modalStates.handleAddPause} />
           <MainTabs />
           <GreaterJoyFundCTA />
           <SupportCTA />
@@ -192,34 +109,34 @@ const Index = () => {
         </div>
       </div>
       
-      {showForm && (
+      {modalStates.showForm && (
         <PauseForm 
-          onClose={handleCloseForm} 
-          onShowSignup={handleShowSignup}
-          signupModalDismissed={signupModalDismissed}
+          onClose={modalStates.handleCloseForm} 
+          onShowSignup={handleShowSignupInternal}
+          signupModalDismissed={modalStates.signupModalDismissed}
         />
       )}
       
       {user && (
         <WelcomeModal 
-          open={showWelcomeModal} 
-          onComplete={handleWelcomeComplete} 
+          open={shouldShowWelcomeModal(modalStates.showWelcomeModal)} 
+          onComplete={handleWelcomeCompleteInternal} 
         />
       )}
       
       <SignupModal 
-        isOpen={showSignupModal} 
-        onClose={handleCloseSignup} 
+        isOpen={modalStates.showSignupModal} 
+        onClose={modalStates.handleCloseSignup} 
       />
       
-      {showReviewModal && (
+      {modalStates.showReviewModal && (
         <ItemReviewModal
-          items={itemsForReview}
-          currentIndex={currentReviewIndex}
-          isOpen={showReviewModal}
+          items={itemReview.itemsForReview}
+          currentIndex={itemReview.currentReviewIndex}
+          isOpen={modalStates.showReviewModal}
           onClose={handleCloseReview}
-          onItemDecided={handleItemDecided}
-          onNext={handleNextReview}
+          onItemDecided={itemReview.handleItemDecided}
+          onNext={itemReview.handleNextReview}
         />
       )}
     </>
