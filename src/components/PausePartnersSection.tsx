@@ -115,14 +115,7 @@ const PausePartnersSection = () => {
   const sentInvites = pendingInvites.filter(inv => inv.inviter_id === inv.invitee_id);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Pause Partners
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4 space-y-6">
         {/* Invite new partner */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Invite partner by email</label>
@@ -257,8 +250,7 @@ const PausePartnersSection = () => {
             <p>No partners yet. Send an invite to get started!</p>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </div>
   );
 };
 

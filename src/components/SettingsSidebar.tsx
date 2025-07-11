@@ -167,7 +167,10 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
           
           <div className="space-y-6 max-h-[70vh] overflow-y-auto">
             {/* Pause Partners */}
-            <PausePartnersSection />
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Pause Partners</h3>
+              <PausePartnersSection />
+            </div>
 
             {/* About Pocket Pause */}
             <div className="space-y-4">
