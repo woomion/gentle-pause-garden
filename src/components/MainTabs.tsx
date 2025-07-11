@@ -14,13 +14,13 @@ const MainTabs = () => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid w-full grid-cols-2 mb-6">
-        <TabsTrigger value="paused" className="flex items-center gap-2">
+        <TabsTrigger value="paused" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
           <Timer className="h-4 w-4" />
-          <span className="hidden sm:inline">Paused</span>
+          <span className="text-xs sm:text-sm">Paused</span>
         </TabsTrigger>
-        <TabsTrigger value="partner-feed" className="flex items-center gap-2">
+        <TabsTrigger value="partner-feed" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
           <Users className="h-4 w-4" />
-          <span className="hidden sm:inline">Partners</span>
+          <span className="text-xs sm:text-sm">Partners</span>
         </TabsTrigger>
       </TabsList>
 
