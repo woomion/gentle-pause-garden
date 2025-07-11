@@ -46,7 +46,7 @@ const PartnerFeedTab = () => {
     if (supabasePausedItemsStore.isDataLoaded()) {
       setIsLoading(false);
     }
-  }, [user, partners, hasPausePartnerAccess, sortItemsByDate]);
+  }, [user?.id, partners.length, hasPausePartnerAccess, sortItemsByDate]);
 
   useEffect(() => {
     updatePartnerItems();
@@ -111,34 +111,9 @@ const PartnerFeedTab = () => {
     );
   }
 
-  if (partnerItems.length === 0) {
-    return (
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-          Partner Feed
-        </h2>
-        <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
-          Items shared with your pause partners
-        </p>
-        <div className="text-center py-12">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <h3 className="text-lg font-medium mb-2 text-black dark:text-[#F9F5EB]">
-            No shared items yet
-          </h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            {partners.length === 0 
-              ? "Connect with partners first, then start sharing pause items for mutual support."
-              : "Share pause items with your partners when adding new items to see them here."
-            }
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="mb-8 space-y-6">
-      {/* Partner Management Section */}
+      {/* Partner Management Section - Always show when user has access */}
       <PausePartnersSection />
       
       {/* Partner Feed Section */}
@@ -146,23 +121,38 @@ const PartnerFeedTab = () => {
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
           Partner Feed
         </h2>
-      <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
-        Items shared with your pause partners
-      </p>
+        <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
+          Items shared with your pause partners
+        </p>
 
-      <PausedItemsCarousel 
-        items={partnerItems}
-        onItemClick={handleItemClick}
-      />
+        {partnerItems.length === 0 ? (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-medium mb-2 text-black dark:text-[#F9F5EB]">
+              No shared items yet
+            </h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              {partners.length === 0 
+                ? "Connect with partners first, then start sharing pause items for mutual support."
+                : "Share pause items with your partners when adding new items to see them here."
+              }
+            </p>
+          </div>
+        ) : (
+          <PausedItemsCarousel 
+            items={partnerItems}
+            onItemClick={handleItemClick}
+          />
+        )}
 
-      {selectedItem && (
-        <PausedItemDetail
-          item={selectedItem}
-          isOpen={!!selectedItem}
-          onClose={handleCloseDetail}
-          onDelete={handleDeleteItem}
-        />
-      )}
+        {selectedItem && (
+          <PausedItemDetail
+            item={selectedItem}
+            isOpen={!!selectedItem}
+            onClose={handleCloseDetail}
+            onDelete={handleDeleteItem}
+          />
+        )}
       </div>
     </div>
   );
