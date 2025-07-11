@@ -12,7 +12,7 @@ import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
 import FeedbackModal from './FeedbackModal';
-import PausePartnersSection from './PausePartnersSection';
+// import PausePartnersSection from './PausePartnersSection';
 
 interface SettingsSidebarProps {
   open: boolean;
@@ -166,11 +166,6 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
           </DialogHeader>
           
           <div className="space-y-6 max-h-[70vh] overflow-y-auto">
-            {/* Pause Partners */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Pause Partners</h3>
-              <PausePartnersSection />
-            </div>
 
             {/* About Pocket Pause */}
             <div className="space-y-4">

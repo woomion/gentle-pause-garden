@@ -15,23 +15,30 @@ export const useInvitationHandler = () => {
       const inviteId = searchParams.get('invite');
       
       if (inviteId) {
+        console.log('🔗 Invitation URL detected:', inviteId);
+        
         if (user) {
-          // User is logged in, process the invitation
+          console.log('👤 User is logged in:', user.email);
+          
+          // Check if this invitation is actually for this user
           try {
-            console.log('Processing invitation:', inviteId);
+            console.log('🔍 Checking if invitation is for current user...');
             const result = await acceptInvite(inviteId);
             
             if (result?.success) {
+              console.log('✅ Invitation accepted successfully!');
               toast({
                 title: 'Invitation accepted!',
                 description: result.message || 'You are now connected as pause partners.',
               });
             } else {
-              console.error('Failed to accept invitation:', result?.error);
+              console.error('❌ Failed to accept invitation:', result?.error);
               
               // If invitation was not found or already processed, just clear the URL silently
-              if (result?.error?.includes('not found') || result?.error?.includes('already processed')) {
-                console.log('Invitation no longer valid, clearing URL parameter');
+              if (result?.error?.includes('not found') || 
+                  result?.error?.includes('already processed') ||
+                  result?.error?.includes('not for your email')) {
+                console.log('🧹 Invitation no longer valid, clearing URL parameter');
               } else {
                 // Only show error toast for other types of errors
                 toast({
@@ -42,7 +49,7 @@ export const useInvitationHandler = () => {
               }
             }
           } catch (error) {
-            console.error('Error processing invitation:', error);
+            console.error('💥 Error processing invitation:', error);
             toast({
               title: 'Error processing invitation',
               description: 'Please try again or contact support.',
@@ -51,9 +58,11 @@ export const useInvitationHandler = () => {
           }
           
           // Always remove the invite parameter from URL after processing
+          console.log('🧹 Clearing invitation from URL');
           searchParams.delete('invite');
           setSearchParams(searchParams, { replace: true });
         } else {
+          console.log('👤 User not logged in, storing invitation for later processing');
           // User not logged in, store invitation for later processing
           localStorage.setItem('pendingInvitation', inviteId);
         }
