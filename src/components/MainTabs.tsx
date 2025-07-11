@@ -13,12 +13,12 @@ const MainTabs = () => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#F5F2FA' }}>
+      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#E8F0E6' }}>
         <TabsTrigger 
           value="paused" 
           className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
-            backgroundColor: activeTab === 'paused' ? '#E8F0E6' : 'transparent',
+            backgroundColor: activeTab === 'paused' ? '#B5C4AE' : 'transparent',
             color: activeTab === 'paused' ? '#4A5A43' : 'inherit'
           }}
         >
@@ -29,7 +29,7 @@ const MainTabs = () => {
           value="partner-feed" 
           className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
-            backgroundColor: activeTab === 'partner-feed' ? '#E8F0E6' : 'transparent',
+            backgroundColor: activeTab === 'partner-feed' ? '#B5C4AE' : 'transparent',
             color: activeTab === 'partner-feed' ? '#4A5A43' : 'inherit'
           }}
         >
