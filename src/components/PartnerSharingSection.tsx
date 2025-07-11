@@ -15,7 +15,7 @@ const PartnerSharingSection = ({ selectedPartners, onPartnersChange }: PartnerSh
   const { partners } = usePausePartners();
   const { hasPausePartnerAccess } = useSubscription();
 
-  if (!hasPausePartnerAccess() || partners.length === 0) {
+  if (!hasPausePartnerAccess || partners.length === 0) {
     return null;
   }
 

@@ -90,7 +90,7 @@ const PausePartnersSection = () => {
     }
   };
 
-  if (!hasPausePartnerAccess()) {
+  if (!hasPausePartnerAccess) {
     return (
       <Card>
         <CardHeader>

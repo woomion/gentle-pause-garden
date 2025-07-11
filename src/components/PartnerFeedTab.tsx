@@ -21,7 +21,7 @@ const PartnerFeedTab = () => {
   }, []);
 
   const updatePartnerItems = useCallback(() => {
-    if (!user || !hasPausePartnerAccess()) {
+    if (!user || !hasPausePartnerAccess) {
       setPartnerItems([]);
       setIsLoading(false);
       return;
@@ -53,7 +53,7 @@ const PartnerFeedTab = () => {
     let unsubscribe: (() => void) | undefined;
     let interval: NodeJS.Timeout | undefined;
 
-    if (user && hasPausePartnerAccess()) {
+    if (user && hasPausePartnerAccess) {
       unsubscribe = supabasePausedItemsStore.subscribe(updatePartnerItems);
       interval = setInterval(updatePartnerItems, 60000);
     }
@@ -77,7 +77,7 @@ const PartnerFeedTab = () => {
     setSelectedItem(null);
   }, []);
 
-  if (!hasPausePartnerAccess()) {
+  if (!hasPausePartnerAccess) {
     return (
       <div className="mb-8">
         <div className="text-center py-12">
