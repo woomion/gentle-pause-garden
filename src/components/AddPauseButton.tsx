@@ -30,7 +30,7 @@ const AddPauseButton = ({ onAddPause }: AddPauseButtonProps) => {
         </div>
       )}
       
-      + ADD NEW PAUSE ITEM
+      + Add to Pause
     </button>
   );
 };
