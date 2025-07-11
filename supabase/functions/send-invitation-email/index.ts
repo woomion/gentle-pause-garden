@@ -32,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
     const acceptUrl = `${appUrl}?invite=${invitationId}`;
 
     const emailResponse = await resend.emails.send({
-      from: "PocketPause <hello@pocketpause.app>", // Using your verified domain
+      from: "PocketPause <woodsm@pocketpause.app>", // Using your verified domain
       to: [inviteeEmail],
       subject: `${inviterName} invited you to be their Pause Partner!`,
       html: `
