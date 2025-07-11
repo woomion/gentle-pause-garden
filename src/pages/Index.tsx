@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import PauseHeader from '../components/PauseHeader';
 import WelcomeMessage from '../components/WelcomeMessage';
 import ReviewBanner from '../components/ReviewBanner';
@@ -22,6 +23,8 @@ import { pausedItemsStore, PausedItem as LocalPausedItem } from '../stores/pause
 import { useInvitationHandler } from '../hooks/useInvitationHandler';
 
 const Index = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
@@ -36,6 +39,16 @@ const Index = () => {
   
   // Handle invitation acceptance from URL
   useInvitationHandler();
+
+  // Redirect to auth page if user has invitation but isn't logged in
+  useEffect(() => {
+    const inviteId = searchParams.get('invite');
+    const pendingInvitation = localStorage.getItem('pendingInvitation');
+    
+    if ((inviteId || pendingInvitation) && !user && !authLoading) {
+      navigate('/auth');
+    }
+  }, [searchParams, user, authLoading, navigate]);
 
   console.log('Index page render - Auth loading:', authLoading, 'Settings loading:', settingsLoading, 'User:', !!user);
   console.log('Mobile check - User agent:', navigator.userAgent);

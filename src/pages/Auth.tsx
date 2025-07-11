@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,14 +9,25 @@ import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
 
 const Auth = () => {
+  const [searchParams] = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hasInvitation, setHasInvitation] = useState(false);
   const { signUp, signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Check if user came from an invitation link
+  useEffect(() => {
+    const inviteId = searchParams.get('invite') || localStorage.getItem('pendingInvitation');
+    if (inviteId) {
+      setHasInvitation(true);
+      setIsSignUp(true); // Default to signup for invitations
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,12 +108,17 @@ const Auth = () => {
             POCKET || PAUSE
           </h1>
           <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
-            {isSignUp ? 'Create your account' : 'Welcome back'}
+            {hasInvitation 
+              ? 'Join as Pause Partner' 
+              : isSignUp ? 'Create your account' : 'Welcome back'
+            }
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            {isSignUp 
-              ? 'Start pausing' 
-              : 'Continue your pause practice'
+            {hasInvitation
+              ? 'Create your account to accept the pause partner invitation'
+              : isSignUp 
+                ? 'Start pausing' 
+                : 'Continue your pause practice'
             }
           </p>
         </div>
