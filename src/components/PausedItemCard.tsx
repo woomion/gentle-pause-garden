@@ -157,7 +157,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
       </div>
       
       <div 
-        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl bg-[#E7D9FA]"
+        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl bg-[#E3F2FD]"
         style={{ color: '#000' }}
       >
         <Timer size={14} aria-hidden="true" />
