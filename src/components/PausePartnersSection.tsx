@@ -7,6 +7,7 @@ import { Trash2, UserPlus, Users, Mail } from 'lucide-react';
 import { usePausePartners } from '@/hooks/usePausePartners';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PausePartnersSection = () => {
   const [inviteEmail, setInviteEmail] = useState('');
@@ -14,6 +15,7 @@ const PausePartnersSection = () => {
   const { partners, invitations, loading, sendInvite, acceptInvite, removePartner } = usePausePartners();
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSendInvite = async () => {
     if (!inviteEmail.trim()) return;
@@ -111,8 +113,8 @@ const PausePartnersSection = () => {
   }
 
   const pendingInvites = invitations.filter(inv => inv.status === 'pending');
-  const receivedInvites = pendingInvites.filter(inv => inv.inviter_id !== inv.invitee_id);
-  const sentInvites = pendingInvites.filter(inv => inv.inviter_id === inv.invitee_id);
+  const receivedInvites = pendingInvites.filter(inv => inv.invitee_id === user?.id);
+  const sentInvites = pendingInvites.filter(inv => inv.inviter_id === user?.id);
 
   return (
     <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4 space-y-6">
