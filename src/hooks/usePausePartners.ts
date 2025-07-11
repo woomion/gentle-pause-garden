@@ -150,12 +150,27 @@ export const usePausePartners = () => {
   };
 
   const acceptInvite = async (invitationId: string) => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found, cannot accept invitation');
+      return { success: false, error: 'User not authenticated' };
+    }
 
     try {
-      console.log('Starting invitation acceptance for ID:', invitationId, 'User email:', user.email);
+      console.log('=== ACCEPTING INVITATION ===');
+      console.log('Invitation ID:', invitationId);
+      console.log('User ID:', user.id);
+      console.log('User email:', user.email);
 
-      // First, check if the invitation exists and matches the user's email
+      // First, let's check all invitations to see what exists
+      const { data: allInvitations, error: allError } = await supabase
+        .from('partner_invitations')
+        .select('*')
+        .eq('id', invitationId);
+
+      console.log('All invitations with this ID:', allInvitations);
+      if (allError) console.log('Error fetching all invitations:', allError);
+
+      // Now check specifically for our user's email
       const { data: invitation, error: fetchError } = await supabase
         .from('partner_invitations')
         .select('*')
@@ -164,13 +179,35 @@ export const usePausePartners = () => {
         .eq('status', 'pending')
         .maybeSingle();
 
+      console.log('Filtered invitation result:', invitation);
+      console.log('Fetch error:', fetchError);
+
       if (fetchError) {
         console.error('Error fetching invitation:', fetchError);
         return { success: false, error: 'Database error while checking invitation' };
       }
 
       if (!invitation) {
-        console.log('No matching invitation found for:', invitationId, user.email);
+        console.log('No matching invitation found');
+        console.log('Checking for any invitation with this ID...');
+        
+        const { data: anyInvitation } = await supabase
+          .from('partner_invitations')
+          .select('*')
+          .eq('id', invitationId)
+          .maybeSingle();
+          
+        if (anyInvitation) {
+          console.log('Found invitation but with different criteria:');
+          console.log('- Invitation email:', anyInvitation.invitee_email);
+          console.log('- User email:', user.email?.toLowerCase());
+          console.log('- Status:', anyInvitation.status);
+          
+          if (anyInvitation.status === 'accepted') {
+            return { success: true, message: 'You are already connected as pause partners!' };
+          }
+        }
+        
         return { success: false, error: 'Invitation not found or already processed' };
       }
 
