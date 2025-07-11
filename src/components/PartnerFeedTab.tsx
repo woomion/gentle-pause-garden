@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePausePartners } from '@/hooks/usePausePartners';
 import { useSubscription } from '@/hooks/useSubscription';
 import PausedItemsCarousel from './PausedItemsCarousel';
+import PausePartnersSection from './PausePartnersSection';
 import PausedItemDetail from './PausedItemDetail';
 import { Button } from '@/components/ui/button';
 import { Users, Crown } from 'lucide-react';
@@ -136,10 +137,15 @@ const PartnerFeedTab = () => {
   }
 
   return (
-    <div className="mb-8">
-      <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-        Partner Feed
-      </h2>
+    <div className="mb-8 space-y-6">
+      {/* Partner Management Section */}
+      <PausePartnersSection />
+      
+      {/* Partner Feed Section */}
+      <div>
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+          Partner Feed
+        </h2>
       <p className="text-black dark:text-[#F9F5EB] text-lg mb-3">
         Items shared with your pause partners
       </p>
@@ -157,6 +163,7 @@ const PartnerFeedTab = () => {
           onDelete={handleDeleteItem}
         />
       )}
+      </div>
     </div>
   );
 };
