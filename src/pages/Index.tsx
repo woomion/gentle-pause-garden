@@ -119,7 +119,10 @@ const Index = () => {
             <div className="flex items-center justify-center">
               <div className="w-full max-w-md">
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
+                  <Link 
+                    to="/pause-log"
+                    className="flex items-center justify-between hover:opacity-80 transition-opacity"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
                         <Timer className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -129,14 +132,11 @@ const Index = () => {
                         <p className="text-xs text-gray-500 dark:text-gray-400">View your pause history</p>
                       </div>
                     </div>
-                    <Link 
-                      to="/pause-log"
-                      className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors text-sm font-medium"
-                    >
+                    <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors text-sm font-medium">
                       View Log
                       <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>
