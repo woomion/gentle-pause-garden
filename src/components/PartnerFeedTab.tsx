@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Crown, Users, Clock, Tag } from 'lucide-react';
+import { Crown, Users, Clock, Tag, Trash2, RefreshCw } from 'lucide-react';
 
 const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
@@ -197,6 +197,85 @@ const PartnerFeedTab = () => {
     }
   };
 
+  const handleDeleteInvite = async (email: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('partner_invitations')
+        .delete()
+        .eq('inviter_id', user.id)
+        .eq('invitee_email', email)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+
+      setSentInvites(prev => prev.filter(invite => invite.email !== email));
+      
+      toast({
+        title: "Success",
+        description: "Invitation deleted successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting invite:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete invitation.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResendInvite = async (email: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    try {
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name')
+        .eq('id', user.id)
+        .single();
+
+      // Get the invitation ID
+      const { data: invitation } = await supabase
+        .from('partner_invitations')
+        .select('id')
+        .eq('inviter_id', user.id)
+        .eq('invitee_email', email)
+        .eq('status', 'pending')
+        .single();
+
+      if (!invitation) throw new Error('Invitation not found');
+
+      // Resend invitation email
+      const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
+        body: {
+          inviterName: profile?.first_name || 'Someone',
+          inviterEmail: user.email,
+          inviteeEmail: email,
+          invitationId: invitation.id
+        }
+      });
+
+      if (emailError) throw emailError;
+      
+      toast({
+        title: "Success",
+        description: "Invitation resent successfully!",
+      });
+    } catch (error) {
+      console.error('Error resending invite:', error);
+      toast({
+        title: "Error",
+        description: "Failed to resend invitation.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
@@ -285,15 +364,37 @@ const PartnerFeedTab = () => {
                         <p className="text-xs text-muted-foreground mb-1">
                           Invite sent
                         </p>
-                        <Badge 
-                          variant={invite.status === 'accepted' ? 'default' : 'outline'}
-                          className={`text-xs ${invite.status === 'accepted' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
-                            : 'border-yellow-400 text-yellow-700 bg-yellow-50 dark:border-yellow-500 dark:text-yellow-300 dark:bg-yellow-950'
-                          }`}
-                        >
-                          {invite.status === 'pending' ? 'Pending' : 'Linked!'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge 
+                            variant={invite.status === 'accepted' ? 'default' : 'outline'}
+                            className={`text-xs ${invite.status === 'accepted' 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
+                              : 'border-yellow-400 text-yellow-700 bg-yellow-50 dark:border-yellow-500 dark:text-yellow-300 dark:bg-yellow-950'
+                            }`}
+                          >
+                            {invite.status === 'pending' ? 'Pending' : 'Linked!'}
+                          </Badge>
+                          {invite.status === 'pending' && (
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteInvite(invite.email)}
+                                className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900 dark:hover:text-red-400"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleResendInvite(invite.email)}
+                                className="h-6 w-6 p-0 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900 dark:hover:text-blue-400"
+                              >
+                                <RefreshCw className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
