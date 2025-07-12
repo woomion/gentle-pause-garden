@@ -41,6 +41,9 @@ export const useItemReview = () => {
   }, [user]);
 
   const handleItemDecided = async (id: string) => {
+    // Store the current length before removal
+    const currentLength = itemsForReview.length;
+    
     if (user) {
       await supabasePausedItemsStore.removeItem(id);
     } else {
@@ -51,8 +54,8 @@ export const useItemReview = () => {
     const updatedItems = itemsForReview.filter(item => item.id !== id);
     setItemsForReview(updatedItems);
     
-    // If this was the last item, trigger gentle confetti
-    if (updatedItems.length === 0) {
+    // If this was the last item (currentLength was 1), trigger confetti
+    if (currentLength === 1) {
       // Gentle confetti effect with gold stars
       confetti({
         particleCount: 50,

@@ -45,7 +45,7 @@ const ItemReviewContent = ({
         await handleLetGo(item, onItemDecided, () => {});
       }
 
-      onItemDecided(item.id);
+      // Don't call onItemDecided again - it's already called by handleBought/handleLetGo
 
       if (isLastItem) {
         onClose();
