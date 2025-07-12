@@ -27,15 +27,17 @@ const ReflectionTab = ({ reflection, setReflection }: ReflectionTabProps) => {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-bold text-black dark:text-[#F9F5EB] mb-6">
-        Your reason for pausing—in your own words
-      </h3>
+      <div className="space-y-2">
+        <h3 className="text-lg font-bold text-black dark:text-[#F9F5EB]">
+          Your reason for pausing—in your own words
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Use this space to get clear on what matters most to you right now. Let your reasons guide your choices.
+        </p>
+      </div>
       
       {!isReflectionComplete && !isEditingReflection && (
         <>
-          <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-            <p className="mb-4">What are you tending to instead of spending? What feeling are you hoping for? What really matters right now?</p>
-          </div>
 
           <div className="relative">
             <Textarea
@@ -51,9 +53,6 @@ const ReflectionTab = ({ reflection, setReflection }: ReflectionTabProps) => {
 
       {isEditingReflection && (
         <>
-          <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-            <p className="mb-4">What are you tending to instead of spending? What feeling are you hoping for? What really matters right now?</p>
-          </div>
 
           <div className="space-y-3">
             <Textarea
