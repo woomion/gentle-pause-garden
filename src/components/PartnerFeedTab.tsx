@@ -15,37 +15,13 @@ const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
-  const [sentInvites, setSentInvites] = useState<Array<{ email: string; status: 'pending' | 'accepted' }>>([]);
   const [showInviteSection, setShowInviteSection] = useState(false);
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
 
-  // Load invitations from database on component mount
-  useEffect(() => {
-    const loadInvitations = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: invitations } = await supabase
-        .from('partner_invitations')
-        .select('invitee_email, status')
-        .eq('inviter_id', user.id);
-
-      if (invitations) {
-        setSentInvites(invitations.map(inv => ({
-          email: inv.invitee_email,
-          status: inv.status === 'accepted' ? 'accepted' : 'pending'
-        })));
-      }
-    };
-
-    loadInvitations();
-  }, []);
-
-
   // Get partners using the Supabase function
-  const { partners, invitations, loading } = usePausePartners();
+  const { partners, invitations, loading, sendInvite, removePartner, resendInvite } = usePausePartners();
 
   // Mock shared items data for now - we'll replace this with real data later
   const sharedItems = [
@@ -73,6 +49,8 @@ const PartnerFeedTab = () => {
     }
   ];
 
+  
+
   const handleSendInvite = async () => {
     if (!inviteEmail.trim()) {
       toast({
@@ -86,57 +64,26 @@ const PartnerFeedTab = () => {
     setIsInviting(true);
     
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      // Get user profile for name
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name')
-        .eq('id', user.id)
-        .single();
-
-      // Create invitation record
-      const { data: invitation, error: inviteError } = await supabase
-        .from('partner_invitations')
-        .insert({
-          inviter_id: user.id,
-          invitee_email: inviteEmail.trim(),
-          status: 'pending'
-        })
-        .select()
-        .single();
-
-      if (inviteError) throw inviteError;
-
-      // Send invitation email
-      const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
-        body: {
-          inviterName: profile?.first_name || 'Someone',
-          inviterEmail: user.email,
-          inviteeEmail: inviteEmail.trim(),
-          invitationId: invitation.id
-        }
-      });
-
-      if (emailError) throw emailError;
-
-      // Add the sent invite to the list
-      setSentInvites(prev => [...prev, { email: inviteEmail.trim(), status: 'pending' }]);
+      const result = await sendInvite(inviteEmail.trim());
       
-      toast({
-        title: "Invite sent!",
-        description: `Invitation sent to ${inviteEmail}`,
-      });
-      setInviteEmail('');
+      if (result.success) {
+        toast({
+          title: "Invite sent!",
+          description: `Invitation sent to ${inviteEmail}`,
+        });
+        setInviteEmail('');
+      } else {
+        toast({
+          title: "Failed to send invite",
+          description: result.error || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
       console.error('Error sending invite:', error);
       toast({
         title: "Failed to send invite",
-        description: error.message || "Something went wrong. Please try again.",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -145,25 +92,32 @@ const PartnerFeedTab = () => {
   };
 
   const handleDeleteInvite = async (email: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    // Find the invitation by email
+    const invitation = invitations.find(inv => inv.invitee_email === email);
+    if (!invitation) {
+      toast({
+        title: "Error",
+        description: "Invitation not found.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      const { error } = await supabase
-        .from('partner_invitations')
-        .delete()
-        .eq('inviter_id', user.id)
-        .eq('invitee_email', email)
-        .eq('status', 'pending');
-
-      if (error) throw error;
-
-      setSentInvites(prev => prev.filter(invite => invite.email !== email));
+      const result = await removePartner(invitation.id);
       
-      toast({
-        title: "Success",
-        description: "Invitation deleted successfully.",
-      });
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Invitation deleted successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to delete invitation.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error deleting invite:', error);
       toast({
@@ -175,44 +129,32 @@ const PartnerFeedTab = () => {
   };
 
   const handleResendInvite = async (email: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    // Find the invitation by email
+    const invitation = invitations.find(inv => inv.invitee_email === email);
+    if (!invitation) {
+      toast({
+        title: "Error",
+        description: "Invitation not found.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      // Get user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name')
-        .eq('id', user.id)
-        .single();
-
-      // Get the invitation ID
-      const { data: invitation } = await supabase
-        .from('partner_invitations')
-        .select('id')
-        .eq('inviter_id', user.id)
-        .eq('invitee_email', email)
-        .eq('status', 'pending')
-        .single();
-
-      if (!invitation) throw new Error('Invitation not found');
-
-      // Resend invitation email
-      const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
-        body: {
-          inviterName: profile?.first_name || 'Someone',
-          inviterEmail: user.email,
-          inviteeEmail: email,
-          invitationId: invitation.id
-        }
-      });
-
-      if (emailError) throw emailError;
+      const result = await resendInvite(invitation.id, email);
       
-      toast({
-        title: "Success",
-        description: "Invitation resent successfully!",
-      });
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Invitation resent successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to resend invitation.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error resending invite:', error);
       toast({
@@ -274,18 +216,7 @@ const PartnerFeedTab = () => {
 
       if (error) throw error;
 
-      // Refresh partners list by reloading invitations
-      const { data: updatedInvitations } = await supabase
-        .from('partner_invitations')
-        .select('invitee_email, status')
-        .eq('inviter_id', user.id);
-
-      if (updatedInvitations) {
-        setSentInvites(updatedInvitations.map(inv => ({
-          email: inv.invitee_email,
-          status: inv.status === 'accepted' ? 'accepted' : 'pending'
-        })));
-      }
+      // The usePausePartners hook will automatically refresh the data via real-time subscription
       
       toast({
         title: "Success",
@@ -366,7 +297,7 @@ const PartnerFeedTab = () => {
               </Button>
             </div>
 
-            {(partners.length === 0 && sentInvites.length === 0) ? (
+            {(partners.length === 0 && invitations.length === 0) ? (
               <div className="text-center py-6">
                 <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
                 <p className="text-muted-foreground">
@@ -376,16 +307,16 @@ const PartnerFeedTab = () => {
             ) : (
               <div className="space-y-3">
                 {/* Show sent invites */}
-                {sentInvites.map((invite, index) => (
+                {invitations.map((invite, index) => (
                   <div key={index} className="flex items-start justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-start gap-3 flex-1">
                       <Avatar className={`h-8 w-8 ${invite.status === 'pending' ? 'bg-yellow-100 border-2 border-yellow-400 dark:bg-yellow-900 dark:border-yellow-500' : ''}`}>
                         <AvatarFallback className={`text-sm ${invite.status === 'pending' ? 'text-yellow-800 dark:text-yellow-200' : ''}`}>
-                          {invite.email.charAt(0).toUpperCase()}
+                          {invite.invitee_email.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-black dark:text-[#F9F5EB]">{invite.email}</p>
+                        <p className="text-sm font-medium text-black dark:text-[#F9F5EB]">{invite.invitee_email}</p>
                         <p className="text-xs text-muted-foreground mb-1">
                           Invite sent
                         </p>
@@ -404,7 +335,7 @@ const PartnerFeedTab = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleResendInvite(invite.email)}
+                                onClick={() => handleResendInvite(invite.invitee_email)}
                                 className="h-auto p-1 text-xs text-muted-foreground hover:text-muted-foreground/80"
                               >
                                 resend invite
@@ -412,7 +343,7 @@ const PartnerFeedTab = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleDeleteInvite(invite.email)}
+                                onClick={() => handleDeleteInvite(invite.invitee_email)}
                                 className="h-6 w-6 p-0 text-muted-foreground hover:text-muted-foreground/80"
                               >
                                 <Trash2 className="h-3 w-3" />
