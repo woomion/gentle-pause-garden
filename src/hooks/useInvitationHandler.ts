@@ -16,6 +16,7 @@ export const useInvitationHandler = () => {
       
       if (inviteId) {
         console.log('🔗 Invitation URL detected:', inviteId);
+        console.log('👤 User state:', user ? `Logged in as ${user.email}` : 'Not logged in');
         
         if (user) {
           console.log('👤 User is logged in:', user.email);
@@ -23,7 +24,9 @@ export const useInvitationHandler = () => {
           // Check if this invitation is actually for this user
           try {
             console.log('🔍 Checking if invitation is for current user...');
+            console.log('🔍 About to call acceptInvite with ID:', inviteId);
             const result = await acceptInvite(inviteId);
+            console.log('🔍 AcceptInvite result:', result);
             
             if (result?.success) {
               console.log('✅ Invitation accepted successfully!');
@@ -74,8 +77,10 @@ export const useInvitationHandler = () => {
 
   // Process pending invitation when user logs in
   useEffect(() => {
+    console.log('🔄 Pending invitation check - User:', user ? `${user.email}` : 'None');
     if (user) {
       const pendingInvitation = localStorage.getItem('pendingInvitation');
+      console.log('📦 Pending invitation in storage:', pendingInvitation);
       if (pendingInvitation) {
         localStorage.removeItem('pendingInvitation');
         

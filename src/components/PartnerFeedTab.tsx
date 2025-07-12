@@ -21,7 +21,7 @@ const PartnerFeedTab = () => {
   const { toast } = useToast();
 
   // Get partners using the Supabase function
-  const { partners, invitations, loading, sendInvite, removePartner, resendInvite } = usePausePartners();
+  const { partners, invitations, loading, sendInvite, removePartner, resendInvite, acceptInvite } = usePausePartners();
 
   // Mock shared items data for now - we'll replace this with real data later
   const sharedItems = [
@@ -297,6 +297,27 @@ const PartnerFeedTab = () => {
               </Button>
             </div>
 
+            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800 mb-2">Debug: Test invitation acceptance</p>
+              <Button 
+                onClick={() => {
+                  const inviteId = 'b0c72f74-439b-4fc9-9b26-b32cd8378ac4';
+                  console.log('🧪 Testing invitation acceptance for ID:', inviteId);
+                  acceptInvite(inviteId).then(result => {
+                    console.log('🧪 Test result:', result);
+                    toast({
+                      title: result?.success ? 'Success' : 'Failed',
+                      description: result?.success ? result.message : result?.error,
+                      variant: result?.success ? 'default' : 'destructive'
+                    });
+                  });
+                }}
+                variant="outline" 
+                size="sm"
+              >
+                Test Accept Invitation
+              </Button>
+            </div>
             {(partners.length === 0 && invitations.length === 0) ? (
               <div className="text-center py-6">
                 <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
