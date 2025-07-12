@@ -13,6 +13,7 @@ import { Crown, Users, Clock, Tag, Trash2 } from 'lucide-react';
 import PausedItemsCarousel from '@/components/PausedItemsCarousel';
 import PausedItemDetail from '@/components/PausedItemDetail';
 import { PausedItem } from '@/stores/pausedItemsStore';
+import { calculateCheckInTimeDisplay } from '@/utils/pausedItemsUtils';
 
 const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
@@ -79,7 +80,7 @@ const PartnerFeedTab = () => {
             photoDataUrl: '',
             tags: item.tags || [],
             pausedAt: new Date(item.created_at),
-            checkInTime: item.review_at,
+            checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
             checkInDate: item.review_at,
             isCart: item.is_cart || false,
             itemType: item.item_type || 'item',
@@ -100,7 +101,7 @@ const PartnerFeedTab = () => {
             photoDataUrl: '',
             tags: item.tags || [],
             pausedAt: new Date(item.created_at),
-            checkInTime: item.review_at,
+            checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
             checkInDate: item.review_at,
             isCart: item.is_cart || false,
             itemType: item.item_type || 'item',
