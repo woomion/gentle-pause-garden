@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Greeting {
@@ -77,7 +78,7 @@ const getTimeBasedCategory = (): string => {
   return 'latenight';
 };
 
-const isNewUser = (user: any): boolean => {
+const isNewUser = (user: User): boolean => {
   if (!user) return false;
   
   // Check if user has completed welcome flow
@@ -92,7 +93,7 @@ const isNewUser = (user: any): boolean => {
   return hoursSinceCreation < 24;
 };
 
-const isReturningUser = (user: any): boolean => {
+const isReturningUser = (user: User): boolean => {
   if (!user) return false;
   
   // Check if user's last visit was more than 24 hours ago

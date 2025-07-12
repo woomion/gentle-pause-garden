@@ -107,7 +107,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       
       return null;
     } catch (error) {
-      console.log('Price extraction failed (gracefully):', error);
       return null;
     }
   };
@@ -122,16 +121,11 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       try {
         // Try regular product parsing first
         const productInfo = await parseProductUrl(value);
-        console.log('Parsed product info:', productInfo);
         
         // If cart mode and no price found, try cart price extraction
         let cartPrice = null;
         if (formData.isCart && !productInfo.price) {
-          console.log('Attempting cart price extraction...');
           cartPrice = await extractCartPrice(value);
-          if (cartPrice) {
-            console.log('Found cart total price:', cartPrice);
-          }
         }
         
         // Only update fields that are currently empty and we found data for
@@ -142,11 +136,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           price: prev.price || cartPrice || productInfo.price || prev.price,
           imageUrl: prev.imageUrl || productInfo.imageUrl || prev.imageUrl,
         }));
-        
-        // Log the image URL for debugging
-        if (productInfo.imageUrl) {
-          console.log('Found product image:', productInfo.imageUrl);
-        }
         
       } catch (error) {
         console.error('Error parsing product URL:', error);
@@ -164,7 +153,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setPhotoPreview(previewUrl);
-      console.log('Photo selected for upload:', file.name, file.size);
+      
     } else {
       setPhotoPreview(null);
     }
@@ -216,8 +205,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     
     // Show ripple effect for 1 second
     setTimeout(async () => {
-      console.log('Pause item data:', formData);
-      
       const itemData = {
         itemName: formData.itemName || 'Unnamed Item',
         storeName: formData.storeName || 'Unknown Store',
@@ -237,7 +224,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
       // Use appropriate store based on authentication status
       if (user) {
-        console.log('Uploading to Supabase with photo:', !!formData.photo);
         await supabasePausedItemsStore.addItem(itemData);
       } else {
         pausedItemsStore.addItem(itemData);

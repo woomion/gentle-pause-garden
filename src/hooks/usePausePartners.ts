@@ -37,8 +37,7 @@ export const usePausePartners = () => {
           schema: 'public',
           table: 'partner_invitations',
         },
-        (payload) => {
-          console.log('Real-time partner invitation change:', payload);
+        () => {
           // Reload partners and invitations when any change occurs
           loadPartners();
         }
@@ -143,75 +142,52 @@ export const usePausePartners = () => {
 
       await loadPartners();
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error sending invite:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
     }
   };
 
   const acceptInvite = async (invitationId: string) => {
-    console.log('🚀 acceptInvite called with ID:', invitationId);
-    
     if (!user) {
-      console.log('❌ No user found, cannot accept invitation');
       return { success: false, error: 'User not authenticated' };
     }
 
     try {
-      console.log('=== ACCEPTING INVITATION ===');
-      console.log('✅ Invitation ID:', invitationId);
-      console.log('✅ User ID:', user.id);
-      console.log('✅ User email:', user.email);
-
       // Check if the invitation exists and is for this user
       const { data: invitation, error: fetchError } = await supabase
         .from('partner_invitations')
         .select('*')
         .eq('id', invitationId)
         .single();
-
-      console.log('📋 Database query result:');
-      console.log('  - Invitation data:', invitation);
-      console.log('  - Fetch error:', fetchError);
       
       if (fetchError) {
-        console.error('❌ Error fetching invitation:', fetchError);
+        console.error('Error fetching invitation:', fetchError);
         return { success: false, error: 'Invitation not found' };
       }
 
       if (!invitation) {
-        console.log('❌ No invitation found');
         return { success: false, error: 'Invitation not found' };
       }
 
       // Check if this invitation is for the current user's email
       const inviteeEmailLower = invitation.invitee_email.toLowerCase();
       const userEmailLower = user.email?.toLowerCase();
-      
-      console.log('📧 Email comparison:');
-      console.log('  - Invitation email:', inviteeEmailLower);
-      console.log('  - User email:', userEmailLower);
-      console.log('  - Match:', inviteeEmailLower === userEmailLower);
 
       if (inviteeEmailLower !== userEmailLower) {
-        console.log('❌ Email mismatch!');
         return { success: false, error: 'This invitation is not for your email address' };
       }
 
       // Check if already accepted
       if (invitation.status === 'accepted') {
-        console.log('✅ Invitation already accepted, refreshing partners...');
         await loadPartners(); // Refresh to show the partnership
         return { success: true, message: 'You are already connected as pause partners!' };
       }
 
       // Check if invitation is still pending
       if (invitation.status !== 'pending') {
-        console.log('❌ Invitation status is not pending:', invitation.status);
         return { success: false, error: 'This invitation is no longer valid' };
       }
-
-      console.log('🔄 Updating invitation to accepted...');
 
       // Update the invitation to accepted
       const { error: updateError } = await supabase
@@ -223,20 +199,15 @@ export const usePausePartners = () => {
         .eq('id', invitationId)
         .eq('status', 'pending'); // Safety check
 
-      console.log('💾 Update result:');
-      console.log('  - Update error:', updateError);
-
       if (updateError) {
-        console.error('❌ Database error accepting invitation:', updateError);
+        console.error('Database error accepting invitation:', updateError);
         return { success: false, error: 'Failed to accept invitation. Please try again.' };
       }
       
-      console.log('✅ Successfully accepted invitation, reloading partners...');
       await loadPartners();
-      console.log('🎉 Partners reloaded successfully!');
       return { success: true, message: 'Successfully connected as pause partners!' };
-    } catch (error: any) {
-      console.error('💥 Error accepting invite:', error);
+    } catch (error) {
+      console.error('Error accepting invite:', error);
       return { success: false, error: 'An unexpected error occurred. Please try again.' };
     }
   };
@@ -251,9 +222,9 @@ export const usePausePartners = () => {
       if (error) throw error;
       await loadPartners();
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error removing partner:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
     }
   };
 
@@ -279,9 +250,9 @@ export const usePausePartners = () => {
       });
 
       return { success: true };
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error resending invite:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error occurred' };
     }
   };
 

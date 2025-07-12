@@ -23,8 +23,6 @@ import { pushNotificationService } from "./services/pushNotificationService";
 const queryClient = new QueryClient();
 
 const App = () => {
-  console.log('App component rendering');
-  
   // Initialize push notifications on app start
   useEffect(() => {
     let mounted = true;
@@ -33,10 +31,7 @@ const App = () => {
       try {
         if (!mounted) return;
         
-        const initialized = await pushNotificationService.initialize();
-        if (initialized && mounted) {
-          console.log('Push notifications initialized successfully');
-        }
+        await pushNotificationService.initialize();
       } catch (error) {
         if (mounted) {
           console.error('Failed to initialize push notifications:', error);

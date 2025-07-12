@@ -21,7 +21,6 @@ export class PushNotificationService {
     try {
       // Only initialize on native platforms
       if (!Capacitor.isNativePlatform()) {
-        console.log('Push notifications not available on web platform');
         return false;
       }
 
@@ -33,7 +32,6 @@ export class PushNotificationService {
       }
       
       if (permStatus.receive !== 'granted') {
-        console.log('Push notification permission denied');
         return false;
       }
 
@@ -44,7 +42,6 @@ export class PushNotificationService {
       this.setupListeners();
       
       this.isInitialized = true;
-      console.log('Push notifications initialized successfully');
       return true;
 
     } catch (error) {
@@ -56,9 +53,7 @@ export class PushNotificationService {
   private setupListeners(): void {
     // Successfully registered
     PushNotifications.addListener('registration', async (token) => {
-      console.log('Push registration success, token: ', token.value);
-      
-      // Send token to your backend
+      // Send token to backend
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -76,17 +71,11 @@ export class PushNotificationService {
 
     // Notification received while app is in foreground
     PushNotifications.addListener('pushNotificationReceived', (notification) => {
-      console.log('Push notification received: ', JSON.stringify(notification));
-      
-      // Handle foreground notification display
       this.handleForegroundNotification(notification);
     });
 
     // Notification tapped (app opened from notification)
     PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-      console.log('Push notification action performed: ', JSON.stringify(notification));
-      
-      // Handle notification tap
       this.handleNotificationTap(notification);
     });
   }
@@ -100,15 +89,13 @@ export class PushNotificationService {
 
       if (error) {
         console.error('Error storing push token:', error);
-      } else {
-        console.log('Push token stored successfully');
       }
     } catch (error) {
       console.error('Error calling store-push-token function:', error);
     }
   }
 
-  private handleForegroundNotification(notification: any): void {
+  private handleForegroundNotification(notification: { title?: string; body?: string }): void {
     // Create a browser notification when app is in foreground
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(notification.title || 'Pocket Pause', {
@@ -120,19 +107,15 @@ export class PushNotificationService {
     }
   }
 
-  private handleNotificationTap(notification: any): void {
-    // Handle what happens when user taps the notification
-    console.log('User tapped notification:', notification);
-    
-    // You can navigate to specific screens based on notification data
+  private handleNotificationTap(notification: { notification?: { data?: { action?: string } } }): void {
+    // Navigate to specific screens based on notification data
     const data = notification.notification?.data;
     if (data?.action === 'review_items') {
-      // Navigate to review screen
       window.location.href = '/';
     }
   }
 
-  public async getDeliveredNotifications(): Promise<any[]> {
+  public async getDeliveredNotifications(): Promise<unknown[]> {
     try {
       const result = await PushNotifications.getDeliveredNotifications();
       return result.notifications;

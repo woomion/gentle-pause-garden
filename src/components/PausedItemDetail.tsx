@@ -32,19 +32,6 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
     onClose();
   };
 
-  // Enhanced debug logging for the item data
-  console.log('🔍 DEBUG: PausedItemDetail render with full item data:', {
-    itemId: item.id,
-    itemName: item.itemName,
-    link: item.link,
-    imageUrl: item.imageUrl,
-    photoDataUrl: item.photoDataUrl ? 'has photoDataUrl' : 'no photoDataUrl',
-    hasLink: !!item.link,
-    hasImageUrl: !!item.imageUrl,
-    linkType: typeof item.link,
-    imageUrlType: typeof item.imageUrl,
-    allItemKeys: Object.keys(item)
-  });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -159,8 +146,6 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('🖱️ DEBUG: View item button clicked manually');
-                  console.log('🖱️ DEBUG: About to call handleViewItem with:', item);
                   handleViewItem(item);
                 }}
                 className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1 bg-transparent border-none cursor-pointer"

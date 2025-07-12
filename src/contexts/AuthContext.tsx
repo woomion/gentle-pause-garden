@@ -7,8 +7,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, firstName?: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName?: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -28,10 +28,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthProvider: Setting up auth state listener');
-    console.log('AuthProvider: Mobile check - User agent:', navigator.userAgent);
-    console.log('AuthProvider: Mobile check - Screen size:', window.innerWidth, 'x', window.innerHeight);
-    
     let mounted = true;
     let timeoutId: NodeJS.Timeout;
     
@@ -39,7 +35,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Set up auth state listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (event, session) => {
-          console.log('AuthProvider: Auth state changed', event, !!session);
           if (mounted) {
             setSession(session);
             setUser(session?.user ?? null);
@@ -50,10 +45,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       );
 
       // Get initial session with better error handling
-      console.log('AuthProvider: Getting initial session');
       supabase.auth.getSession()
         .then(({ data: { session }, error }) => {
-          console.log('AuthProvider: Initial session loaded', !!session, 'Error:', error);
           if (mounted) {
             setSession(session);
             setUser(session?.user ?? null);
@@ -69,16 +62,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         });
 
-      // Shorter timeout for mobile - 5 seconds
+      // Timeout for loading state - 5 seconds
       timeoutId = setTimeout(() => {
-        console.log('AuthProvider: Timeout reached, forcing loading to false');
         if (mounted) {
           setLoading(false);
         }
       }, 5000);
 
       return () => {
-        console.log('AuthProvider: Cleaning up auth listener');
         mounted = false;
         if (timeoutId) clearTimeout(timeoutId);
         subscription.unsubscribe();
@@ -141,8 +132,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signIn,
     signOut
   };
-
-  console.log('AuthProvider: Rendering with loading:', loading, 'user:', !!user);
 
   return (
     <AuthContext.Provider value={value}>

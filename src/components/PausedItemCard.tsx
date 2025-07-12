@@ -19,18 +19,8 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
   const emotionColor = useMemo(() => getEmotionColor(item.emotion, isDarkMode), [item.emotion, isDarkMode]);
 
   const imageUrl = useMemo(() => {
-    console.log('🖼️ PausedItemCard - Processing image for item:', {
-      itemId: item.id,
-      itemName: item.itemName,
-      imageUrl: item.imageUrl,
-      photoDataUrl: item.photoDataUrl,
-      hasPhoto: !!item.photo,
-      isCart: item.isCart
-    });
-
     // Handle cart placeholder
     if (item.isCart && item.imageUrl === 'cart-placeholder') {
-      console.log('🛒 Using cart placeholder');
       return 'cart-placeholder';
     }
 
@@ -42,39 +32,29 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
     if (item.imageUrl && item.imageUrl !== 'cart-placeholder') {
       // Check if this is a Supabase Storage URL
       if (item.imageUrl.includes('supabase.co/storage') || item.imageUrl.includes('supabase')) {
-        console.log('🖼️ Using Supabase storage URL:', item.imageUrl);
         return item.imageUrl;
       }
       // Check if it's a valid external URL
       try {
         new URL(item.imageUrl);
-        console.log('🖼️ Using external image URL:', item.imageUrl);
         return item.imageUrl;
       } catch {
-        console.log('🖼️ Invalid URL format:', item.imageUrl);
+        // Invalid URL format - continue to next option
       }
     }
     
     if (item.photoDataUrl) {
-      console.log('🖼️ Using photo data URL');
       return item.photoDataUrl;
     }
     
     if (item.photo instanceof File) {
-      console.log('🖼️ Creating object URL from file');
       return URL.createObjectURL(item.photo);
     }
     
-    console.log('🖼️ No valid image found');
     return null;
   }, [item.imageUrl, item.photoDataUrl, item.photo, item.id, item.isCart]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    console.error('🖼️ Image failed to load:', {
-      src: e.currentTarget.src,
-      itemId: item.id,
-      itemName: item.itemName
-    });
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
     if (target.parentElement) {
@@ -82,12 +62,8 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
     }
   };
 
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    console.log('🖼️ Image loaded successfully:', {
-      src: e.currentTarget.src,
-      itemId: item.id,
-      itemName: item.itemName
-    });
+  const handleImageLoad = () => {
+    // Image loaded successfully
   };
 
   const formattedPrice = useMemo(() => {

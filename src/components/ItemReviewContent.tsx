@@ -39,8 +39,6 @@ const ItemReviewContent = ({
     if (!selectedDecision) return;
 
     try {
-      console.log('🔍 ItemReviewContent: submitting decision', { selectedDecision, isLastItem, itemId: item.id });
-      
       if (selectedDecision === 'purchase') {
         await handleBought(item, onItemDecided, () => {});
       } else {
@@ -48,13 +46,9 @@ const ItemReviewContent = ({
       }
 
       // Don't call onItemDecided again - it's already called by handleBought/handleLetGo
-      console.log('🔍 ItemReviewContent: decision processed, checking if lastItem:', isLastItem);
-
       if (isLastItem) {
-        console.log('🔍 ItemReviewContent: last item, calling onClose()');
         onClose();
       } else {
-        console.log('🔍 ItemReviewContent: not last item, resetting state and navigating next');
         setSelectedDecision(null);
         setShowFeedback(false);
         setNotes('');
