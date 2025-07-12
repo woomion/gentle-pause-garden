@@ -15,6 +15,7 @@ const PartnerFeedTab = () => {
   const [isInviting, setIsInviting] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
   const [sentInvites, setSentInvites] = useState<Array<{ email: string; status: 'pending' | 'accepted' }>>([]);
+  const [showInviteSection, setShowInviteSection] = useState(false);
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
@@ -219,14 +220,28 @@ const PartnerFeedTab = () => {
 
   return (
     <div className="mb-8 space-y-8">
-      {/* Show Partner Connection section if no partners */}
-      {partners.length === 0 && (
+      {/* Show Partner Connection section if no partners OR if user wants to add more */}
+      {(partners.length === 0 || showInviteSection) && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-black dark:text-[#F9F5EB]">Your Pause Partners</CardTitle>
-            <p className="text-muted-foreground">
-              Connect with someone you trust to help you reflect before you spend.
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-black dark:text-[#F9F5EB]">Your Pause Partners</CardTitle>
+                <p className="text-muted-foreground">
+                  Connect with someone you trust to help you reflect before you spend.
+                </p>
+              </div>
+              {partners.length > 0 && showInviteSection && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowInviteSection(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  ← Back to Shared Pauses
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
@@ -323,9 +338,7 @@ const PartnerFeedTab = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => {
-                  // TODO: Open add partner modal or expand invite section
-                }}
+                onClick={() => setShowInviteSection(true)}
                 className="flex items-center gap-1 text-xs"
               >
                 <Users className="h-3 w-3" />
