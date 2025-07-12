@@ -41,13 +41,6 @@ const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink, onDelete }: Pau
       <DialogContent className="max-w-sm mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600">
         <DialogHeader>
           <DialogTitle className="sr-only">Pause Log Item Details</DialogTitle>
-          {/* Close button in top right corner */}
-          <button 
-            className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
-            onClick={onClose}
-          >
-            <X size={16} />
-          </button>
         </DialogHeader>
         
         <div className="space-y-4">
