@@ -293,6 +293,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_current_user_email: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_subscription_tier: {
         Args: { user_uuid?: string }
         Returns: string
