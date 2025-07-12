@@ -13,13 +13,13 @@ const MainTabs = () => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#E8F0E6' }}>
+      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
         <TabsTrigger 
           value="paused" 
           className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
-            backgroundColor: activeTab === 'paused' ? '#B5C4AE' : 'transparent',
-            color: activeTab === 'paused' ? '#4A5A43' : 'inherit'
+            backgroundColor: activeTab === 'paused' ? '#C7D3C5' : 'transparent',
+            color: activeTab === 'paused' ? '#7A5DD9' : 'inherit'
           }}
         >
           <Timer className="h-4 w-4" />
@@ -29,8 +29,8 @@ const MainTabs = () => {
           value="partner-feed" 
           className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
-            backgroundColor: activeTab === 'partner-feed' ? '#B5C4AE' : 'transparent',
-            color: activeTab === 'partner-feed' ? '#4A5A43' : 'inherit'
+            backgroundColor: activeTab === 'partner-feed' ? '#C7D3C5' : 'transparent',
+            color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
           }}
         >
           <Users className="h-4 w-4" />
