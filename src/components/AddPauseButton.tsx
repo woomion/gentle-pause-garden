@@ -24,7 +24,7 @@ const AddPauseButton = ({ onAddPause }: AddPauseButtonProps) => {
       style={{ 
         backgroundColor: '#C9B1FF', 
         boxShadow: '0 4px 12px rgba(201, 177, 255, 0.3), 0 2px 4px rgba(201, 177, 255, 0.2)',
-        borderRadius: '9999px 9999px 4px 4px'
+        borderRadius: '24px 24px 4px 4px'
       }}
     >
       {/* Ripple effect */}
