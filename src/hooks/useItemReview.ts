@@ -51,17 +51,19 @@ export const useItemReview = () => {
     const updatedItems = itemsForReview.filter(item => item.id !== id);
     setItemsForReview(updatedItems);
     
-    // If this was the last item, trigger confetti
+    // If this was the last item, trigger gentle confetti
     if (updatedItems.length === 0) {
-      // Gentle confetti effect
+      // Gentle confetti effect with gold stars
       confetti({
-        particleCount: 60,
-        spread: 70,
+        particleCount: 50,
+        spread: 60,
         origin: { y: 0.6 },
-        colors: ['#E7D9FA', '#BFD1BF', '#DDE7DD', '#CAB6F7'],
-        gravity: 0.8,
-        scalar: 0.8,
-        drift: 0.1
+        colors: ['#E7D9FA', '#BFD1BF', '#DDE7DD', '#CAB6F7', '#FFD700', '#FFA500'],
+        gravity: 0.4,
+        scalar: 0.7,
+        drift: 0.05,
+        shapes: ['star', 'circle'],
+        ticks: 300
       });
     }
   };
