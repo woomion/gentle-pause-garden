@@ -13,6 +13,7 @@ const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
+  const [sentInvites, setSentInvites] = useState<Array<{ email: string; status: 'pending' | 'linked' }>>([]);
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
@@ -61,6 +62,9 @@ const PartnerFeedTab = () => {
     
     // Simulate sending invite for now
     setTimeout(() => {
+      // Add the sent invite to the list
+      setSentInvites(prev => [...prev, { email: inviteEmail.trim(), status: 'pending' }]);
+      
       toast({
         title: "Invite sent!",
         description: `Invitation sent to ${inviteEmail}`,
@@ -121,12 +125,61 @@ const PartnerFeedTab = () => {
               </Button>
             </div>
 
-            <div className="text-center py-6">
-              <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-              <p className="text-muted-foreground">
-                Mindful decisions are easier with support. Send an invite to start pausing together.
-              </p>
-            </div>
+            {(partners.length === 0 && sentInvites.length === 0) ? (
+              <div className="text-center py-6">
+                <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                <p className="text-muted-foreground">
+                  Mindful decisions are easier with support. Send an invite to start pausing together.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {/* Show sent invites */}
+                {sentInvites.map((invite, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-sm">
+                          {invite.email.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium text-black dark:text-[#F9F5EB]">{invite.email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Invite sent
+                        </p>
+                      </div>
+                    </div>
+                    <Badge 
+                      variant={invite.status === 'linked' ? 'default' : 'secondary'}
+                      className={invite.status === 'linked' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : ''}
+                    >
+                      {invite.status === 'pending' ? 'Pending' : 'Linked!'}
+                    </Badge>
+                  </div>
+                ))}
+                
+                {/* Show connected partners */}
+                {partners.map((partner) => (
+                  <div key={partner.partner_id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-sm">
+                          {getInitials(partner.partner_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium text-black dark:text-[#F9F5EB]">{partner.partner_name}</p>
+                        <p className="text-xs text-muted-foreground">{partner.partner_email}</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                      Linked!
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
