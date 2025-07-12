@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PenTool, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import IntentionSection from '../components/IntentionSection';
@@ -12,6 +12,7 @@ import GreaterJoyDonation from '../components/GreaterJoyDonation';
 import { usePausedItems } from '../hooks/usePausedItems';
 
 const GreaterJoyFund = () => {
+  const [activeTab, setActiveTab] = useState('reflection');
   const [intention, setIntention] = useState('');
   const [reflection, setReflection] = useState('');
   const { items } = usePausedItems();
@@ -97,17 +98,37 @@ const GreaterJoyFund = () => {
 
         <IntentionSection intention={intention} onSave={handleSaveIntention} />
 
-        <Tabs defaultValue="reflection" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/60 dark:bg-white/10">
-            <TabsTrigger value="reflection">Reflection</TabsTrigger>
-            <TabsTrigger value="stats">Stats</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
+            <TabsTrigger 
+              value="reflection" 
+              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-3xl sm:rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none data-[state=active]:px-1 data-[state=active]:sm:px-2 data-[state=inactive]:px-2 data-[state=inactive]:sm:px-3"
+              style={{ 
+                backgroundColor: activeTab === 'reflection' ? '#BFD1BF' : 'transparent',
+                color: activeTab === 'reflection' ? '#7A5DD9' : 'inherit'
+              }}
+            >
+              <PenTool className="h-4 w-4" />
+              <span className="text-xs sm:text-sm">Reflection</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="stats" 
+              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-3xl sm:rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none data-[state=active]:px-1 data-[state=active]:sm:px-2 data-[state=inactive]:px-2 data-[state=inactive]:sm:px-3"
+              style={{ 
+                backgroundColor: activeTab === 'stats' ? '#BFD1BF' : 'transparent',
+                color: activeTab === 'stats' ? '#7A5DD9' : 'inherit'
+              }}
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="text-xs sm:text-sm">Stats</span>
+            </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="reflection">
+          <TabsContent value="reflection" className="mt-0">
             <ReflectionTab reflection={reflection} setReflection={setReflection} />
           </TabsContent>
           
-          <TabsContent value="stats">
+          <TabsContent value="stats" className="mt-0">
             <StatsTab stats={stats} />
           </TabsContent>
         </Tabs>
