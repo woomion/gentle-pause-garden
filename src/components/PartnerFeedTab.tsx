@@ -43,59 +43,6 @@ const PartnerFeedTab = () => {
     loadInvitations();
   }, []);
 
-  // Handle invitation acceptance from URL parameter
-  useEffect(() => {
-    const handleInvitationAcceptance = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const inviteId = urlParams.get('invite');
-      
-      if (!inviteId) return;
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      try {
-        // Update invitation status and set invitee_id
-        const { error } = await supabase
-          .from('partner_invitations')
-          .update({ 
-            status: 'accepted',
-            invitee_id: user.id 
-          })
-          .eq('id', inviteId)
-          .eq('status', 'pending');
-
-        if (!error) {
-          toast({
-            title: "Invitation accepted!",
-            description: "You are now connected as pause partners.",
-          });
-          
-          // Clear the invite parameter from URL
-          const url = new URL(window.location.href);
-          url.searchParams.delete('invite');
-          window.history.replaceState({}, '', url.toString());
-          
-          // Reload invitations to show updated status
-          const { data: invitations } = await supabase
-            .from('partner_invitations')
-            .select('invitee_email, status')
-            .eq('inviter_id', user.id);
-
-          if (invitations) {
-            setSentInvites(invitations.map(inv => ({
-              email: inv.invitee_email,
-              status: inv.status === 'accepted' ? 'accepted' : 'pending'
-            })));
-          }
-        }
-      } catch (error) {
-        console.error('Error accepting invitation:', error);
-      }
-    };
-
-    handleInvitationAcceptance();
-  }, [toast]);
 
   // Get partners using the Supabase function
   const { partners, invitations, loading } = usePausePartners();
