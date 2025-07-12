@@ -388,9 +388,10 @@ const PartnerFeedTab = () => {
                 variant="ghost" 
                 size="sm"
                 onClick={() => setShowInviteSection(false)}
-                className="text-muted-foreground hover:text-foreground mb-2 self-start"
+                className="text-muted-foreground hover:text-foreground mb-2 self-start p-0 h-auto justify-start"
               >
-                <span className="text-lg">←</span> Back to shared pauses
+                <span className="text-lg mr-1">←</span>
+                <span>Back to shared pauses</span>
               </Button>
             )}
             <div className="flex items-center justify-between">
