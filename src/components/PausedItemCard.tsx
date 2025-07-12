@@ -114,7 +114,7 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
       }}
       aria-label={`View details for ${item.itemName}`}
     >
-      <div className="p-4 pb-12">
+      <div className="px-4 py-6 pb-12">
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
             {imageUrl === 'cart-placeholder' ? (
