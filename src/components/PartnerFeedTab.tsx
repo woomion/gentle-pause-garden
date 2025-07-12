@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Crown, Users, Clock, Tag, Trash2 } from 'lucide-react';
+import PausedItemsCarousel from '@/components/PausedItemsCarousel';
+import { PausedItem } from '@/stores/pausedItemsStore';
 
 const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
@@ -23,31 +25,98 @@ const PartnerFeedTab = () => {
   // Get partners using the Supabase function
   const { partners, invitations, loading, sendInvite, removePartner, resendInvite, acceptInvite } = usePausePartners();
 
-  // Mock shared items data for now - we'll replace this with real data later
-  const sharedItems = [
-    {
-      id: '1',
-      name: 'Wireless Noise-Canceling Headphones',
-      price: 299.99,
-      imageUrl: '/placeholder.svg',
-      addedBy: 'You',
-      timeLeft: '12 hours left',
-      reflection: 'Do I really need another pair of headphones?',
-      partnerName: 'Jack',
-      partnerInitials: 'JD'
-    },
-    {
-      id: '2', 
-      name: 'Smart Fitness Watch',
-      price: 199.50,
-      imageUrl: '/placeholder.svg',
-      addedBy: 'Jack',
-      timeLeft: '2 days left',
-      reflection: 'Will this actually motivate me to exercise more?',
-      partnerName: 'Jack',
-      partnerInitials: 'JD'
-    }
-  ];
+  // Get shared items from the store
+  const [sharedItems, setSharedItems] = useState<PausedItem[]>([]);
+  
+  useEffect(() => {
+    const fetchSharedItems = async () => {
+      if (!partners.length) {
+        setSharedItems([]);
+        return;
+      }
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Get items shared with partners (items current user created and shared)
+        const { data: mySharedItems, error: myError } = await supabase
+          .from('paused_items')
+          .select('*')
+          .eq('user_id', user.id)
+          .not('shared_with_partners', 'eq', '{}')
+          .eq('status', 'paused');
+
+        // Get items shared with current user (items partners created and shared with me)
+        const partnerIds = partners.map(p => p.partner_id);
+        const { data: partnersSharedItems, error: partnersError } = await supabase
+          .from('paused_items')
+          .select('*')
+          .in('user_id', partnerIds)
+          .contains('shared_with_partners', [user.id])
+          .eq('status', 'paused');
+
+        if (myError || partnersError) {
+          console.error('Error fetching shared items:', myError || partnersError);
+          return;
+        }
+
+        // Combine and format the items to match PausedItem interface
+        const allSharedItems = [
+          ...(mySharedItems || []).map((item: any) => ({
+            id: item.id,
+            itemName: item.title,
+            storeName: 'Store', // We'll need to add this to the DB schema
+            price: item.price?.toString() || '0',
+            imageUrl: '', // We'll need to add this to the DB schema
+            emotion: item.reason || 'unknown',
+            notes: item.notes || '',
+            duration: `${item.pause_duration_days} days`,
+            otherDuration: '',
+            link: item.url || '',
+            photo: null,
+            photoDataUrl: '',
+            tags: item.tags || [],
+            pausedAt: new Date(item.created_at),
+            checkInTime: item.review_at,
+            checkInDate: item.review_at,
+            isCart: false,
+            itemType: 'item' as const,
+            sharedWithPartners: item.shared_with_partners || [],
+            addedBy: 'You'
+          })),
+          ...(partnersSharedItems || []).map((item: any) => ({
+            id: item.id,
+            itemName: item.title,
+            storeName: 'Store',
+            price: item.price?.toString() || '0',
+            imageUrl: '',
+            emotion: item.reason || 'unknown',
+            notes: item.notes || '',
+            duration: `${item.pause_duration_days} days`,
+            otherDuration: '',
+            link: item.url || '',
+            photo: null,
+            photoDataUrl: '',
+            tags: item.tags || [],
+            pausedAt: new Date(item.created_at),
+            checkInTime: item.review_at,
+            checkInDate: item.review_at,
+            isCart: false,
+            itemType: 'item' as const,
+            sharedWithPartners: item.shared_with_partners || [],
+            addedBy: 'Partner'
+          }))
+        ];
+
+        setSharedItems(allSharedItems);
+      } catch (error) {
+        console.error('Error fetching shared items:', error);
+      }
+    };
+
+    fetchSharedItems();
+  }, [partners]);
 
   
 
@@ -297,27 +366,6 @@ const PartnerFeedTab = () => {
               </Button>
             </div>
 
-            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800 mb-2">Debug: Test invitation acceptance</p>
-              <Button 
-                onClick={() => {
-                  const inviteId = 'b0c72f74-439b-4fc9-9b26-b32cd8378ac4';
-                  console.log('🧪 Testing invitation acceptance for ID:', inviteId);
-                  acceptInvite(inviteId).then(result => {
-                    console.log('🧪 Test result:', result);
-                    toast({
-                      title: result?.success ? 'Success' : 'Failed',
-                      description: result?.success ? result.message : result?.error,
-                      variant: result?.success ? 'default' : 'destructive'
-                    });
-                  });
-                }}
-                variant="outline" 
-                size="sm"
-              >
-                Test Accept Invitation
-              </Button>
-            </div>
             {(partners.length === 0 && invitations.length === 0) ? (
               <div className="text-center py-6">
                 <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
@@ -462,61 +510,15 @@ const PartnerFeedTab = () => {
                   </Select>
                 </div>
 
-                {/* Shared Items List */}
+                {/* Shared Items Carousel */}
                 <div className="space-y-4">
-                  {sharedItems.map((item) => (
-                    <div key={item.id} className="border rounded-lg p-4 space-y-3">
-                      <div className="flex gap-4">
-                        {/* Item Image */}
-                        <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
-                          <img 
-                            src={item.imageUrl} 
-                            alt={item.name}
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        </div>
-
-                        {/* Item Details */}
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-start justify-between">
-                            <h4 className="font-medium text-black dark:text-[#F9F5EB]">{item.name}</h4>
-                            <span className="font-semibold text-black dark:text-[#F9F5EB]">
-                              ${item.price}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Avatar className="h-4 w-4">
-                                <AvatarFallback className="text-xs">
-                                  {item.addedBy === 'You' ? 'Y' : item.partnerInitials}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>Added by {item.addedBy}</span>
-                            </div>
-                            
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              <span>{item.timeLeft}</span>
-                            </div>
-                          </div>
-
-                          {item.reflection && (
-                            <p className="text-sm text-muted-foreground italic">
-                              "{item.reflection}"
-                            </p>
-                          )}
-
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="flex items-center gap-1">
-                              <Tag className="h-3 w-3" />
-                              With {item.partnerName}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  <PausedItemsCarousel 
+                    items={sharedItems}
+                    onItemClick={(item) => {
+                      // Handle item click for detail view - similar to PausedSection
+                      console.log('Partner shared item clicked:', item);
+                    }}
+                  />
                 </div>
               </div>
             )}
