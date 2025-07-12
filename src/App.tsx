@@ -27,18 +27,28 @@ const App = () => {
   
   // Initialize push notifications on app start
   useEffect(() => {
+    let mounted = true;
+    
     const initializePushNotifications = async () => {
       try {
+        if (!mounted) return;
+        
         const initialized = await pushNotificationService.initialize();
-        if (initialized) {
+        if (initialized && mounted) {
           console.log('Push notifications initialized successfully');
         }
       } catch (error) {
-        console.error('Failed to initialize push notifications:', error);
+        if (mounted) {
+          console.error('Failed to initialize push notifications:', error);
+        }
       }
     };
 
     initializePushNotifications();
+    
+    return () => {
+      mounted = false;
+    };
   }, []);
   
   return (
