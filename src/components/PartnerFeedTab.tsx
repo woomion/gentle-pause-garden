@@ -526,8 +526,11 @@ const PartnerFeedTab = () => {
                 <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
                   Shared Pauses
                 </h2>
-                <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
-                  See items you've chosen to pause on together.
+                <p className="text-base mb-1" style={{ color: '#6b6b6b' }}>
+                  Mindful choices, made together.
+                </p>
+                <p className="text-sm mb-3" style={{ color: '#6b6b6b' }}>
+                  (You've chosen to pause on these with a partner—slow down and reflect, side by side.)
                 </p>
               </div>
               <Button 
