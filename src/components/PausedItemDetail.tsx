@@ -10,6 +10,7 @@ import { useItemActions } from '../hooks/useItemActions';
 import ItemImage from './ItemImage';
 import PauseDurationBanner from './PauseDurationBanner';
 import EmotionBadge from './EmotionBadge';
+import { extractActualNotes } from '../utils/notesMetadataUtils';
 
 interface PausedItemDetailProps {
   item: PausedItem;
@@ -22,12 +23,16 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
 
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
+  const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
 
   console.log('🔍 PausedItemDetail rendered:', {
     isOpen,
     itemName: item.itemName,
     hasNotes: !!item.notes,
+    cleanNotes: cleanNotes,
     notesLength: item.notes?.length || 0,
+    link: item.link,
+    hasLink: !!item.link,
     windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'undefined',
     windowHeight: typeof window !== 'undefined' ? window.innerHeight : 'undefined'
   });
@@ -45,7 +50,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-sm w-[90vw] mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto"
+        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto fixed"
       >
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
@@ -86,11 +91,11 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
               </div>
             )}
 
-            {/* Only show notes if they exist and aren't empty */}
-            {item.notes && item.notes.trim() && (
+            {/* Only show notes if they exist and aren't empty after cleaning */}
+            {cleanNotes && cleanNotes.trim() && (
               <div className="pt-2">
                 <p className="text-gray-600 dark:text-gray-300 text-sm break-words">
-                  <strong>Note:</strong> {item.notes}
+                  <strong>Note:</strong> {cleanNotes}
                 </p>
               </div>
             )}
