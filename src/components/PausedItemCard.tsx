@@ -8,15 +8,38 @@ import PauseDurationBanner from './PauseDurationBanner';
 import EmotionBadge from './EmotionBadge';
 import { getEmotionColor } from '../utils/emotionColors';
 import { useTheme } from '../contexts/ThemeContext';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+
+interface Partner {
+  partner_id: string;
+  partner_email: string;
+  partner_name: string;
+}
 
 interface PausedItemCardProps {
   item: PausedItem;
   onClick: () => void;
+  partners?: Partner[];
+  currentUserId?: string;
 }
 
-const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
+const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: PausedItemCardProps) => {
   const { isDarkMode } = useTheme();
   const emotionColor = useMemo(() => getEmotionColor(item.emotion, isDarkMode), [item.emotion, isDarkMode]);
+
+  // Get initials for shared partners
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  // Get partner info for the badges
+  const sharedWithPartners = useMemo(() => {
+    if (!item.sharedWithPartners || item.sharedWithPartners.length === 0) return [];
+    
+    return partners.filter(partner => 
+      item.sharedWithPartners.includes(partner.partner_id)
+    );
+  }, [item.sharedWithPartners, partners]);
 
   const imageUrl = useMemo(() => {
     // Handle cart placeholder
@@ -127,6 +150,18 @@ const PausedItemCard = memo(({ item, onClick }: PausedItemCardProps) => {
               {item.storeName}
             </p>
             
+            {/* Partner badges */}
+            {sharedWithPartners.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {sharedWithPartners.map((partner) => (
+                  <Avatar key={partner.partner_id} className="h-6 w-6 bg-green-100 border-2 border-green-400 dark:bg-green-900 dark:border-green-500">
+                    <AvatarFallback className="text-xs text-green-800 dark:text-green-200">
+                      {getInitials(partner.partner_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+              </div>
+            )}
 
           </div>
         </div>

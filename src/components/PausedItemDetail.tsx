@@ -4,6 +4,7 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useMemo } from 'react';
 import { formatPrice } from '../utils/priceFormatter';
 import { useItemActions } from '../hooks/useItemActions';
@@ -12,18 +13,40 @@ import PauseDurationBanner from './PauseDurationBanner';
 import EmotionBadge from './EmotionBadge';
 import { extractActualNotes } from '../utils/notesMetadataUtils';
 
+interface Partner {
+  partner_id: string;
+  partner_email: string;
+  partner_name: string;
+}
+
 interface PausedItemDetailProps {
   item: PausedItem;
   isOpen: boolean;
   onClose: () => void;
   onDelete: (id: string) => void;
+  partners?: Partner[];
+  currentUserId?: string;
 }
 
-const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailProps) => {
+const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], currentUserId }: PausedItemDetailProps) => {
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
 
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
   const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
+
+  // Get initials for shared partners
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  // Get partner info for the badges
+  const sharedWithPartners = useMemo(() => {
+    if (!item.sharedWithPartners || item.sharedWithPartners.length === 0) return [];
+    
+    return partners.filter(partner => 
+      item.sharedWithPartners.includes(partner.partner_id)
+    );
+  }, [item.sharedWithPartners, partners]);
 
   console.log('🔍 PausedItemDetail rendered:', {
     isOpen,
@@ -76,6 +99,20 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             <p className="text-gray-600 dark:text-gray-300 text-base">{item.storeName}</p>
             
             <EmotionBadge emotion={item.emotion} />
+
+            {/* Partner badges */}
+            {sharedWithPartners.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                <span className="text-sm text-gray-600 dark:text-gray-300">Shared with:</span>
+                {sharedWithPartners.map((partner) => (
+                  <Avatar key={partner.partner_id} className="h-7 w-7 bg-green-100 border-2 border-green-400 dark:bg-green-900 dark:border-green-500">
+                    <AvatarFallback className="text-xs text-green-800 dark:text-green-200">
+                      {getInitials(partner.partner_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+              </div>
+            )}
 
             {/* Tags section */}
             {item.tags && item.tags.length > 0 && (

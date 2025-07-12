@@ -390,7 +390,7 @@ const PartnerFeedTab = () => {
                 onClick={() => setShowInviteSection(false)}
                 className="text-muted-foreground hover:text-foreground mb-2 self-start"
               >
-                ↩ Back to shared pauses
+                <span className="text-lg">←</span> Back to shared pauses
               </Button>
             )}
             <div className="flex items-center justify-between">
@@ -579,6 +579,8 @@ const PartnerFeedTab = () => {
                   <PausedItemsCarousel 
                     items={sharedItems}
                     onItemClick={(item) => setSelectedItem(item)}
+                    partners={partners}
+                    currentUserId={undefined} // We'll need to get this from auth
                   />
                 </div>
               </div>
@@ -597,6 +599,8 @@ const PartnerFeedTab = () => {
             // Handle delete if needed - for now just close
             setSelectedItem(null);
           }}
+          partners={partners}
+          currentUserId={undefined} // We'll need to get this from auth
         />
       )}
     </div>

@@ -4,12 +4,20 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import PausedItemCard from './PausedItemCard';
 import { PausedItem } from '../stores/pausedItemsStore';
 
+interface Partner {
+  partner_id: string;
+  partner_email: string;
+  partner_name: string;
+}
+
 interface PausedItemsCarouselProps {
   items: PausedItem[];
   onItemClick: (item: PausedItem) => void;
+  partners?: Partner[];
+  currentUserId?: string;
 }
 
-const PausedItemsCarousel = memo(({ items, onItemClick }: PausedItemsCarouselProps) => {
+const PausedItemsCarousel = memo(({ items, onItemClick, partners = [], currentUserId }: PausedItemsCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
 
   useEffect(() => {
@@ -42,6 +50,8 @@ const PausedItemsCarousel = memo(({ items, onItemClick }: PausedItemsCarouselPro
           <PausedItemCard 
             item={items[0]} 
             onClick={() => onItemClick(items[0])} 
+            partners={partners}
+            currentUserId={currentUserId}
           />
         </div>
         <div className="flex justify-center mt-2">
@@ -62,6 +72,8 @@ const PausedItemsCarousel = memo(({ items, onItemClick }: PausedItemsCarouselPro
                 <PausedItemCard 
                   item={item} 
                   onClick={() => onItemClick(item)} 
+                  partners={partners}
+                  currentUserId={currentUserId}
                 />
               </CarouselItem>
             ))}
@@ -80,7 +92,9 @@ const PausedItemsCarousel = memo(({ items, onItemClick }: PausedItemsCarouselPro
                     <PausedItemCard 
                       key={item.id}
                       item={item} 
-                      onClick={() => onItemClick(item)} 
+                      onClick={() => onItemClick(item)}
+                      partners={partners}
+                      currentUserId={currentUserId}
                     />
                   ))}
                 </div>
