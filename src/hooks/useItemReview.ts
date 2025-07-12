@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabasePausedItemsStore, PausedItem } from '@/stores/supabasePausedItemsStore';
 import { pausedItemsStore, PausedItem as LocalPausedItem } from '@/stores/pausedItemsStore';
@@ -45,7 +46,24 @@ export const useItemReview = () => {
     } else {
       pausedItemsStore.removeItem(id);
     }
-    setItemsForReview(prev => prev.filter(item => item.id !== id));
+    
+    // Update the items list
+    const updatedItems = itemsForReview.filter(item => item.id !== id);
+    setItemsForReview(updatedItems);
+    
+    // If this was the last item, trigger confetti
+    if (updatedItems.length === 0) {
+      // Gentle confetti effect
+      confetti({
+        particleCount: 60,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#E7D9FA', '#BFD1BF', '#DDE7DD', '#CAB6F7'],
+        gravity: 0.8,
+        scalar: 0.8,
+        drift: 0.1
+      });
+    }
   };
 
   const handleNextReview = () => {
