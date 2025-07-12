@@ -161,6 +161,11 @@ const PauseLog = () => {
   };
 
   const handleDeleteItem = (id: string) => {
+    // If the deleted item is currently being viewed in detail, close the detail modal
+    if (selectedItem && selectedItem.id === id) {
+      setShowItemDetail(false);
+      setSelectedItem(null);
+    }
     deleteItem(id);
   };
 
