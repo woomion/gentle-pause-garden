@@ -29,7 +29,6 @@ const PartnerFeedTab = () => {
     }
 
     const allItems = supabasePausedItemsStore.getItems();
-    const partnerIds = partners.map(p => p.partner_id);
     
     // Get items that are shared with partners or where I'm included in sharing
     const sharedItems = allItems.filter(item => {
@@ -42,7 +41,7 @@ const PartnerFeedTab = () => {
     if (supabasePausedItemsStore.isDataLoaded()) {
       setIsLoading(false);
     }
-  }, [user?.id, partners.length, hasPausePartnerAccess, sortItemsByDate]);
+  }, [user?.id, hasPausePartnerAccess, sortItemsByDate]);
 
   useEffect(() => {
     updatePartnerItems();
@@ -59,7 +58,7 @@ const PartnerFeedTab = () => {
       if (unsubscribe) unsubscribe();
       if (interval) clearInterval(interval);
     };
-  }, [updatePartnerItems, user, hasPausePartnerAccess]);
+  }, [user?.id, hasPausePartnerAccess, updatePartnerItems]);
 
   const handleItemClick = useCallback((item: PausedItem) => {
     setSelectedItem(item);
