@@ -161,11 +161,18 @@ const PauseLog = () => {
   };
 
   const handleDeleteItem = (id: string) => {
+    console.log('🗑️ PauseLog: handleDeleteItem called for id:', id);
+    console.log('🗑️ PauseLog: selectedItem:', selectedItem?.id);
+    console.log('🗑️ PauseLog: showItemDetail:', showItemDetail);
+    
     // If the deleted item is currently being viewed in detail, close the detail modal
     if (selectedItem && selectedItem.id === id) {
+      console.log('🗑️ PauseLog: Deleted item is currently selected, closing detail modal');
       setShowItemDetail(false);
       setSelectedItem(null);
     }
+    
+    console.log('🗑️ PauseLog: Calling deleteItem');
     deleteItem(id);
   };
 
@@ -331,6 +338,7 @@ const PauseLog = () => {
         isOpen={showItemDetail}
         onClose={handleCloseDetail}
         onViewLink={handleViewLink}
+        onDelete={handleDeleteItem}
       />
     </div>
   );

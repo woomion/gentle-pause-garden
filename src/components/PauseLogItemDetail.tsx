@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
@@ -11,9 +11,10 @@ interface PauseLogItemDetailProps {
   isOpen: boolean;
   onClose: () => void;
   onViewLink: (item: PauseLogItem) => void;
+  onDelete: (id: string) => void;
 }
 
-const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink }: PauseLogItemDetailProps) => {
+const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink, onDelete }: PauseLogItemDetailProps) => {
   const formattedPrice = useMemo(() => {
     if (!item?.originalPausedItem?.price) return null;
     return formatPrice(item.originalPausedItem.price);
@@ -40,6 +41,40 @@ const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink }: PauseLogItemD
       <DialogContent className="max-w-sm mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600">
         <DialogHeader>
           <DialogTitle className="sr-only">Pause Log Item Details</DialogTitle>
+          {/* Delete button in top right corner */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button 
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <X size={16} />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Delete from Paused Decision Log</AlertDialogTitle>
+                <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                  Are you sure you want to delete "{item?.itemName}" from your Paused Decision Log? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={() => {
+                    console.log('🗑️ PauseLogItemDetail: Delete button clicked for item:', item?.id);
+                    if (item) {
+                      onDelete(item.id);
+                      onClose(); // Close the detail modal after deletion
+                    }
+                  }}
+                  className="rounded-2xl bg-red-500 hover:bg-red-600 text-white"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </DialogHeader>
         
         <div className="space-y-4">
