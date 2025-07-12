@@ -22,8 +22,8 @@ const MainTabs = () => {
             color: activeTab === 'paused' ? '#7A5DD9' : 'inherit'
           }}
         >
-          <User className="h-5 w-5 sm:h-4 sm:w-4" />
-          <span className="text-sm sm:text-sm">My Pauses</span>
+          <User className="h-5 w-5 sm:h-5 sm:w-5" />
+          <span className="text-sm sm:text-base">My Pauses</span>
         </TabsTrigger>
         <TabsTrigger 
           value="partner-feed" 
@@ -33,8 +33,8 @@ const MainTabs = () => {
             color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
           }}
         >
-          <Users className="h-5 w-5 sm:h-4 sm:w-4" />
-          <span className="text-sm sm:text-sm">Partner Pauses</span>
+          <Users className="h-5 w-5 sm:h-5 sm:w-5" />
+          <span className="text-sm sm:text-base">Partner Pauses</span>
         </TabsTrigger>
       </TabsList>
 
