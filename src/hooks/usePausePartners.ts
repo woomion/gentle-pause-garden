@@ -96,7 +96,11 @@ export const usePausePartners = () => {
   };
 
   const sendInvite = async (email: string) => {
-    if (!user) return;
+    console.log('🔄 sendInvite called with email:', email, 'user:', user?.id);
+    if (!user) {
+      console.log('❌ No user found, cannot send invite');
+      return { success: false, error: 'User not authenticated' };
+    }
 
     try {
       // Check if there's already a pending invitation to this email
