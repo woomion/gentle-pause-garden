@@ -74,6 +74,12 @@ export const convertPauseLogItemToDb = (
     notes: notesWithStore,
     status: dbStatus,
     tags: item.tags || [],
-    shared_with_partners: []
+    shared_with_partners: [],
+    emotion: item.emotion,
+    image_url: '',
+    is_cart: false,
+    item_type: 'item',
+    store_name: item.storeName || '',
+    other_duration: ''
   };
 };

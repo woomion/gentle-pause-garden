@@ -82,14 +82,20 @@ export type Database = {
       paused_items: {
         Row: {
           created_at: string
+          emotion: string | null
           id: string
+          image_url: string | null
+          is_cart: boolean | null
+          item_type: string | null
           notes: string | null
+          other_duration: string | null
           pause_duration_days: number
           price: number | null
           reason: string | null
           review_at: string
           shared_with_partners: string[] | null
           status: string
+          store_name: string | null
           tags: string[] | null
           title: string
           url: string | null
@@ -97,14 +103,20 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          emotion?: string | null
           id?: string
+          image_url?: string | null
+          is_cart?: boolean | null
+          item_type?: string | null
           notes?: string | null
+          other_duration?: string | null
           pause_duration_days?: number
           price?: number | null
           reason?: string | null
           review_at: string
           shared_with_partners?: string[] | null
           status?: string
+          store_name?: string | null
           tags?: string[] | null
           title: string
           url?: string | null
@@ -112,14 +124,20 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          emotion?: string | null
           id?: string
+          image_url?: string | null
+          is_cart?: boolean | null
+          item_type?: string | null
           notes?: string | null
+          other_duration?: string | null
           pause_duration_days?: number
           price?: number | null
           reason?: string | null
           review_at?: string
           shared_with_partners?: string[] | null
           status?: string
+          store_name?: string | null
           tags?: string[] | null
           title?: string
           url?: string | null

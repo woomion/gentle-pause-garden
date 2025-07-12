@@ -11,17 +11,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Crown, Users, Clock, Tag, Trash2 } from 'lucide-react';
 import PausedItemsCarousel from '@/components/PausedItemsCarousel';
+import PausedItemDetail from '@/components/PausedItemDetail';
 import { PausedItem } from '@/stores/pausedItemsStore';
 
 const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
-  const [showInviteSection, setShowInviteSection] = useState(false);
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
-
+  const [showInviteSection, setShowInviteSection] = useState(false);
   // Get partners using the Supabase function
   const { partners, invitations, loading, sendInvite, removePartner, resendInvite, acceptInvite } = usePausePartners();
 
@@ -66,13 +67,13 @@ const PartnerFeedTab = () => {
           ...(mySharedItems || []).map((item: any) => ({
             id: item.id,
             itemName: item.title,
-            storeName: 'Store', // We'll need to add this to the DB schema
+            storeName: item.store_name || 'Unknown Store',
             price: item.price?.toString() || '0',
-            imageUrl: '', // We'll need to add this to the DB schema
-            emotion: item.reason || 'unknown',
+            imageUrl: item.image_url || '',
+            emotion: item.emotion || item.reason || 'unknown',
             notes: item.notes || '',
             duration: `${item.pause_duration_days} days`,
-            otherDuration: '',
+            otherDuration: item.other_duration || '',
             link: item.url || '',
             photo: null,
             photoDataUrl: '',
@@ -80,21 +81,20 @@ const PartnerFeedTab = () => {
             pausedAt: new Date(item.created_at),
             checkInTime: item.review_at,
             checkInDate: item.review_at,
-            isCart: false,
-            itemType: 'item' as const,
-            sharedWithPartners: item.shared_with_partners || [],
-            addedBy: 'You'
+            isCart: item.is_cart || false,
+            itemType: item.item_type || 'item',
+            sharedWithPartners: item.shared_with_partners || []
           })),
           ...(partnersSharedItems || []).map((item: any) => ({
             id: item.id,
             itemName: item.title,
-            storeName: 'Store',
+            storeName: item.store_name || 'Unknown Store',
             price: item.price?.toString() || '0',
-            imageUrl: '',
-            emotion: item.reason || 'unknown',
+            imageUrl: item.image_url || '',
+            emotion: item.emotion || item.reason || 'unknown',
             notes: item.notes || '',
             duration: `${item.pause_duration_days} days`,
-            otherDuration: '',
+            otherDuration: item.other_duration || '',
             link: item.url || '',
             photo: null,
             photoDataUrl: '',
@@ -102,10 +102,9 @@ const PartnerFeedTab = () => {
             pausedAt: new Date(item.created_at),
             checkInTime: item.review_at,
             checkInDate: item.review_at,
-            isCart: false,
-            itemType: 'item' as const,
-            sharedWithPartners: item.shared_with_partners || [],
-            addedBy: 'Partner'
+            isCart: item.is_cart || false,
+            itemType: item.item_type || 'item',
+            sharedWithPartners: item.shared_with_partners || []
           }))
         ];
 
@@ -116,6 +115,26 @@ const PartnerFeedTab = () => {
     };
 
     fetchSharedItems();
+    
+    // Set up real-time subscription for shared items
+    const channel = supabase
+      .channel('shared-paused-items')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'paused_items',
+        },
+        () => {
+          fetchSharedItems(); // Reload when any paused item changes
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [partners]);
 
   
@@ -514,16 +533,26 @@ const PartnerFeedTab = () => {
                 <div className="space-y-4">
                   <PausedItemsCarousel 
                     items={sharedItems}
-                    onItemClick={(item) => {
-                      // Handle item click for detail view - similar to PausedSection
-                      console.log('Partner shared item clicked:', item);
-                    }}
+                    onItemClick={(item) => setSelectedItem(item)}
                   />
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Detail Modal for selected shared item */}
+      {selectedItem && (
+        <PausedItemDetail
+          item={selectedItem}
+          isOpen={!!selectedItem}
+          onClose={() => setSelectedItem(null)}
+          onDelete={(id) => {
+            // Handle delete if needed - for now just close
+            setSelectedItem(null);
+          }}
+        />
       )}
     </div>
   );

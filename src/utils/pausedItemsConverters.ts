@@ -59,13 +59,13 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
   return {
     id: dbItem.id,
     itemName: dbItem.title,
-    storeName: storeName,
+    storeName: dbItem.store_name || storeName,
     price: dbItem.price?.toString() || '',
-    imageUrl: imageUrl,
-    emotion: dbItem.reason || 'something else',
+    imageUrl: dbItem.image_url || imageUrl,
+    emotion: dbItem.emotion || dbItem.reason || 'something else',
     notes: actualNotes || undefined,
     duration: `${dbItem.pause_duration_days} days`,
-    otherDuration: undefined,
+    otherDuration: dbItem.other_duration || undefined,
     link: productLink,
     photo: null,
     photoDataUrl: undefined,
@@ -73,8 +73,8 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     pausedAt,
     checkInTime: calculateCheckInTimeDisplay(reviewAt),
     checkInDate: reviewAt,
-    isCart: dbItem.title === 'Cart' || false,
-    itemType: dbItem.title === 'Cart' ? 'cart' : 'item',
+    isCart: dbItem.is_cart || dbItem.title === 'Cart' || false,
+    itemType: (dbItem.item_type === 'cart' ? 'cart' : 'item') as 'cart' | 'item',
     sharedWithPartners: dbItem.shared_with_partners || []
   };
 };
@@ -125,6 +125,12 @@ export const convertLocalToDb = (
     review_at: reviewAt.toISOString(),
     status: 'paused',
     tags: item.tags || [],
-    shared_with_partners: item.sharedWithPartners || []
+    shared_with_partners: item.sharedWithPartners || [],
+    emotion: item.emotion,
+    image_url: imageUrl || item.imageUrl || '',
+    is_cart: item.isCart || false,
+    item_type: item.itemType || 'item',
+    store_name: item.storeName || '',
+    other_duration: item.otherDuration || ''
   };
 };
