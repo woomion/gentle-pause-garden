@@ -138,8 +138,8 @@ const PartnerFeedTab = () => {
                 {sentInvites.map((invite, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-sm">
+                      <Avatar className={`h-8 w-8 ${invite.status === 'pending' ? 'bg-yellow-100 border-2 border-yellow-400 dark:bg-yellow-900 dark:border-yellow-500' : ''}`}>
+                        <AvatarFallback className={`text-sm ${invite.status === 'pending' ? 'text-yellow-800 dark:text-yellow-200' : ''}`}>
                           {invite.email.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -151,8 +151,11 @@ const PartnerFeedTab = () => {
                       </div>
                     </div>
                     <Badge 
-                      variant={invite.status === 'linked' ? 'default' : 'secondary'}
-                      className={invite.status === 'linked' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : ''}
+                      variant={invite.status === 'linked' ? 'default' : 'outline'}
+                      className={invite.status === 'linked' 
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
+                        : 'border-yellow-400 text-yellow-700 bg-yellow-50 dark:border-yellow-500 dark:text-yellow-300 dark:bg-yellow-950'
+                      }
                     >
                       {invite.status === 'pending' ? 'Pending' : 'Linked!'}
                     </Badge>
