@@ -12,16 +12,8 @@ const GreaterJoyDonation = () => {
         <div className="rounded-2xl p-6 max-w-sm mx-auto md:mx-0" style={{ backgroundColor: '#F2E8FF' }}>
           <div className="space-y-1 text-left">
             <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Pocket Pause is independently made and still growing. To help support its next chapter:
+              Pocket Pause is independently made and still growing.
             </p>
-            
-            <button 
-              onClick={() => setShowDonationModal(true)}
-              className="text-sm text-gray-600 dark:text-gray-300 hover:text-[#CAB6F7] dark:hover:text-[#CAB6F7] transition-colors underline decoration-dotted underline-offset-4 inline-flex items-center gap-2 mt-2"
-            >
-              <Star size={14} />
-              <span>Make a one-time gift</span>
-            </button>
           </div>
         </div>
       </div>
