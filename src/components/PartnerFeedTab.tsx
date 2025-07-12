@@ -36,12 +36,14 @@ const PartnerFeedTab = () => {
       return item.sharedWithPartners && item.sharedWithPartners.length > 0;
     });
 
-    setPartnerItems(sortItemsByDate(sharedItems));
+    // Sort items inline to avoid dependency chain
+    const sortedItems = sharedItems.sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
+    setPartnerItems(sortedItems);
     
     if (supabasePausedItemsStore.isDataLoaded()) {
       setIsLoading(false);
     }
-  }, [user?.id, hasPausePartnerAccess, sortItemsByDate]);
+  }, [user?.id, hasPausePartnerAccess]);
 
   useEffect(() => {
     updatePartnerItems();
