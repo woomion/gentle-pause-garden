@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
+import { usePausePartners } from '@/hooks/usePausePartners';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -96,9 +97,8 @@ const PartnerFeedTab = () => {
     handleInvitationAcceptance();
   }, [toast]);
 
-  // Mock data for now to avoid subscription issues
-  const partners: any[] = []; // Empty for now to show the invite section
-  const loading = false;
+  // Get partners using the Supabase function
+  const { partners, invitations, loading } = usePausePartners();
 
   // Mock shared items data for now - we'll replace this with real data later
   const sharedItems = [
