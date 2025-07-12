@@ -18,7 +18,7 @@ const MainTabs = () => {
           value="paused" 
           className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
-            backgroundColor: activeTab === 'paused' ? '#C7D3C5' : 'transparent',
+            backgroundColor: activeTab === 'paused' ? '#BFD1BF' : 'transparent',
             color: activeTab === 'paused' ? '#7A5DD9' : 'inherit'
           }}
         >
@@ -29,7 +29,7 @@ const MainTabs = () => {
           value="partner-feed" 
           className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
-            backgroundColor: activeTab === 'partner-feed' ? '#C7D3C5' : 'transparent',
+            backgroundColor: activeTab === 'partner-feed' ? '#BFD1BF' : 'transparent',
             color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
           }}
         >
