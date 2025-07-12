@@ -521,7 +521,7 @@ const PartnerFeedTab = () => {
       {partners.length > 0 && !showInviteSection && (
         <Card>
           <CardHeader>
-            <div className="flex items-start justify-end mb-4">
+            <div className="flex items-start justify-end mb-2">
               <Button 
                 variant="outline" 
                 size="sm"
