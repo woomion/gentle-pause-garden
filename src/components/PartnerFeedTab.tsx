@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,19 @@ const PartnerFeedTab = () => {
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
+
+  // Load pending invites from localStorage on component mount
+  useEffect(() => {
+    const storedInvites = localStorage.getItem('pendingInvites');
+    if (storedInvites) {
+      setSentInvites(JSON.parse(storedInvites));
+    }
+  }, []);
+
+  // Save pending invites to localStorage whenever sentInvites changes
+  useEffect(() => {
+    localStorage.setItem('pendingInvites', JSON.stringify(sentInvites));
+  }, [sentInvites]);
 
   // Mock data for now to avoid subscription issues
   const partners: any[] = []; // Empty for now to show the invite section
