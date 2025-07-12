@@ -14,6 +14,7 @@ import PausedItemsCarousel from '@/components/PausedItemsCarousel';
 import PausedItemDetail from '@/components/PausedItemDetail';
 import { PausedItem } from '@/stores/pausedItemsStore';
 import { calculateCheckInTimeDisplay } from '@/utils/pausedItemsUtils';
+import { extractProductLinkFromNotes, extractActualNotes } from '@/utils/notesMetadataUtils';
 
 const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
@@ -63,50 +64,84 @@ const PartnerFeedTab = () => {
           return;
         }
 
+        // Helper function to extract the actual product link
+        const getProductLink = (item: any) => {
+          // First try to extract from notes metadata
+          const notesProductLink = extractProductLinkFromNotes(item.notes);
+          if (notesProductLink) {
+            console.log('📝 Found product link in notes:', notesProductLink);
+            return notesProductLink;
+          }
+          
+          // Check if the URL looks like a product page (not an image)
+          const url = item.url;
+          if (url && !url.includes('cart-placeholder')) {
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+            const isImageUrl = imageExtensions.some(ext => url.toLowerCase().includes(ext));
+            if (!isImageUrl) {
+              console.log('🔗 Using URL as product link:', url);
+              return url;
+            }
+          }
+          
+          console.log('⚠️ No valid product link found for item:', item.title);
+          return '';
+        };
+
         // Combine and format the items to match PausedItem interface
         const allSharedItems = [
-          ...(mySharedItems || []).map((item: any) => ({
-            id: item.id,
-            itemName: item.title,
-            storeName: item.store_name || 'Unknown Store',
-            price: item.price?.toString() || '0',
-            imageUrl: item.image_url || '',
-            emotion: item.emotion || item.reason || 'unknown',
-            notes: item.notes || '',
-            duration: `${item.pause_duration_days} days`,
-            otherDuration: item.other_duration || '',
-            link: item.url || '',
-            photo: null,
-            photoDataUrl: '',
-            tags: item.tags || [],
-            pausedAt: new Date(item.created_at),
-            checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
-            checkInDate: item.review_at,
-            isCart: item.is_cart || false,
-            itemType: item.item_type || 'item',
-            sharedWithPartners: item.shared_with_partners || []
-          })),
-          ...(partnersSharedItems || []).map((item: any) => ({
-            id: item.id,
-            itemName: item.title,
-            storeName: item.store_name || 'Unknown Store',
-            price: item.price?.toString() || '0',
-            imageUrl: item.image_url || '',
-            emotion: item.emotion || item.reason || 'unknown',
-            notes: item.notes || '',
-            duration: `${item.pause_duration_days} days`,
-            otherDuration: item.other_duration || '',
-            link: item.url || '',
-            photo: null,
-            photoDataUrl: '',
-            tags: item.tags || [],
-            pausedAt: new Date(item.created_at),
-            checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
-            checkInDate: item.review_at,
-            isCart: item.is_cart || false,
-            itemType: item.item_type || 'item',
-            sharedWithPartners: item.shared_with_partners || []
-          }))
+          ...(mySharedItems || []).map((item: any) => {
+            const productLink = getProductLink(item);
+            const cleanNotes = extractActualNotes(item.notes);
+            
+            return {
+              id: item.id,
+              itemName: item.title,
+              storeName: item.store_name || 'Unknown Store',
+              price: item.price?.toString() || '0',
+              imageUrl: item.image_url || '',
+              emotion: item.emotion || item.reason || 'unknown',
+              notes: cleanNotes || '',
+              duration: `${item.pause_duration_days} days`,
+              otherDuration: item.other_duration || '',
+              link: productLink,
+              photo: null,
+              photoDataUrl: '',
+              tags: item.tags || [],
+              pausedAt: new Date(item.created_at),
+              checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
+              checkInDate: item.review_at,
+              isCart: item.is_cart || false,
+              itemType: item.item_type || 'item',
+              sharedWithPartners: item.shared_with_partners || []
+            };
+          }),
+          ...(partnersSharedItems || []).map((item: any) => {
+            const productLink = getProductLink(item);
+            const cleanNotes = extractActualNotes(item.notes);
+            
+            return {
+              id: item.id,
+              itemName: item.title,
+              storeName: item.store_name || 'Unknown Store',
+              price: item.price?.toString() || '0',
+              imageUrl: item.image_url || '',
+              emotion: item.emotion || item.reason || 'unknown',
+              notes: cleanNotes || '',
+              duration: `${item.pause_duration_days} days`,
+              otherDuration: item.other_duration || '',
+              link: productLink,
+              photo: null,
+              photoDataUrl: '',
+              tags: item.tags || [],
+              pausedAt: new Date(item.created_at),
+              checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
+              checkInDate: item.review_at,
+              isCart: item.is_cart || false,
+              itemType: item.item_type || 'item',
+              sharedWithPartners: item.shared_with_partners || []
+            };
+          })
         ];
 
         setSharedItems(allSharedItems);
