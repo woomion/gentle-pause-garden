@@ -16,7 +16,7 @@ const MainTabs = () => {
       <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
         <TabsTrigger 
           value="paused" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-3xl sm:rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-3xl sm:rounded-full px-2 sm:px-3 data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
             backgroundColor: activeTab === 'paused' ? '#BFD1BF' : 'transparent',
             color: activeTab === 'paused' ? '#7A5DD9' : 'inherit'
@@ -27,7 +27,7 @@ const MainTabs = () => {
         </TabsTrigger>
         <TabsTrigger 
           value="partner-feed" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-3xl sm:rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-3xl sm:rounded-full px-2 sm:px-3 data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none"
           style={{ 
             backgroundColor: activeTab === 'partner-feed' ? '#BFD1BF' : 'transparent',
             color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
