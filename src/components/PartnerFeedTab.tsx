@@ -432,8 +432,8 @@ const PartnerFeedTab = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {/* Show sent invites */}
-                {invitations.map((invite, index) => (
+                {/* Show sent invites - only pending ones, not accepted */}
+                {invitations.filter(invite => invite.status === 'pending').map((invite, index) => (
                   <div key={index} className="flex items-start justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-start gap-3 flex-1">
                       <Avatar className={`h-8 w-8 ${invite.status === 'pending' ? 'bg-yellow-100 border-2 border-yellow-400 dark:bg-yellow-900 dark:border-yellow-500' : ''}`}>
