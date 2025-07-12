@@ -122,6 +122,7 @@ const PartnerFeedTab = () => {
             <Button 
               onClick={handleSendInvite} 
               disabled={isInviting || loading}
+              className="bg-invite-button text-invite-button-foreground hover:bg-invite-button/90"
             >
               {isInviting ? 'Sending...' : 'Send Invite'}
             </Button>
