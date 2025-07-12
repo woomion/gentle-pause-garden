@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Crown, Users, Clock, Tag, Trash2, RefreshCw } from 'lucide-react';
+import { Crown, Users, Clock, Tag, Trash2 } from 'lucide-react';
 
 const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
@@ -276,6 +276,84 @@ const PartnerFeedTab = () => {
     }
   };
 
+  const handleRemovePartner = async (partnerId: string, partnerEmail: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // First check if there are shared pauses that need to be moved
+    const { data: sharedPauses, error: pausesError } = await supabase
+      .from('paused_items')
+      .select('*')
+      .eq('user_id', user.id)
+      .contains('shared_with_partners', [partnerId]);
+
+    if (pausesError) {
+      console.error('Error checking shared pauses:', pausesError);
+      return;
+    }
+
+    const hasSharedPauses = sharedPauses && sharedPauses.length > 0;
+
+    if (hasSharedPauses) {
+      // Show confirmation dialog
+      const shouldMoveToPersonal = window.confirm(
+        `You have ${sharedPauses.length} pause(s) shared with this partner. Would you like to move them back to your personal "My Pauses" section? (Note: This will only move pauses you created, not ones your partner added.)`
+      );
+
+      if (shouldMoveToPersonal) {
+        // Remove partner from shared_with_partners array for user's pauses
+        for (const pause of sharedPauses) {
+          const updatedSharedWith = pause.shared_with_partners?.filter((id: string) => id !== partnerId) || [];
+          
+          const { error: updateError } = await supabase
+            .from('paused_items')
+            .update({ shared_with_partners: updatedSharedWith })
+            .eq('id', pause.id);
+
+          if (updateError) {
+            console.error('Error updating pause:', updateError);
+          }
+        }
+      }
+    }
+
+    try {
+      // Remove the partnership
+      const { error } = await supabase
+        .from('partner_invitations')
+        .delete()
+        .or(`and(inviter_id.eq.${user.id},invitee_id.eq.${partnerId}),and(inviter_id.eq.${partnerId},invitee_id.eq.${user.id})`)
+        .eq('status', 'accepted');
+
+      if (error) throw error;
+
+      // Refresh partners list by reloading invitations
+      const { data: updatedInvitations } = await supabase
+        .from('partner_invitations')
+        .select('invitee_email, status')
+        .eq('inviter_id', user.id);
+
+      if (updatedInvitations) {
+        setSentInvites(updatedInvitations.map(inv => ({
+          email: inv.invitee_email,
+          status: inv.status === 'accepted' ? 'accepted' : 'pending'
+        })));
+      }
+      
+      toast({
+        title: "Success",
+        description: "Partner removed successfully.",
+      });
+    } catch (error) {
+      console.error('Error removing partner:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove partner.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
@@ -375,12 +453,12 @@ const PartnerFeedTab = () => {
                             {invite.status === 'pending' ? 'Pending' : 'Linked!'}
                           </Badge>
                           {invite.status === 'pending' && (
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-2">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDeleteInvite(invite.email)}
-                                className="h-6 w-6 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900 dark:hover:text-red-400"
+                                className="h-6 w-6 p-0 text-muted-foreground hover:text-muted-foreground/80"
                               >
                                 <Trash2 className="h-3 w-3" />
                               </Button>
@@ -388,9 +466,9 @@ const PartnerFeedTab = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleResendInvite(invite.email)}
-                                className="h-6 w-6 p-0 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900 dark:hover:text-blue-400"
+                                className="h-auto p-1 text-xs text-muted-foreground hover:text-muted-foreground/80"
                               >
-                                <RefreshCw className="h-3 w-3" />
+                                resend invite
                               </Button>
                             </div>
                           )}
@@ -414,9 +492,19 @@ const PartnerFeedTab = () => {
                         <p className="text-xs text-muted-foreground">{partner.partner_email}</p>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                      Linked!
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                        Linked!
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemovePartner(partner.partner_id, partner.partner_email)}
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-muted-foreground/80"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -425,8 +513,8 @@ const PartnerFeedTab = () => {
         </Card>
       )}
 
-      {/* Show Shared Pauses section if has partners */}
-      {partners.length > 0 && (
+      {/* Show Partner Pauses section if partners exist and not showing invite section */}
+      {partners.length > 0 && !showInviteSection && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
