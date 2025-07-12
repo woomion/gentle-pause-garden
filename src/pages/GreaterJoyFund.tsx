@@ -96,8 +96,6 @@ const GreaterJoyFund = () => {
           </p>
         </div>
 
-        <IntentionSection intention={intention} onSave={handleSaveIntention} />
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
             <TabsTrigger 
@@ -125,6 +123,7 @@ const GreaterJoyFund = () => {
           </TabsList>
           
           <TabsContent value="reflection" className="mt-0">
+            <IntentionSection intention={intention} onSave={handleSaveIntention} />
             <ReflectionTab reflection={reflection} setReflection={setReflection} />
           </TabsContent>
           
