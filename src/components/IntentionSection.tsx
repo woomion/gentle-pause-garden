@@ -117,33 +117,39 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
           </div>
         )}
       </div>
-      <p className="text-sm text-gray-600 dark:text-gray-300 font-medium mb-2">
-        A phrase to come back to, to help you choose with clarity and care.
-      </p>
-      <Dialog open={inspirationOpen} onOpenChange={setInspirationOpen}>
-        <DialogTrigger asChild>
-          <button className="text-sm text-[#8B5A96] hover:text-[#6B4C9A] underline">
-            Need inspiration?
-          </button>
-        </DialogTrigger>
-        <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-gray-700 max-w-xs sm:max-w-sm">
-          <DialogHeader className="pt-4">
-            <DialogTitle className="text-black dark:text-[#F9F5EB] text-lg leading-relaxed">
-              Here are a few ways other people have named their Joy Fund:
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 text-black dark:text-[#F9F5EB] pb-2">
-            <p>&quot;More calm in my day&quot;</p>
-            <p>&quot;Presence &gt; pressure&quot;</p>
-            <p>&quot;One good choice at a time&quot;</p>
-            <p>&quot;Peace over urgency&quot;</p>
-            <p>&quot;More walks, fewer carts&quot;</p>
-            <p>&quot;Rooted, not rushed&quot;</p>
-            <p>&quot;Space to choose what matters&quot;</p>
-            <p>&quot;Trusting myself again&quot;</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      
+      {/* Only show helper text and inspiration when no intention is set */}
+      {!intention && (
+        <>
+          <p className="text-sm text-gray-600 dark:text-gray-300 font-medium mb-2">
+            A phrase to come back to, to help you choose with clarity and care.
+          </p>
+          <Dialog open={inspirationOpen} onOpenChange={setInspirationOpen}>
+            <DialogTrigger asChild>
+              <button className="text-sm text-[#8B5A96] hover:text-[#6B4C9A] underline">
+                Need inspiration?
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-gray-700 max-w-xs sm:max-w-sm">
+              <DialogHeader className="pt-4">
+                <DialogTitle className="text-black dark:text-[#F9F5EB] text-lg leading-relaxed">
+                  Here are a few ways other people have named their Joy Fund:
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 text-black dark:text-[#F9F5EB] pb-2">
+                <p>&quot;More calm in my day&quot;</p>
+                <p>&quot;Presence &gt; pressure&quot;</p>
+                <p>&quot;One good choice at a time&quot;</p>
+                <p>&quot;Peace over urgency&quot;</p>
+                <p>&quot;More walks, fewer carts&quot;</p>
+                <p>&quot;Rooted, not rushed&quot;</p>
+                <p>&quot;Space to choose what matters&quot;</p>
+                <p>&quot;Trusting myself again&quot;</p>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 };
