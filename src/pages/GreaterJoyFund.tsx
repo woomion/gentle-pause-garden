@@ -28,14 +28,18 @@ const GreaterJoyFund = () => {
     if (savedIntention) {
       setIntention(savedIntention);
     }
-    if (savedReflection) {
+    if (savedReflection && savedReflection.trim().length > 2) {
+      // Only load saved reflection if it has meaningful content (more than 2 characters)
       setReflection(savedReflection);
+    } else if (savedReflection && savedReflection.trim().length <= 2) {
+      // Clear localStorage if it contains very short/meaningless content
+      localStorage.removeItem('greaterJoyReflection');
     }
   }, []);
 
-  // Save reflection to localStorage when it changes
+  // Save reflection to localStorage when it changes (only if it has meaningful content)
   useEffect(() => {
-    if (reflection) {
+    if (reflection && reflection.trim().length > 0) {
       localStorage.setItem('greaterJoyReflection', reflection);
     }
   }, [reflection]);
