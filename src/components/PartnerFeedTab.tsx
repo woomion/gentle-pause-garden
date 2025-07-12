@@ -14,23 +14,86 @@ const PartnerFeedTab = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
-  const [sentInvites, setSentInvites] = useState<Array<{ email: string; status: 'pending' | 'linked' }>>([]);
+  const [sentInvites, setSentInvites] = useState<Array<{ email: string; status: 'pending' | 'accepted' }>>([]);
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
 
-  // Load pending invites from localStorage on component mount
+  // Load invitations from database on component mount
   useEffect(() => {
-    const storedInvites = localStorage.getItem('pendingInvites');
-    if (storedInvites) {
-      setSentInvites(JSON.parse(storedInvites));
-    }
+    const loadInvitations = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: invitations } = await supabase
+        .from('partner_invitations')
+        .select('invitee_email, status')
+        .eq('inviter_id', user.id);
+
+      if (invitations) {
+        setSentInvites(invitations.map(inv => ({
+          email: inv.invitee_email,
+          status: inv.status === 'accepted' ? 'accepted' : 'pending'
+        })));
+      }
+    };
+
+    loadInvitations();
   }, []);
 
-  // Save pending invites to localStorage whenever sentInvites changes
+  // Handle invitation acceptance from URL parameter
   useEffect(() => {
-    localStorage.setItem('pendingInvites', JSON.stringify(sentInvites));
-  }, [sentInvites]);
+    const handleInvitationAcceptance = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const inviteId = urlParams.get('invite');
+      
+      if (!inviteId) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      try {
+        // Update invitation status and set invitee_id
+        const { error } = await supabase
+          .from('partner_invitations')
+          .update({ 
+            status: 'accepted',
+            invitee_id: user.id 
+          })
+          .eq('id', inviteId)
+          .eq('status', 'pending');
+
+        if (!error) {
+          toast({
+            title: "Invitation accepted!",
+            description: "You are now connected as pause partners.",
+          });
+          
+          // Clear the invite parameter from URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('invite');
+          window.history.replaceState({}, '', url.toString());
+          
+          // Reload invitations to show updated status
+          const { data: invitations } = await supabase
+            .from('partner_invitations')
+            .select('invitee_email, status')
+            .eq('inviter_id', user.id);
+
+          if (invitations) {
+            setSentInvites(invitations.map(inv => ({
+              email: inv.invitee_email,
+              status: inv.status === 'accepted' ? 'accepted' : 'pending'
+            })));
+          }
+        }
+      } catch (error) {
+        console.error('Error accepting invitation:', error);
+      }
+    };
+
+    handleInvitationAcceptance();
+  }, [toast]);
 
   // Mock data for now to avoid subscription issues
   const partners: any[] = []; // Empty for now to show the invite section
@@ -208,8 +271,8 @@ const PartnerFeedTab = () => {
                           Invite sent
                         </p>
                         <Badge 
-                          variant={invite.status === 'linked' ? 'default' : 'outline'}
-                          className={`text-xs ${invite.status === 'linked' 
+                          variant={invite.status === 'accepted' ? 'default' : 'outline'}
+                          className={`text-xs ${invite.status === 'accepted' 
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
                             : 'border-yellow-400 text-yellow-700 bg-yellow-50 dark:border-yellow-500 dark:text-yellow-300 dark:bg-yellow-950'
                           }`}
