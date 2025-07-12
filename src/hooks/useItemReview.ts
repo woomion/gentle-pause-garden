@@ -41,6 +41,9 @@ export const useItemReview = () => {
   }, [user]);
 
   const handleItemDecided = async (id: string) => {
+    console.log('🔍 useItemReview: handleItemDecided called for item:', id);
+    console.log('🔍 useItemReview: current items count:', itemsForReview.length);
+    
     // Store the current length before removal
     const currentLength = itemsForReview.length;
     
@@ -52,6 +55,7 @@ export const useItemReview = () => {
     
     // Update the items list
     const updatedItems = itemsForReview.filter(item => item.id !== id);
+    console.log('🔍 useItemReview: updated items count:', updatedItems.length);
     setItemsForReview(updatedItems);
     
     // If this was the last item (currentLength was 1), trigger confetti

@@ -45,7 +45,6 @@ export const useItemDecisions = () => {
       
       // Remove from paused items
       onDelete(item.id);
-      onClose();
       
       // Show success toast
       toast({
@@ -98,7 +97,6 @@ export const useItemDecisions = () => {
       
       // Remove from paused items
       onDelete(item.id);
-      onClose();
       
       // Show success toast that auto-dismisses
       const toastInstance = toast({
