@@ -440,15 +440,14 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   accept="image/*"
                   onChange={handleFileChange}
                   className="w-full text-sm text-gray-500 dark:text-gray-300
-                             file:py-2 file:px-4
+                             file:py-3 file:px-4
                              file:rounded-xl file:border-0
                              file:text-sm file:font-medium
                              file:bg-lavender file:text-dark-gray
                              hover:file:bg-lavender/90
                              rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 h-12
                              overflow-hidden
-                             flex items-center justify-center
-                             file:mr-auto file:ml-auto"
+                             flex items-center"
                 />
               )}
               
