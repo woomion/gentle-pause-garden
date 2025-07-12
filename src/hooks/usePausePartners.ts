@@ -23,13 +23,17 @@ export const usePausePartners = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  // Set up real-time subscriptions
+  // Set up real-time subscriptions with unique channel per instance
   useEffect(() => {
     if (!user) return;
 
-    // Subscribe to changes in partner_invitations table with unique channel name
+    // Create a unique channel name to avoid conflicts between multiple hook instances
+    const channelName = `partner-invitations-${user.id}-${Math.random().toString(36).substring(7)}`;
+    
+    console.log('Creating real-time subscription:', channelName);
+    
     const channel = supabase
-      .channel(`partner-invitations-${user.id}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -37,14 +41,18 @@ export const usePausePartners = () => {
           schema: 'public',
           table: 'partner_invitations',
         },
-        () => {
+        (payload) => {
+          console.log('Real-time update received:', payload);
           // Reload partners and invitations when any change occurs
           loadPartners();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up subscription:', channelName);
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
