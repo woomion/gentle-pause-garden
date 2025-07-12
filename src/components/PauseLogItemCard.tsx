@@ -24,7 +24,10 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
   return (
     <div 
       className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600 relative cursor-pointer hover:bg-white/70 dark:hover:bg-white/15 transition-colors"
-      onClick={() => onClick(item)}
+      onClick={(e) => {
+        console.log('🗑️ PauseLogItemCard: Card clicked for item:', item.id);
+        onClick(item);
+      }}
     >
       <AlertDialog>
         <AlertDialogTrigger asChild>
@@ -43,8 +46,12 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onDelete(item.id)}>
+            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => {
+              e.stopPropagation();
+              console.log('🗑️ PauseLogItemCard: Delete confirmed for item:', item.id);
+              onDelete(item.id);
+            }}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
