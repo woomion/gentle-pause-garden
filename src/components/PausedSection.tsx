@@ -16,7 +16,14 @@ const PausedSection = () => {
   const { user } = useAuth();
 
   const sortItemsByDate = useCallback((items: (PausedItem | LocalPausedItem)[]) => {
-    return items.sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
+    return items
+      .filter(item => {
+        // Filter out items that are shared with partners (those should only appear in Partner Pauses)
+        // Check if the item has sharedWithPartners property and if it's not empty
+        const sharedWithPartners = (item as any).sharedWithPartners;
+        return !sharedWithPartners || sharedWithPartners.length === 0;
+      })
+      .sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
   }, []);
 
   useEffect(() => {
