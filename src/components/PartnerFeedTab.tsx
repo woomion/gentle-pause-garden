@@ -521,18 +521,7 @@ const PartnerFeedTab = () => {
       {partners.length > 0 && !showInviteSection && (
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-                  Shared Pauses
-                </h2>
-                <p className="text-base mb-1" style={{ color: '#6b6b6b' }}>
-                  Mindful choices, made together.
-                </p>
-                <p className="text-sm mb-3" style={{ color: '#6b6b6b' }}>
-                  (You've chosen to pause on these with a partner—slow down and reflect, side by side.)
-                </p>
-              </div>
+            <div className="flex items-start justify-end mb-4">
               <Button 
                 variant="outline" 
                 size="sm"
@@ -543,6 +532,35 @@ const PartnerFeedTab = () => {
                 <span>+</span>
                 <span className="hidden sm:inline">Add another partner</span>
               </Button>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+                Shared Pauses
+              </h2>
+              <p className="text-base mb-1" style={{ color: '#6b6b6b' }}>
+                Mindful choices, made together.
+              </p>
+              <p className="text-sm mb-3" style={{ color: '#6b6b6b' }}>
+                (You've chosen to pause on these with a partner—slow down and reflect, side by side.)
+              </p>
+              {sharedItems.length > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm text-muted-foreground">Viewing with:</span>
+                  <Select value={selectedPartner} onValueChange={setSelectedPartner}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="All Partners" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Partners</SelectItem>
+                      {partners.map((partner) => (
+                        <SelectItem key={partner.partner_id} value={partner.partner_name}>
+                          {partner.partner_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -555,22 +573,6 @@ const PartnerFeedTab = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Sort/Filter Dropdown */}
-                <div className="flex justify-end">
-                  <Select value={selectedPartner} onValueChange={setSelectedPartner}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Sort by partner" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Partners</SelectItem>
-                      {partners.map((partner) => (
-                        <SelectItem key={partner.partner_id} value={partner.partner_name}>
-                          {partner.partner_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
 
                 {/* Shared Items Carousel */}
                 <div className="space-y-4">
