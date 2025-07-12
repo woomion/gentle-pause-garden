@@ -41,40 +41,13 @@ const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink, onDelete }: Pau
       <DialogContent className="max-w-sm mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600">
         <DialogHeader>
           <DialogTitle className="sr-only">Pause Log Item Details</DialogTitle>
-          {/* Delete button in top right corner */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button 
-                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <X size={16} />
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Delete from Paused Decision Log</AlertDialogTitle>
-                <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-                  Are you sure you want to delete "{item?.itemName}" from your Paused Decision Log? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">Cancel</AlertDialogCancel>
-                <AlertDialogAction 
-                  onClick={() => {
-                    console.log('🗑️ PauseLogItemDetail: Delete button clicked for item:', item?.id);
-                    if (item) {
-                      onDelete(item.id);
-                      onClose(); // Close the detail modal after deletion
-                    }
-                  }}
-                  className="rounded-2xl bg-red-500 hover:bg-red-600 text-white"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {/* Close button in top right corner */}
+          <button 
+            className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+            onClick={onClose}
+          >
+            <X size={16} />
+          </button>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -164,6 +137,51 @@ const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink, onDelete }: Pau
               </AlertDialog>
             </div>
           )}
+
+          {/* Delete from history CTA */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-600 mt-4">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 underline transition-colors">
+                  Delete from history
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Delete from Paused Decision Log</AlertDialogTitle>
+                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                    Are you sure you want to delete "{item?.itemName}" from your Paused Decision Log? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={() => {
+                      console.log('🗑️ PauseLogItemDetail: Delete button clicked for item:', item?.id);
+                      if (item) {
+                        onDelete(item.id);
+                        onClose(); // Close the detail modal after deletion
+                      }
+                    }}
+                    className="rounded-2xl text-white transition-colors"
+                    style={{
+                      backgroundColor: '#777777',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#D66C6C';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#777777';
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
