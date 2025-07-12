@@ -383,23 +383,25 @@ const PartnerFeedTab = () => {
       {(partners.length === 0 || showInviteSection) && (
         <Card>
           <CardHeader>
+            {partners.length > 0 && showInviteSection && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowInviteSection(false)}
+                className="text-muted-foreground hover:text-foreground mb-4 self-start"
+              >
+                ← Back to shared pauses
+              </Button>
+            )}
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-black dark:text-[#F9F5EB]">Your Pause Partners</CardTitle>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+                  Your Pause Partners
+                </h2>
+                <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
                   Connect with someone you trust to help you reflect before you spend.
                 </p>
               </div>
-              {partners.length > 0 && showInviteSection && (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setShowInviteSection(false)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  ← Back to Shared Pauses
-                </Button>
-              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
