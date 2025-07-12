@@ -101,155 +101,157 @@ const PartnerFeedTab = () => {
 
   return (
     <div className="mb-8 space-y-8">
-      {/* Section 1: Partner Connection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-black dark:text-[#F9F5EB]">Your Pause Partners</CardTitle>
-          <p className="text-muted-foreground">
-            Connect with someone you trust to help you reflect before you spend.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              type="email"
-              placeholder="partner@example.com"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendInvite()}
-              className="flex-1"
-            />
-            <Button 
-              onClick={handleSendInvite} 
-              disabled={isInviting || loading}
-              className="bg-invite-button text-invite-button-foreground hover:bg-invite-button/90"
-            >
-              {isInviting ? 'Sending...' : 'Send Invite'}
-            </Button>
-          </div>
+      {/* Show Partner Connection section if no partners */}
+      {partners.length === 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-black dark:text-[#F9F5EB]">Your Pause Partners</CardTitle>
+            <p className="text-muted-foreground">
+              Connect with someone you trust to help you reflect before you spend.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="partner@example.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendInvite()}
+                className="flex-1"
+              />
+              <Button 
+                onClick={handleSendInvite} 
+                disabled={isInviting || loading}
+                className="bg-invite-button text-invite-button-foreground hover:bg-invite-button/90"
+              >
+                {isInviting ? 'Sending...' : 'Send Invite'}
+              </Button>
+            </div>
 
-          {partners.length === 0 ? (
             <div className="text-center py-6">
               <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
               <p className="text-muted-foreground">
                 Mindful decisions are easier with support. Send an invite to start pausing together.
               </p>
             </div>
-          ) : (
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-black dark:text-[#F9F5EB]">Connected Partners</h4>
-              <div className="flex flex-wrap gap-2">
-                {partners.map((partner) => (
-                  <Badge key={partner.partner_id} variant="secondary" className="flex items-center gap-2">
-                    <Avatar className="h-4 w-4">
-                      <AvatarFallback className="text-xs">
-                        {getInitials(partner.partner_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {partner.partner_name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Section 2: Shared Pauses Feed */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-black dark:text-[#F9F5EB]">Shared Pauses</CardTitle>
-          <p className="text-muted-foreground">
-            See items you've chosen to pause on together.
-          </p>
-        </CardHeader>
-        <CardContent>
-          {sharedItems.length === 0 ? (
-            <div className="text-center py-8">
-              <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-              <p className="text-muted-foreground">
-                No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Sort/Filter Dropdown */}
-              <div className="flex justify-end">
-                <Select value={selectedPartner} onValueChange={setSelectedPartner}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Sort by partner" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Partners</SelectItem>
-                    {partners.map((partner) => (
-                      <SelectItem key={partner.partner_id} value={partner.partner_name}>
-                        {partner.partner_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+      {/* Show Shared Pauses section if has partners */}
+      {partners.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-black dark:text-[#F9F5EB]">Shared Pauses</CardTitle>
+                <p className="text-muted-foreground">
+                  See items you've chosen to pause on together.
+                </p>
               </div>
-
-              {/* Shared Items List */}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  // TODO: Open add partner modal or expand invite section
+                }}
+                className="flex items-center gap-1 text-xs"
+              >
+                <Users className="h-3 w-3" />
+                <span>+</span>
+                <span className="hidden sm:inline">Add another partner</span>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {sharedItems.length === 0 ? (
+              <div className="text-center py-8">
+                <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                <p className="text-muted-foreground">
+                  No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
+                </p>
+              </div>
+            ) : (
               <div className="space-y-4">
-                {sharedItems.map((item) => (
-                  <div key={item.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex gap-4">
-                      {/* Item Image */}
-                      <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
-                        <img 
-                          src={item.imageUrl} 
-                          alt={item.name}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      </div>
+                {/* Sort/Filter Dropdown */}
+                <div className="flex justify-end">
+                  <Select value={selectedPartner} onValueChange={setSelectedPartner}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Sort by partner" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Partners</SelectItem>
+                      {partners.map((partner) => (
+                        <SelectItem key={partner.partner_id} value={partner.partner_name}>
+                          {partner.partner_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                      {/* Item Details */}
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-start justify-between">
-                          <h4 className="font-medium text-black dark:text-[#F9F5EB]">{item.name}</h4>
-                          <span className="font-semibold text-black dark:text-[#F9F5EB]">
-                            ${item.price}
-                          </span>
+                {/* Shared Items List */}
+                <div className="space-y-4">
+                  {sharedItems.map((item) => (
+                    <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex gap-4">
+                        {/* Item Image */}
+                        <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
+                          <img 
+                            src={item.imageUrl} 
+                            alt={item.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
                         </div>
 
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Avatar className="h-4 w-4">
-                              <AvatarFallback className="text-xs">
-                                {item.addedBy === 'You' ? 'Y' : item.partnerInitials}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>Added by {item.addedBy}</span>
+                        {/* Item Details */}
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-start justify-between">
+                            <h4 className="font-medium text-black dark:text-[#F9F5EB]">{item.name}</h4>
+                            <span className="font-semibold text-black dark:text-[#F9F5EB]">
+                              ${item.price}
+                            </span>
                           </div>
-                          
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{item.timeLeft}</span>
+
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Avatar className="h-4 w-4">
+                                <AvatarFallback className="text-xs">
+                                  {item.addedBy === 'You' ? 'Y' : item.partnerInitials}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>Added by {item.addedBy}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              <span>{item.timeLeft}</span>
+                            </div>
                           </div>
-                        </div>
 
-                        {item.reflection && (
-                          <p className="text-sm text-muted-foreground italic">
-                            "{item.reflection}"
-                          </p>
-                        )}
+                          {item.reflection && (
+                            <p className="text-sm text-muted-foreground italic">
+                              "{item.reflection}"
+                            </p>
+                          )}
 
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="flex items-center gap-1">
-                            <Tag className="h-3 w-3" />
-                            With {item.partnerName}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="flex items-center gap-1">
+                              <Tag className="h-3 w-3" />
+                              With {item.partnerName}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
