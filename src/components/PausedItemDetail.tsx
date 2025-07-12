@@ -23,6 +23,15 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
 
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
 
+  console.log('🔍 PausedItemDetail rendered:', {
+    isOpen,
+    itemName: item.itemName,
+    hasNotes: !!item.notes,
+    notesLength: item.notes?.length || 0,
+    windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'undefined',
+    windowHeight: typeof window !== 'undefined' ? window.innerHeight : 'undefined'
+  });
+
   const handleDelete = () => {
     onDelete(item.id);
     onClose();
@@ -36,7 +45,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-sm mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600"
+        className="max-w-sm w-[90vw] mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto"
       >
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
@@ -80,7 +89,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete }: PausedItemDetailP
             {/* Only show notes if they exist and aren't empty */}
             {item.notes && item.notes.trim() && (
               <div className="pt-2">
-                <p className="text-gray-600 dark:text-gray-300 text-sm">
+                <p className="text-gray-600 dark:text-gray-300 text-sm break-words">
                   <strong>Note:</strong> {item.notes}
                 </p>
               </div>
