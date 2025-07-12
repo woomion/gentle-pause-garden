@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -73,8 +74,45 @@ const PartnerFeedTab = () => {
 
     setIsInviting(true);
     
-    // Simulate sending invite for now
-    setTimeout(() => {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Get user profile for name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name')
+        .eq('id', user.id)
+        .single();
+
+      // Create invitation record
+      const { data: invitation, error: inviteError } = await supabase
+        .from('partner_invitations')
+        .insert({
+          inviter_id: user.id,
+          invitee_email: inviteEmail.trim(),
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (inviteError) throw inviteError;
+
+      // Send invitation email
+      const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
+        body: {
+          inviterName: profile?.first_name || 'Someone',
+          inviterEmail: user.email,
+          inviteeEmail: inviteEmail.trim(),
+          invitationId: invitation.id
+        }
+      });
+
+      if (emailError) throw emailError;
+
       // Add the sent invite to the list
       setSentInvites(prev => [...prev, { email: inviteEmail.trim(), status: 'pending' }]);
       
@@ -83,8 +121,16 @@ const PartnerFeedTab = () => {
         description: `Invitation sent to ${inviteEmail}`,
       });
       setInviteEmail('');
+    } catch (error: any) {
+      console.error('Error sending invite:', error);
+      toast({
+        title: "Failed to send invite",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsInviting(false);
-    }, 1000);
+    }
   };
 
   const getInitials = (name: string) => {
