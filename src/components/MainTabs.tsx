@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Timer, BarChart3 } from 'lucide-react';
+import { User, Link, BarChart3 } from 'lucide-react';
 import PausedSection from './PausedSection';
 import PauseLogSection from './PauseLogSection';
 import PartnerFeedTab from './PartnerFeedTab';
@@ -22,8 +22,8 @@ const MainTabs = () => {
             color: activeTab === 'paused' ? '#7A5DD9' : 'inherit'
           }}
         >
-          <Timer className="h-5 w-5 sm:h-4 sm:w-4" />
-          <span className="text-sm sm:text-sm">Paused</span>
+          <User className="h-5 w-5 sm:h-4 sm:w-4" />
+          <span className="text-sm sm:text-sm">My Pauses</span>
         </TabsTrigger>
         <TabsTrigger 
           value="partner-feed" 
@@ -33,8 +33,12 @@ const MainTabs = () => {
             color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
           }}
         >
-          <Users className="h-5 w-5 sm:h-4 sm:w-4" />
-          <span className="text-sm sm:text-sm">Partners</span>
+          <div className="flex items-center gap-1">
+            <User className="h-4 w-4 sm:h-3 sm:w-3" />
+            <Link className="h-3 w-3 sm:h-2 sm:w-2" />
+            <User className="h-4 w-4 sm:h-3 sm:w-3" />
+          </div>
+          <span className="text-sm sm:text-sm">Partner Pauses</span>
         </TabsTrigger>
       </TabsList>
 
