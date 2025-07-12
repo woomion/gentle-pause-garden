@@ -404,18 +404,18 @@ const PartnerFeedTab = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleDeleteInvite(invite.email)}
-                                className="h-6 w-6 p-0 text-muted-foreground hover:text-muted-foreground/80"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
                                 onClick={() => handleResendInvite(invite.email)}
                                 className="h-auto p-1 text-xs text-muted-foreground hover:text-muted-foreground/80"
                               >
                                 resend invite
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteInvite(invite.email)}
+                                className="h-6 w-6 p-0 text-muted-foreground hover:text-muted-foreground/80"
+                              >
+                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </div>
                           )}
