@@ -388,9 +388,9 @@ const PartnerFeedTab = () => {
                 variant="ghost" 
                 size="sm"
                 onClick={() => setShowInviteSection(false)}
-                className="text-muted-foreground hover:text-foreground mb-4 self-start"
+                className="text-muted-foreground hover:text-foreground mb-2 self-start"
               >
-                ← Back to shared pauses
+                ↩ Back to shared pauses
               </Button>
             )}
             <div className="flex items-center justify-between">
@@ -521,7 +521,7 @@ const PartnerFeedTab = () => {
       {partners.length > 0 && !showInviteSection && (
         <Card>
           <CardHeader>
-            <div className="flex items-start justify-end mb-1">
+            <div className="flex items-start justify-end mb-0">
               <Button 
                 variant="outline" 
                 size="sm"
