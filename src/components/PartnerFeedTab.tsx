@@ -521,8 +521,10 @@ const PartnerFeedTab = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-black dark:text-[#F9F5EB]">Shared Pauses</CardTitle>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+                  Shared Pauses
+                </h2>
+                <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
                   See items you've chosen to pause on together.
                 </p>
               </div>
