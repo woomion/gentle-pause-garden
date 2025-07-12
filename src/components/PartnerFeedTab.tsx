@@ -149,29 +149,29 @@ const PartnerFeedTab = () => {
               <div className="space-y-3">
                 {/* Show sent invites */}
                 {sentInvites.map((invite, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
+                  <div key={index} className="flex items-start justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-start gap-3 flex-1">
                       <Avatar className={`h-8 w-8 ${invite.status === 'pending' ? 'bg-yellow-100 border-2 border-yellow-400 dark:bg-yellow-900 dark:border-yellow-500' : ''}`}>
                         <AvatarFallback className={`text-sm ${invite.status === 'pending' ? 'text-yellow-800 dark:text-yellow-200' : ''}`}>
                           {invite.email.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
+                      <div className="flex-1">
                         <p className="text-sm font-medium text-black dark:text-[#F9F5EB]">{invite.email}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground mb-1">
                           Invite sent
                         </p>
+                        <Badge 
+                          variant={invite.status === 'linked' ? 'default' : 'outline'}
+                          className={`text-xs ${invite.status === 'linked' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
+                            : 'border-yellow-400 text-yellow-700 bg-yellow-50 dark:border-yellow-500 dark:text-yellow-300 dark:bg-yellow-950'
+                          }`}
+                        >
+                          {invite.status === 'pending' ? 'Pending' : 'Linked!'}
+                        </Badge>
                       </div>
                     </div>
-                    <Badge 
-                      variant={invite.status === 'linked' ? 'default' : 'outline'}
-                      className={invite.status === 'linked' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
-                        : 'border-yellow-400 text-yellow-700 bg-yellow-50 dark:border-yellow-500 dark:text-yellow-300 dark:bg-yellow-950'
-                      }
-                    >
-                      {invite.status === 'pending' ? 'Pending' : 'Linked!'}
-                    </Badge>
                   </div>
                 ))}
                 
