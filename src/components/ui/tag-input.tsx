@@ -50,7 +50,7 @@ export const TagInput: React.FC<TagInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
       e.preventDefault();
       if (inputValue.trim()) {
         addTag(inputValue);
@@ -58,6 +58,13 @@ export const TagInput: React.FC<TagInputProps> = ({
     } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
       removeTag(value[value.length - 1]);
     }
+  };
+
+  const handleBlur = () => {
+    if (inputValue.trim()) {
+      addTag(inputValue);
+    }
+    setTimeout(() => setShowSuggestions(false), 200);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,7 +116,7 @@ export const TagInput: React.FC<TagInputProps> = ({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue && setShowSuggestions(filteredSuggestions.length > 0)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+          onBlur={handleBlur}
           placeholder={value.length === 0 ? placeholder : ""}
           className="flex-1 border-0 bg-transparent p-0 outline-none placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 dark:text-[#F9F5EB]"
         />
