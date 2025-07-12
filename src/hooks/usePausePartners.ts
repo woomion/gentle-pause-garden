@@ -27,9 +27,9 @@ export const usePausePartners = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Subscribe to changes in partner_invitations table
+    // Subscribe to changes in partner_invitations table with unique channel name
     const channel = supabase
-      .channel('partner-invitations-changes')
+      .channel(`partner-invitations-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -47,7 +47,7 @@ export const usePausePartners = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user?.id]);
 
   const loadPartners = async () => {
     if (!user) {
