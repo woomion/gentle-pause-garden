@@ -18,13 +18,13 @@ const PausedSection = () => {
   const sortItemsByDate = useCallback((items: (PausedItem | LocalPausedItem)[]) => {
     return items
       .filter(item => {
-        // Filter out items that are shared with partners (those should only appear in Partner Pauses)
-        // Check if the item has sharedWithPartners property and if it's not empty
-        const sharedWithPartners = (item as any).sharedWithPartners;
-        return !sharedWithPartners || sharedWithPartners.length === 0;
+        // Only show items that belong to the current user
+        // Items from other users (shared with me) should only appear in Partner Pauses section
+        const itemUserId = (item as any).originalUserId || (item as any).user_id;
+        return user ? itemUserId === user.id : true; // For guest users, show all local items
       })
       .sort((a, b) => new Date(b.pausedAt).getTime() - new Date(a.pausedAt).getTime());
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const updateItems = () => {

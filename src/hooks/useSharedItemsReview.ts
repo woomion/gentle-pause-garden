@@ -33,13 +33,25 @@ export const useSharedItemsReview = () => {
         // Filter for shared items with proper null checks
         const sharedItems = allReviewItems.filter(item => {
           try {
-            return (
+            // Items shared WITH me: my ID is in sharedWithPartners AND it's not my original item
+            const isSharedWithMe = (
               item?.sharedWithPartners && 
               Array.isArray(item.sharedWithPartners) &&
               item.sharedWithPartners.includes(user.id) &&
               item.originalUserId && 
               item.originalUserId !== user.id
             );
+            
+            console.log('Checking shared item:', {
+              itemId: item.id,
+              itemTitle: item.itemName,
+              sharedWithPartners: item.sharedWithPartners,
+              itemUserId: item.originalUserId,
+              currentUserId: user.id,
+              isSharedWithMe
+            });
+            
+            return isSharedWithMe;
           } catch (error) {
             console.error('Error filtering shared item:', error, item);
             return false;
