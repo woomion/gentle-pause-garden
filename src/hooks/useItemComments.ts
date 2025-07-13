@@ -143,28 +143,66 @@ export const useItemComments = (userId: string | null) => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'item_comments'
         },
-        () => {
-          console.log('🔔 Comment change detected, reloading counts');
-          if (isMounted) {
-            loadCommentCounts();
+        (payload) => {
+          console.log('🔔 New comment inserted, updating counts instantly');
+          const newComment = payload.new as any;
+          
+          if (isMounted && newComment.user_id !== userId) {
+            // Instantly update unread count for comments from other users
+            setUnreadComments(prev => {
+              const newMap = new Map(prev);
+              const currentCount = newMap.get(newComment.item_id) || 0;
+              newMap.set(newComment.item_id, currentCount + 1);
+              return newMap;
+            });
+            
+            // Update comment count as well
+            setCommentCounts(prev => {
+              const newMap = new Map(prev);
+              const existing = newMap.get(newComment.item_id);
+              if (existing) {
+                newMap.set(newComment.item_id, {
+                  ...existing,
+                  comment_count: existing.comment_count + 1,
+                  last_comment_at: newComment.created_at
+                });
+              } else {
+                newMap.set(newComment.item_id, {
+                  item_id: newComment.item_id,
+                  comment_count: 1,
+                  last_comment_at: newComment.created_at
+                });
+              }
+              return newMap;
+            });
           }
         }
       )
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'comment_read_status'
         },
-        () => {
-          console.log('🔔 Read status change detected, reloading counts');
-          if (isMounted) {
-            loadCommentCounts();
+        (payload) => {
+          console.log('🔔 Read status change detected, updating counts');
+          const newReadStatus = payload.new as any;
+          
+          if (isMounted && newReadStatus.user_id === userId) {
+            // Instantly update unread count when user marks as read
+            setUnreadComments(prev => {
+              const newMap = new Map(prev);
+              const currentCount = newMap.get(newReadStatus.item_id) || 0;
+              if (currentCount > 0) {
+                newMap.set(newReadStatus.item_id, Math.max(0, currentCount - 1));
+              }
+              return newMap;
+            });
           }
         }
       )
