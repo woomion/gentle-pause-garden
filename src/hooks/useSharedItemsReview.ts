@@ -15,6 +15,7 @@ export const useSharedItemsReview = () => {
     const updateSharedItemsForReview = () => {
       // Early return if no user or partners still loading or component unmounted
       if (!user || partnersLoading || !isMounted) {
+        console.log('🔍 SharedItemsReview - Early return:', { user: !!user, partnersLoading, isMounted });
         if (isMounted) {
           setSharedItemsForReview([]);
           setPartnerNames([]);
@@ -25,15 +26,17 @@ export const useSharedItemsReview = () => {
       try {
         // Get all items for review - only if store is loaded
         if (!supabasePausedItemsStore.isDataLoaded()) {
+          console.log('🔍 SharedItemsReview - Store not loaded yet');
           return;
         }
         
         const allReviewItems = supabasePausedItemsStore.getItemsForReview();
+        console.log('🔍 SharedItemsReview - All review items:', allReviewItems.length, allReviewItems);
         
         // Filter for shared items with proper null checks
         const sharedItems = allReviewItems.filter(item => {
           try {
-            // Items shared WITH me: my ID is in sharedWithPartners AND it's not my original item
+            // Case 1: Items shared WITH me (I'm in sharedWithPartners, not the owner)
             const isSharedWithMe = (
               item?.sharedWithPartners && 
               Array.isArray(item.sharedWithPartners) &&
@@ -42,21 +45,35 @@ export const useSharedItemsReview = () => {
               item.originalUserId !== user.id
             );
             
-            console.log('Checking shared item:', {
+            // Case 2: Items I shared WITH partners (I'm the owner, has sharedWithPartners)
+            const isMySharedItem = (
+              item?.sharedWithPartners && 
+              Array.isArray(item.sharedWithPartners) &&
+              item.sharedWithPartners.length > 0 &&
+              item.originalUserId === user.id
+            );
+            
+            const isSharedItem = isSharedWithMe || isMySharedItem;
+            
+            console.log('🔍 Checking shared item:', {
               itemId: item.id,
               itemTitle: item.itemName,
               sharedWithPartners: item.sharedWithPartners,
               itemUserId: item.originalUserId,
               currentUserId: user.id,
-              isSharedWithMe
+              isSharedWithMe,
+              isMySharedItem,
+              isSharedItem
             });
             
-            return isSharedWithMe;
+            return isSharedItem;
           } catch (error) {
             console.error('Error filtering shared item:', error, item);
             return false;
           }
         });
+
+        console.log('🔍 SharedItemsReview - Filtered shared items:', sharedItems.length, sharedItems);
 
         if (!isMounted) return; // Check if still mounted
 
@@ -77,6 +94,11 @@ export const useSharedItemsReview = () => {
           if (partner) {
             names.push(partner.partner_name);
           }
+        });
+
+        console.log('🔍 SharedItemsReview - Final state:', {
+          sharedItemsCount: sharedItems.length,
+          partnerNames: names
         });
 
         if (isMounted) {
