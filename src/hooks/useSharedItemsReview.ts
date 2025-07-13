@@ -7,46 +7,66 @@ export const useSharedItemsReview = () => {
   const [sharedItemsForReview, setSharedItemsForReview] = useState<PausedItem[]>([]);
   const [partnerNames, setPartnerNames] = useState<string[]>([]);
   const { user } = useAuth();
-  const { partners } = usePausePartners();
+  const { partners, loading: partnersLoading } = usePausePartners();
 
   useEffect(() => {
     const updateSharedItemsForReview = () => {
-      if (!user) {
+      // Early return if no user or partners still loading
+      if (!user || partnersLoading) {
         setSharedItemsForReview([]);
         setPartnerNames([]);
         return;
       }
 
-      // Get all items for review
-      const allReviewItems = supabasePausedItemsStore.getItemsForReview();
-      
-      // Filter for shared items (items where current user is in sharedWithPartners but not the owner)
-      const sharedItems = allReviewItems.filter(item => 
-        item.sharedWithPartners && 
-        item.sharedWithPartners.includes(user.id) &&
-        item.originalUserId !== user.id
-      );
-
-      setSharedItemsForReview(sharedItems);
-
-      // Extract unique partner names from shared items
-      const uniquePartnerIds = new Set<string>();
-      sharedItems.forEach(item => {
-        if (item.originalUserId) {
-          uniquePartnerIds.add(item.originalUserId);
+      try {
+        // Get all items for review - only if store is loaded
+        if (!supabasePausedItemsStore.isDataLoaded()) {
+          return;
         }
-      });
+        
+        const allReviewItems = supabasePausedItemsStore.getItemsForReview();
+        
+        // Filter for shared items with proper null checks
+        const sharedItems = allReviewItems.filter(item => {
+          try {
+            return (
+              item?.sharedWithPartners && 
+              Array.isArray(item.sharedWithPartners) &&
+              item.sharedWithPartners.includes(user.id) &&
+              item.originalUserId && 
+              item.originalUserId !== user.id
+            );
+          } catch (error) {
+            console.error('Error filtering shared item:', error, item);
+            return false;
+          }
+        });
 
-      // Map partner IDs to names
-      const names: string[] = [];
-      uniquePartnerIds.forEach(partnerId => {
-        const partner = partners.find(p => p.partner_id === partnerId);
-        if (partner) {
-          names.push(partner.partner_name);
-        }
-      });
+        setSharedItemsForReview(sharedItems);
 
-      setPartnerNames(names);
+        // Extract unique partner names from shared items
+        const uniquePartnerIds = new Set<string>();
+        sharedItems.forEach(item => {
+          if (item.originalUserId) {
+            uniquePartnerIds.add(item.originalUserId);
+          }
+        });
+
+        // Map partner IDs to names
+        const names: string[] = [];
+        uniquePartnerIds.forEach(partnerId => {
+          const partner = partners.find(p => p.partner_id === partnerId);
+          if (partner) {
+            names.push(partner.partner_name);
+          }
+        });
+
+        setPartnerNames(names);
+      } catch (error) {
+        console.error('Error in updateSharedItemsForReview:', error);
+        setSharedItemsForReview([]);
+        setPartnerNames([]);
+      }
     };
 
     updateSharedItemsForReview();
@@ -61,7 +81,7 @@ export const useSharedItemsReview = () => {
       unsubscribe();
       clearInterval(interval);
     };
-  }, [user, partners]);
+  }, [user, partners, partnersLoading]);
 
   return {
     sharedItemsForReview,

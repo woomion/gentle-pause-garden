@@ -213,42 +213,37 @@ class SupabasePausedItemsStore {
   }
 
   getItemsForReview(): PausedItem[] {
-    const now = new Date();
-    console.log('🔍 getItemsForReview DETAILED DEBUG:');
-    console.log('🔍 Current time:', now.toISOString());
-    console.log('🔍 Current timestamp:', now.getTime());
-    console.log('🔍 Total items:', this.items.length);
-    
-    const reviewItems = this.items.filter(item => {
-      const checkInTimestamp = item.checkInDate.getTime();
-      const nowTimestamp = now.getTime();
-      const isReady = checkInTimestamp <= nowTimestamp;
-      const timeDiffMs = checkInTimestamp - nowTimestamp;
-      const timeDiffMinutes = Math.round(timeDiffMs / (1000 * 60));
-      const timeDiffHours = Math.round(timeDiffMs / (1000 * 60 * 60));
+    // Return empty array if not loaded or no items
+    if (!this.isLoaded || !this.items.length) {
+      return [];
+    }
+
+    try {
+      const now = new Date();
       
-      console.log(`🔍 Item "${item.itemName}":`, {
-        checkInDate: item.checkInDate.toISOString(),
-        checkInTimestamp,
-        nowTimestamp,
-        timeDiffMs,
-        timeDiffMinutes,
-        timeDiffHours,
-        isReady: isReady ? '✅ READY' : '❌ NOT READY',
-        comparison: `${checkInTimestamp} <= ${nowTimestamp} = ${isReady}`
+      const reviewItems = this.items.filter(item => {
+        try {
+          // Ensure item has required properties
+          if (!item || !item.checkInDate) {
+            return false;
+          }
+          
+          const checkInTimestamp = item.checkInDate.getTime();
+          const nowTimestamp = now.getTime();
+          const isReady = checkInTimestamp <= nowTimestamp;
+          
+          return isReady;
+        } catch (error) {
+          console.error('Error filtering review item:', error, item);
+          return false;
+        }
       });
-      return isReady;
-    });
-    
-    console.log('🔍 Items ready for review:', reviewItems.length);
-    console.log('🔍 Review items:', reviewItems.map(item => ({
-      id: item.id,
-      itemName: item.itemName,
-      checkInDate: item.checkInDate.toISOString(),
-      checkInTime: item.checkInTime
-    })));
-    
-    return reviewItems;
+      
+      return reviewItems;
+    } catch (error) {
+      console.error('Error in getItemsForReview:', error);
+      return [];
+    }
   }
 
   async removeItem(id: string): Promise<void> {
