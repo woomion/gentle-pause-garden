@@ -12,7 +12,11 @@ export const useItemComments = (userId: string | null) => {
   const [unreadComments, setUnreadComments] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setCommentCounts(new Map());
+      setUnreadComments(new Map());
+      return;
+    }
 
     loadCommentCounts();
 
@@ -38,7 +42,11 @@ export const useItemComments = (userId: string | null) => {
   }, [userId]);
 
   const loadCommentCounts = async () => {
-    if (!userId) return;
+    if (!userId) {
+      setCommentCounts(new Map());
+      setUnreadComments(new Map());
+      return;
+    }
 
     try {
       // Get items the user can see (owned or shared)
@@ -47,9 +55,16 @@ export const useItemComments = (userId: string | null) => {
         .select('id')
         .or(`user_id.eq.${userId},shared_with_partners.cs.{${userId}}`);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error('Error loading items for comments:', itemsError);
+        return;
+      }
 
-      if (!items || items.length === 0) return;
+      if (!items || items.length === 0) {
+        setCommentCounts(new Map());
+        setUnreadComments(new Map());
+        return;
+      }
 
       const itemIds = items.map(item => item.id);
 
@@ -59,7 +74,10 @@ export const useItemComments = (userId: string | null) => {
         .select('item_id, created_at, user_id')
         .in('item_id', itemIds);
 
-      if (commentsError) throw commentsError;
+      if (commentsError) {
+        console.error('Error loading comments:', commentsError);
+        return;
+      }
 
       // Process comment data
       const counts = new Map<string, CommentCount>();
@@ -95,6 +113,8 @@ export const useItemComments = (userId: string | null) => {
       setUnreadComments(unread);
     } catch (error) {
       console.error('Error loading comment counts:', error);
+      setCommentCounts(new Map());
+      setUnreadComments(new Map());
     }
   };
 

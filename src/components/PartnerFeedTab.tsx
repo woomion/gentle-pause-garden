@@ -22,11 +22,13 @@ const PartnerFeedTab = () => {
   const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
   const [showInviteSection, setShowInviteSection] = useState(false);
-  // Get partners using the Supabase function
+  
+  // Get partners using the Supabase function - hooks must be called at top level
   const { partners, invitations, loading, sendInvite, removePartner, resendInvite, acceptInvite } = usePausePartners();
 
   // Get shared items from the store
@@ -370,6 +372,25 @@ const PartnerFeedTab = () => {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="mb-8">
+        <div className="text-center py-12">
+          <h3 className="text-xl font-medium mb-2 text-red-600">
+            Error Loading Partner Feed
+          </h3>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            {error}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Reload Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!hasPausePartnerAccess) {
     return (
