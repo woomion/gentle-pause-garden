@@ -379,6 +379,22 @@ const PartnerFeedTab = () => {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
+  
+  // Early return if user is not authenticated to prevent errors
+  if (!currentUserId) {
+    return (
+      <div className="mb-8">
+        <div className="text-center py-12">
+          <h3 className="text-xl font-medium mb-2">
+            Please sign in to access partner features
+          </h3>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            You need to be signed in to view and manage pause partners.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Show error state if there's an error
   if (error) {
@@ -399,7 +415,7 @@ const PartnerFeedTab = () => {
     );
   }
 
-  if (!hasPausePartnerAccess) {
+  if (!hasPausePartnerAccess()) {
     return (
       <div className="mb-8">
         <div className="text-center py-12">
