@@ -18,7 +18,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import AuthGuard from "./components/AuthGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import MobileDebugger from "./components/MobileDebugger";
-import Snowfall from "./components/Snowfall";
+
 import { pushNotificationService } from "./services/pushNotificationService";
 
 const queryClient = new QueryClient();
@@ -56,7 +56,7 @@ const App = () => {
               <MobileDebugger />
               <Toaster />
               <Sonner />
-              <Snowfall />
+              
               <BrowserRouter>
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
