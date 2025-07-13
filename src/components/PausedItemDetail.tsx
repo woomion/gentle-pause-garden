@@ -114,17 +114,17 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             
             <EmotionBadge emotion={item.emotion} />
 
-            {/* Partner badges */}
+            {/* Shared indicator with green pill */}
             {sharedWithPartners.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                <span className="text-sm text-gray-600 dark:text-gray-300">Shared with:</span>
-                {sharedWithPartners.map((partner) => (
-                  <Avatar key={partner.partner_id} className="h-7 w-7 bg-green-100 border-2 border-green-400 dark:bg-green-900 dark:border-green-500">
-                    <AvatarFallback className="text-xs text-green-800 dark:text-green-200">
-                      {getInitials(partner.partner_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
+              <div className="flex items-center gap-2 pt-2">
+                <span className="text-sm text-gray-600 dark:text-gray-300">Shared</span>
+                <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  {sharedWithPartners.length === 1 ? (
+                    <span>{sharedWithPartners[0].partner_name}</span>
+                  ) : (
+                    <span>{sharedWithPartners.length} partners</span>
+                  )}
+                </div>
               </div>
             )}
 
@@ -163,57 +163,62 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             )}
           </div>
 
-          {/* Let it go button */}
-          <div className="pt-2">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 dark:hover:bg-lavender/20 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
-                  {item.isCart ? 'Let This Cart Go' : 'Let This Item Go'}
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">
-                    {item.isCart ? 'Let go of this cart?' : 'Let go of this item?'}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-                    This will move "{item.itemName}" to your pause log. You can always see what you've let go of in your pause log section.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleLetGo(item, onDelete, onClose)} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
-                    Let it go
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+          {/* Decision buttons - only show if current user is the item owner */}
+          {currentUserId === item.originalUserId && (
+            <>
+              {/* Let it go button */}
+              <div className="pt-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 dark:hover:bg-lavender/20 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+                      {item.isCart ? 'Let This Cart Go' : 'Let This Item Go'}
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">
+                        {item.isCart ? 'Let go of this cart?' : 'Let go of this item?'}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                        This will move "{item.itemName}" to your pause log. You can always see what you've let go of in your pause log section.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleLetGo(item, onDelete, onClose)} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
+                        Let it go
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
 
-          {/* I bought this button */}
-          <div className="text-center">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 underline">
-                  I Purchased This
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Mark as purchased?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-                    This will move "{item.itemName}" to your Pause Log as a thoughtful purchase decision.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleBought(item, onDelete, onClose)} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
-                    Yes, I bought it
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+              {/* I bought this button */}
+              <div className="text-center">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 underline">
+                      I Purchased This
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Mark as purchased?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                        This will move "{item.itemName}" to your Pause Log as a thoughtful purchase decision.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleBought(item, onDelete, onClose)} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
+                        Yes, I bought it
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </>
+          )}
 
           {/* Footer actions */}
           <div className="pt-2 flex items-center justify-between">
