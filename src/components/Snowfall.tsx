@@ -6,8 +6,8 @@ const Snowfall: React.FC = () => {
     id: i,
     left: Math.random() * 100,
     animationDelay: Math.random() * 10,
-    animationDuration: 3 + Math.random() * 7,
-    size: 2 + Math.random() * 4,
+    animationDuration: 8 + Math.random() * 12,
+    size: 4 + Math.random() * 8,
     opacity: 0.3 + Math.random() * 0.7,
   }));
 
