@@ -131,7 +131,10 @@ export const useItemComments = (userId: string | null) => {
   };
 
   const getTotalUnreadCount = (): number => {
-    return Array.from(unreadComments.values()).reduce((sum, count) => sum + count, 0);
+    const total = Array.from(unreadComments.values()).reduce((sum, count) => sum + count, 0);
+    console.log('🔔 useItemComments - Unread comments map:', unreadComments);
+    console.log('🔔 useItemComments - Total unread count:', total);
+    return total;
   };
 
   const markAsRead = async (itemId: string) => {

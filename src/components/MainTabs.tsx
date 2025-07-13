@@ -14,6 +14,10 @@ const MainTabs = () => {
   const { hasPausePartnerAccess } = useSubscription();
   const { user } = useAuth();
   const { getTotalUnreadCount } = useItemComments(user?.id || null);
+  
+  // Debug: Log the unread count
+  const totalUnreadCount = getTotalUnreadCount();
+  console.log('🔔 MainTabs - Total unread count:', totalUnreadCount);
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -40,9 +44,9 @@ const MainTabs = () => {
           <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
             <Users className="h-5 w-5 sm:h-5 sm:w-5" />
             <span className="text-sm sm:text-base">Partner Pauses</span>
-            {getTotalUnreadCount() > 0 && (
+            {totalUnreadCount > 0 && (
               <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                {getTotalUnreadCount() > 9 ? '9+' : getTotalUnreadCount()}
+                {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
               </div>
             )}
           </div>
