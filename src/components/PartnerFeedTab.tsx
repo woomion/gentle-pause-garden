@@ -52,14 +52,19 @@ const PartnerFeedTab = () => {
   
   useEffect(() => {
     const fetchSharedItems = async () => {
-      if (!partners.length) {
+      // Early return if no partners to avoid unnecessary API calls
+      if (!partners.length || !currentUserId) {
         setSharedItems([]);
         return;
       }
 
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.log('No authenticated user, clearing shared items');
+          setSharedItems([]);
+          return;
+        }
 
         // Get items shared with partners (items current user created and shared)
         const { data: mySharedItems, error: myError } = await supabase
@@ -69,137 +74,135 @@ const PartnerFeedTab = () => {
           .not('shared_with_partners', 'eq', '{}')
           .eq('status', 'paused');
 
-        // Get items shared with current user (items partners created and shared with me)
-        const partnerIds = partners.map(p => p.partner_id);
-        const { data: partnersSharedItems, error: partnersError } = await supabase
-          .from('paused_items')
-          .select('*')
-          .in('user_id', partnerIds)
-          .contains('shared_with_partners', [user.id])
-          .eq('status', 'paused');
-
-        if (myError || partnersError) {
-          console.error('Error fetching shared items:', myError || partnersError);
+        if (myError) {
+          console.error('Error fetching my shared items:', myError);
+          setSharedItems([]);
           return;
+        }
+
+        // Get items shared with current user (items partners created and shared with me)
+        const partnerIds = partners.map(p => p.partner_id).filter(Boolean);
+        let partnersSharedItems = [];
+        
+        if (partnerIds.length > 0) {
+          const { data, error: partnersError } = await supabase
+            .from('paused_items')
+            .select('*')
+            .in('user_id', partnerIds)
+            .contains('shared_with_partners', [user.id])
+            .eq('status', 'paused');
+
+          if (partnersError) {
+            console.error('Error fetching partners shared items:', partnersError);
+            // Don't return here, continue with just my shared items
+          } else {
+            partnersSharedItems = data || [];
+          }
         }
 
         // Helper function to extract the actual product link
         const getProductLink = (item: any) => {
-          // First try to extract from notes metadata
-          const notesProductLink = extractProductLinkFromNotes(item.notes);
-          if (notesProductLink) {
-            console.log('📝 Found product link in notes:', notesProductLink);
-            return notesProductLink;
-          }
-          
-          // Check if the URL looks like a product page (not an image)
-          const url = item.url;
-          if (url && !url.includes('cart-placeholder')) {
-            const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
-            const isImageUrl = imageExtensions.some(ext => url.toLowerCase().includes(ext));
-            if (!isImageUrl) {
-              console.log('🔗 Using URL as product link:', url);
-              return url;
+          try {
+            // First try to extract from notes metadata
+            const notesProductLink = extractProductLinkFromNotes(item.notes);
+            if (notesProductLink) {
+              return notesProductLink;
             }
+            
+            // Check if the URL looks like a product page (not an image)
+            const url = item.url;
+            if (url && !url.includes('cart-placeholder')) {
+              const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+              const isImageUrl = imageExtensions.some(ext => url.toLowerCase().includes(ext));
+              if (!isImageUrl) {
+                return url;
+              }
+            }
+            
+            return '';
+          } catch (error) {
+            console.error('Error extracting product link:', error);
+            return '';
           }
-          
-          console.log('⚠️ No valid product link found for item:', item.title);
-          return '';
         };
 
-        // Combine and format the items to match PausedItem interface
+        // Safely convert database items to PausedItem format
+        const convertDbItemToPausedItem = (item: any) => {
+          try {
+            const productLink = getProductLink(item);
+            const cleanNotes = extractActualNotes(item.notes);
+            
+            return {
+              id: item.id,
+              itemName: item.title || 'Untitled Item',
+              storeName: item.store_name || 'Unknown Store',
+              price: item.price?.toString() || '0',
+              imageUrl: item.image_url || '',
+              emotion: item.emotion || item.reason || 'unknown',
+              notes: cleanNotes || '',
+              duration: `${item.pause_duration_days || 7} days`,
+              otherDuration: item.other_duration || '',
+              link: productLink,
+              photo: null,
+              photoDataUrl: '',
+              tags: Array.isArray(item.tags) ? item.tags : [],
+              pausedAt: new Date(item.created_at),
+              checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
+              checkInDate: new Date(item.review_at),
+              isCart: item.is_cart || false,
+              itemType: item.item_type || 'item',
+              sharedWithPartners: Array.isArray(item.shared_with_partners) ? item.shared_with_partners : [],
+              originalUserId: item.user_id
+            };
+          } catch (error) {
+            console.error('Error converting database item:', error, item);
+            return null;
+          }
+        };
+
+        // Combine and format the items
         const allSharedItems = [
-          ...(mySharedItems || []).map((item: any) => {
-            const productLink = getProductLink(item);
-            const cleanNotes = extractActualNotes(item.notes);
-            
-            return {
-              id: item.id,
-              itemName: item.title,
-              storeName: item.store_name || 'Unknown Store',
-              price: item.price?.toString() || '0',
-              imageUrl: item.image_url || '',
-              emotion: item.emotion || item.reason || 'unknown',
-              notes: cleanNotes || '',
-              duration: `${item.pause_duration_days} days`,
-              otherDuration: item.other_duration || '',
-              link: productLink,
-              photo: null,
-              photoDataUrl: '',
-              tags: item.tags || [],
-              pausedAt: new Date(item.created_at),
-              checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
-              checkInDate: item.review_at,
-              isCart: item.is_cart || false,
-              itemType: item.item_type || 'item',
-              sharedWithPartners: item.shared_with_partners || [],
-              originalUserId: item.user_id // Add original user ID to determine sharing direction
-            };
-          }),
-          ...(partnersSharedItems || []).map((item: any) => {
-            const productLink = getProductLink(item);
-            const cleanNotes = extractActualNotes(item.notes);
-            
-            return {
-              id: item.id,
-              itemName: item.title,
-              storeName: item.store_name || 'Unknown Store',
-              price: item.price?.toString() || '0',
-              imageUrl: item.image_url || '',
-              emotion: item.emotion || item.reason || 'unknown',
-              notes: cleanNotes || '',
-              duration: `${item.pause_duration_days} days`,
-              otherDuration: item.other_duration || '',
-              link: productLink,
-              photo: null,
-              photoDataUrl: '',
-              tags: item.tags || [],
-              pausedAt: new Date(item.created_at),
-              checkInTime: calculateCheckInTimeDisplay(new Date(item.review_at)),
-              checkInDate: item.review_at,
-              isCart: item.is_cart || false,
-              itemType: item.item_type || 'item',
-              sharedWithPartners: item.shared_with_partners || [],
-              originalUserId: item.user_id // Add original user ID to determine sharing direction
-            };
-          })
+          ...(mySharedItems || []).map(convertDbItemToPausedItem).filter(Boolean),
+          ...partnersSharedItems.map(convertDbItemToPausedItem).filter(Boolean)
         ];
 
         setSharedItems(allSharedItems);
       } catch (error) {
-        console.error('Error fetching shared items:', error);
-        setError(null); // Reset any previous errors
-        setSharedItems([]); // Set empty array on error
+        console.error('Error in fetchSharedItems:', error);
+        setSharedItems([]);
       }
     };
 
     fetchSharedItems();
     
-    // Create unique channel name to avoid conflicts
-    const channelName = `shared-paused-items-${currentUserId}-${Date.now()}`;
-    
-    // Set up real-time subscription for shared items
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'paused_items',
-        },
-        () => {
-          console.log('🔔 Paused items change detected, reloading shared items');
-          fetchSharedItems(); // Reload when any paused item changes
-        }
-      )
-      .subscribe();
+    // Only set up real-time subscription if we have partners and user
+    if (partners.length > 0 && currentUserId) {
+      // Create unique channel name to avoid conflicts
+      const channelName = `shared-paused-items-${currentUserId}-${Date.now()}`;
+      
+      // Set up real-time subscription for shared items
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'paused_items',
+          },
+          () => {
+            console.log('🔔 Paused items change detected, reloading shared items');
+            fetchSharedItems(); // Reload when any paused item changes
+          }
+        )
+        .subscribe();
 
-    return () => {
-      console.log('🔔 Cleaning up shared items subscription:', channelName);
-      supabase.removeChannel(channel);
-    };
-  }, [partners]);
+      return () => {
+        console.log('🔔 Cleaning up shared items subscription:', channelName);
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [partners, currentUserId]);
 
   
 
@@ -434,7 +437,7 @@ const PartnerFeedTab = () => {
     );
   }
 
-  if (!hasPausePartnerAccess()) {
+  if (!hasPausePartnerAccess) {
     return (
       <div className="mb-8">
         <div className="text-center py-12">
