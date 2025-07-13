@@ -246,7 +246,8 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
             onClick={submitComment}
             disabled={!newComment.trim() || isSubmitting}
             size="sm"
-            className="bg-invite-button text-black hover:bg-invite-button/90 flex items-center gap-2"
+            className="bg-invite-button hover:bg-invite-button/90 flex items-center gap-2"
+            style={{ color: '#000' }}
           >
             <Send size={14} />
             {isSubmitting ? 'Sending...' : 'Send'}
