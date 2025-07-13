@@ -602,27 +602,56 @@ const PartnerFeedTab = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {sharedItems.length === 0 ? (
-              <div className="text-center py-8">
-                <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                <p className="text-muted-foreground">
-                  No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
+          {sharedItems.length === 0 ? (
+            <div className="text-center py-8">
+              <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+              <p className="text-muted-foreground">
+                No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {(() => {
+                // Filter shared items based on selected partner
+                const filteredItems = selectedPartner === 'all' 
+                  ? sharedItems 
+                  : sharedItems.filter(item => {
+                      // Find the partner by name
+                      const selectedPartnerData = partners.find(p => p.partner_name === selectedPartner);
+                      if (!selectedPartnerData) return false;
+                      
+                      // Show items where:
+                      // 1. Current user created the item and shared it with the selected partner
+                      // 2. The selected partner created the item and shared it with current user
+                      return (
+                        (item.originalUserId === currentUserId && item.sharedWithPartners?.includes(selectedPartnerData.partner_id)) ||
+                        (item.originalUserId === selectedPartnerData.partner_id && item.sharedWithPartners?.includes(currentUserId || ''))
+                      );
+                    });
 
-                {/* Shared Items Carousel */}
-                <div className="space-y-4">
-                  <PausedItemsCarousel 
-                    items={sharedItems}
-                    onItemClick={(item) => setSelectedItem(item)}
-                    partners={partners}
-                    currentUserId={currentUserId}
-                  />
-                </div>
-              </div>
-            )}
+                return filteredItems.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                    <p className="text-muted-foreground">
+                      {selectedPartner === 'all' 
+                        ? "No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together."
+                        : `No shared pauses with ${selectedPartner} yet.`
+                      }
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <PausedItemsCarousel 
+                      items={filteredItems}
+                      onItemClick={(item) => setSelectedItem(item)}
+                      partners={partners}
+                      currentUserId={currentUserId}
+                    />
+                  </div>
+                );
+              })()}
+            </div>
+          )}
           </CardContent>
         </Card>
       )}

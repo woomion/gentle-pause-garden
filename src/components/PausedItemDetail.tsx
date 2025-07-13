@@ -154,7 +154,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             {sharedWithPartners.length > 0 && getAttributionText && (
               <div className="flex items-center gap-2 pt-2">
                 <span className="text-sm text-gray-600 dark:text-gray-300">Shared</span>
-                <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-3 py-1 rounded-full flex items-center gap-2">
                   <span>{getAttributionText}</span>
                 </div>
               </div>
