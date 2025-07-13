@@ -13,10 +13,17 @@ const MainTabs = () => {
   const [activeTab, setActiveTab] = useState('paused');
   const { hasPausePartnerAccess } = useSubscription();
   const { user } = useAuth();
-  const { getTotalUnreadCount } = useItemComments(user?.id || null);
+  
+  // Safely get total unread count with error handling
+  let totalUnreadCount = 0;
+  try {
+    const { getTotalUnreadCount } = useItemComments(user?.id || null);
+    totalUnreadCount = getTotalUnreadCount();
+  } catch (error) {
+    console.error('Error getting unread count:', error);
+  }
   
   // Debug: Log the unread count
-  const totalUnreadCount = getTotalUnreadCount();
   console.log('🔔 MainTabs - User:', user?.id || 'none');
   console.log('🔔 MainTabs - Total unread count:', totalUnreadCount);
   console.log('🔔 MainTabs - Should show badge:', user && totalUnreadCount > 0);

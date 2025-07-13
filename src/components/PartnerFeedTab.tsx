@@ -160,6 +160,8 @@ const PartnerFeedTab = () => {
         setSharedItems(allSharedItems);
       } catch (error) {
         console.error('Error fetching shared items:', error);
+        setError(null); // Reset any previous errors
+        setSharedItems([]); // Set empty array on error
       }
     };
 

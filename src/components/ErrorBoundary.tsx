@@ -34,10 +34,10 @@ class ErrorBoundary extends React.Component<
               {this.state.error?.message || 'Unknown error'}
             </div>
             <button 
-              onClick={() => window.location.reload()}
+              onClick={() => this.setState({ hasError: false, error: undefined })}
               className="bg-lavender text-black px-4 py-2 rounded"
             >
-              Reload Page
+              Try Again
             </button>
           </div>
         </div>
