@@ -111,7 +111,7 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
         </div>
 
         {item.notes && item.notes.trim() && (
-          <div className="pt-2 border-t border-gray-200 dark:border-gray-600 mb-3">
+          <div className="pt-2 border-t border-gray-200 dark:border-gray-600 mb-1">
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <strong>Note:</strong> {item.notes}
             </p>
