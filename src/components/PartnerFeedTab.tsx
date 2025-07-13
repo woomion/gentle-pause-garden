@@ -389,8 +389,8 @@ const PartnerFeedTab = () => {
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             {error}
           </p>
-          <Button onClick={() => window.location.reload()}>
-            Reload Page
+          <Button onClick={() => setError(null)}>
+            Try Again
           </Button>
         </div>
       </div>
