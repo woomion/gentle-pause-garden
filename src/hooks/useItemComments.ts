@@ -20,9 +20,12 @@ export const useItemComments = (userId: string | null) => {
 
     loadCommentCounts();
 
+    // Create unique channel name to avoid conflicts
+    const channelName = `item-comments-changes-${userId}-${Date.now()}`;
+    
     // Set up real-time subscription for comment changes
     const channel = supabase
-      .channel('item-comments-changes')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -31,12 +34,14 @@ export const useItemComments = (userId: string | null) => {
           table: 'item_comments'
         },
         () => {
+          console.log('🔔 Comment change detected, reloading counts');
           loadCommentCounts();
         }
       )
       .subscribe();
 
     return () => {
+      console.log('🔔 Cleaning up subscription:', channelName);
       supabase.removeChannel(channel);
     };
   }, [userId]);

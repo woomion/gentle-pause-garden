@@ -165,9 +165,12 @@ const PartnerFeedTab = () => {
 
     fetchSharedItems();
     
+    // Create unique channel name to avoid conflicts
+    const channelName = `shared-paused-items-${currentUserId}-${Date.now()}`;
+    
     // Set up real-time subscription for shared items
     const channel = supabase
-      .channel('shared-paused-items')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -176,12 +179,14 @@ const PartnerFeedTab = () => {
           table: 'paused_items',
         },
         () => {
+          console.log('🔔 Paused items change detected, reloading shared items');
           fetchSharedItems(); // Reload when any paused item changes
         }
       )
       .subscribe();
 
     return () => {
+      console.log('🔔 Cleaning up shared items subscription:', channelName);
       supabase.removeChannel(channel);
     };
   }, [partners]);
