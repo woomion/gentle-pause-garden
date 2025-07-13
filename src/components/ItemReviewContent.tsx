@@ -90,7 +90,10 @@ const ItemReviewContent = ({
             </div>
           )}
           
-          <ItemReviewDecisionButtons onDecision={handleDecision} />
+          {/* Add breathing room before decision buttons */}
+          <div className="mt-8">
+            <ItemReviewDecisionButtons onDecision={handleDecision} />
+          </div>
         </>
       ) : (
         <ItemReviewFeedbackForm
