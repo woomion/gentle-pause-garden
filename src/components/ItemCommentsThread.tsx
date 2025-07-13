@@ -242,16 +242,16 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
           disabled={isSubmitting}
         />
         <div className="flex justify-end">
-          <Button
-            onClick={submitComment}
-            disabled={!newComment.trim() || isSubmitting}
-            size="sm"
-            className="bg-invite-button hover:bg-invite-button/90 flex items-center gap-2"
-            style={{ color: '#000' }}
-          >
-            <Send size={14} style={{ color: '#000' }} />
-            <span style={{ color: '#000' }}>{isSubmitting ? 'Sending...' : 'Send'}</span>
-          </Button>
+        <Button
+          onClick={submitComment}
+          disabled={!newComment.trim() || isSubmitting}
+          size="sm"
+          className="flex items-center gap-2"
+          style={{ backgroundColor: '#D8B4FE', color: '#000' }}
+        >
+          <Send size={14} style={{ color: '#000' }} />
+          <span style={{ color: '#000' }}>{isSubmitting ? 'Sending...' : 'Send'}</span>
+        </Button>
         </div>
       </div>
     </div>
