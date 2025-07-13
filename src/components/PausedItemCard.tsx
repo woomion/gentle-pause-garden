@@ -169,10 +169,13 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       }}
       aria-label={`View details for ${item.itemName}`}
     >
-      {/* Purple dot indicator for new messages */}
+      {/* New message indicator for shared items */}
       {item.sharedWithPartners && item.sharedWithPartners.length > 0 && hasNewComments(item.id) && (
         <div className="absolute top-2 right-2 z-10">
-          <div className="w-3 h-3 bg-purple-500 rounded-full shadow-sm"></div>
+          <div className="flex items-center gap-1 bg-purple-500 text-white text-xs px-2 py-1 rounded-full shadow-sm">
+            <MessageCircle size={10} />
+            <span className="font-medium">{getUnreadCount(item.id)}</span>
+          </div>
         </div>
       )}
       
