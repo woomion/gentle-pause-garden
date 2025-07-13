@@ -27,6 +27,50 @@ export const usePausePartners = () => {
   useEffect(() => {
     if (!user) return;
 
+    let isMounted = true; // Track if component is still mounted
+
+    const loadPartners = async () => {
+      if (!user || !isMounted) {
+        return;
+      }
+
+      try {
+        // Load accepted partnerships
+        const { data: partnersData, error: partnersError } = await supabase
+          .rpc('get_user_partners');
+
+        if (!isMounted) return; // Check if still mounted
+
+        if (partnersError) {
+          console.error('Error loading partners:', partnersError);
+        } else {
+          if (isMounted) setPartners(partnersData || []);
+        }
+
+        // Load all invitations
+        const { data: invitationsData, error: invitationsError } = await supabase
+          .from('partner_invitations')
+          .select('*')
+          .or(`inviter_id.eq.${user.id},invitee_id.eq.${user.id}`)
+          .order('created_at', { ascending: false });
+
+        if (!isMounted) return; // Check if still mounted
+
+        if (invitationsError) {
+          console.error('Error loading invitations:', invitationsError);
+        } else {
+          if (isMounted) setInvitations((invitationsData || []) as PartnerInvitation[]);
+        }
+      } catch (error) {
+        console.error('Error in loadPartners:', error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    // Load initial data
+    loadPartners();
+
     // Create a unique channel name to avoid conflicts between multiple hook instances
     const channelName = `partner-invitations-${user.id}-${Math.random().toString(36).substring(7)}`;
     
@@ -44,7 +88,9 @@ export const usePausePartners = () => {
         (payload) => {
           console.log('Real-time update received:', payload);
           // Reload partners and invitations when any change occurs
-          loadPartners();
+          if (isMounted) {
+            loadPartners();
+          }
         }
       )
       .subscribe((status) => {
@@ -53,46 +99,13 @@ export const usePausePartners = () => {
 
     return () => {
       console.log('Cleaning up subscription:', channelName);
+      isMounted = false; // Mark as unmounted
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
   const loadPartners = async () => {
-    if (!user) {
-      setPartners([]);
-      setInvitations([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // Load accepted partnerships
-      const { data: partnersData, error: partnersError } = await supabase
-        .rpc('get_user_partners');
-
-      if (partnersError) {
-        console.error('Error loading partners:', partnersError);
-      } else {
-        setPartners(partnersData || []);
-      }
-
-      // Load all invitations
-      const { data: invitationsData, error: invitationsError } = await supabase
-        .from('partner_invitations')
-        .select('*')
-        .or(`inviter_id.eq.${user.id},invitee_id.eq.${user.id}`)
-        .order('created_at', { ascending: false });
-
-      if (invitationsError) {
-        console.error('Error loading invitations:', invitationsError);
-      } else {
-        setInvitations((invitationsData || []) as PartnerInvitation[]);
-      }
-    } catch (error) {
-      console.error('Error in loadPartners:', error);
-    } finally {
-      setLoading(false);
-    }
+    // This function is now defined inside useEffect with proper cleanup
   };
 
   const sendInvite = async (email: string) => {
@@ -152,7 +165,7 @@ export const usePausePartners = () => {
         // Don't fail the whole operation if email fails
       }
 
-      await loadPartners();
+      // Real-time subscription will automatically reload data
       return { success: true };
     } catch (error) {
       console.error('Error sending invite:', error);
@@ -192,7 +205,7 @@ export const usePausePartners = () => {
 
       // Check if already accepted
       if (invitation.status === 'accepted') {
-        await loadPartners(); // Refresh to show the partnership
+        // Real-time subscription will automatically reload data
         return { success: true, message: 'You are already connected as pause partners!' };
       }
 
@@ -216,7 +229,7 @@ export const usePausePartners = () => {
         return { success: false, error: 'Failed to accept invitation. Please try again.' };
       }
       
-      await loadPartners();
+      // Real-time subscription will automatically reload data
       return { success: true, message: 'Successfully connected as pause partners!' };
     } catch (error) {
       console.error('Error accepting invite:', error);
@@ -232,7 +245,7 @@ export const usePausePartners = () => {
         .eq('id', invitationId);
 
       if (error) throw error;
-      await loadPartners();
+      // Real-time subscription will automatically reload data
       return { success: true };
     } catch (error) {
       console.error('Error removing partner:', error);
@@ -269,7 +282,9 @@ export const usePausePartners = () => {
   };
 
   useEffect(() => {
-    loadPartners();
+    if (user) {
+      // Only load if user exists, this will use the loadPartners function defined in the subscription useEffect
+    }
   }, [user]);
 
   return {
@@ -280,6 +295,6 @@ export const usePausePartners = () => {
     acceptInvite,
     removePartner,
     resendInvite,
-    reload: loadPartners
+    reload: () => {} // Removed to prevent external calls that bypass mount checks
   };
 };

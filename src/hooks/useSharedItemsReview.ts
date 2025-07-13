@@ -10,11 +10,15 @@ export const useSharedItemsReview = () => {
   const { partners, loading: partnersLoading } = usePausePartners();
 
   useEffect(() => {
+    let isMounted = true; // Track if component is still mounted
+    
     const updateSharedItemsForReview = () => {
-      // Early return if no user or partners still loading
-      if (!user || partnersLoading) {
-        setSharedItemsForReview([]);
-        setPartnerNames([]);
+      // Early return if no user or partners still loading or component unmounted
+      if (!user || partnersLoading || !isMounted) {
+        if (isMounted) {
+          setSharedItemsForReview([]);
+          setPartnerNames([]);
+        }
         return;
       }
 
@@ -42,6 +46,8 @@ export const useSharedItemsReview = () => {
           }
         });
 
+        if (!isMounted) return; // Check if still mounted
+
         setSharedItemsForReview(sharedItems);
 
         // Extract unique partner names from shared items
@@ -61,25 +67,47 @@ export const useSharedItemsReview = () => {
           }
         });
 
-        setPartnerNames(names);
+        if (isMounted) {
+          setPartnerNames(names);
+        }
       } catch (error) {
         console.error('Error in updateSharedItemsForReview:', error);
-        setSharedItemsForReview([]);
-        setPartnerNames([]);
+        if (isMounted) {
+          setSharedItemsForReview([]);
+          setPartnerNames([]);
+        }
       }
     };
 
     updateSharedItemsForReview();
 
-    // Subscribe to store updates
-    const unsubscribe = supabasePausedItemsStore.subscribe(updateSharedItemsForReview);
+    // Subscribe to store updates only if we have valid data
+    let unsubscribe: (() => void) | null = null;
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (user && !partnersLoading) {
+      unsubscribe = supabasePausedItemsStore.subscribe(() => {
+        if (isMounted) {
+          updateSharedItemsForReview();
+        }
+      });
 
-    // Update every minute to keep check-in times accurate
-    const interval = setInterval(updateSharedItemsForReview, 60000);
+      // Update every minute to keep check-in times accurate
+      interval = setInterval(() => {
+        if (isMounted) {
+          updateSharedItemsForReview();
+        }
+      }, 60000);
+    }
 
     return () => {
-      unsubscribe();
-      clearInterval(interval);
+      isMounted = false; // Mark as unmounted
+      if (unsubscribe) {
+        unsubscribe();
+      }
+      if (interval) {
+        clearInterval(interval);
+      }
     };
   }, [user, partners, partnersLoading]);
 
