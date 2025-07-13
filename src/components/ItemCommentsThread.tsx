@@ -249,8 +249,8 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
             className="bg-invite-button hover:bg-invite-button/90 flex items-center gap-2"
             style={{ color: '#000' }}
           >
-            <Send size={14} />
-            {isSubmitting ? 'Sending...' : 'Send'}
+            <Send size={14} style={{ color: '#000' }} />
+            <span style={{ color: '#000' }}>{isSubmitting ? 'Sending...' : 'Send'}</span>
           </Button>
         </div>
       </div>
