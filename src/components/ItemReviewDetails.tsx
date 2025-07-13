@@ -5,10 +5,6 @@ import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
 import { getEmotionColor } from '../utils/emotionColors';
 import { useTheme } from '../contexts/ThemeContext';
-import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/contexts/AuthContext';
-import { usePausePartners } from '@/hooks/usePausePartners';
-import { useMemo } from 'react';
 
 interface ItemReviewDetailsProps {
   item: PausedItem | LocalPausedItem;
@@ -17,52 +13,7 @@ interface ItemReviewDetailsProps {
 
 const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
   const { isDarkMode } = useTheme();
-  const { user } = useAuth();
-  const { partners } = usePausePartners();
   const emotionColor = getEmotionColor(item.emotion, isDarkMode);
-
-  // Get sharing attribution text for shared items
-  const getAttributionText = useMemo(() => {
-    if (!user?.id || !('sharedWithPartners' in item) || !item.sharedWithPartners?.length) {
-      return null;
-    }
-
-    const itemOwnerId = item.originalUserId;
-    if (!itemOwnerId) {
-      return null;
-    }
-
-    const isSharedByCurrentUser = itemOwnerId === user.id;
-    
-    if (isSharedByCurrentUser) {
-      // Current user shared this item - show who they shared it with
-      const sharedWithPartners = partners.filter(partner => 
-        item.sharedWithPartners?.includes(partner.partner_id)
-      );
-      
-      if (sharedWithPartners.length > 0) {
-        if (sharedWithPartners.length === 1) {
-          return { from: 'You', to: sharedWithPartners[0].partner_name, direction: 'shared-with' };
-        } else {
-          return { from: 'You', to: `${sharedWithPartners.length} partners`, direction: 'shared-with' };
-        }
-      } else if (item.sharedWithPartners.length > 0) {
-        // Fallback: if partners data isn't loaded but we know it's shared
-        return { from: 'You', to: `${item.sharedWithPartners.length} partner${item.sharedWithPartners.length > 1 ? 's' : ''}`, direction: 'shared-with' };
-      }
-    } else {
-      // Partner shared this with current user
-      const sharer = partners.find(p => p.partner_id === itemOwnerId);
-      if (sharer) {
-        return { from: sharer.partner_name, to: 'You', direction: 'shared-by' };
-      } else {
-        // Fallback: if partner data isn't loaded but we know it's from a partner
-        return { from: 'Partner', to: 'You', direction: 'shared-by' };
-      }
-    }
-    
-    return null;
-  }, [user?.id, item, partners]);
 
   const imageUrl = (() => {
     // Handle cart placeholder case
@@ -156,19 +107,8 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
           </div>
         )}
 
-        {/* Directional Attribution Badge - placed under notes, above view link */}
-        {getAttributionText && (
-          <div className="mb-3">
-            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs flex items-center justify-center gap-2 w-fit">
-              <span className="text-xs leading-none flex items-center">{getAttributionText.from}</span>
-              <span className="text-lg leading-none flex items-center justify-center h-4">→</span>
-              <span className="text-xs leading-none flex items-center">{getAttributionText.to}</span>
-            </Badge>
-          </div>
-        )}
-
         {item.link && item.link.trim() && (
-          <div className="pt-2 flex items-center gap-3">
+          <div className="pt-2">
             <button
               onClick={() => onViewItem(item)}
               className="text-black dark:text-[#F9F5EB] text-sm underline hover:no-underline transition-all duration-200"

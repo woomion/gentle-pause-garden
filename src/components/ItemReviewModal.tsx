@@ -5,6 +5,10 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemReviewCarousel } from '../hooks/useItemReviewCarousel';
 import { ItemReviewContent } from './ItemReviewContent';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePausePartners } from '@/hooks/usePausePartners';
+import { useMemo } from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -35,9 +39,54 @@ const ItemReviewModal = ({
     isOpen,
     items.length
   );
+  const { user } = useAuth();
+  const { partners } = usePausePartners();
 
   const currentItem = items[activeIndex];
   const isLastItem = activeIndex >= items.length - 1;
+
+  // Get sharing attribution text for current item
+  const getAttributionText = useMemo(() => {
+    if (!user?.id || !currentItem || !('sharedWithPartners' in currentItem) || !currentItem.sharedWithPartners?.length) {
+      return null;
+    }
+
+    const itemOwnerId = currentItem.originalUserId;
+    if (!itemOwnerId) {
+      return null;
+    }
+
+    const isSharedByCurrentUser = itemOwnerId === user.id;
+    
+    if (isSharedByCurrentUser) {
+      // Current user shared this item - show who they shared it with
+      const sharedWithPartners = partners.filter(partner => 
+        currentItem.sharedWithPartners?.includes(partner.partner_id)
+      );
+      
+      if (sharedWithPartners.length > 0) {
+        if (sharedWithPartners.length === 1) {
+          return { from: 'You', to: sharedWithPartners[0].partner_name, direction: 'shared-with' };
+        } else {
+          return { from: 'You', to: `${sharedWithPartners.length} partners`, direction: 'shared-with' };
+        }
+      } else if (currentItem.sharedWithPartners.length > 0) {
+        // Fallback: if partners data isn't loaded but we know it's shared
+        return { from: 'You', to: `${currentItem.sharedWithPartners.length} partner${currentItem.sharedWithPartners.length > 1 ? 's' : ''}`, direction: 'shared-with' };
+      }
+    } else {
+      // Partner shared this with current user
+      const sharer = partners.find(p => p.partner_id === itemOwnerId);
+      if (sharer) {
+        return { from: sharer.partner_name, to: 'You', direction: 'shared-by' };
+      } else {
+        // Fallback: if partner data isn't loaded but we know it's from a partner
+        return { from: 'Partner', to: 'You', direction: 'shared-by' };
+      }
+    }
+    
+    return null;
+  }, [user?.id, currentItem, partners]);
 
   if (!isOpen || !currentItem) return null;
 
@@ -58,9 +107,19 @@ const ItemReviewModal = ({
               <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
                 Ready to decide?
               </h2>
-              <p className="text-black dark:text-[#F9F5EB] text-sm mt-1">
-                {activeIndex + 1} of {items.length}
-              </p>
+              <div className="flex items-center gap-3 mt-1">
+                <p className="text-black dark:text-[#F9F5EB] text-sm">
+                  {activeIndex + 1} of {items.length}
+                </p>
+                {/* Directional Attribution Badge */}
+                {getAttributionText && (
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs flex items-center justify-center gap-2">
+                    <span className="text-xs leading-none flex items-center">{getAttributionText.from}</span>
+                    <span className="text-lg leading-none flex items-center justify-center h-4">→</span>
+                    <span className="text-xs leading-none flex items-center">{getAttributionText.to}</span>
+                  </Badge>
+                )}
+              </div>
             </div>
             <button
               onClick={onClose}
