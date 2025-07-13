@@ -57,11 +57,6 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   // Get sharing attribution text
   const getAttributionText = useMemo(() => {
-    // If no shared partners, no attribution needed
-    if (sharedWithPartners.length === 0) {
-      return null;
-    }
-
     // Use currentUserId prop if currentUser from state isn't ready yet
     const userId = currentUser || currentUserId;
     if (!userId) {
@@ -78,16 +73,24 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     
     if (isSharedByCurrentUser) {
       // Current user shared this item - show who they shared it with
-      if (sharedWithPartners.length === 1) {
-        return { from: 'You', to: sharedWithPartners[0].partner_name, direction: 'shared-with' };
-      } else {
-        return { from: 'You', to: `${sharedWithPartners.length} partners`, direction: 'shared-with' };
+      if (sharedWithPartners.length > 0) {
+        if (sharedWithPartners.length === 1) {
+          return { from: 'You', to: sharedWithPartners[0].partner_name, direction: 'shared-with' };
+        } else {
+          return { from: 'You', to: `${sharedWithPartners.length} partners`, direction: 'shared-with' };
+        }
+      } else if (item.sharedWithPartners && item.sharedWithPartners.length > 0) {
+        // Fallback: if partners data isn't loaded but we know it's shared
+        return { from: 'You', to: `${item.sharedWithPartners.length} partner${item.sharedWithPartners.length > 1 ? 's' : ''}`, direction: 'shared-with' };
       }
     } else {
       // Partner shared this with current user
       const sharer = partners.find(p => p.partner_id === itemOwnerId);
       if (sharer) {
         return { from: sharer.partner_name, to: 'You', direction: 'shared-by' };
+      } else {
+        // Fallback: if partner data isn't loaded but we know it's from a partner
+        return { from: 'Partner', to: 'You', direction: 'shared-by' };
       }
     }
     
