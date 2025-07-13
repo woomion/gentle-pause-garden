@@ -49,6 +49,32 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
     );
   }, [item.sharedWithPartners, partners]);
 
+  // Get sharing attribution text with direction
+  const getAttributionText = useMemo(() => {
+    if (!currentUserId || !item.originalUserId || sharedWithPartners.length === 0) {
+      return null;
+    }
+
+    const isSharedByCurrentUser = item.originalUserId === currentUserId;
+    
+    if (isSharedByCurrentUser) {
+      // Current user shared this item - use regular arrow
+      if (sharedWithPartners.length === 1) {
+        return `You → ${sharedWithPartners[0].partner_name}`;
+      } else {
+        return `You → ${sharedWithPartners.length} partners`;
+      }
+    } else {
+      // Partner shared this with current user - use regular arrow
+      const sharer = partners.find(p => p.partner_id === item.originalUserId);
+      if (sharer) {
+        return `${sharer.partner_name} → You`;
+      }
+    }
+    
+    return null;
+  }, [currentUserId, item.originalUserId, sharedWithPartners, partners]);
+
   // Debug logging
   useEffect(() => {
     console.log('🔍 PausedItemDetail Debug:', {
@@ -58,9 +84,10 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
       shouldShowComments: (sharedWithPartners.length > 0 || (item.sharedWithPartners && item.sharedWithPartners.length > 0)) && currentUserId,
       partners: partners.length,
       itemName: item.itemName,
-      isSharedItem: item.sharedWithPartners && item.sharedWithPartners.length > 0
+      isSharedItem: item.sharedWithPartners && item.sharedWithPartners.length > 0,
+      attributionText: getAttributionText
     });
-  }, [sharedWithPartners, currentUserId, item.sharedWithPartners, partners, item.itemName]);
+  }, [sharedWithPartners, currentUserId, item.sharedWithPartners, partners, item.itemName, getAttributionText]);
 
   console.log('🔍 PausedItemDetail rendered:', {
     isOpen,
@@ -114,16 +141,12 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             
             <EmotionBadge emotion={item.emotion} />
 
-            {/* Shared indicator with green pill */}
-            {sharedWithPartners.length > 0 && (
+            {/* Shared indicator with directional information */}
+            {sharedWithPartners.length > 0 && getAttributionText && (
               <div className="flex items-center gap-2 pt-2">
                 <span className="text-sm text-gray-600 dark:text-gray-300">Shared</span>
                 <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                  {sharedWithPartners.length === 1 ? (
-                    <span>{sharedWithPartners[0].partner_name}</span>
-                  ) : (
-                    <span>{sharedWithPartners.length} partners</span>
-                  )}
+                  <span>{getAttributionText}</span>
                 </div>
               </div>
             )}
