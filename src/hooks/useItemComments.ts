@@ -48,6 +48,7 @@ export const useItemComments = (userId: string | null) => {
 
   const loadCommentCounts = async () => {
     if (!userId) {
+      console.log('🔔 loadCommentCounts - No userId, clearing counts');
       setCommentCounts(new Map());
       setUnreadComments(new Map());
       return;
@@ -66,12 +67,14 @@ export const useItemComments = (userId: string | null) => {
       }
 
       if (!items || items.length === 0) {
+        console.log('🔔 loadCommentCounts - No items found, clearing counts');
         setCommentCounts(new Map());
         setUnreadComments(new Map());
         return;
       }
 
       const itemIds = items.map(item => item.id);
+      console.log('🔔 loadCommentCounts - Found items:', itemIds);
 
       // Get comment counts and latest comment dates for these items
       const { data: comments, error: commentsError } = await supabase
@@ -83,6 +86,8 @@ export const useItemComments = (userId: string | null) => {
         console.error('Error loading comments:', commentsError);
         return;
       }
+
+      console.log('🔔 loadCommentCounts - Found comments:', comments?.length || 0);
 
       // Process comment data
       const counts = new Map<string, CommentCount>();
@@ -109,11 +114,22 @@ export const useItemComments = (userId: string | null) => {
         const isRecent = commentTime > new Date(Date.now() - 24 * 60 * 60 * 1000);
         const isFromOtherUser = comment.user_id !== userId;
         
+        console.log('🔔 Comment analysis:', {
+          comment_id: comment.item_id,
+          commentTime: commentTime.toISOString(),
+          isRecent,
+          isFromOtherUser,
+          comment_user_id: comment.user_id,
+          current_user_id: userId
+        });
+        
         if (isRecent && isFromOtherUser) {
           unread.set(comment.item_id, (unread.get(comment.item_id) || 0) + 1);
+          console.log('🔔 Added unread comment for item:', comment.item_id);
         }
       });
 
+      console.log('🔔 Final unread counts:', Array.from(unread.entries()));
       setCommentCounts(counts);
       setUnreadComments(unread);
     } catch (error) {
