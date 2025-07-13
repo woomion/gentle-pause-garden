@@ -43,7 +43,34 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
+          schema: 'public',
+          table: 'item_comments',
+          filter: `item_id=eq.${itemId}`
+        },
+        (payload) => {
+          console.log('🔔 New comment received:', payload);
+          // Add the new comment immediately to the state
+          const newComment = payload.new as Comment;
+          setComments(prev => [...prev, newComment]);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'item_comments',
+          filter: `item_id=eq.${itemId}`
+        },
+        () => {
+          loadComments();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
           schema: 'public',
           table: 'item_comments',
           filter: `item_id=eq.${itemId}`

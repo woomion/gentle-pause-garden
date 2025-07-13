@@ -155,10 +155,10 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     >
       {/* New message indicator for shared items */}
       {item.sharedWithPartners && item.sharedWithPartners.length > 0 && hasNewComments(item.id) && (
-        <div className="absolute top-3 right-3 z-10">
-          <div className="flex items-center gap-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-            <MessageCircle size={12} />
-            <span>{getUnreadCount(item.id)}</span>
+        <div className="absolute top-2 right-2 z-10">
+          <div className="flex items-center gap-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full shadow-sm">
+            <MessageCircle size={10} />
+            <span className="font-medium">{getUnreadCount(item.id)}</span>
           </div>
         </div>
       )}

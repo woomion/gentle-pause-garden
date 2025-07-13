@@ -55,9 +55,10 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
       sharedWithPartnersLength: sharedWithPartners.length,
       currentUserId: currentUserId,
       itemSharedWith: item.sharedWithPartners,
-      shouldShowComments: sharedWithPartners.length > 0 && currentUserId,
+      shouldShowComments: (sharedWithPartners.length > 0 || (item.sharedWithPartners && item.sharedWithPartners.length > 0)) && currentUserId,
       partners: partners.length,
-      itemName: item.itemName
+      itemName: item.itemName,
+      isSharedItem: item.sharedWithPartners && item.sharedWithPartners.length > 0
     });
   }, [sharedWithPartners, currentUserId, item.sharedWithPartners, partners, item.itemName]);
 
@@ -151,11 +152,8 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             )}
 
             {/* Comments Thread for Shared Items */}
-            {sharedWithPartners.length > 0 && currentUserId && (
+            {((sharedWithPartners.length > 0) || (item.sharedWithPartners && item.sharedWithPartners.length > 0)) && currentUserId && (
               <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
-                <div className="mb-2 text-sm text-gray-500">
-                  DEBUG: Showing comments thread for shared item
-                </div>
                 <ItemCommentsThread 
                   itemId={item.id}
                   partners={partners}
