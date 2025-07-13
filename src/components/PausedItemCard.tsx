@@ -9,6 +9,7 @@ import EmotionBadge from './EmotionBadge';
 import { getEmotionColor } from '../utils/emotionColors';
 import { useTheme } from '../contexts/ThemeContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Partner {
@@ -61,17 +62,17 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     const isSharedByCurrentUser = item.originalUserId === currentUser;
     
     if (isSharedByCurrentUser) {
-      // Current user shared this item - use larger arrow
+      // Current user shared this item - use regular arrow
       if (sharedWithPartners.length === 1) {
-        return `Shared: You ➜ ${sharedWithPartners[0].partner_name}`;
+        return `You → ${sharedWithPartners[0].partner_name}`;
       } else {
-        return `Shared: You ➜ ${sharedWithPartners.length} partners`;
+        return `You → ${sharedWithPartners.length} partners`;
       }
     } else {
-      // Partner shared this with current user - use larger arrow
+      // Partner shared this with current user - use regular arrow
       const sharer = partners.find(p => p.partner_id === item.originalUserId);
       if (sharer) {
-        return `Shared: ${sharer.partner_name} ➜ You`;
+        return `${sharer.partner_name} → You`;
       }
     }
     
@@ -190,7 +191,9 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
             {/* Show either shared attribution or partner badges */}
             {getAttributionText ? (
               <div className="flex items-center gap-1 mt-2">
-                <span className="text-xs text-green-800 dark:text-green-100 truncate font-medium">{getAttributionText}</span>
+                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
+                  {getAttributionText}
+                </Badge>
               </div>
             ) : sharedWithPartners.length > 0 ? (
               <div className="flex flex-wrap gap-1 mt-2">
