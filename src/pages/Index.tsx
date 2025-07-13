@@ -61,7 +61,12 @@ const Index = () => {
 
   const handleStartReview = () => {
     itemReview.resetReviewIndex();
-    modalStates.handleStartReview();
+    modalStates.handleStartReview('solo');
+  };
+
+  const handleStartPartnerReview = () => {
+    itemReview.resetReviewIndex();
+    modalStates.handleStartReview('partner');
   };
 
   const handleCloseReview = () => {
@@ -110,7 +115,7 @@ const Index = () => {
             <SharedItemsReviewPill
               sharedItemsCount={sharedItemsReview.sharedItemsCount}
               partnerNames={sharedItemsReview.partnerNames}
-              onStartReview={handleStartReview}
+              onStartReview={handleStartPartnerReview}
             />
           )}
           <MainTabs />
@@ -185,7 +190,7 @@ const Index = () => {
       
       {modalStates.showReviewModal && (
         <ItemReviewModal
-          items={itemReview.itemsForReview}
+          items={modalStates.reviewType === 'partner' ? sharedItemsReview.sharedItemsForReview : itemReview.itemsForReview}
           currentIndex={itemReview.currentReviewIndex}
           isOpen={modalStates.showReviewModal}
           onClose={handleCloseReview}

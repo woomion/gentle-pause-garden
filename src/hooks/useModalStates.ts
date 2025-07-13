@@ -6,6 +6,7 @@ export const useModalStates = () => {
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [signupModalDismissed, setSignupModalDismissed] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewType, setReviewType] = useState<'solo' | 'partner'>('solo');
 
   const handleAddPause = () => {
     // Delay to allow ripple animation to complete
@@ -30,7 +31,8 @@ export const useModalStates = () => {
     setSignupModalDismissed(true);
   };
 
-  const handleStartReview = () => {
+  const handleStartReview = (type: 'solo' | 'partner' = 'solo') => {
+    setReviewType(type);
     setShowReviewModal(true);
   };
 
@@ -45,6 +47,7 @@ export const useModalStates = () => {
     showSignupModal,
     signupModalDismissed,
     showReviewModal,
+    reviewType,
     
     // Actions
     setShowWelcomeModal,
