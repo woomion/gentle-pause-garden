@@ -67,12 +67,14 @@ const PartnerFeedTab = () => {
         }
 
         // Get items shared with partners (items current user created and shared)
+        // Exclude items that are ready for review
         const { data: mySharedItems, error: myError } = await supabase
           .from('paused_items')
           .select('*')
           .eq('user_id', user.id)
           .not('shared_with_partners', 'eq', '{}')
-          .eq('status', 'paused');
+          .eq('status', 'paused')
+          .gt('review_at', new Date().toISOString());
 
         if (myError) {
           console.error('Error fetching my shared items:', myError);
@@ -90,7 +92,8 @@ const PartnerFeedTab = () => {
             .select('*')
             .in('user_id', partnerIds)
             .contains('shared_with_partners', [user.id])
-            .eq('status', 'paused');
+            .eq('status', 'paused')
+            .gt('review_at', new Date().toISOString());
 
           if (partnersError) {
             console.error('Error fetching partners shared items:', partnersError);
