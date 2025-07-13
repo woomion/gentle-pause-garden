@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
+import { PasswordValidation } from '@/components/PasswordValidation';
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -176,6 +177,7 @@ const Auth = () => {
                 placeholder="Enter your password"
                 required
               />
+              {isSignUp && <PasswordValidation password={password} />}
             </div>
 
             <Button
