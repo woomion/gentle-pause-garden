@@ -71,8 +71,8 @@ export const usePausePartners = () => {
     // Load initial data
     loadPartners();
 
-    // Create a unique channel name to avoid conflicts between multiple hook instances
-    const channelName = `partner-invitations-${user.id}-${Math.random().toString(36).substring(7)}`;
+    // Create globally unique channel name to avoid conflicts
+    const channelName = `partner-invitations-${user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
     
     console.log('Creating real-time subscription:', channelName);
     

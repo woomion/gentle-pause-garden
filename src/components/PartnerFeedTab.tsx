@@ -177,8 +177,8 @@ const PartnerFeedTab = () => {
     
     // Only set up real-time subscription if we have partners and user
     if (partners.length > 0 && currentUserId) {
-      // Create unique channel name to avoid conflicts
-      const channelName = `shared-paused-items-${currentUserId}-${Date.now()}`;
+      // Create globally unique channel name to avoid conflicts
+      const channelName = `shared-paused-items-${currentUserId}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
       
       // Set up real-time subscription for shared items
       const channel = supabase

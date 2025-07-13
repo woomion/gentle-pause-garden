@@ -37,9 +37,9 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
   useEffect(() => {
     loadComments();
     
-    // Set up real-time subscription
+    // Set up real-time subscription with globally unique channel name
     const channel = supabase
-      .channel(`item-comments-${itemId}`)
+      .channel(`item-comments-${itemId}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`)
       .on(
         'postgres_changes',
         {

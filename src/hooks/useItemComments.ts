@@ -134,8 +134,8 @@ export const useItemComments = (userId: string | null) => {
     
     loadCommentCounts();
 
-    // Create unique channel name to avoid conflicts
-    const channelName = `item-comments-changes-${userId}-${Date.now()}`;
+    // Create globally unique channel name to avoid conflicts
+    const channelName = `item-comments-${userId}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
     
     // Set up real-time subscription for comment and read status changes
     const channel = supabase
