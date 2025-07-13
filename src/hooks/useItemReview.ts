@@ -14,9 +14,10 @@ export const useItemReview = () => {
     const updateItemsForReview = () => {
       if (user) {
         const allReviewItems = supabasePausedItemsStore.getItemsForReview();
-        // Filter for solo items (items owned by current user and not shared items from others)
+        // Filter for solo items (items owned by current user that are NOT shared)
         const soloItems = allReviewItems.filter(item => 
-          item.originalUserId === user.id
+          item.originalUserId === user.id && 
+          (!item.sharedWithPartners || item.sharedWithPartners.length === 0)
         );
         setItemsForReview(soloItems);
       } else {
