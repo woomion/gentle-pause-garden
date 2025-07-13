@@ -113,25 +113,42 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
   const submitComment = async () => {
     if (!newComment.trim() || isSubmitting) return;
 
+    const tempComment: Comment = {
+      id: `temp-${Date.now()}`,
+      content: newComment.trim(),
+      created_at: new Date().toISOString(),
+      user_id: currentUserId
+    };
+
+    // Optimistically add the comment to show it immediately
+    setComments(prev => [...prev, tempComment]);
+    const commentText = newComment.trim();
+    setNewComment('');
     setIsSubmitting(true);
+
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('item_comments')
         .insert({
           item_id: itemId,
           user_id: currentUserId,
-          content: newComment.trim()
-        });
+          content: commentText
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      setNewComment('');
-      toast({
-        title: "Message sent",
-        description: "Your reflection has been shared with your partner.",
-      });
+      // Replace the temporary comment with the real one from the database
+      setComments(prev => prev.map(comment => 
+        comment.id === tempComment.id ? data : comment
+      ));
     } catch (error) {
       console.error('Error submitting comment:', error);
+      // Remove the optimistic comment on error
+      setComments(prev => prev.filter(comment => comment.id !== tempComment.id));
+      // Restore the comment text
+      setNewComment(commentText);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
