@@ -81,7 +81,7 @@ const ItemReviewContent = ({
           
           {/* Comments Thread for Shared Items */}
           {isSharedItem && user?.id && (
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
               <ItemCommentsThread 
                 itemId={item.id}
                 partners={partners}
