@@ -76,6 +76,11 @@ export default {
 				'invite-button': {
 					DEFAULT: 'hsl(var(--invite-button))',
 					foreground: 'hsl(var(--invite-button-foreground))'
+				},
+				'shared-review': {
+					DEFAULT: 'hsl(var(--shared-review))',
+					foreground: 'hsl(var(--shared-review-foreground))',
+					muted: 'hsl(var(--shared-review-muted))'
 				}
 			},
 			borderRadius: {

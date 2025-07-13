@@ -9,12 +9,16 @@ export const useItemReview = () => {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const { user } = useAuth();
 
-  // Track items for review
+  // Track items for review (solo items only - exclude shared items)
   useEffect(() => {
     const updateItemsForReview = () => {
       if (user) {
-        const reviewItems = supabasePausedItemsStore.getItemsForReview();
-        setItemsForReview(reviewItems);
+        const allReviewItems = supabasePausedItemsStore.getItemsForReview();
+        // Filter for solo items (items owned by current user and not shared items from others)
+        const soloItems = allReviewItems.filter(item => 
+          item.originalUserId === user.id
+        );
+        setItemsForReview(soloItems);
       } else {
         const reviewItems = pausedItemsStore.getItemsForReview();
         setItemsForReview(reviewItems);

@@ -20,6 +20,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useInvitationHandler } from '../hooks/useInvitationHandler';
 import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
+import { useSharedItemsReview } from '../hooks/useSharedItemsReview';
+import SharedItemsReviewPill from '../components/SharedItemsReviewPill';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useWelcomeFlow } from '../hooks/useWelcomeFlow';
 
@@ -30,6 +32,7 @@ const Index = () => {
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
   const itemReview = useItemReview();
+  const sharedItemsReview = useSharedItemsReview();
   const { userName, handleWelcomeComplete, shouldShowWelcomeModal } = useWelcomeFlow();
   
   // Handle invitation acceptance from URL
@@ -103,6 +106,13 @@ const Index = () => {
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
           />
+          {user && (
+            <SharedItemsReviewPill
+              sharedItemsCount={sharedItemsReview.sharedItemsCount}
+              partnerNames={sharedItemsReview.partnerNames}
+              onStartReview={handleStartReview}
+            />
+          )}
           <MainTabs />
           
           {/* Greater Joy Fund Section */}

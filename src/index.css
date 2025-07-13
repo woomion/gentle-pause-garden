@@ -38,6 +38,10 @@
     --invite-button: 250 100% 69%;
     --invite-button-foreground: 0 0% 100%;
 
+    --shared-review: 152 57% 88%;
+    --shared-review-foreground: 152 70% 25%;
+    --shared-review-muted: 152 30% 45%;
+
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;

@@ -75,7 +75,8 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     checkInDate: reviewAt,
     isCart: dbItem.is_cart || dbItem.title === 'Cart' || false,
     itemType: (dbItem.item_type === 'cart' ? 'cart' : 'item') as 'cart' | 'item',
-    sharedWithPartners: dbItem.shared_with_partners || []
+    sharedWithPartners: dbItem.shared_with_partners || [],
+    originalUserId: dbItem.user_id
   };
 };
 
