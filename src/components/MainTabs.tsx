@@ -17,7 +17,9 @@ const MainTabs = () => {
   
   // Debug: Log the unread count
   const totalUnreadCount = getTotalUnreadCount();
+  console.log('🔔 MainTabs - User:', user?.id || 'none');
   console.log('🔔 MainTabs - Total unread count:', totalUnreadCount);
+  console.log('🔔 MainTabs - Should show badge:', user && totalUnreadCount > 0);
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
