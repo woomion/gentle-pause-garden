@@ -57,11 +57,24 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   // Get sharing attribution text
   const getAttributionText = useMemo(() => {
-    if (!currentUser || !item.originalUserId || sharedWithPartners.length === 0) {
+    // If no shared partners, no attribution needed
+    if (sharedWithPartners.length === 0) {
       return null;
     }
 
-    const isSharedByCurrentUser = item.originalUserId === currentUser;
+    // Use currentUserId prop if currentUser from state isn't ready yet
+    const userId = currentUser || currentUserId;
+    if (!userId) {
+      return null;
+    }
+
+    // Use originalUserId for comparison  
+    const itemOwnerId = item.originalUserId;
+    if (!itemOwnerId) {
+      return null;
+    }
+
+    const isSharedByCurrentUser = itemOwnerId === userId;
     
     if (isSharedByCurrentUser) {
       // Current user shared this item - show who they shared it with
@@ -72,14 +85,14 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       }
     } else {
       // Partner shared this with current user
-      const sharer = partners.find(p => p.partner_id === item.originalUserId);
+      const sharer = partners.find(p => p.partner_id === itemOwnerId);
       if (sharer) {
         return { from: sharer.partner_name, to: 'You', direction: 'shared-by' };
       }
     }
     
     return null;
-  }, [currentUser, item.originalUserId, sharedWithPartners, partners]);
+  }, [currentUser, currentUserId, item.originalUserId, sharedWithPartners, partners]);
 
   const imageUrl = useMemo(() => {
     // Handle cart placeholder
