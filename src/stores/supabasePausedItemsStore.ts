@@ -24,6 +24,7 @@ export interface PausedItem {
   isCart?: boolean;
   itemType?: 'item' | 'cart';
   sharedWithPartners?: string[];
+  originalUserId?: string; // Added to track who originally created the item
 }
 
 type Listener = () => void;

@@ -113,7 +113,8 @@ const PartnerFeedTab = () => {
               checkInDate: item.review_at,
               isCart: item.is_cart || false,
               itemType: item.item_type || 'item',
-              sharedWithPartners: item.shared_with_partners || []
+              sharedWithPartners: item.shared_with_partners || [],
+              originalUserId: item.user_id // Add original user ID to determine sharing direction
             };
           }),
           ...(partnersSharedItems || []).map((item: any) => {
@@ -139,7 +140,8 @@ const PartnerFeedTab = () => {
               checkInDate: item.review_at,
               isCart: item.is_cart || false,
               itemType: item.item_type || 'item',
-              sharedWithPartners: item.shared_with_partners || []
+              sharedWithPartners: item.shared_with_partners || [],
+              originalUserId: item.user_id // Add original user ID to determine sharing direction
             };
           })
         ];
@@ -581,7 +583,7 @@ const PartnerFeedTab = () => {
                     items={sharedItems}
                     onItemClick={(item) => setSelectedItem(item)}
                     partners={partners}
-                    currentUserId={undefined} // We'll need to get this from auth
+                    currentUserId={undefined} // We'll get this from the item's context
                   />
                 </div>
               </div>
@@ -601,7 +603,7 @@ const PartnerFeedTab = () => {
             setSelectedItem(null);
           }}
           partners={partners}
-          currentUserId={undefined} // We'll need to get this from auth
+          currentUserId={undefined} // We'll get this from the item's context
         />
       )}
     </div>

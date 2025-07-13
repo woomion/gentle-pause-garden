@@ -1,6 +1,6 @@
 
-import { Timer, ShoppingCart } from 'lucide-react';
-import { memo, useMemo } from 'react';
+import { Timer, ShoppingCart, ArrowRight } from 'lucide-react';
+import { memo, useMemo, useEffect, useState } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
 import ItemImage from './ItemImage';
@@ -9,6 +9,7 @@ import EmotionBadge from './EmotionBadge';
 import { getEmotionColor } from '../utils/emotionColors';
 import { useTheme } from '../contexts/ThemeContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Partner {
   partner_id: string;
@@ -26,6 +27,16 @@ interface PausedItemCardProps {
 const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: PausedItemCardProps) => {
   const { isDarkMode } = useTheme();
   const emotionColor = useMemo(() => getEmotionColor(item.emotion, isDarkMode), [item.emotion, isDarkMode]);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+
+  // Get current user ID
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
 
   // Get initials for shared partners
   const getInitials = (name: string) => {
@@ -40,6 +51,32 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       item.sharedWithPartners.includes(partner.partner_id)
     );
   }, [item.sharedWithPartners, partners]);
+
+  // Get sharing attribution text
+  const getAttributionText = useMemo(() => {
+    if (!currentUser || !item.originalUserId || sharedWithPartners.length === 0) {
+      return null;
+    }
+
+    const isSharedByCurrentUser = item.originalUserId === currentUser;
+    
+    if (isSharedByCurrentUser) {
+      // Current user shared this item
+      if (sharedWithPartners.length === 1) {
+        return `Shared: You → ${sharedWithPartners[0].partner_name}`;
+      } else {
+        return `Shared: You → ${sharedWithPartners.length} partners`;
+      }
+    } else {
+      // Partner shared this with current user
+      const sharer = partners.find(p => p.partner_id === item.originalUserId);
+      if (sharer) {
+        return `Shared: ${sharer.partner_name} → You`;
+      }
+    }
+    
+    return null;
+  }, [currentUser, item.originalUserId, sharedWithPartners, partners]);
 
   const imageUrl = useMemo(() => {
     // Handle cart placeholder
@@ -113,7 +150,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       }}
       aria-label={`View details for ${item.itemName}`}
     >
-      <div className="px-4 py-6 pb-12">
+      <div className={`px-4 py-6 ${getAttributionText ? 'pb-16' : 'pb-12'}`}>
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
             {imageUrl === 'cart-placeholder' ? (
@@ -166,6 +203,16 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
           </div>
         </div>
       </div>
+      
+      {/* Attribution line for shared items - placed above the timer */}
+      {getAttributionText && (
+        <div className="absolute bottom-8 left-4 right-4">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <ArrowRight size={12} className="flex-shrink-0" />
+            <span className="truncate">{getAttributionText}</span>
+          </div>
+        </div>
+      )}
       
       <div 
         className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl"
