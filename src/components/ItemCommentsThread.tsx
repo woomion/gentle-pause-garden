@@ -50,9 +50,16 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
         },
         (payload) => {
           console.log('🔔 New comment received:', payload);
-          // Add the new comment immediately to the state
+          // Add the new comment immediately to the state, but check for duplicates
           const newComment = payload.new as Comment;
-          setComments(prev => [...prev, newComment]);
+          setComments(prev => {
+            // Check if this comment already exists to prevent duplicates
+            const exists = prev.some(comment => comment.id === newComment.id);
+            if (exists) {
+              return prev;
+            }
+            return [...prev, newComment];
+          });
         }
       )
       .on(
@@ -231,7 +238,7 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
             onClick={submitComment}
             disabled={!newComment.trim() || isSubmitting}
             size="sm"
-            className="flex items-center gap-2"
+            className="bg-invite-button text-invite-button-foreground hover:bg-invite-button/90 flex items-center gap-2"
           >
             <Send size={14} />
             {isSubmitting ? 'Sending...' : 'Send'}
