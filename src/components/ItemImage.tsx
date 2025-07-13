@@ -1,8 +1,7 @@
 
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Pause } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUrlHelper';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import itemPlaceholder from '@/assets/item-placeholder.png';
 
 interface ItemImageProps {
   item: PausedItem;
@@ -18,6 +17,13 @@ const ItemImage = ({ item }: ItemImageProps) => {
     imageUrl = null;
   }
 
+  // CSS-based placeholder component
+  const PlaceholderImage = () => (
+    <div className="w-full h-full bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
+      <Pause size={48} className="text-purple-600 dark:text-purple-400" style={{ color: '#7A5DD9' }} />
+    </div>
+  );
+
   return (
     <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center overflow-hidden">
       {imageUrl === 'cart-placeholder' ? (
@@ -32,31 +38,25 @@ const ItemImage = ({ item }: ItemImageProps) => {
           onError={(e) => {
             console.error('Image failed to load:', imageUrl);
             const target = e.target as HTMLImageElement;
-            try {
-              target.src = itemPlaceholder;
-              target.alt = "Item placeholder";
-            } catch (error) {
-              console.error('Error setting placeholder:', error);
-              target.style.display = 'none';
+            // Hide the broken image and show placeholder
+            target.style.display = 'none';
+            const placeholder = target.parentElement?.querySelector('.fallback-placeholder');
+            if (placeholder) {
+              (placeholder as HTMLElement).style.display = 'flex';
             }
           }}
           onLoad={() => {
             console.log('Image loaded successfully:', imageUrl);
           }}
         />
-      ) : (
-        <img 
-          src={itemPlaceholder} 
-          alt="Item placeholder"
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            console.error('Placeholder image failed to load');
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-purple-200 dark:bg-purple-800 rounded-full opacity-50 flex items-center justify-center"><div class="w-4 h-4 bg-purple-600 dark:bg-purple-400 rounded-sm"></div></div>';
-          }}
-        />
-      )}
+      ) : null}
+      
+      {/* Fallback placeholder - always present but hidden by default */}
+      <div 
+        className={`fallback-placeholder w-full h-full bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center ${imageUrl && imageUrl !== 'cart-placeholder' ? 'hidden' : 'flex'}`}
+      >
+        <Pause size={48} className="text-purple-600 dark:text-purple-400" style={{ color: '#7A5DD9' }} />
+      </div>
     </div>
   );
 };
