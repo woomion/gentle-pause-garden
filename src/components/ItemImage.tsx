@@ -2,6 +2,7 @@
 import { ShoppingCart } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUrlHelper';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
+import itemPlaceholder from '../assets/item-placeholder.png';
 
 interface ItemImageProps {
   item: PausedItem;
@@ -24,15 +25,19 @@ const ItemImage = ({ item }: ItemImageProps) => {
           onError={(e) => {
             console.error('Image failed to load:', imageUrl);
             const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            target.parentElement!.innerHTML = '<div class="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>';
+            target.src = itemPlaceholder;
+            target.alt = "Item placeholder";
           }}
           onLoad={() => {
             console.log('Image loaded successfully:', imageUrl);
           }}
         />
       ) : (
-        <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50"></div>
+        <img 
+          src={itemPlaceholder} 
+          alt="Item placeholder"
+          className="w-full h-full object-cover"
+        />
       )}
     </div>
   );
