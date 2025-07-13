@@ -6,10 +6,14 @@ import PauseLogSection from './PauseLogSection';
 import PartnerFeedTab from './PartnerFeedTab';
 import StatsTab from './StatsTab';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useItemComments } from '@/hooks/useItemComments';
+import { useAuth } from '@/contexts/AuthContext';
 
 const MainTabs = () => {
   const [activeTab, setActiveTab] = useState('paused');
   const { hasPausePartnerAccess } = useSubscription();
+  const { user } = useAuth();
+  const { getTotalUnreadCount } = useItemComments(user?.id || null);
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -33,8 +37,15 @@ const MainTabs = () => {
             color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
           }}
         >
-          <Users className="h-5 w-5 sm:h-5 sm:w-5" />
-          <span className="text-sm sm:text-base">Partner Pauses</span>
+          <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+            <Users className="h-5 w-5 sm:h-5 sm:w-5" />
+            <span className="text-sm sm:text-base">Partner Pauses</span>
+            {getTotalUnreadCount() > 0 && (
+              <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {getTotalUnreadCount() > 9 ? '9+' : getTotalUnreadCount()}
+              </div>
+            )}
+          </div>
         </TabsTrigger>
       </TabsList>
 

@@ -7,6 +7,9 @@ import { useItemActions } from '../hooks/useItemActions';
 import ItemReviewDetails from './ItemReviewDetails';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 import ItemReviewFeedbackForm from './ItemReviewFeedbackForm';
+import { ItemCommentsThread } from './ItemCommentsThread';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePausePartners } from '@/hooks/usePausePartners';
 
 interface ItemReviewContentProps {
   item: PausedItem | LocalPausedItem;
@@ -27,8 +30,13 @@ const ItemReviewContent = ({
   const [showFeedback, setShowFeedback] = useState(false);
   const [notes, setNotes] = useState('');
 
+  const { user } = useAuth();
+  const { partners } = usePausePartners();
   const { handleViewItem } = useItemNavigation();
   const { handleBought, handleLetGo } = useItemActions();
+
+  // Check if item is shared
+  const isSharedItem = 'sharedWithPartners' in item && item.sharedWithPartners && item.sharedWithPartners.length > 0;
 
   const handleDecision = async (decision: 'purchase' | 'let-go') => {
     setSelectedDecision(decision);
@@ -70,6 +78,18 @@ const ItemReviewContent = ({
       {!showFeedback ? (
         <>
           <ItemReviewDetails item={item} onViewItem={handleViewItem} />
+          
+          {/* Comments Thread for Shared Items */}
+          {isSharedItem && user?.id && (
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+              <ItemCommentsThread 
+                itemId={item.id}
+                partners={partners}
+                currentUserId={user.id}
+              />
+            </div>
+          )}
+          
           <ItemReviewDecisionButtons onDecision={handleDecision} />
         </>
       ) : (

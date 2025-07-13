@@ -12,6 +12,7 @@ import ItemImage from './ItemImage';
 import PauseDurationBanner from './PauseDurationBanner';
 import EmotionBadge from './EmotionBadge';
 import { extractActualNotes } from '../utils/notesMetadataUtils';
+import { ItemCommentsThread } from './ItemCommentsThread';
 
 interface Partner {
   partner_id: string;
@@ -134,6 +135,17 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                 <p className="text-gray-600 dark:text-gray-300 text-sm break-words">
                   <strong>Note:</strong> {cleanNotes}
                 </p>
+              </div>
+            )}
+
+            {/* Comments Thread for Shared Items */}
+            {sharedWithPartners.length > 0 && currentUserId && (
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
+                <ItemCommentsThread 
+                  itemId={item.id}
+                  partners={partners}
+                  currentUserId={currentUserId}
+                />
               </div>
             )}
           </div>

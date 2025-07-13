@@ -1,5 +1,5 @@
 
-import { Timer, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Timer, ShoppingCart, ArrowRight, MessageCircle } from 'lucide-react';
 import { memo, useMemo, useEffect, useState } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
@@ -11,6 +11,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
+import { useItemComments } from '@/hooks/useItemComments';
 
 interface Partner {
   partner_id: string;
@@ -29,6 +30,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
   const { isDarkMode } = useTheme();
   const emotionColor = useMemo(() => getEmotionColor(item.emotion, isDarkMode), [item.emotion, isDarkMode]);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const { hasNewComments, getUnreadCount } = useItemComments(currentUserId || null);
 
   // Get current user ID
   useEffect(() => {
@@ -151,6 +153,16 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       }}
       aria-label={`View details for ${item.itemName}`}
     >
+      {/* New message indicator for shared items */}
+      {item.sharedWithPartners && item.sharedWithPartners.length > 0 && hasNewComments(item.id) && (
+        <div className="absolute top-3 right-3 z-10">
+          <div className="flex items-center gap-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+            <MessageCircle size={12} />
+            <span>{getUnreadCount(item.id)}</span>
+          </div>
+        </div>
+      )}
+      
       <div className="px-4 py-6 pb-12">
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
