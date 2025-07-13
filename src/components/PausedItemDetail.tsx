@@ -132,8 +132,17 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto fixed"
+        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto fixed relative"
       >
+        {/* Sticky close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-50 w-8 h-8 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors shadow-sm sticky"
+          style={{ position: 'sticky', top: '1rem' }}
+        >
+          ✕
+        </button>
+        
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
         </DialogHeader>
