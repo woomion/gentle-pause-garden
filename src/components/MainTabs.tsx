@@ -8,44 +8,6 @@ import StatsTab from './StatsTab';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useItemComments } from '@/hooks/useItemComments';
 import { useAuth } from '@/contexts/AuthContext';
-import React from 'react';
-
-// Local error boundary specifically for the partner tab
-class PartnerTabErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error) {
-    console.error('PartnerTabErrorBoundary caught error:', error);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="text-center py-12">
-          <h3 className="text-lg mb-4">Something went wrong with the partner tab</h3>
-          <button 
-            onClick={() => this.setState({ hasError: false })}
-            className="bg-purple-600 text-white px-4 py-2 rounded"
-          >
-            Try Again
-          </button>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
 
 const MainTabs = () => {
   const [activeTab, setActiveTab] = useState('paused');
@@ -59,6 +21,7 @@ const MainTabs = () => {
     totalUnreadCount = getTotalUnreadCount();
   } catch (error) {
     console.error('Error getting unread count:', error);
+    // Continue with 0 count on error
   }
   
   // Debug: Log the unread count
@@ -105,9 +68,7 @@ const MainTabs = () => {
       </TabsContent>
 
       <TabsContent value="partner-feed" className="mt-0">
-        <PartnerTabErrorBoundary>
-          <PartnerFeedTab />
-        </PartnerTabErrorBoundary>
+        <PartnerFeedTab />
       </TabsContent>
     </Tabs>
   );
