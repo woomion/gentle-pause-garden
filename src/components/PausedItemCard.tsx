@@ -61,17 +61,17 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     const isSharedByCurrentUser = item.originalUserId === currentUser;
     
     if (isSharedByCurrentUser) {
-      // Current user shared this item
+      // Current user shared this item - use larger arrow
       if (sharedWithPartners.length === 1) {
-        return `Shared: You → ${sharedWithPartners[0].partner_name}`;
+        return `Shared: You ➜ ${sharedWithPartners[0].partner_name}`;
       } else {
-        return `Shared: You → ${sharedWithPartners.length} partners`;
+        return `Shared: You ➜ ${sharedWithPartners.length} partners`;
       }
     } else {
-      // Partner shared this with current user
+      // Partner shared this with current user - use larger arrow
       const sharer = partners.find(p => p.partner_id === item.originalUserId);
       if (sharer) {
-        return `Shared: ${sharer.partner_name} → You`;
+        return `Shared: ${sharer.partner_name} ➜ You`;
       }
     }
     
@@ -190,7 +190,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
             {/* Show either shared attribution or partner badges */}
             {getAttributionText ? (
               <div className="flex items-center gap-1 mt-2">
-                <span className="text-xs text-muted-foreground truncate">{getAttributionText}</span>
+                <span className="text-xs text-green-800 dark:text-green-100 truncate font-medium">{getAttributionText}</span>
               </div>
             ) : sharedWithPartners.length > 0 ? (
               <div className="flex flex-wrap gap-1 mt-2">
