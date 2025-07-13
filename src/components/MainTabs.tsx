@@ -44,7 +44,7 @@ const MainTabs = () => {
           <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
             <Users className="h-5 w-5 sm:h-5 sm:w-5" />
             <span className="text-sm sm:text-base">Partner Pauses</span>
-            {totalUnreadCount > 0 && (
+            {user && totalUnreadCount > 0 && (
               <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                 {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
               </div>
