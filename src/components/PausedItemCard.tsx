@@ -191,7 +191,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
             {/* Show either shared attribution or partner badges */}
             {getAttributionText ? (
               <div className="flex items-center gap-1 mt-2">
-                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs">
+                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-sm">
                   {getAttributionText}
                 </Badge>
               </div>
