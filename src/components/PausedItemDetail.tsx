@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { formatPrice } from '../utils/priceFormatter';
 import { useItemActions } from '../hooks/useItemActions';
 import ItemImage from './ItemImage';
@@ -33,6 +33,7 @@ interface PausedItemDetailProps {
 const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], currentUserId }: PausedItemDetailProps) => {
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
   const { markAsRead } = useItemComments(currentUserId);
+  const [showDecisionButtons, setShowDecisionButtons] = useState(false);
 
   // Mark comments as read when opening the detail view
   useEffect(() => {
@@ -128,6 +129,22 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
     onClose();
   };
 
+  const handleDecisionClick = () => {
+    setShowDecisionButtons(true);
+  };
+
+  const handleDecision = async (decision: 'purchase' | 'let-go') => {
+    try {
+      if (decision === 'purchase') {
+        await handleBought(item, onDelete, onClose);
+      } else {
+        await handleLetGo(item, onDelete, onClose);
+      }
+    } catch (error) {
+      console.error('Error handling decision:', error);
+    }
+  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -188,6 +205,37 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
 
           {/* Decision buttons - only show if current user is the item owner */}
           {currentUserId === item.originalUserId && (
+            <>
+              {!showDecisionButtons ? (
+                <div className="pt-2">
+                  <button 
+                    onClick={handleDecisionClick}
+                    className="w-full py-3 px-4 bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 text-black dark:text-[#F9F5EB] font-medium rounded-xl border border-lavender/30 dark:border-gray-600 transition-colors"
+                  >
+                    Decide now
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3 pt-2">
+                  <button
+                    onClick={() => handleDecision('purchase')}
+                    className="w-full py-3 px-4 bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 text-black dark:text-[#F9F5EB] font-medium rounded-xl border border-lavender/30 dark:border-gray-600 transition-colors"
+                  >
+                    I'm going to buy this
+                  </button>
+                  <button
+                    onClick={() => handleDecision('let-go')}
+                    className="w-full py-3 px-4 bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 text-black dark:text-[#F9F5EB] font-medium rounded-xl border border-lavender/30 dark:border-gray-600 transition-colors"
+                  >
+                    I'm ready to let this go
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Legacy decision buttons - keep for backward compatibility but hide when new buttons are shown */}
+          {currentUserId === item.originalUserId && !showDecisionButtons && (
             <>
               {/* Let it go button */}
               <div className="pt-2">
