@@ -30,7 +30,7 @@ export const useItemComments = (userId: string | null) => {
     // Create unique channel name to avoid conflicts
     const channelName = `item-comments-changes-${userId}-${Date.now()}`;
     
-    // Set up real-time subscription for comment changes
+    // Set up real-time subscription for comment and read status changes
     const channel = supabase
       .channel(channelName)
       .on(
@@ -42,6 +42,18 @@ export const useItemComments = (userId: string | null) => {
         },
         () => {
           console.log('🔔 Comment change detected, reloading counts');
+          loadCommentCounts();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comment_read_status'
+        },
+        () => {
+          console.log('🔔 Read status change detected, reloading counts');
           loadCommentCounts();
         }
       )
@@ -83,11 +95,12 @@ export const useItemComments = (userId: string | null) => {
       const itemIds = items.map(item => item.id);
       console.log('🔔 loadCommentCounts - Found items:', itemIds);
 
-      // Get comment counts and latest comment dates for these items
+      // Get all comments for these items
       const { data: comments, error: commentsError } = await supabase
         .from('item_comments')
-        .select('item_id, created_at, user_id')
-        .in('item_id', itemIds);
+        .select('id, item_id, created_at, user_id')
+        .in('item_id', itemIds)
+        .order('created_at', { ascending: true });
 
       if (commentsError) {
         console.error('Error loading comments:', commentsError);
@@ -96,11 +109,25 @@ export const useItemComments = (userId: string | null) => {
 
       console.log('🔔 loadCommentCounts - Found comments:', comments?.length || 0);
 
+      // Get read status for current user
+      const { data: readStatus, error: readError } = await supabase
+        .from('comment_read_status')
+        .select('comment_id')
+        .eq('user_id', userId);
+
+      if (readError) {
+        console.error('Error loading read status:', readError);
+      }
+
+      const readCommentIds = new Set(readStatus?.map(r => r.comment_id) || []);
+      console.log('🔔 Read comment IDs:', Array.from(readCommentIds));
+
       // Process comment data
       const counts = new Map<string, CommentCount>();
       const unread = new Map<string, number>();
 
       comments?.forEach(comment => {
+        // Update comment counts
         const existing = counts.get(comment.item_id);
         const commentTime = new Date(comment.created_at);
         
@@ -117,20 +144,19 @@ export const useItemComments = (userId: string | null) => {
           });
         }
 
-        // Count unread comments (comments from other users in last 24 hours)
-        const isRecent = commentTime > new Date(Date.now() - 24 * 60 * 60 * 1000);
+        // Count unread comments (comments from other users that haven't been marked as read)
         const isFromOtherUser = comment.user_id !== userId;
+        const isUnread = !readCommentIds.has(comment.id);
         
         console.log('🔔 Comment analysis:', {
-          comment_id: comment.item_id,
-          commentTime: commentTime.toISOString(),
-          isRecent,
+          comment_id: comment.id,
           isFromOtherUser,
+          isUnread,
           comment_user_id: comment.user_id,
           current_user_id: userId
         });
         
-        if (isRecent && isFromOtherUser) {
+        if (isFromOtherUser && isUnread) {
           unread.set(comment.item_id, (unread.get(comment.item_id) || 0) + 1);
           console.log('🔔 Added unread comment for item:', comment.item_id);
         }
@@ -169,13 +195,47 @@ export const useItemComments = (userId: string | null) => {
     if (!userId) return;
     
     try {
-      // For now, simply remove from unread count
-      // In a more sophisticated system, you'd track read status in the database
-      setUnreadComments(prev => {
-        const newMap = new Map(prev);
-        newMap.delete(itemId);
-        return newMap;
-      });
+      console.log('🔔 Marking comments as read for item:', itemId);
+      
+      // Get all unread comments for this item
+      const { data: comments, error: commentsError } = await supabase
+        .from('item_comments')
+        .select('id')
+        .eq('item_id', itemId)
+        .neq('user_id', userId); // Only comments from other users
+
+      if (commentsError) {
+        console.error('Error getting comments to mark as read:', commentsError);
+        return;
+      }
+
+      if (!comments || comments.length === 0) {
+        console.log('🔔 No comments found to mark as read');
+        return;
+      }
+
+      // Mark all comments from other users as read
+      const readStatusInserts = comments.map(comment => ({
+        user_id: userId,
+        comment_id: comment.id,
+        item_id: itemId
+      }));
+
+      const { error: insertError } = await supabase
+        .from('comment_read_status')
+        .upsert(readStatusInserts, {
+          onConflict: 'user_id,comment_id',
+          ignoreDuplicates: true
+        });
+
+      if (insertError) {
+        console.error('Error inserting read status:', insertError);
+        return;
+      }
+
+      console.log('🔔 Successfully marked comments as read, refreshing counts');
+      // Refresh counts to reflect the changes
+      loadCommentCounts();
     } catch (error) {
       console.error('Error marking comments as read:', error);
     }

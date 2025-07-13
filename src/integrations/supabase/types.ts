@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      comment_read_status: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          item_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          item_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          item_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_read_status_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "item_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       item_comments: {
         Row: {
           content: string
