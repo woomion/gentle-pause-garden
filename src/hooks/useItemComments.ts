@@ -12,12 +12,19 @@ export const useItemComments = (userId: string | null) => {
   const [unreadComments, setUnreadComments] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
+    console.log('🔔 useItemComments - Hook initialized with userId:', userId);
+    
     if (!userId) {
+      console.log('🔔 useItemComments - No userId, clearing all state');
       setCommentCounts(new Map());
       setUnreadComments(new Map());
       return;
     }
 
+    // Clear any existing state first
+    setCommentCounts(new Map());
+    setUnreadComments(new Map());
+    
     loadCommentCounts();
 
     // Create unique channel name to avoid conflicts
