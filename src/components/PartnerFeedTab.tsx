@@ -33,11 +33,19 @@ const PartnerFeedTab = () => {
 
   // Get shared items from the store
   const [sharedItems, setSharedItems] = useState<PausedItem[]>([]);
+  const [componentLoaded, setComponentLoaded] = useState(false);
   
   useEffect(() => {
     const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setCurrentUserId(user?.id || null);
+        setComponentLoaded(true);
+      } catch (error) {
+        console.error('Error getting current user:', error);
+        setCurrentUserId(null);
+        setComponentLoaded(true);
+      }
     };
     getCurrentUser();
   }, []);
@@ -380,6 +388,17 @@ const PartnerFeedTab = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
   
+  // Show loading state while component initializes
+  if (!componentLoaded) {
+    return (
+      <div className="mb-8">
+        <div className="text-center py-12">
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   // Early return if user is not authenticated to prevent errors
   if (!currentUserId) {
     return (

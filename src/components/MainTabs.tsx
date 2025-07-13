@@ -14,14 +14,24 @@ const MainTabs = () => {
   const { hasPausePartnerAccess } = useSubscription();
   const { user } = useAuth();
   
-  // Safely get total unread count with error handling
+  // Always call the hook, but handle errors gracefully
+  const itemCommentsHook = useItemComments(user?.id || null);
+  
+  // Safely get total unread count with comprehensive error handling
   let totalUnreadCount = 0;
+  
   try {
-    const { getTotalUnreadCount } = useItemComments(user?.id || null);
-    totalUnreadCount = getTotalUnreadCount();
+    if (user?.id && itemCommentsHook && typeof itemCommentsHook.getTotalUnreadCount === 'function') {
+      totalUnreadCount = itemCommentsHook.getTotalUnreadCount();
+    }
   } catch (error) {
     console.error('Error getting unread count:', error);
-    // Continue with 0 count on error
+    totalUnreadCount = 0;
+  }
+  
+  // Ensure totalUnreadCount is a valid number
+  if (typeof totalUnreadCount !== 'number' || isNaN(totalUnreadCount)) {
+    totalUnreadCount = 0;
   }
   
   // Debug: Log the unread count
