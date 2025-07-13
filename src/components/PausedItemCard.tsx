@@ -191,10 +191,10 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
             {/* Show either shared attribution or partner badges */}
             {getAttributionText ? (
               <div className="flex items-center gap-1 mt-2">
-                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs flex items-center">
-                  <span className="text-xs">{getAttributionText?.split('  ')[0]}</span>
-                  <span className="text-lg mx-1">→</span>
-                  <span className="text-xs">{getAttributionText?.split('  ')[1]}</span>
+                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs flex items-center gap-1">
+                  <span className="text-xs leading-none">{getAttributionText?.split('  ')[0]}</span>
+                  <span className="text-lg leading-none">→</span>
+                  <span className="text-xs leading-none">{getAttributionText?.split('  ')[1]}</span>
                 </Badge>
               </div>
             ) : sharedWithPartners.length > 0 ? (
