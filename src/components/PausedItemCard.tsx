@@ -150,7 +150,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       }}
       aria-label={`View details for ${item.itemName}`}
     >
-      <div className={`px-4 py-6 ${getAttributionText ? 'pb-16' : 'pb-12'}`}>
+      <div className="px-4 py-6 pb-12">
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
             {imageUrl === 'cart-placeholder' ? (
@@ -187,8 +187,12 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
               {item.storeName}
             </p>
             
-            {/* Partner badges */}
-            {sharedWithPartners.length > 0 && (
+            {/* Show either shared attribution or partner badges */}
+            {getAttributionText ? (
+              <div className="flex items-center gap-1 mt-2">
+                <span className="text-xs text-muted-foreground truncate">{getAttributionText}</span>
+              </div>
+            ) : sharedWithPartners.length > 0 ? (
               <div className="flex flex-wrap gap-1 mt-2">
                 {sharedWithPartners.map((partner) => (
                   <Avatar key={partner.partner_id} className="h-6 w-6 bg-green-100 border-2 border-green-400 dark:bg-green-900 dark:border-green-500">
@@ -198,21 +202,11 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
                   </Avatar>
                 ))}
               </div>
-            )}
+            ) : null}
 
           </div>
         </div>
       </div>
-      
-      {/* Attribution line for shared items - placed above the timer */}
-      {getAttributionText && (
-        <div className="absolute bottom-8 left-4 right-4">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <ArrowRight size={12} className="flex-shrink-0" />
-            <span className="truncate">{getAttributionText}</span>
-          </div>
-        </div>
-      )}
       
       <div 
         className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl"
