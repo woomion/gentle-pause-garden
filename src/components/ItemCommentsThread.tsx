@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,6 +32,16 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Auto-scroll when comments change
+  useEffect(() => {
+    scrollToBottom();
+  }, [comments]);
 
   // Load comments
   useEffect(() => {
@@ -217,34 +227,37 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
             <p className="text-sm">No messages yet. Start the conversation!</p>
           </div>
         ) : (
-          comments.map((comment) => (
-            <div key={comment.id} className="flex gap-3">
-              <Avatar className={`h-8 w-8 flex-shrink-0 ${
-                comment.user_id === currentUserId 
-                  ? 'bg-purple-100 border-2 border-purple-300 dark:bg-purple-900 dark:border-purple-600' 
-                  : 'bg-gray-200 border-2 border-gray-400 dark:bg-gray-700 dark:border-gray-500'
-              }`}>
-                <AvatarFallback className={`text-xs ${
+          <>
+            {comments.map((comment) => (
+              <div key={comment.id} className="flex gap-3">
+                <Avatar className={`h-8 w-8 flex-shrink-0 ${
                   comment.user_id === currentUserId 
-                    ? 'text-purple-800 dark:text-purple-200' 
-                    : 'text-gray-700 dark:text-gray-300'
+                    ? 'bg-purple-100 border-2 border-purple-300 dark:bg-purple-900 dark:border-purple-600' 
+                    : 'bg-gray-200 border-2 border-gray-400 dark:bg-gray-700 dark:border-gray-500'
                 }`}>
-                  {getUserInitials(comment.user_id)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-foreground">
-                    {getUserDisplayName(comment.user_id)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                  </span>
+                  <AvatarFallback className={`text-xs ${
+                    comment.user_id === currentUserId 
+                      ? 'text-purple-800 dark:text-purple-200' 
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}>
+                    {getUserInitials(comment.user_id)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-foreground">
+                      {getUserDisplayName(comment.user_id)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                    </span>
+                  </div>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{comment.content}</p>
                 </div>
-                <p className="text-sm text-foreground whitespace-pre-wrap">{comment.content}</p>
               </div>
-            </div>
-          ))
+            ))}
+            <div ref={messagesEndRef} />
+          </>
         )}
       </div>
 
