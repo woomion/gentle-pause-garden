@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Crown, Users, Clock, Tag, Trash2 } from 'lucide-react';
 import PausedItemsCarousel from '@/components/PausedItemsCarousel';
 import PausedItemDetail from '@/components/PausedItemDetail';
-import { PausedItem } from '@/stores/pausedItemsStore';
+import { PausedItem } from '@/stores/supabasePausedItemsStore';
 import { calculateCheckInTimeDisplay } from '@/utils/pausedItemsUtils';
 import { extractProductLinkFromNotes, extractActualNotes } from '@/utils/notesMetadataUtils';
 
