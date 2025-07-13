@@ -21,6 +21,7 @@ const PartnerFeedTab = () => {
   const [isInviting, setIsInviting] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
@@ -30,6 +31,14 @@ const PartnerFeedTab = () => {
 
   // Get shared items from the store
   const [sharedItems, setSharedItems] = useState<PausedItem[]>([]);
+  
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+    };
+    getCurrentUser();
+  }, []);
   
   useEffect(() => {
     const fetchSharedItems = async () => {
@@ -583,7 +592,7 @@ const PartnerFeedTab = () => {
                     items={sharedItems}
                     onItemClick={(item) => setSelectedItem(item)}
                     partners={partners}
-                    currentUserId={undefined} // We'll get this from the item's context
+                    currentUserId={currentUserId}
                   />
                 </div>
               </div>
@@ -603,7 +612,7 @@ const PartnerFeedTab = () => {
             setSelectedItem(null);
           }}
           partners={partners}
-          currentUserId={undefined} // We'll get this from the item's context
+          currentUserId={currentUserId}
         />
       )}
     </div>
