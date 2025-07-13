@@ -13,6 +13,7 @@ import PauseDurationBanner from './PauseDurationBanner';
 import EmotionBadge from './EmotionBadge';
 import { extractActualNotes } from '../utils/notesMetadataUtils';
 import { ItemCommentsThread } from './ItemCommentsThread';
+import { useItemComments } from '../hooks/useItemComments';
 
 interface Partner {
   partner_id: string;
@@ -31,6 +32,14 @@ interface PausedItemDetailProps {
 
 const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], currentUserId }: PausedItemDetailProps) => {
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
+  const { markAsRead } = useItemComments(currentUserId);
+
+  // Mark comments as read when opening the detail view
+  useEffect(() => {
+    if (isOpen && currentUserId) {
+      markAsRead(item.id);
+    }
+  }, [isOpen, item.id, currentUserId, markAsRead]);
 
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
   const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);

@@ -202,8 +202,16 @@ export const ItemCommentsThread = ({ itemId, partners, currentUserId }: ItemComm
         ) : (
           comments.map((comment) => (
             <div key={comment.id} className="flex gap-3">
-              <Avatar className="h-8 w-8 flex-shrink-0">
-                <AvatarFallback className="text-xs bg-muted">
+              <Avatar className={`h-8 w-8 flex-shrink-0 ${
+                comment.user_id === currentUserId 
+                  ? 'bg-purple-100 border-2 border-purple-300 dark:bg-purple-900 dark:border-purple-600' 
+                  : 'bg-gray-200 border-2 border-gray-400 dark:bg-gray-700 dark:border-gray-500'
+              }`}>
+                <AvatarFallback className={`text-xs ${
+                  comment.user_id === currentUserId 
+                    ? 'text-purple-800 dark:text-purple-200' 
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}>
                   {getUserInitials(comment.user_id)}
                 </AvatarFallback>
               </Avatar>

@@ -114,11 +114,28 @@ export const useItemComments = (userId: string | null) => {
     return Array.from(unreadComments.values()).reduce((sum, count) => sum + count, 0);
   };
 
+  const markAsRead = async (itemId: string) => {
+    if (!userId) return;
+    
+    try {
+      // For now, simply remove from unread count
+      // In a more sophisticated system, you'd track read status in the database
+      setUnreadComments(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(itemId);
+        return newMap;
+      });
+    } catch (error) {
+      console.error('Error marking comments as read:', error);
+    }
+  };
+
   return {
     getCommentCount,
     getUnreadCount,
     hasNewComments,
     getTotalUnreadCount,
+    markAsRead,
     refreshCommentCounts: loadCommentCounts
   };
 };
