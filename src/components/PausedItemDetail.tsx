@@ -60,24 +60,33 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
 
   // Get sharing attribution text with direction
   const getAttributionText = useMemo(() => {
-    if (!currentUserId || !item.originalUserId || sharedWithPartners.length === 0) {
+    // Use currentUserId if available
+    if (!currentUserId || !item.originalUserId) {
       return null;
     }
 
     const isSharedByCurrentUser = item.originalUserId === currentUserId;
     
     if (isSharedByCurrentUser) {
-      // Current user shared this item - use regular arrow
-      if (sharedWithPartners.length === 1) {
-        return `You → ${sharedWithPartners[0].partner_name}`;
-      } else {
-        return `You → ${sharedWithPartners.length} partners`;
+      // Current user shared this item - show who they shared it with
+      if (sharedWithPartners.length > 0) {
+        if (sharedWithPartners.length === 1) {
+          return `You → ${sharedWithPartners[0].partner_name}`;
+        } else {
+          return `You → ${sharedWithPartners.length} partners`;
+        }
+      } else if (item.sharedWithPartners && item.sharedWithPartners.length > 0) {
+        // Fallback: if partners data isn't loaded but we know it's shared
+        return `You → ${item.sharedWithPartners.length} partner${item.sharedWithPartners.length > 1 ? 's' : ''}`;
       }
     } else {
-      // Partner shared this with current user - use regular arrow
+      // Partner shared this with current user
       const sharer = partners.find(p => p.partner_id === item.originalUserId);
       if (sharer) {
         return `${sharer.partner_name} → You`;
+      } else {
+        // Fallback: if partner data isn't loaded but we know it's from a partner
+        return `Partner → You`;
       }
     }
     
@@ -133,6 +142,12 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
           {/* Product image */}
           <div className="relative">
             <ItemImage item={item} />
+            {/* Attribution pill in top right corner */}
+            {getAttributionText && (
+              <div className="absolute top-2 right-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-3 py-1 rounded-full shadow-sm animate-fade-in">
+                <span>{getAttributionText}</span>
+              </div>
+            )}
             {/* Pause Duration Banner - touching bottom of image */}
             <PauseDurationBanner checkInTime={item.checkInTime} />
           </div>
@@ -150,15 +165,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             
             <EmotionBadge emotion={item.emotion} />
 
-            {/* Shared indicator with directional information */}
-            {sharedWithPartners.length > 0 && getAttributionText && (
-              <div className="flex items-center gap-2 pt-2">
-                <span className="text-sm text-gray-600 dark:text-gray-300">Shared</span>
-                <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-3 py-1 rounded-full flex items-center gap-2">
-                  <span>{getAttributionText}</span>
-                </div>
-              </div>
-            )}
+            {/* Shared indicator removed - now shown on image */}
 
             {/* Tags section */}
             {item.tags && item.tags.length > 0 && (
