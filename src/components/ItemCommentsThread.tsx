@@ -168,7 +168,7 @@ export function ItemCommentsThread({ itemId, partners, currentUserId }: ItemComm
             <div className="flex items-center gap-2">
               <MessageCircle size={18} className="text-muted-foreground" />
               <h3 className="font-medium text-foreground">Reflect together</h3>
-              <span className="text-xs text-muted-foreground ml-1">(tap to open)</span>
+              <span className="text-xs text-muted-foreground ml-1">({isOpen ? 'tap to close' : 'tap to open'})</span>
             </div>
             <ChevronDown
               className={`h-4 w-4 text-muted-foreground transition-transform ${
@@ -196,7 +196,7 @@ export function ItemCommentsThread({ itemId, partners, currentUserId }: ItemComm
                 {comments.length}
               </Badge>
             )}
-            <span className="text-xs text-muted-foreground ml-1">(tap to open)</span>
+            <span className="text-xs text-muted-foreground ml-1">({isOpen ? 'tap to close' : 'tap to open'})</span>
           </div>
           <ChevronDown
             className={`h-4 w-4 text-muted-foreground transition-transform ${
