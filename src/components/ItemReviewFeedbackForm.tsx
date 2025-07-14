@@ -31,7 +31,7 @@ const ItemReviewFeedbackForm = ({
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Optional reflection..."
           className="w-full p-3 border border-lavender/30 dark:border-gray-600 rounded-xl bg-white/60 dark:bg-white/10 text-black dark:text-[#F9F5EB] placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#CAB6F7]"
-          rows={4}
+          rows={2}
         />
       </div>
 
