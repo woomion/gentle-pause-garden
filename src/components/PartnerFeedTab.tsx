@@ -531,7 +531,7 @@ const PartnerFeedTab = () => {
                           <Badge 
                             variant={invite.status === 'accepted' ? 'default' : 'outline'}
                             className={`text-xs ${invite.status === 'accepted' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
+                              ? 'bg-green-100 text-green-800 border border-green-800 dark:bg-green-900 dark:text-green-100 dark:border-green-100' 
                               : 'border-yellow-400 text-yellow-700 bg-yellow-50 dark:border-yellow-500 dark:text-yellow-300 dark:bg-yellow-950'
                             }`}
                           >
@@ -578,7 +578,7 @@ const PartnerFeedTab = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                      <Badge className="bg-green-100 text-green-800 border border-green-800 dark:bg-green-900 dark:text-green-100 dark:border-green-100">
                         Linked!
                       </Badge>
                       <Button
