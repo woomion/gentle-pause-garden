@@ -135,6 +135,7 @@ const PausedSection = () => {
           isOpen={!!selectedItem}
           onClose={handleCloseDetail}
           onDelete={handleDeleteItem}
+          currentUserId={user?.id}
         />
       )}
     </div>
