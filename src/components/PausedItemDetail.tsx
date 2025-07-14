@@ -1,5 +1,5 @@
 
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, ArrowLeft } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -155,6 +155,12 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
     }
   };
 
+  const handleBackToDecision = () => {
+    setShowFeedback(false);
+    setSelectedDecision(null);
+    setNotes('');
+  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -243,6 +249,15 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                 </div>
               ) : showFeedback && selectedDecision ? (
                 <div className="pt-2">
+                  {/* Back arrow */}
+                  <button
+                    onClick={handleBackToDecision}
+                    className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors mb-4"
+                  >
+                    <ArrowLeft size={16} />
+                    <span className="text-sm">Back to options</span>
+                  </button>
+                  
                   <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-2">
                     {(() => {
                       const supportivePhrases = [
