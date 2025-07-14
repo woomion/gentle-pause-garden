@@ -122,17 +122,88 @@
     color: #F9F5EB;
   }
 
-  /* Dark mode for main containers */
+  /* Theme-aware UI elements */
+  .bg-cream {
+    background-color: var(--theme-background, #F9F5EB) !important;
+  }
+
+  /* Theme-aware buttons */
+  .bg-lavender, 
+  button:not(.bg-white):not([class*="bg-"]):not(.outline):not(.ghost):not(.destructive),
+  .btn-primary {
+    background-color: var(--theme-buttons, #D6BBF7) !important;
+    color: var(--theme-text, #2B2B2B) !important;
+  }
+
+  .bg-lavender:hover,
+  button:not(.bg-white):not([class*="bg-"]):not(.outline):not(.ghost):not(.destructive):hover {
+    background-color: var(--theme-accent, #6B4C9A) !important;
+    color: var(--theme-background, #F9F5EB) !important;
+  }
+
+  /* Theme-aware cards and containers */
+  .bg-white\/60,
+  .bg-white\/80 {
+    background-color: var(--theme-borders, rgba(230, 222, 211, 0.6)) !important;
+    backdrop-filter: blur(10px);
+  }
+
+  .bg-white\/80:hover {
+    background-color: var(--theme-borders, rgba(230, 222, 211, 0.8)) !important;
+  }
+
+  /* Theme-aware borders */
+  .border-gray-200,
+  .border-gray-300 {
+    border-color: var(--theme-borders, #E6DED3) !important;
+  }
+
+  /* Theme-aware accent elements */
+  .text-purple,
+  .accent-color {
+    color: var(--theme-accent, #6B4C9A) !important;
+  }
+
+  .bg-purple {
+    background-color: var(--theme-accent, #6B4C9A) !important;
+  }
+
+  /* Theme-aware emotion badges and tags */
+  .emotion-badge {
+    background-color: var(--theme-buttons, #D6BBF7) !important;
+    color: var(--theme-text, #2B2B2B) !important;
+    border: 1px solid var(--theme-borders, #E6DED3) !important;
+  }
+
+  /* Theme-aware secondary elements */
+  .text-gray-600,
+  .text-gray-500 {
+    color: var(--theme-text, #2B2B2B) !important;
+    opacity: 0.7;
+  }
+
+  /* Theme-aware form elements */
+  input, textarea, select {
+    background-color: var(--theme-background, #F9F5EB) !important;
+    border-color: var(--theme-borders, #E6DED3) !important;
+    color: var(--theme-text, #2B2B2B) !important;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--theme-accent, #6B4C9A) !important;
+    box-shadow: 0 0 0 2px var(--theme-accent, #6B4C9A) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-accent, #6B4C9A) 20%, transparent) !important;
+  }
+
+  /* Dark mode overrides - keep dark mode styles when enabled */
   .dark .bg-cream {
     background-color: #200E3B !important;
   }
 
-  /* Dark mode for emotion badges - keep lavender but use dark text */
   .dark .emotion-badge {
     color: #2B2B2B !important;
   }
 
-  /* Dark mode for cards and UI elements */
   .dark .bg-white\/60 {
     background-color: rgba(249, 245, 235, 0.1) !important;
   }
@@ -161,7 +232,6 @@
     color: #F9F5EB !important;
   }
 
-  /* Dark mode for form elements */
   .dark .text-dark-gray {
     color: #F9F5EB !important;
   }
@@ -170,7 +240,6 @@
     color: rgba(249, 245, 235, 0.5) !important;
   }
 
-  /* Dark mode for inputs and form fields */
   .dark input {
     background-color: rgba(249, 245, 235, 0.1) !important;
     border-color: rgba(249, 245, 235, 0.2) !important;
@@ -189,7 +258,6 @@
     color: #F9F5EB !important;
   }
 
-  /* Dark mode for dropdown content */
   .dark [data-radix-select-content] {
     background-color: rgba(32, 14, 59, 0.95) !important;
     border-color: rgba(249, 245, 235, 0.2) !important;
@@ -199,7 +267,6 @@
     color: #F9F5EB !important;
   }
 
-  /* Dark mode for file inputs */
   .dark input[type="file"] {
     color: #F9F5EB !important;
   }

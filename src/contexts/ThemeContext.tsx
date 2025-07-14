@@ -107,6 +107,15 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     // Update body background color immediately
     document.body.style.backgroundColor = themeColors.background;
     document.body.style.color = themeColors.text;
+
+    // Add theme class to body for more specific targeting
+    document.body.className = document.body.className.replace(/theme-\w+/g, '');
+    document.body.classList.add(`theme-${theme}`);
+    
+    // Force a repaint to ensure all elements update
+    document.body.style.display = 'none';
+    document.body.offsetHeight; // trigger reflow
+    document.body.style.display = '';
   };
 
   const setTheme = (theme: ThemeName) => {
