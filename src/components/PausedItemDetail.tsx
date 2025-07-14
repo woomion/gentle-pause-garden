@@ -213,8 +213,9 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             )}
           </div>
 
-          {/* Decision buttons - only show if current user is the item owner */}
-          {currentUserId === item.originalUserId && (
+          {/* Decision buttons - show if current user is the item owner or a shared partner */}
+          {(currentUserId === item.originalUserId || 
+            (currentUserId && item.sharedWithPartners?.includes(currentUserId))) && (
             <>
               {!showDecisionButtons && !showFeedback ? (
                 <div className="pt-2">
