@@ -60,6 +60,8 @@
     --decision-buy-foreground: 222.2 84% 4.9%;
     --decision-let-go: 0 47% 83%;
     --decision-let-go-foreground: 222.2 84% 4.9%;
+    --decide-now: 263 57% 88%;
+    --decide-now-foreground: 222.2 84% 4.9%;
   }
 
   .dark {
@@ -98,6 +100,8 @@
     --decision-buy-foreground: 222.2 84% 4.9%;
     --decision-let-go: 0 47% 83%;
     --decision-let-go-foreground: 222.2 84% 4.9%;
+    --decide-now: 263 57% 88%;
+    --decide-now-foreground: 222.2 84% 4.9%;
   }
 }
 

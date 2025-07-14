@@ -89,6 +89,10 @@ export default {
 				'decision-let-go': {
 					DEFAULT: 'hsl(var(--decision-let-go))',
 					foreground: 'hsl(var(--decision-let-go-foreground))'
+				},
+				'decide-now': {
+					DEFAULT: 'hsl(var(--decide-now))',
+					foreground: 'hsl(var(--decide-now-foreground))'
 				}
 			},
 			borderRadius: {
