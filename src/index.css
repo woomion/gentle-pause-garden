@@ -56,10 +56,10 @@
     --invite-button: 250 100% 69%;
     --invite-button-foreground: 0 0% 100%;
 
-    --decision-buy: 212 73% 47%;
-    --decision-buy-foreground: 0 0% 100%;
-    --decision-let-go: 4 66% 61%;
-    --decision-let-go-foreground: 0 0% 100%;
+    --decision-buy: 185 45% 83%;
+    --decision-buy-foreground: 222.2 84% 4.9%;
+    --decision-let-go: 0 47% 83%;
+    --decision-let-go-foreground: 222.2 84% 4.9%;
   }
 
   .dark {
@@ -94,10 +94,10 @@
     --invite-button: 250 100% 69%;
     --invite-button-foreground: 0 0% 100%;
 
-    --decision-buy: 212 73% 47%;
-    --decision-buy-foreground: 0 0% 100%;
-    --decision-let-go: 4 66% 61%;
-    --decision-let-go-foreground: 0 0% 100%;
+    --decision-buy: 185 45% 83%;
+    --decision-buy-foreground: 222.2 84% 4.9%;
+    --decision-let-go: 0 47% 83%;
+    --decision-let-go-foreground: 222.2 84% 4.9%;
   }
 }
 
