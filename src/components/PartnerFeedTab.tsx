@@ -567,7 +567,7 @@ const PartnerFeedTab = () => {
                 {partners.map((partner) => (
                   <div key={partner.partner_id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-8 w-8 border-2 border-green-800 dark:border-green-100">
                         <AvatarFallback className="text-sm">
                           {getInitials(partner.partner_name)}
                         </AvatarFallback>
