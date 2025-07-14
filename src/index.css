@@ -35,8 +35,8 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --invite-button: 250 100% 69%;
-    --invite-button-foreground: 0 0% 100%;
+    --invite-button: 263 100% 86%;
+    --invite-button-foreground: 0 0% 0%;
 
     --shared-review: 152 57% 88%;
     --shared-review-foreground: 152 70% 25%;
@@ -52,9 +52,6 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-
-    --invite-button: 250 100% 69%;
-    --invite-button-foreground: 0 0% 100%;
 
     --decision-buy: 185 45% 83%;
     --decision-buy-foreground: 222.2 84% 4.9%;
@@ -93,8 +90,8 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --invite-button: 250 100% 69%;
-    --invite-button-foreground: 0 0% 100%;
+    --invite-button: 263 100% 86%;
+    --invite-button-foreground: 0 0% 0%;
 
     --decision-buy: 185 45% 83%;
     --decision-buy-foreground: 222.2 84% 4.9%;
