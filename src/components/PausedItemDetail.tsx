@@ -234,62 +234,6 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             </>
           )}
 
-          {/* Legacy decision buttons - keep for backward compatibility but hide when new buttons are shown */}
-          {currentUserId === item.originalUserId && !showDecisionButtons && (
-            <>
-              {/* Let it go button */}
-              <div className="pt-2">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 dark:hover:bg-lavender/20 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
-                      {item.isCart ? 'Let This Cart Go' : 'Let This Item Go'}
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">
-                        {item.isCart ? 'Let go of this cart?' : 'Let go of this item?'}
-                      </AlertDialogTitle>
-                      <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-                        This will move "{item.itemName}" to your pause log. You can always see what you've let go of in your pause log section.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleLetGo(item, onDelete, onClose)} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
-                        Let it go
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-
-              {/* I bought this button */}
-              <div className="text-center">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 underline">
-                      I Purchased This
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Mark as purchased?</AlertDialogTitle>
-                      <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
-                        This will move "{item.itemName}" to your Pause Log as a thoughtful purchase decision.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20" onClick={handleKeepPaused}>Keep paused</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleBought(item, onDelete, onClose)} className="rounded-2xl bg-lavender hover:bg-lavender/90 text-black">
-                        Yes, I bought it
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </>
-          )}
 
           {/* Footer actions */}
           <div className="pt-2 flex items-center justify-between">
