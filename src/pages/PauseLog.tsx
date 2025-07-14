@@ -26,7 +26,6 @@ const PauseLog = () => {
   
   const { items, deleteItem, loadItems } = user ? supabasePauseLog : localPauseLog;
   
-  const [filteredItems, setFilteredItems] = useState<PauseLogItem[]>([]);
   const [cartFilter, setCartFilter] = useState<string>('all');
   const [emotionFilters, setEmotionFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
