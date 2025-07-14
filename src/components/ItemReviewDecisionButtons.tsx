@@ -8,13 +8,13 @@ const ItemReviewDecisionButtons = ({ onDecision }: ItemReviewDecisionButtonsProp
     <div className="space-y-3">
       <button
         onClick={() => onDecision('purchase')}
-        className="w-full py-3 px-4 bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 text-black dark:text-[#F9F5EB] font-medium rounded-xl border border-lavender/30 dark:border-gray-600 transition-colors"
+        className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
       >
         I'm going to buy this
       </button>
       <button
         onClick={() => onDecision('let-go')}
-        className="w-full py-3 px-4 bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 text-black dark:text-[#F9F5EB] font-medium rounded-xl border border-lavender/30 dark:border-gray-600 transition-colors"
+        className="w-full py-3 px-4 bg-decision-let-go hover:bg-decision-let-go/90 text-decision-let-go-foreground font-medium rounded-xl transition-colors"
       >
         I'm ready to let this go
       </button>

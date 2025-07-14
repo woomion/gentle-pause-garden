@@ -81,6 +81,14 @@ export default {
 					DEFAULT: 'hsl(var(--shared-review))',
 					foreground: 'hsl(var(--shared-review-foreground))',
 					muted: 'hsl(var(--shared-review-muted))'
+				},
+				'decision-buy': {
+					DEFAULT: 'hsl(var(--decision-buy))',
+					foreground: 'hsl(var(--decision-buy-foreground))'
+				},
+				'decision-let-go': {
+					DEFAULT: 'hsl(var(--decision-let-go))',
+					foreground: 'hsl(var(--decision-let-go-foreground))'
 				}
 			},
 			borderRadius: {

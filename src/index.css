@@ -55,6 +55,11 @@
 
     --invite-button: 250 100% 69%;
     --invite-button-foreground: 0 0% 100%;
+
+    --decision-buy: 212 73% 47%;
+    --decision-buy-foreground: 0 0% 100%;
+    --decision-let-go: 4 66% 61%;
+    --decision-let-go-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -88,6 +93,11 @@
 
     --invite-button: 250 100% 69%;
     --invite-button-foreground: 0 0% 100%;
+
+    --decision-buy: 212 73% 47%;
+    --decision-buy-foreground: 0 0% 100%;
+    --decision-let-go: 4 66% 61%;
+    --decision-let-go-foreground: 0 0% 100%;
   }
 }
 
