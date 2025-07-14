@@ -112,8 +112,8 @@
 
   body {
     @apply bg-background text-foreground font-inter;
-    background-color: #F9F5EB;
-    color: #2B2B2B;
+    background-color: var(--theme-background, #F9F5EB);
+    color: var(--theme-text, #2B2B2B);
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
