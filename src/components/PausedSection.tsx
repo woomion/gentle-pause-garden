@@ -7,9 +7,11 @@ import GuestModeIndicator from './GuestModeIndicator';
 import PausedItemsCarousel from './PausedItemsCarousel';
 import PausedSectionEmpty from './PausedSectionEmpty';
 import PausedSectionLoading from './PausedSectionLoading';
+import { PausedItemsSearch } from './PausedItemsSearch';
 
 const PausedSection = () => {
   const [pausedItems, setPausedItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
+  const [filteredItems, setFilteredItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
   const [selectedItem, setSelectedItem] = useState<PausedItem | LocalPausedItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -123,9 +125,19 @@ const PausedSection = () => {
         show={!user && pausedItems.length > 0}
       />
 
+      {/* Search and filter */}
+      {pausedItems.length > 0 && (
+        <div className="mb-6">
+          <PausedItemsSearch
+            items={pausedItems}
+            onFilteredItemsChange={setFilteredItems}
+          />
+        </div>
+      )}
+
       {/* Paused items display */}
       <PausedItemsCarousel 
-        items={pausedItems}
+        items={filteredItems.length > 0 ? filteredItems : pausedItems}
         onItemClick={handleItemClick}
       />
 
