@@ -34,6 +34,7 @@ const ItemReviewModal = ({
   onItemDecided,
   onNext
 }: ItemReviewModalProps) => {
+  const [showFeedback, setShowFeedback] = useState(false);
   const { activeIndex, api, setApi, navigateToNext } = useItemReviewCarousel(
     currentIndex,
     isOpen,
@@ -44,6 +45,13 @@ const ItemReviewModal = ({
 
   const currentItem = items[activeIndex];
   const isLastItem = activeIndex >= items.length - 1;
+
+  // Reset feedback state when modal opens or active item changes
+  useEffect(() => {
+    if (isOpen) {
+      setShowFeedback(false);
+    }
+  }, [isOpen, activeIndex]);
 
   // Get sharing attribution text for current item
   const getAttributionText = useMemo(() => {
@@ -91,8 +99,20 @@ const ItemReviewModal = ({
   if (!isOpen || !currentItem) return null;
 
   const handleNavigateNext = () => {
+    // Reset feedback state when navigating
+    setShowFeedback(false);
     const nextIndex = navigateToNext();
     if (nextIndex === null) {
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
+    if (showFeedback) {
+      // If in feedback mode, go back to decision buttons
+      setShowFeedback(false);
+    } else {
+      // If not in feedback mode, close the modal
       onClose();
     }
   };
@@ -122,7 +142,7 @@ const ItemReviewModal = ({
               </div>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-2 hover:bg-lavender/20 dark:hover:bg-gray-700 rounded-full transition-colors"
             >
               <X size={20} className="text-black dark:text-[#F9F5EB]" />
@@ -142,6 +162,8 @@ const ItemReviewModal = ({
                     onNavigateNext={handleNavigateNext}
                     onClose={onClose}
                     isLastItem={index >= items.length - 1}
+                    showFeedback={showFeedback}
+                    setShowFeedback={setShowFeedback}
                   />
                 </CarouselItem>
               ))}
@@ -163,6 +185,8 @@ const ItemReviewModal = ({
             onNavigateNext={handleNavigateNext}
             onClose={onClose}
             isLastItem={isLastItem}
+            showFeedback={showFeedback}
+            setShowFeedback={setShowFeedback}
           />
         )}
       </div>

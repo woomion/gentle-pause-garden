@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemNavigation } from '../hooks/useItemNavigation';
@@ -17,6 +17,8 @@ interface ItemReviewContentProps {
   onNavigateNext: () => void;
   onClose: () => void;
   isLastItem: boolean;
+  showFeedback: boolean;
+  setShowFeedback: (show: boolean) => void;
 }
 
 const ItemReviewContent = ({
@@ -24,10 +26,11 @@ const ItemReviewContent = ({
   onItemDecided,
   onNavigateNext,
   onClose,
-  isLastItem
+  isLastItem,
+  showFeedback,
+  setShowFeedback
 }: ItemReviewContentProps) => {
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
   const [notes, setNotes] = useState('');
 
   const { user } = useAuth();
