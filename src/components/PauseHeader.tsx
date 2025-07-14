@@ -31,7 +31,7 @@ const PauseHeader = () => {
       <header className="relative mb-18">
         <div className="text-center">
           <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors inline-block">
-            POCKET <span className="inline-block px-1 text-shadow-sm shadow-inner bg-black/5 dark:bg-white/5 rounded-sm border border-black/10 dark:border-white/10 text-black/70 dark:text-[#F9F5EB]/70">||</span> PAUSE
+            POCKET || PAUSE
           </Link>
         </div>
         
