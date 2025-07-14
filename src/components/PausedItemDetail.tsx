@@ -243,7 +243,15 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
               ) : showFeedback && selectedDecision ? (
                 <div className="pt-2">
                   <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-4">
-                    {selectedDecision === 'purchase' ? 'Great choice!' : 'Good for you!'}
+                    {(() => {
+                      const supportivePhrases = [
+                        "You've made a conscious choice.",
+                        "You've paused with presence.",
+                        "Decision made. Onward.",
+                        "Clarity is powerful."
+                      ];
+                      return supportivePhrases[Math.floor(Math.random() * supportivePhrases.length)];
+                    })()}
                   </h3>
                   <p className="text-black dark:text-[#F9F5EB] text-sm mb-4">
                     {selectedDecision === 'purchase' 
