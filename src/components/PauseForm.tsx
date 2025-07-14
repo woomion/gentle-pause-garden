@@ -60,7 +60,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     tags: [] as string[],
     isCart: false,
     itemType: 'item' as 'item' | 'cart',
-    sharedWithPartners: [] as string[]
+    sharedWithPartners: [] as string[],
+    usePlaceholder: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingUrl, setIsParsingUrl] = useState(false);
@@ -219,7 +220,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         tags: formData.tags,
         isCart: formData.isCart,
         itemType: formData.itemType,
-        sharedWithPartners: formData.sharedWithPartners
+        sharedWithPartners: formData.sharedWithPartners,
+        usePlaceholder: formData.usePlaceholder
       };
 
       // Use appropriate store based on authentication status
@@ -384,6 +386,35 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               <Label htmlFor="photo" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
                 Photo (optional)
               </Label>
+              
+              {/* Use Placeholder Checkbox */}
+              {!formData.photo && !formData.imageUrl && (
+                <div className="flex items-center space-x-3 mb-3">
+                  <Checkbox
+                    id="usePlaceholder"
+                    checked={formData.usePlaceholder}
+                    onCheckedChange={(checked) => {
+                      setFormData(prev => ({ ...prev, usePlaceholder: checked === true }));
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="usePlaceholder" className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
+                    Use placeholder image
+                  </Label>
+                </div>
+              )}
+              
+              {/* Show placeholder preview if checked */}
+              {formData.usePlaceholder && !formData.photo && !formData.imageUrl && (
+                <div className="mb-3">
+                  <img 
+                    src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
+                    alt="Placeholder preview" 
+                    className="w-20 h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                  />
+                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">✓ Placeholder image selected</p>
+                </div>
+              )}
               
               {(formData.imageUrl && !formData.photo) || (formData.isCart && formData.imageUrl === 'cart-placeholder') ? (
                 <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-center">

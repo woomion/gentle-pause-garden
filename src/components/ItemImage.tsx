@@ -17,11 +17,13 @@ const ItemImage = ({ item }: ItemImageProps) => {
     imageUrl = null;
   }
 
-  // CSS-based placeholder component
+  // Default placeholder component using uploaded image
   const PlaceholderImage = () => (
-    <div className="w-full h-full bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
-      <Pause size={48} className="text-purple-600 dark:text-purple-400" style={{ color: '#7A5DD9' }} />
-    </div>
+    <img 
+      src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
+      alt="Placeholder" 
+      className="w-full h-full object-cover rounded-2xl"
+    />
   );
 
   return (
@@ -49,13 +51,15 @@ const ItemImage = ({ item }: ItemImageProps) => {
             console.log('Image loaded successfully:', imageUrl);
           }}
         />
-      ) : null}
+      ) : (
+        <PlaceholderImage />
+      )}
       
       {/* Fallback placeholder - always present but hidden by default */}
       <div 
-        className={`fallback-placeholder w-full h-full bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center ${imageUrl && imageUrl !== 'cart-placeholder' ? 'hidden' : 'flex'}`}
+        className={`fallback-placeholder w-full h-full rounded-2xl ${imageUrl && imageUrl !== 'cart-placeholder' ? 'hidden' : 'flex'}`}
       >
-        <Pause size={48} className="text-purple-600 dark:text-purple-400" style={{ color: '#7A5DD9' }} />
+        <PlaceholderImage />
       </div>
     </div>
   );

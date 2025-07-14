@@ -18,6 +18,7 @@ export interface PausedItem {
   checkInDate: Date;
   isCart?: boolean;
   itemType?: 'item' | 'cart';
+  usePlaceholder?: boolean;
 }
 
 type Listener = () => void;

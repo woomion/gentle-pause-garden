@@ -58,17 +58,21 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
             <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
               <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
             </div>
-          ) : imageUrl ? (
-            <img 
-              src={imageUrl} 
-              alt={item.itemName}
-              className="w-full h-full object-cover"
-              onError={handleImageError}
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50" aria-hidden="true" />
-          )}
+           ) : imageUrl ? (
+             <img 
+               src={imageUrl} 
+               alt={item.itemName}
+               className="w-full h-full object-cover"
+               onError={handleImageError}
+               loading="lazy"
+             />
+           ) : (
+             <img 
+               src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
+               alt="Placeholder" 
+               className="w-full h-full object-cover"
+             />
+           )}
         </div>
         
         {item.link && item.link.trim() && (

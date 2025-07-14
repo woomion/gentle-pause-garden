@@ -195,9 +195,13 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
                 onLoad={handleImageLoad}
                 loading="lazy"
               />
-            ) : (
-              <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50" aria-hidden="true" />
-            )}
+             ) : (
+               <img 
+                 src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
+                 alt="Placeholder" 
+                 className="w-full h-full object-cover"
+               />
+             )}
           </div>
           
           <div className="flex-1 min-w-0">
