@@ -7,6 +7,13 @@ interface ItemReviewFeedbackFormProps {
   isLastItem: boolean;
 }
 
+const supportivePhrases = [
+  "You've made a conscious choice.",
+  "You've paused with presence.",
+  "Decision made. Onward.",
+  "Clarity is powerful."
+];
+
 const ItemReviewFeedbackForm = ({
   selectedDecision,
   notes,
@@ -14,11 +21,13 @@ const ItemReviewFeedbackForm = ({
   onSubmit,
   isLastItem
 }: ItemReviewFeedbackFormProps) => {
+  const randomPhrase = supportivePhrases[Math.floor(Math.random() * supportivePhrases.length)];
+
   return (
     <>
       <div className="mb-4">
         <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-2">
-          {selectedDecision === 'purchase' ? 'Great choice!' : 'Good for you!'}
+          {randomPhrase}
         </h3>
         <p className="text-black dark:text-[#F9F5EB] text-sm mb-3">
           {selectedDecision === 'purchase' 
