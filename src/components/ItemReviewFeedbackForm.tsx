@@ -16,11 +16,11 @@ const ItemReviewFeedbackForm = ({
 }: ItemReviewFeedbackFormProps) => {
   return (
     <>
-      <div className="mb-6">
-        <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-4">
+      <div className="mb-4">
+        <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-2">
           {selectedDecision === 'purchase' ? 'Great choice!' : 'Good for you!'}
         </h3>
-        <p className="text-black dark:text-[#F9F5EB] text-sm mb-4">
+        <p className="text-black dark:text-[#F9F5EB] text-sm mb-3">
           {selectedDecision === 'purchase' 
             ? 'Any thoughts about this purchase?'
             : 'What helped you decide to let this go?'
