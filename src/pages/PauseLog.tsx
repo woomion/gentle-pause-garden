@@ -9,7 +9,6 @@ import { PauseLogItem } from '../stores/pauseLogStore';
 import PauseLogHeader from '../components/PauseLogHeader';
 import PauseLogFilterControls from '../components/PauseLogFilterControls';
 import PauseLogItemCard from '../components/PauseLogItemCard';
-import { PauseLogSearch } from '../components/PauseLogSearch';
 import PauseLogItemDetail from '../components/PauseLogItemDetail';
 import PauseLogEmptyState from '../components/PauseLogEmptyState';
 import FooterLinks from '../components/FooterLinks';
