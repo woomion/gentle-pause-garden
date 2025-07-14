@@ -614,15 +614,12 @@ const PartnerFeedTab = () => {
                 <span className="hidden sm:inline">Add another partner</span>
               </Button>
             </div>
-            <div>
+            <div className="mt-2">
               <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
                 Shared Pauses
               </h2>
               <p className="text-base mb-1" style={{ color: '#6b6b6b' }}>
                 Mindful choices, made together.
-              </p>
-              <p className="text-sm mb-3" style={{ color: '#6b6b6b' }}>
-                (You've chosen to pause on these with a partner—slow down and reflect, side by side.)
               </p>
               {sharedItems.length > 0 && (
                 <div className="flex items-center gap-2 mt-2">
