@@ -12,7 +12,6 @@ import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
 import FeedbackModal from './FeedbackModal';
-import ThemeSelector from './ThemeSelector';
 // import PausePartnersSection from './PausePartnersSection';
 
 interface SettingsSidebarProps {
@@ -24,7 +23,6 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const { isDarkMode, toggleTheme } = useTheme();
   const { toast } = useToast();
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [showThemeSelector, setShowThemeSelector] = useState(false);
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
   const { user } = useAuth();
 
@@ -214,30 +212,20 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
             {/* Appearance */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Appearance</h3>
-              <div className="space-y-3">
-                <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-black dark:text-[#F9F5EB] font-medium">
-                        {isDarkMode ? 'Dark Mode' : 'Light Mode'}
-                      </span>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">Switch between light and dark themes</p>
-                    </div>
-                    <Switch 
-                      checked={isDarkMode} 
-                      onCheckedChange={toggleTheme}
-                      className="ml-4"
-                    />
+              <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-black dark:text-[#F9F5EB] font-medium">
+                      {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+                    </span>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Switch between light and dark themes</p>
                   </div>
+                  <Switch 
+                    checked={isDarkMode} 
+                    onCheckedChange={toggleTheme}
+                    className="ml-4"
+                  />
                 </div>
-                
-                <button 
-                  onClick={() => setShowThemeSelector(true)}
-                  className="w-full text-left p-3 rounded-lg bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 transition-colors"
-                >
-                  <span className="text-black dark:text-[#F9F5EB] font-medium">App Theme</span>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Customize your app's visual style</p>
-                </button>
               </div>
             </div>
 
@@ -277,11 +265,6 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
       <FeedbackModal 
         open={showFeedbackModal} 
         onOpenChange={setShowFeedbackModal} 
-      />
-      
-      <ThemeSelector
-        open={showThemeSelector}
-        onOpenChange={setShowThemeSelector}
       />
     </>
   );
