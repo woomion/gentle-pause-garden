@@ -34,6 +34,9 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
   const { markAsRead } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
+  const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [notes, setNotes] = useState('');
 
   // Mark comments as read when opening the detail view
   useEffect(() => {
@@ -134,8 +137,15 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
   };
 
   const handleDecision = async (decision: 'purchase' | 'let-go') => {
+    setSelectedDecision(decision);
+    setShowFeedback(true);
+  };
+
+  const handleSubmitDecision = async () => {
+    if (!selectedDecision) return;
+
     try {
-      if (decision === 'purchase') {
+      if (selectedDecision === 'purchase') {
         await handleBought(item, onDelete, onClose);
       } else {
         await handleLetGo(item, onDelete, onClose);
@@ -206,7 +216,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
           {/* Decision buttons - only show if current user is the item owner */}
           {currentUserId === item.originalUserId && (
             <>
-              {!showDecisionButtons ? (
+              {!showDecisionButtons && !showFeedback ? (
                 <div className="pt-2">
                   <button 
                     onClick={handleDecisionClick}
@@ -215,7 +225,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                     Decide now
                   </button>
                 </div>
-              ) : (
+              ) : showDecisionButtons && !showFeedback ? (
                 <div className="space-y-3 pt-2">
                   <button
                     onClick={() => handleDecision('purchase')}
@@ -230,7 +240,32 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                     I'm ready to let this go
                   </button>
                 </div>
-              )}
+              ) : showFeedback && selectedDecision ? (
+                <div className="pt-2">
+                  <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-4">
+                    {selectedDecision === 'purchase' ? 'Great choice!' : 'Good for you!'}
+                  </h3>
+                  <p className="text-black dark:text-[#F9F5EB] text-sm mb-4">
+                    {selectedDecision === 'purchase' 
+                      ? 'Any thoughts about this purchase?'
+                      : 'What helped you decide to let this go?'
+                    }
+                  </p>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Optional reflection..."
+                    className="w-full p-3 border border-lavender/30 dark:border-gray-600 rounded-xl bg-white/60 dark:bg-white/10 text-black dark:text-[#F9F5EB] placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#CAB6F7]"
+                    rows={4}
+                  />
+                  <button
+                    onClick={handleSubmitDecision}
+                    className="w-full mt-4 py-3 px-4 bg-[#CAB6F7] hover:bg-[#B5A0F2] text-black font-medium rounded-xl transition-colors"
+                  >
+                    Finish
+                  </button>
+                </div>
+              ) : null}
             </>
           )}
 
