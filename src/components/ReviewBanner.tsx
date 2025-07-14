@@ -25,8 +25,8 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
         <div className="text-base font-medium flex items-center gap-2" style={{ color: '#5C47A3' }}>
           <Search size={16} style={{ color: '#5C47A3' }} />
           {itemsCount > 0 
-            ? `${itemsCount} solo item${itemsCount === 1 ? '' : 's'} ready for review`
-            : 'No solo items ready for review'
+            ? `${itemsCount} item${itemsCount === 1 ? '' : 's'} ready for review`
+            : 'No items ready for review'
           }
           <ArrowRight size={16} style={{ color: '#5C47A3' }} />
         </div>
