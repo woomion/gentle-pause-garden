@@ -12,16 +12,37 @@ export const useItemReview = () => {
   // Track items for review (solo items only - exclude shared items)
   useEffect(() => {
     const updateItemsForReview = () => {
+      console.log('🔍 useItemReview: updateItemsForReview called, user:', !!user);
+      
       if (user) {
         const allReviewItems = supabasePausedItemsStore.getItemsForReview();
+        console.log('🔍 useItemReview: All review items from store:', allReviewItems.length, allReviewItems);
+        
         // Filter for solo items (items owned by current user that are NOT shared)
-        const soloItems = allReviewItems.filter(item => 
-          item.originalUserId === user.id && 
-          (!item.sharedWithPartners || item.sharedWithPartners.length === 0)
-        );
+        const soloItems = allReviewItems.filter(item => {
+          const isOwned = item.originalUserId === user.id;
+          const isNotShared = (!item.sharedWithPartners || item.sharedWithPartners.length === 0);
+          const isSolo = isOwned && isNotShared;
+          
+          console.log('🔍 useItemReview: Item filter check:', {
+            itemId: item.id,
+            itemName: item.itemName,
+            originalUserId: item.originalUserId,
+            currentUserId: user.id,
+            sharedWithPartners: item.sharedWithPartners,
+            isOwned,
+            isNotShared,
+            isSolo
+          });
+          
+          return isSolo;
+        });
+        
+        console.log('🔍 useItemReview: Solo items after filtering:', soloItems.length, soloItems);
         setItemsForReview(soloItems);
       } else {
         const reviewItems = pausedItemsStore.getItemsForReview();
+        console.log('🔍 useItemReview: Guest items for review:', reviewItems.length, reviewItems);
         setItemsForReview(reviewItems);
       }
     };

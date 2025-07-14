@@ -213,24 +213,43 @@ class SupabasePausedItemsStore {
   }
 
   getItemsForReview(): PausedItem[] {
+    console.log('🔍 Store getItemsForReview: isLoaded:', this.isLoaded, 'items length:', this.items.length);
+    
     // Return empty array if not loaded or no items
     if (!this.isLoaded || !this.items.length) {
+      console.log('🔍 Store getItemsForReview: Early return - not loaded or no items');
       return [];
     }
 
     try {
       const now = new Date();
+      console.log('🔍 Store getItemsForReview: Current time:', now.toISOString());
       
       const reviewItems = this.items.filter(item => {
         try {
           // Ensure item has required properties
           if (!item || !item.checkInDate) {
+            console.log('🔍 Store getItemsForReview: Item missing required properties:', {
+              itemId: item?.id,
+              itemName: item?.itemName,
+              hasCheckInDate: !!item?.checkInDate
+            });
             return false;
           }
           
           const checkInTimestamp = item.checkInDate.getTime();
           const nowTimestamp = now.getTime();
           const isReady = checkInTimestamp <= nowTimestamp;
+          
+          console.log('🔍 Store getItemsForReview: Item time check:', {
+            itemId: item.id,
+            itemName: item.itemName,
+            checkInDate: item.checkInDate.toISOString(),
+            checkInTimestamp,
+            nowTimestamp,
+            timeDiff: nowTimestamp - checkInTimestamp,
+            isReady
+          });
           
           return isReady;
         } catch (error) {
@@ -239,6 +258,7 @@ class SupabasePausedItemsStore {
         }
       });
       
+      console.log('🔍 Store getItemsForReview: Final review items:', reviewItems.length, reviewItems);
       return reviewItems;
     } catch (error) {
       console.error('Error in getItemsForReview:', error);
