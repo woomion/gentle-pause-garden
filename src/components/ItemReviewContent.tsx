@@ -40,6 +40,12 @@ const ItemReviewContent = ({
 
   // Check if item is shared
   const isSharedItem = 'sharedWithPartners' in item && item.sharedWithPartners && item.sharedWithPartners.length > 0;
+  
+  // Check if current user is the owner of the item (not just a partner viewing it)
+  const isItemOwner = user?.id && (
+    ('originalUserId' in item && item.originalUserId === user.id) ||
+    ('userId' in item && item.userId === user.id)
+  );
 
   const handleDecision = async (decision: 'purchase' | 'let-go') => {
     setSelectedDecision(decision);
@@ -93,10 +99,12 @@ const ItemReviewContent = ({
             </div>
           )}
           
-          {/* Add breathing room before decision buttons */}
-          <div className="mt-8">
-            <ItemReviewDecisionButtons onDecision={handleDecision} />
-          </div>
+          {/* Add breathing room before decision buttons - only show to item owner */}
+          {isItemOwner && (
+            <div className="mt-8">
+              <ItemReviewDecisionButtons onDecision={handleDecision} />
+            </div>
+          )}
         </>
       ) : (
         <ItemReviewFeedbackForm
