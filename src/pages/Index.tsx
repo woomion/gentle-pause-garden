@@ -111,7 +111,7 @@ const Index = () => {
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
           />
-          {user && sharedItemsReview.sharedItemsCount > 0 && (
+          {user && (
             <SharedItemsReviewPill
               sharedItemsCount={sharedItemsReview.sharedItemsCount}
               partnerNames={sharedItemsReview.partnerNames}
