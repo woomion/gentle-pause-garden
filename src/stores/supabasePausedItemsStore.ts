@@ -47,11 +47,13 @@ class SupabasePausedItemsStore {
 
   async loadItems(): Promise<void> {
     try {
-      console.log('Loading paused items from Supabase...');
+      console.log('🔍 Store loadItems: Starting to load paused items from Supabase...');
       
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔍 Store loadItems: Auth check result:', { user: !!user, userId: user?.id });
+      
       if (!user) {
-        console.log('No authenticated user, skipping load');
+        console.log('🔍 Store loadItems: No authenticated user, skipping load');
         this.items = [];
         this.isLoaded = true;
         this.notifyListeners();
