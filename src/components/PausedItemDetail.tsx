@@ -242,7 +242,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                 </div>
               ) : showFeedback && selectedDecision ? (
                 <div className="pt-2">
-                  <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-4">
+                  <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-2">
                     {(() => {
                       const supportivePhrases = [
                         "You've made a conscious choice.",
