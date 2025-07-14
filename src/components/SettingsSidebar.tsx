@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
@@ -20,7 +19,6 @@ interface SettingsSidebarProps {
 }
 
 const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
-  const { isDarkMode, toggleTheme } = useTheme();
   const { toast } = useToast();
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
@@ -206,26 +204,6 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
                 >
                   <span className="text-black dark:text-[#F9F5EB]">Privacy Policy</span>
                 </Link>
-              </div>
-            </div>
-
-            {/* Appearance */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Appearance</h3>
-              <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-black dark:text-[#F9F5EB] font-medium">
-                      {isDarkMode ? 'Dark Mode' : 'Light Mode'}
-                    </span>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Switch between light and dark themes</p>
-                  </div>
-                  <Switch 
-                    checked={isDarkMode} 
-                    onCheckedChange={toggleTheme}
-                    className="ml-4"
-                  />
-                </div>
               </div>
             </div>
 
