@@ -1,8 +1,12 @@
 
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const About = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
       <div className="max-w-4xl mx-auto px-6 py-8">
