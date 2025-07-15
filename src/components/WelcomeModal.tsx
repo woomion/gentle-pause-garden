@@ -88,7 +88,7 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
         <img 
           src="/lovable-uploads/31b762e2-9f4e-4576-ab49-b6c593e8d060.png" 
           alt="Person contemplating in a peaceful landscape with various items around them"
-          className="w-full max-w-sm mx-auto rounded-lg"
+          className="w-full max-w-xs mx-auto rounded-lg"
         />
         
         <div className="space-y-4">
