@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Crown, Users, Clock } from 'lucide-react';
+import { Crown, Users, Clock, ChevronDown, ChevronRight } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import PausedItemsCarousel from '@/components/PausedItemsCarousel';
 import PausedItemDetail from '@/components/PausedItemDetail';
 import PartnerItemsReadyBanner from '@/components/PartnerItemsReadyBanner';
@@ -23,6 +24,7 @@ const PartnerFeedTab = () => {
   const [partnerReviewModalOpen, setPartnerReviewModalOpen] = useState(false);
   const [partnerReviewItems, setPartnerReviewItems] = useState<PausedItem[]>([]);
   const [partnerReviewName, setPartnerReviewName] = useState<string>('');
+  const [isPartnerSectionOpen, setIsPartnerSectionOpen] = useState(false);
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
@@ -280,117 +282,133 @@ const PartnerFeedTab = () => {
       {/* Show Partner Pauses section */}
       {partners.length > 0 ? (
         <Card>
-          <CardHeader>
-            <div className="flex items-start justify-end mb-0">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  // This will be handled by opening the account modal from parent
-                  // For now, show a message to guide users
-                  toast({
-                    title: "Manage Partners",
-                    description: "Click the account icon in the top right to manage your partners.",
-                  });
-                }}
-                className="flex items-center gap-1 text-xs"
-              >
-                <Users className="h-3 w-3" />
-                <span>Manage Partners</span>
-              </Button>
-            </div>
-            <div className="mt-2">
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-                Shared Pauses
-              </h2>
-              <p className="text-base mb-1" style={{ color: '#6b6b6b' }}>
-                Mindful choices, made together.
-              </p>
-              {sharedItems.length > 0 && (
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-muted-foreground">Viewing with:</span>
-                  <Select value={selectedPartner} onValueChange={setSelectedPartner}>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="All Partners" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Partners</SelectItem>
-                      {partners.map((partner) => (
-                        <SelectItem key={partner.partner_id} value={partner.partner_name}>
-                          {partner.partner_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <Collapsible open={isPartnerSectionOpen} onOpenChange={setIsPartnerSectionOpen}>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Shared Pauses
+                    </h2>
+                    <p className="text-base mb-0" style={{ color: '#6b6b6b' }}>
+                      Mindful choices, made together.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toast({
+                          title: "Manage Partners",
+                          description: "Click the account icon in the top right to manage your partners.",
+                        });
+                      }}
+                      className="flex items-center gap-1 text-xs"
+                    >
+                      <Users className="h-3 w-3" />
+                      <span>Manage</span>
+                    </Button>
+                    {isPartnerSectionOpen ? (
+                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {/* Partner Items Ready Banner */}
-            <PartnerItemsReadyBanner
-              partners={partners}
-              currentUserId={currentUserId}
-              onItemsReady={handlePartnerItemsReady}
-            />
+              </CardHeader>
+            </CollapsibleTrigger>
             
-          {sharedItems.length === 0 ? (
-            <div className="text-center py-8">
-              <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-              <p className="text-muted-foreground">
-                No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {(() => {
-                // Filter shared items based on selected partner
-                const filteredItems = selectedPartner === 'all' 
-                  ? sharedItems 
-                  : sharedItems.filter(item => {
-                      // Find the partner by name
-                      const selectedPartnerData = partners.find(p => p.partner_name === selectedPartner);
-                      if (!selectedPartnerData) return false;
-                      
-                      // Show items where:
-                      // 1. Current user created the item and shared it with the selected partner
-                      // 2. The selected partner created the item and shared it with current user
-                      return (
-                        (item.originalUserId === currentUserId && item.sharedWithPartners?.includes(selectedPartnerData.partner_id)) ||
-                        (item.originalUserId === selectedPartnerData.partner_id && item.sharedWithPartners?.includes(currentUserId || ''))
-                      );
-                    });
+            <CollapsibleContent>
+              <CardContent className="pt-0">
+                {sharedItems.length > 0 && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-sm text-muted-foreground">Viewing with:</span>
+                    <Select value={selectedPartner} onValueChange={setSelectedPartner}>
+                      <SelectTrigger className="w-48 bg-background z-50">
+                        <SelectValue placeholder="All Partners" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-50">
+                        <SelectItem value="all">All Partners</SelectItem>
+                        {partners.map((partner) => (
+                          <SelectItem key={partner.partner_id} value={partner.partner_name}>
+                            {partner.partner_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
-                return filteredItems.length === 0 ? (
+                {/* Partner Items Ready Banner */}
+                <PartnerItemsReadyBanner
+                  partners={partners}
+                  currentUserId={currentUserId}
+                  onItemsReady={handlePartnerItemsReady}
+                />
+                
+                {sharedItems.length === 0 ? (
                   <div className="text-center py-8">
                     <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
                     <p className="text-muted-foreground">
-                      {selectedPartner === 'all' 
-                        ? "No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together."
-                        : `No shared pauses with ${selectedPartner} yet.`
-                      }
+                      No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <PausedItemsCarousel 
-                      items={filteredItems}
-                      onItemClick={(item) => setSelectedItem(item)}
-                      partners={partners}
-                      currentUserId={currentUserId}
-                    />
+                    {(() => {
+                      // Filter shared items based on selected partner
+                      const filteredItems = selectedPartner === 'all' 
+                        ? sharedItems 
+                        : sharedItems.filter(item => {
+                            // Find the partner by name
+                            const selectedPartnerData = partners.find(p => p.partner_name === selectedPartner);
+                            if (!selectedPartnerData) return false;
+                            
+                            // Show items where:
+                            // 1. Current user created the item and shared it with the selected partner
+                            // 2. The selected partner created the item and shared it with current user
+                            return (
+                              (item.originalUserId === currentUserId && item.sharedWithPartners?.includes(selectedPartnerData.partner_id)) ||
+                              (item.originalUserId === selectedPartnerData.partner_id && item.sharedWithPartners?.includes(currentUserId || ''))
+                            );
+                          });
+
+                      return filteredItems.length === 0 ? (
+                        <div className="text-center py-8">
+                          <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                          <p className="text-muted-foreground">
+                            {selectedPartner === 'all' 
+                              ? "No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together."
+                              : `No shared pauses with ${selectedPartner} yet.`
+                            }
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <PausedItemsCarousel 
+                            items={filteredItems}
+                            onItemClick={(item) => setSelectedItem(item)}
+                            partners={partners}
+                            currentUserId={currentUserId}
+                          />
+                        </div>
+                      );
+                    })()}
                   </div>
-                );
-              })()}
-            </div>
-          )}
-          </CardContent>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
         </Card>
       ) : (
         <Card>
           <CardHeader>
             <div>
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
+                <Users className="h-5 w-5" />
                 Partner Pauses
               </h2>
               <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
