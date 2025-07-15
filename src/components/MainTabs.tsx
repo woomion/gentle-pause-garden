@@ -41,31 +41,23 @@ const MainTabs = () => {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
+      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-12 rounded-full bg-muted/30 p-1">
         <TabsTrigger 
           value="paused" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none data-[state=active]:px-0.5 data-[state=active]:sm:px-2 data-[state=inactive]:px-2 data-[state=inactive]:sm:px-3"
-          style={{ 
-            backgroundColor: activeTab === 'paused' ? '#BFD1BF' : 'transparent',
-            color: activeTab === 'paused' ? '#7A5DD9' : 'inherit'
-          }}
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-primary/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground transition-all duration-200 font-medium py-2 sm:py-1.5"
         >
-          <User className="h-5 w-5 sm:h-5 sm:w-5" />
-          <span className="text-sm sm:text-base">My Pauses</span>
+          <User className="h-4 w-4 sm:h-4 sm:w-4" />
+          <span className="text-sm sm:text-base leading-none">My Pauses</span>
         </TabsTrigger>
         <TabsTrigger 
           value="partner-feed" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none data-[state=active]:px-0.5 data-[state=active]:sm:px-2 data-[state=inactive]:px-2 data-[state=inactive]:sm:px-3"
-          style={{ 
-            backgroundColor: activeTab === 'partner-feed' ? '#BFD1BF' : 'transparent',
-            color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
-          }}
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-primary/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground transition-all duration-200 font-medium py-2 sm:py-1.5"
         >
           <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
-            <Users className="h-5 w-5 sm:h-5 sm:w-5" />
-            <span className="text-sm sm:text-base">Partner Pauses</span>
+            <Users className="h-4 w-4 sm:h-4 sm:w-4" />
+            <span className="text-sm sm:text-base leading-none">Partner Pauses</span>
             {user && totalUnreadCount > 0 && (
-              <div className="absolute -top-2 -right-2 text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
+              <div className="absolute -top-2 -right-2 text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg bg-primary/20 text-primary border border-primary/30">
                 {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
               </div>
             )}
