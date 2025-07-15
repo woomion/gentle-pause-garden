@@ -34,6 +34,14 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
     }
   };
 
+  const handleBack = () => {
+    if (typeof currentScreen === 'number' && currentScreen > 1) {
+      setCurrentScreen(currentScreen - 1);
+    } else if (currentScreen === 1 && showNameStep) {
+      setCurrentScreen('name');
+    }
+  };
+
   const handleComplete = () => {
     onComplete(name.trim());
   };
@@ -101,13 +109,23 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
           </p>
         </div>
         
-        <button
-          onClick={handleNext}
-          className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
-          style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-        >
-          Next →
-        </button>
+        <div className="flex justify-center gap-3 mt-6">
+          {showNameStep && (
+            <button
+              onClick={handleBack}
+              className="bg-transparent border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200"
+            >
+              ← Back
+            </button>
+          )}
+          <button
+            onClick={handleNext}
+            className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+            style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+          >
+            Next →
+          </button>
+        </div>
       </div>
     </>
   );
@@ -125,13 +143,21 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
         </p>
       </div>
       
-      <button
-        onClick={handleNext}
-        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
-        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-      >
-        Next →
-      </button>
+      <div className="flex justify-center gap-3 mt-6">
+        <button
+          onClick={handleBack}
+          className="bg-transparent border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={handleNext}
+          className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+          style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+        >
+          Next →
+        </button>
+      </div>
     </div>
   );
 
@@ -148,13 +174,21 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
         </p>
       </div>
       
-      <button
-        onClick={handleNext}
-        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
-        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-      >
-        Next →
-      </button>
+      <div className="flex justify-center gap-3 mt-6">
+        <button
+          onClick={handleBack}
+          className="bg-transparent border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={handleNext}
+          className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+          style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+        >
+          Next →
+        </button>
+      </div>
     </div>
   );
 
@@ -171,13 +205,21 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
         </p>
       </div>
       
-      <button
-        onClick={handleNext}
-        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
-        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-      >
-        Next →
-      </button>
+      <div className="flex justify-center gap-3 mt-6">
+        <button
+          onClick={handleBack}
+          className="bg-transparent border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={handleNext}
+          className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+          style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+        >
+          Next →
+        </button>
+      </div>
     </div>
   );
 
@@ -193,13 +235,21 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
         </p>
       </div>
       
-      <button
-        onClick={handleNext}
-        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
-        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-      >
-        Next →
-      </button>
+      <div className="flex justify-center gap-3 mt-6">
+        <button
+          onClick={handleBack}
+          className="bg-transparent border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={handleNext}
+          className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+          style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+        >
+          Next →
+        </button>
+      </div>
     </div>
   );
 
@@ -211,37 +261,45 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
         </h2>
         
         <div className="text-center space-y-4 text-black dark:text-[#F9F5EB] font-medium">
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <p className="font-semibold">Add a pause</p>
             <p>Add any item you're thinking about buying.</p>
           </div>
           
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <p className="font-semibold">Let it breathe</p>
             <p>Set how long you want to wait before deciding.</p>
           </div>
           
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <p className="font-semibold">Check back in</p>
             <p>Review your item when the pause period ends.</p>
           </div>
           
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <p className="font-semibold">Reflect</p>
-            <p>Choose to buy, remove, or pause again.</p>
+            <p>Choose to purchase, let go of, or pause again.</p>
           </div>
           
-          <p className="text-sm italic pt-2">You can even share with a partner for thoughtful decisions together.</p>
+          <p className="text-sm italic pt-2">You can also share paused items with a partner for thoughtful decisions together.</p>
         </div>
       </div>
       
-      <button
-        onClick={handleComplete}
-        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
-        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-      >
-        Start Your First Pause →
-      </button>
+      <div className="flex justify-center gap-3 mt-6">
+        <button
+          onClick={handleBack}
+          className="bg-transparent border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={handleComplete}
+          className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+          style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+        >
+          Start Your First Pause →
+        </button>
+      </div>
     </div>
   );
 
@@ -258,8 +316,8 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-w-md mx-auto bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20" hideCloseButton>
+    <Dialog open={open} onOpenChange={(open) => !open && onComplete(name.trim())}>
+      <DialogContent className="max-w-md mx-auto bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20">
         {renderCurrentScreen()}
       </DialogContent>
     </Dialog>
