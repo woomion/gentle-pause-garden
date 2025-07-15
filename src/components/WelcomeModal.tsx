@@ -85,12 +85,6 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
   const renderScreen1 = () => (
     <>
       <div className="space-y-6 text-center">
-        <img 
-          src="/lovable-uploads/31b762e2-9f4e-4576-ab49-b6c593e8d060.png" 
-          alt="Person contemplating in a peaceful landscape with various items around them"
-          className="w-full max-w-xs mx-auto rounded-lg"
-        />
-        
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
             Hi {name || 'there'}, you're here.
@@ -112,28 +106,107 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
     </>
   );
 
+  const renderScreen2 = () => (
+    <div className="space-y-6 text-center">
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
+          We're not here to budget.
+        </h2>
+        
+        <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
+          This isn't about tracking every penny.<br />
+          It's about noticing what's pulling at you — and why.
+        </p>
+      </div>
+      
+      <button
+        onClick={handleNext}
+        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
+        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+      >
+        Next →
+      </button>
+    </div>
+  );
+
+  const renderScreen3 = () => (
+    <div className="space-y-6 text-center">
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
+          One pause at a time.
+        </h2>
+        
+        <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
+          Add anything you're considering — a sweater, a course, a plan.<br />
+          Let it breathe for a day or two. Then check back in.
+        </p>
+      </div>
+      
+      <button
+        onClick={handleNext}
+        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
+        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+      >
+        Next →
+      </button>
+    </div>
+  );
+
+  const renderScreen4 = () => (
+    <div className="space-y-6 text-center">
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
+          You don't have to pause alone.
+        </h2>
+        
+        <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
+          Share a pause with a partner.<br />
+          Reflect together. Decide with care.
+        </p>
+      </div>
+      
+      <button
+        onClick={handleNext}
+        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
+        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+      >
+        Next →
+      </button>
+    </div>
+  );
+
+  const renderScreen5 = () => (
+    <div className="space-y-6 text-center">
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
+          The joy isn't always in the buying.
+        </h2>
+        
+        <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
+          Sometimes it's in the clarity.<br />
+          Sometimes it's in the letting go.
+        </p>
+      </div>
+      
+      <button
+        onClick={handleComplete}
+        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
+        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+      >
+        Start Your First Pause
+      </button>
+    </div>
+  );
+
   const renderCurrentScreen = () => {
     if (currentScreen === 'name') return renderNameScreen();
     if (currentScreen === 1) return renderScreen1();
+    if (currentScreen === 2) return renderScreen2();
+    if (currentScreen === 3) return renderScreen3();
+    if (currentScreen === 4) return renderScreen4();
+    if (currentScreen === 5) return renderScreen5();
     
-    // Placeholder for screens 2-5
-    return (
-      <div className="space-y-6 text-center">
-        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
-          Screen {currentScreen}
-        </h2>
-        <p className="text-black dark:text-[#F9F5EB]">
-          Content for screen {currentScreen} coming soon...
-        </p>
-        <button
-          onClick={handleNext}
-          className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
-          style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-        >
-          {currentScreen === 5 ? 'Get Started' : 'Next →'}
-        </button>
-      </div>
-    );
+    return null;
   };
 
   return (
