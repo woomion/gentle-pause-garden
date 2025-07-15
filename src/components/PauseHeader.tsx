@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
+import QuickPauseButton from './QuickPauseButton';
 
 const PauseHeader = () => {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -24,6 +25,12 @@ const PauseHeader = () => {
     }
   };
 
+  const handleQuickPause = () => {
+    // This would trigger the same pause form as the main button
+    // For now, just log to console - you can integrate with your existing pause logic
+    console.log('Quick pause in-store triggered');
+  };
+
   return (
     <>
       <header className="relative mb-18">
@@ -31,6 +38,10 @@ const PauseHeader = () => {
           <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors inline-block">
             POCKET || PAUSE
           </Link>
+        </div>
+        
+        <div className="absolute top-6 left-0">
+          <QuickPauseButton onQuickPause={handleQuickPause} />
         </div>
         
         <div className="absolute top-6 right-0">
