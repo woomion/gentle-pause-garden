@@ -344,6 +344,8 @@ class SupabasePausedItemsStore {
         };
       }
 
+      // Refresh the data to ensure proper filtering across tabs
+      await this.loadItems();
       this.notifyListeners();
     } catch (error) {
       console.error('Error in extendPause:', error);
