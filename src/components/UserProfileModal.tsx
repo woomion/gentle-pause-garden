@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useToast } from '@/hooks/use-toast';
 import FeedbackModal from './FeedbackModal';
+import PartnerManagement from './PartnerManagement';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -166,6 +167,9 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                 </Button>
               )}
             </div>
+
+            {/* Partner Management Section */}
+            <PartnerManagement onClose={onClose} />
 
             {/* Feedback Section */}
             <div className="border-t border-gray-200 dark:border-white/20 pt-4">
