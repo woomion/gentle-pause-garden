@@ -293,10 +293,10 @@ const PartnerFeedTab = () => {
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-sm text-muted-foreground">Viewing with:</span>
                   <Select value={selectedPartner} onValueChange={setSelectedPartner}>
-                    <SelectTrigger className="w-48 bg-background z-50">
+                    <SelectTrigger className="w-48 bg-background">
                       <SelectValue placeholder="All Partners" />
                     </SelectTrigger>
-                    <SelectContent className="bg-background border shadow-lg z-50">
+                    <SelectContent className="bg-background border shadow-lg z-40">
                       <SelectItem value="all">All Partners</SelectItem>
                       {partners.map((partner) => (
                         <SelectItem key={partner.partner_id} value={partner.partner_name}>
