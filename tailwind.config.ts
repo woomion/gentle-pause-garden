@@ -21,6 +21,8 @@ export default {
 		extend: {
 			fontFamily: {
 				'inter': ['Inter', 'sans-serif'],
+				'caveat': ['Caveat', 'cursive'],
+				'crimson': ['Crimson Text', 'serif'],
 			},
 			colors: {
 				// Pocket Pause custom colors

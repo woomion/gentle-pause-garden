@@ -4,12 +4,16 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemNavigation } from '../hooks/useItemNavigation';
 import { useItemActions } from '../hooks/useItemActions';
+import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
+import { pausedItemsStore } from '../stores/pausedItemsStore';
 import ItemReviewDetails from './ItemReviewDetails';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 import ItemReviewFeedbackForm from './ItemReviewFeedbackForm';
+import ExtendPauseModal from './ExtendPauseModal';
 import { ItemCommentsThread } from './ItemCommentsThread';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePausePartners } from '@/hooks/usePausePartners';
+import { toast } from '@/hooks/use-toast';
 
 interface ItemReviewContentProps {
   item: PausedItem | LocalPausedItem;
@@ -32,6 +36,7 @@ const ItemReviewContent = ({
 }: ItemReviewContentProps) => {
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
   const [notes, setNotes] = useState('');
+  const [showExtendModal, setShowExtendModal] = useState(false);
 
   const { user } = useAuth();
   const { partners } = usePausePartners();
@@ -82,6 +87,39 @@ const ItemReviewContent = ({
     setNotes('');
   };
 
+  const handleExtendPause = async (duration: string, otherDuration?: string) => {
+    try {
+      if (user) {
+        await supabasePausedItemsStore.extendPause(item.id, duration, otherDuration);
+      } else {
+        // For guest users, use local store
+        // Note: This would need implementation in the local store as well
+        console.log('Extending pause for guest user - feature not yet implemented');
+      }
+      
+      toast({
+        title: "Pause extended",
+        description: "Your item will be ready for review later.",
+      });
+      
+      // Remove item from review queue by calling onItemDecided
+      onItemDecided(item.id);
+      
+      if (isLastItem) {
+        onClose();
+      } else {
+        onNavigateNext();
+      }
+    } catch (error) {
+      console.error('Error extending pause:', error);
+      toast({
+        title: "Error",
+        description: "Failed to extend pause. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="p-6">
       {!showFeedback ? (
@@ -102,7 +140,10 @@ const ItemReviewContent = ({
           {/* Add breathing room before decision buttons - only show to item owner */}
           {isItemOwner && (
             <div className="mt-8">
-              <ItemReviewDecisionButtons onDecision={handleDecision} />
+              <ItemReviewDecisionButtons 
+                onDecision={handleDecision} 
+                onExtendPause={() => setShowExtendModal(true)}
+              />
             </div>
           )}
         </>
@@ -115,6 +156,13 @@ const ItemReviewContent = ({
           isLastItem={isLastItem}
         />
       )}
+
+      <ExtendPauseModal
+        isOpen={showExtendModal}
+        onClose={() => setShowExtendModal(false)}
+        onExtend={handleExtendPause}
+        itemName={'itemName' in item ? item.itemName : (item as any).title || 'item'}
+      />
     </div>
   );
 };

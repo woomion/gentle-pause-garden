@@ -1,9 +1,12 @@
 
+import ExtendPauseCTA from './ExtendPauseCTA';
+
 interface ItemReviewDecisionButtonsProps {
   onDecision: (decision: 'purchase' | 'let-go') => void;
+  onExtendPause?: () => void;
 }
 
-const ItemReviewDecisionButtons = ({ onDecision }: ItemReviewDecisionButtonsProps) => {
+const ItemReviewDecisionButtons = ({ onDecision, onExtendPause }: ItemReviewDecisionButtonsProps) => {
   return (
     <div className="space-y-3">
       <button
@@ -18,6 +21,10 @@ const ItemReviewDecisionButtons = ({ onDecision }: ItemReviewDecisionButtonsProp
       >
         I'm ready to let this go
       </button>
+      
+      {onExtendPause && (
+        <ExtendPauseCTA onExtend={onExtendPause} />
+      )}
     </div>
   );
 };

@@ -288,6 +288,81 @@ class SupabasePausedItemsStore {
     }
   }
 
+  async extendPause(itemId: string, newDuration: string, otherDuration?: string): Promise<void> {
+    try {
+      // Calculate new review date based on duration
+      const now = new Date();
+      let daysToAdd = 0;
+      
+      switch (newDuration) {
+        case '1-day':
+          daysToAdd = 1;
+          break;
+        case '3-days':
+          daysToAdd = 3;
+          break;
+        case '1-week':
+          daysToAdd = 7;
+          break;
+        case '2-weeks':
+          daysToAdd = 14;
+          break;
+        case '1-month':
+          daysToAdd = 30;
+          break;
+        case 'other':
+          // Parse the other duration
+          if (otherDuration) {
+            const match = otherDuration.match(/(\d+)\s*(day|days|week|weeks|month|months)/i);
+            if (match) {
+              const number = parseInt(match[1]);
+              const unit = match[2].toLowerCase();
+              if (unit.startsWith('day')) {
+                daysToAdd = number;
+              } else if (unit.startsWith('week')) {
+                daysToAdd = number * 7;
+              } else if (unit.startsWith('month')) {
+                daysToAdd = number * 30;
+              }
+            }
+          }
+          break;
+      }
+
+      const newReviewAt = new Date(now.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
+      
+      const { error } = await supabase
+        .from('paused_items')
+        .update({
+          pause_duration_days: daysToAdd,
+          other_duration: otherDuration,
+          review_at: newReviewAt.toISOString()
+        })
+        .eq('id', itemId);
+
+      if (error) {
+        console.error('Error extending pause:', error);
+        return;
+      }
+
+      // Update local item
+      const itemIndex = this.items.findIndex(item => item.id === itemId);
+      if (itemIndex !== -1) {
+        this.items[itemIndex] = {
+          ...this.items[itemIndex],
+          duration: newDuration,
+          otherDuration,
+          checkInDate: newReviewAt,
+          checkInTime: calculateCheckInTimeDisplay(newReviewAt)
+        };
+      }
+
+      this.notifyListeners();
+    } catch (error) {
+      console.error('Error in extendPause:', error);
+    }
+  }
+
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
     return () => {
