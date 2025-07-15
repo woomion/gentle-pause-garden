@@ -160,6 +160,26 @@ class PausedItemsStore {
     }
   }
 
+  extendPause(itemId: string, newDuration: string): void {
+    const itemIndex = this.items.findIndex(item => item.id === itemId);
+    if (itemIndex === -1) return;
+
+    // Calculate new check-in date
+    const now = new Date();
+    const newCheckInDate = this.calculateCheckInDate(newDuration, now);
+    
+    // Update the item
+    this.items[itemIndex] = {
+      ...this.items[itemIndex],
+      duration: newDuration,
+      checkInDate: newCheckInDate,
+      checkInTime: this.calculateCheckInTimeDisplay(newCheckInDate)
+    };
+
+    this.saveToStorage();
+    this.notifyListeners();
+  }
+
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener);
     return () => {

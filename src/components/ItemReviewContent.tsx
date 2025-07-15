@@ -1,11 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
+import { PausedItem as LocalPausedItem, pausedItemsStore } from '../stores/pausedItemsStore';
 import { useItemNavigation } from '../hooks/useItemNavigation';
 import { useItemActions } from '../hooks/useItemActions';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
-import { pausedItemsStore } from '../stores/pausedItemsStore';
 import ItemReviewDetails from './ItemReviewDetails';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 import ItemReviewFeedbackForm from './ItemReviewFeedbackForm';
@@ -93,8 +92,7 @@ const ItemReviewContent = ({
         await supabasePausedItemsStore.extendPause(item.id, duration);
       } else {
         // For guest users, use local store
-        // Note: This would need implementation in the local store as well
-        console.log('Extending pause for guest user - feature not yet implemented');
+        pausedItemsStore.extendPause(item.id, duration);
       }
       
       toast({
