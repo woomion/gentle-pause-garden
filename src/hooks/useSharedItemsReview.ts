@@ -33,19 +33,10 @@ export const useSharedItemsReview = () => {
         const allReviewItems = supabasePausedItemsStore.getItemsForReview();
         console.log('🔍 SharedItemsReview - All review items:', allReviewItems.length, allReviewItems);
         
-        // Filter for shared items with proper null checks
+        // Filter for shared items - only show items I initiated and shared with partners
         const sharedItems = allReviewItems.filter(item => {
           try {
-            // Case 1: Items shared WITH me (I'm in sharedWithPartners, not the owner)
-            const isSharedWithMe = (
-              item?.sharedWithPartners && 
-              Array.isArray(item.sharedWithPartners) &&
-              item.sharedWithPartners.includes(user.id) &&
-              item.originalUserId && 
-              item.originalUserId !== user.id
-            );
-            
-            // Case 2: Items I shared WITH partners (I'm the owner, has sharedWithPartners)
+            // Only show items I shared WITH partners (I'm the owner, has sharedWithPartners)
             const isMySharedItem = (
               item?.sharedWithPartners && 
               Array.isArray(item.sharedWithPartners) &&
@@ -53,7 +44,7 @@ export const useSharedItemsReview = () => {
               item.originalUserId === user.id
             );
             
-            const isSharedItem = isSharedWithMe || isMySharedItem;
+            const isSharedItem = isMySharedItem;
             
             console.log('🔍 Checking shared item:', {
               itemId: item.id,
@@ -61,7 +52,6 @@ export const useSharedItemsReview = () => {
               sharedWithPartners: item.sharedWithPartners,
               itemUserId: item.originalUserId,
               currentUserId: user.id,
-              isSharedWithMe,
               isMySharedItem,
               isSharedItem
             });
