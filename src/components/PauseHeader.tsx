@@ -1,15 +1,13 @@
 
 import { useState } from 'react';
-import { Settings, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import SettingsSidebar from './SettingsSidebar';
 import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
 
 const PauseHeader = () => {
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const { user } = useAuth();
@@ -35,7 +33,7 @@ const PauseHeader = () => {
           </Link>
         </div>
         
-        <div className="absolute top-6 right-0 flex items-center gap-2">
+        <div className="absolute top-6 right-0">
           <button 
             className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
             onClick={handleAccountClick}
@@ -50,17 +48,9 @@ const PauseHeader = () => {
               <User size={24} />
             )}
           </button>
-          
-          <button 
-            className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
-            onClick={() => setSettingsOpen(true)}
-          >
-            <Settings size={24} />
-          </button>
         </div>
       </header>
       
-      <SettingsSidebar open={settingsOpen} onOpenChange={setSettingsOpen} />
       <UserProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
       <SignupModal isOpen={signupOpen} onClose={() => setSignupOpen(false)} />
     </>

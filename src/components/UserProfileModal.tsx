@@ -1,9 +1,13 @@
 
 import { useState } from 'react';
-import { X, User } from 'lucide-react';
+import { X, Bell, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
+import { useUserSettings } from '@/hooks/useUserSettings';
+import { useToast } from '@/hooks/use-toast';
+import FeedbackModal from './FeedbackModal';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -13,6 +17,9 @@ interface UserProfileModalProps {
 const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const { user, signOut } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const { notificationsEnabled, updateNotificationSetting } = useUserSettings();
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -24,6 +31,77 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
     } finally {
       setIsSigningOut(false);
     }
+  };
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    try {
+      if (checked) {
+        // Request browser permission for web notifications
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          if (permission !== 'granted') {
+            toast({
+              title: "Notifications blocked",
+              description: "Please enable notifications in your browser settings to receive updates.",
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      }
+
+      const success = await updateNotificationSetting(checked);
+      
+      if (success) {
+        toast({
+          title: checked ? "Notifications enabled" : "Notifications disabled",
+          description: checked 
+            ? "You'll receive notifications about your paused items." 
+            : "You won't receive any notifications.",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating notification settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update notification settings. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTestNotification = () => {
+    if (!notificationsEnabled) {
+      toast({
+        title: "Notifications disabled",
+        description: "Please enable notifications first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (Notification.permission !== 'granted') {
+      toast({
+        title: "Notifications not allowed",
+        description: "Please enable notifications in your browser settings.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    new Notification('Test Notification', {
+      body: 'Your notifications are working correctly!',
+      icon: '/favicon.ico'
+    });
+
+    toast({
+      title: "Test notification sent",
+      description: "Check if you received the notification.",
+    });
+  };
+
+  const handleFeedbackClick = () => {
+    setFeedbackOpen(true);
   };
 
   if (!isOpen || !user) return null;
@@ -61,18 +139,62 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
             {email}
           </p>
 
-          <div className="space-y-3">
-            <Button
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              variant="outline"
-              className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
-            >
-              {isSigningOut ? 'Signing out...' : 'Sign Out'}
-            </Button>
+          <div className="space-y-4">
+            {/* Notifications Section */}
+            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Bell size={16} className="text-gray-600 dark:text-gray-300" />
+                  <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+                    Notifications
+                  </span>
+                </div>
+                <Switch
+                  checked={notificationsEnabled}
+                  onCheckedChange={handleNotificationToggle}
+                />
+              </div>
+              
+              {notificationsEnabled && (
+                <Button
+                  onClick={handleTestNotification}
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20"
+                >
+                  Test Notification
+                </Button>
+              )}
+            </div>
+
+            {/* Feedback Section */}
+            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+              <Button
+                onClick={handleFeedbackClick}
+                variant="outline"
+                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
+              >
+                <MessageSquare size={16} className="mr-2" />
+                Send Feedback
+              </Button>
+            </div>
+
+            {/* Sign Out */}
+            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+              <Button
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                variant="outline"
+                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
+              >
+                {isSigningOut ? 'Signing out...' : 'Sign Out'}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+      
+      <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </div>
   );
 };
