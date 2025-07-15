@@ -26,7 +26,7 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const handleNext = () => {
     if (typeof currentScreen === 'number') {
-      if (currentScreen < 5) {
+      if (currentScreen < 6) {
         setCurrentScreen(currentScreen + 1);
       } else {
         onComplete(name.trim());
@@ -194,11 +194,37 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
       </div>
       
       <button
+        onClick={handleNext}
+        className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
+        style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+      >
+        Next →
+      </button>
+    </div>
+  );
+
+  const renderScreen6 = () => (
+    <div className="space-y-6 text-center">
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
+          Here's how to use Pocket Pause
+        </h2>
+        
+        <div className="text-left space-y-3 text-black dark:text-[#F9F5EB] font-medium">
+          <p><strong>Add a pause</strong> — Save something you're considering. Big or small.</p>
+          <p><strong>Let it breathe</strong> — Take a little space before deciding.</p>
+          <p><strong>Check back in</strong> — When you're ready, review with care.</p>
+          <p><strong>Reflect</strong> — Buy it, let it go, or save it for later — with presence.</p>
+          <p className="text-sm italic">(Optional) Share with a partner for thoughtful decisions together.</p>
+        </div>
+      </div>
+      
+      <button
         onClick={handleComplete}
         className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md mt-6 mx-auto block"
         style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
       >
-        Start Your First Pause
+        Start Your First Pause →
       </button>
     </div>
   );
@@ -210,6 +236,7 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
     if (currentScreen === 3) return renderScreen3();
     if (currentScreen === 4) return renderScreen4();
     if (currentScreen === 5) return renderScreen5();
+    if (currentScreen === 6) return renderScreen6();
     
     return null;
   };
