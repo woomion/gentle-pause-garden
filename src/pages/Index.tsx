@@ -33,7 +33,7 @@ const Index = () => {
   const modalStates = useModalStates();
   const itemReview = useItemReview();
   const sharedItemsReview = useSharedItemsReview();
-  const { userName, handleWelcomeComplete, shouldShowWelcomeModal } = useWelcomeFlow();
+  const { userName, handleWelcomeComplete, shouldShowWelcomeModal, shouldShowNameStep } = useWelcomeFlow();
   
   // Handle invitation acceptance from URL
   useInvitationHandler();
@@ -48,13 +48,21 @@ const Index = () => {
   // Initialize notifications
   useNotifications(notificationsEnabled);
 
-  // Update welcome modal visibility when user state changes
+  // Update welcome modal visibility for first-time visitors (guests and new users)
   useEffect(() => {
-    if (user && !authLoading) {
-      const firstName = user.user_metadata?.first_name || '';
-      const hasCompletedWelcome = localStorage.getItem(`hasCompletedWelcome_${user.id}`);
-      if (!hasCompletedWelcome && !firstName) {
-        modalStates.setShowWelcomeModal(true);
+    if (!authLoading) {
+      if (user) {
+        // For authenticated users - show if they haven't completed welcome
+        const hasCompletedWelcome = localStorage.getItem(`hasCompletedWelcome_${user.id}`);
+        if (!hasCompletedWelcome) {
+          modalStates.setShowWelcomeModal(true);
+        }
+      } else {
+        // For guests - show if they haven't completed welcome
+        const hasCompletedWelcome = localStorage.getItem('hasCompletedWelcome_guest');
+        if (!hasCompletedWelcome) {
+          modalStates.setShowWelcomeModal(true);
+        }
       }
     }
   }, [user, authLoading, modalStates]);
@@ -176,12 +184,11 @@ const Index = () => {
         />
       )}
       
-      {user && (
-        <WelcomeModal 
-          open={shouldShowWelcomeModal(modalStates.showWelcomeModal)} 
-          onComplete={handleWelcomeCompleteInternal} 
-        />
-      )}
+      <WelcomeModal 
+        open={shouldShowWelcomeModal(modalStates.showWelcomeModal)} 
+        onComplete={handleWelcomeCompleteInternal}
+        showNameStep={shouldShowNameStep()}
+      />
       
       <SignupModal 
         isOpen={modalStates.showSignupModal} 

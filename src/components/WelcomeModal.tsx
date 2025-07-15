@@ -8,11 +8,12 @@ import { Label } from '@/components/ui/label';
 interface WelcomeModalProps {
   open: boolean;
   onComplete: (name: string) => void;
+  showNameStep?: boolean;
 }
 
-const WelcomeModal = ({ open, onComplete }: WelcomeModalProps) => {
+const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalProps) => {
   const [name, setName] = useState('');
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(showNameStep ? 1 : 2);
 
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
