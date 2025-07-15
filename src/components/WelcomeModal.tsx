@@ -85,6 +85,12 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
   const renderScreen1 = () => (
     <>
       <div className="space-y-6 text-center">
+        <img 
+          src="/lovable-uploads/da2e57d6-d551-4244-92c8-4ea04dd6a895.png" 
+          alt="Purple folder with white dot on cream background"
+          className="w-full max-w-xs mx-auto rounded-lg"
+        />
+        
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
             Hi {name || 'there'}, you're here.
