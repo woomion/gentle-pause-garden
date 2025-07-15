@@ -290,6 +290,17 @@ class SupabasePausedItemsStore {
 
   async extendPause(itemId: string, newDuration: string): Promise<void> {
     try {
+      console.log('🔄 Supabase store extendPause called:', { itemId, newDuration });
+      
+      // First verify the item exists
+      const existingItem = this.items.find(item => item.id === itemId);
+      if (!existingItem) {
+        console.error('❌ Item not found in store before extend:', itemId);
+        return;
+      }
+      
+      console.log('📦 Item found before extend:', existingItem);
+      
       // Calculate new review date based on duration
       const now = new Date();
       let daysToAdd = 0;
@@ -320,6 +331,8 @@ class SupabasePausedItemsStore {
 
       const newReviewAt = new Date(now.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
       
+      console.log('📅 Calculated new review date:', newReviewAt.toISOString());
+      
       const { error } = await supabase
         .from('paused_items')
         .update({
@@ -330,26 +343,38 @@ class SupabasePausedItemsStore {
         .eq('id', itemId);
 
       if (error) {
-        console.error('Error extending pause:', error);
+        console.error('❌ Database error extending pause:', error);
         return;
       }
+
+      console.log('✅ Database update successful');
 
       // Update local item
       const itemIndex = this.items.findIndex(item => item.id === itemId);
       if (itemIndex !== -1) {
+        const originalItem = this.items[itemIndex];
         this.items[itemIndex] = {
           ...this.items[itemIndex],
           duration: newDuration,
           checkInDate: newReviewAt,
           checkInTime: calculateCheckInTimeDisplay(newReviewAt)
         };
+        
+        console.log('📦 Local item updated:', {
+          original: originalItem,
+          updated: this.items[itemIndex]
+        });
+      } else {
+        console.error('❌ Item not found in local store after database update:', itemId);
       }
 
       // Refresh the data to ensure proper filtering across tabs
       await this.loadItems();
       this.notifyListeners();
+      
+      console.log('🔄 Store refreshed after extend pause');
     } catch (error) {
-      console.error('Error in extendPause:', error);
+      console.error('❌ Critical error in extendPause:', error);
     }
   }
 
