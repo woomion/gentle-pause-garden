@@ -42,12 +42,7 @@ const PausePartnersSection = () => {
   const handleAcceptInvite = async (invitationId: string, inviterEmail: string) => {
     const result = await acceptInvite(invitationId);
     
-    if (result?.success) {
-      toast({
-        title: 'Invitation accepted!',
-        description: `You are now connected with ${inviterEmail}`,
-      });
-    } else {
+    if (!result?.success) {
       toast({
         title: 'Error accepting invite',
         description: result?.error || 'Failed to accept invitation',

@@ -471,7 +471,7 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleInitialConfirmation}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
             >
               Remove Partner
             </AlertDialogAction>

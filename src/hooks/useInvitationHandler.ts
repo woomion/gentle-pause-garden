@@ -30,10 +30,6 @@ export const useInvitationHandler = () => {
             
             if (result?.success) {
               console.log('✅ Invitation accepted successfully!');
-              toast({
-                title: 'Invitation accepted!',
-                description: result.message || 'You are now connected as pause partners.',
-              });
             } else {
               console.error('❌ Failed to accept invitation:', result?.error);
               
@@ -86,10 +82,11 @@ export const useInvitationHandler = () => {
         
         // Process the stored invitation
         acceptInvite(pendingInvitation).then((result) => {
-          if (result?.success) {
+          if (!result?.success) {
             toast({
-              title: 'Invitation accepted!',
-              description: 'You are now connected as pause partners.',
+              title: 'Error processing invitation',
+              description: result?.error || 'Please try again or contact support.',
+              variant: 'destructive',
             });
           }
         }).catch((error) => {
