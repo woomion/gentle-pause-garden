@@ -179,12 +179,11 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
     <div className="space-y-6 text-center">
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
-          The joy isn't always in the buying.
+          Joy lives in the choosing.
         </h2>
         
         <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
-          Sometimes it's in the clarity.<br />
-          Sometimes it's in the letting go.
+          Whether you say yes or no — presence is the point.
         </p>
       </div>
       
