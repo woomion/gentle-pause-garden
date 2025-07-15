@@ -295,28 +295,11 @@ const PartnerFeedTab = () => {
                       Mindful choices, made together.
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toast({
-                          title: "Manage Partners",
-                          description: "Click the account icon in the top right to manage your partners.",
-                        });
-                      }}
-                      className="flex items-center gap-1 text-xs"
-                    >
-                      <Users className="h-3 w-3" />
-                      <span>Manage</span>
-                    </Button>
-                    {isPartnerSectionOpen ? (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </div>
+                  {isPartnerSectionOpen ? (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  )}
                 </div>
               </CardHeader>
             </CollapsibleTrigger>
@@ -422,18 +405,9 @@ const PartnerFeedTab = () => {
               <p className="text-muted-foreground mb-4">
                 You haven't connected with any pause partners yet.
               </p>
-              <Button
-                onClick={() => {
-                  toast({
-                    title: "Add Partners",
-                    description: "Click the account icon in the top right to invite pause partners.",
-                  });
-                }}
-                className="bg-invite-button text-invite-button-foreground hover:bg-invite-button/90"
-              >
-                <Users className="h-4 w-4 mr-2" />
-                Add Pause Partners
-              </Button>
+              <p className="text-sm text-muted-foreground mb-4">
+                Click your account icon (circle) in the top right to invite pause partners and start sharing mindful decisions together.
+              </p>
             </div>
           </CardContent>
         </Card>
