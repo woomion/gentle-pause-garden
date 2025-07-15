@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Users, Trash2, Crown } from 'lucide-react';
+import { Users, Trash2, Crown, ChevronDown, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { usePausePartners } from '@/hooks/usePausePartners';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,7 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
   } | null>(null);
   const [sharedItemsToMove, setSharedItemsToMove] = useState<any[]>([]);
   const [showMoveItemsDialog, setShowMoveItemsDialog] = useState(false);
+  const [isPartnerSectionOpen, setIsPartnerSectionOpen] = useState(false);
 
   const { partners, invitations, loading, sendInvite, removePartner, resendInvite } = usePausePartners();
   const { hasPausePartnerAccess } = useSubscription();
@@ -262,15 +264,25 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
   return (
     <>
       <div className="border-t border-gray-200 dark:border-white/20 pt-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Users size={16} className="text-gray-600 dark:text-gray-300" />
-          <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
-            Pause Partners
-          </span>
-        </div>
+        <Collapsible open={isPartnerSectionOpen} onOpenChange={setIsPartnerSectionOpen}>
+          <CollapsibleTrigger className="w-full">
+            <div className="flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors rounded p-2 -m-2">
+              <div className="flex items-center gap-2">
+                <Users size={16} className="text-gray-600 dark:text-gray-300" />
+                <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+                  Pause Partners
+                </span>
+              </div>
+              {isPartnerSectionOpen ? (
+                <ChevronDown size={16} className="text-gray-600 dark:text-gray-300" />
+              ) : (
+                <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
+              )}
+            </div>
+          </CollapsibleTrigger>
 
-        {/* Invite new partner section */}
-        <div className="space-y-3">
+          <CollapsibleContent>
+            <div className="mt-4 space-y-3">
           <div className="flex gap-2">
             <Input
               type="email"
@@ -375,7 +387,9 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
               ))}
             </div>
           )}
-        </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       {/* Move items confirmation dialog */}

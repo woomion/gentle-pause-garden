@@ -21,7 +21,6 @@ const greetings: Greeting[] = [
   {
     category: 'midday',
     messages: [
-      'A moment to reflect, mid-journey.',
       'Let\'s pause before you press go.',
       'A quick breath before the next thing.',
       'What\'s still asking for your attention?',
