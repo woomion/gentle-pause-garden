@@ -161,8 +161,15 @@ class PausedItemsStore {
   }
 
   extendPause(itemId: string, newDuration: string): void {
+    console.log('🔄 Local store extendPause called:', { itemId, newDuration });
     const itemIndex = this.items.findIndex(item => item.id === itemId);
-    if (itemIndex === -1) return;
+    if (itemIndex === -1) {
+      console.log('❌ Item not found in local store:', itemId);
+      return;
+    }
+
+    const originalItem = this.items[itemIndex];
+    console.log('📦 Original item before extend:', originalItem);
 
     // Calculate new check-in date
     const now = new Date();
@@ -175,6 +182,9 @@ class PausedItemsStore {
       checkInDate: newCheckInDate,
       checkInTime: this.calculateCheckInTimeDisplay(newCheckInDate)
     };
+
+    console.log('📦 Updated item after extend:', this.items[itemIndex]);
+    console.log('📦 All items in store:', this.items);
 
     this.saveToStorage();
     this.notifyListeners();

@@ -45,6 +45,11 @@ const PausedSection = () => {
         const reviewItems = pausedItemsStore.getItemsForReview();
         const reviewItemIds = new Set(reviewItems.map(item => item.id));
         const nonReviewItems = allItems.filter(item => !reviewItemIds.has(item.id));
+        
+        console.log('📋 PausedSection - All items:', allItems);
+        console.log('📋 PausedSection - Review items:', reviewItems);
+        console.log('📋 PausedSection - Non-review items:', nonReviewItems);
+        
         setPausedItems(sortItemsByDate(nonReviewItems));
         setIsLoading(false);
       }
