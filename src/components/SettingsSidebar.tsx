@@ -23,7 +23,6 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
   const { user } = useAuth();
-  
 
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
 
@@ -237,7 +236,6 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
                 )}
               </div>
             </div>
-
           </div>
         </DialogContent>
       </Dialog>
