@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, Users } from 'lucide-react';
 
 interface SharedItemsReviewPillProps {
   sharedItemsCount: number;
@@ -14,12 +14,13 @@ const SharedItemsReviewPill = memo(({ sharedItemsCount, partnerNames, onStartRev
     <div className="mb-4">
       <button 
         onClick={onStartReview}
-        className="rounded-full px-6 py-3 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm bg-green-100 dark:bg-green-900"
+        className="rounded-full px-6 py-3 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+        style={{ backgroundColor: '#E7D9FA' }}
       >
-        <div className="text-base font-medium flex items-center gap-2 justify-center text-green-800 dark:text-green-100">
-          <Search size={16} className="text-green-800 dark:text-green-100" />
+        <div className="text-base font-medium flex items-center gap-2 justify-center" style={{ color: '#5C47A3' }}>
+          <Users size={16} style={{ color: '#5C47A3' }} />
           {sharedItemsCount} partner item{sharedItemsCount === 1 ? '' : 's'} ready for review
-          <ArrowRight size={16} className="text-green-800 dark:text-green-100" />
+          <ArrowRight size={16} style={{ color: '#5C47A3' }} />
         </div>
       </button>
     </div>
