@@ -407,11 +407,10 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
             <AlertDialogTitle>Remove Partner & Move Shared Items?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
               <p>
-                You have {sharedItemsToMove.length} item(s) shared with {partnerToRemove?.name}. 
-                This will permanently remove your partnership connection.
+                You have {sharedItemsToMove.length} pause{sharedItemsToMove.length > 1 ? 's' : ''} shared with {partnerToRemove?.name}.
               </p>
               <p className="font-medium">
-                Would you like to move your shared items back to your personal "My Pauses" section?
+                Would you like to move the items you paused back to your personal "My Pauses" section?
               </p>
               <p className="text-xs text-muted-foreground">
                 Note: This will only move items you created, not ones your partner added.
@@ -427,16 +426,16 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => handleConfirmRemoval(false)}
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              onClick={() => handleConfirmRemoval(true)}
+              className="bg-muted text-foreground hover:bg-muted/80"
             >
-              Remove Partner Only
+              Remove Partner & Move Pauses
             </AlertDialogAction>
             <AlertDialogAction 
-              onClick={() => handleConfirmRemoval(true)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => handleConfirmRemoval(false)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Remove & Move Items
+              Remove Both Partner & Shared Pauses
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -451,7 +450,7 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
               <p>
                 Are you sure you want to remove {partnerToRemove?.name} as your pause partner?
               </p>
-              <p className="font-medium text-destructive">
+              <p className="italic text-muted-foreground">
                 You will no longer be able to share pauses with them.
               </p>
               {sharedItemsToMove.length > 0 && (
@@ -471,7 +470,7 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleInitialConfirmation}
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+              className="bg-muted text-foreground hover:bg-muted/80"
             >
               Remove Partner
             </AlertDialogAction>
