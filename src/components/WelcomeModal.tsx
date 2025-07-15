@@ -210,12 +210,28 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
           Here's how to use Pocket Pause
         </h2>
         
-        <div className="text-left space-y-3 text-black dark:text-[#F9F5EB] font-medium">
-          <p><strong>Add a pause</strong> — Save something you're considering. Big or small.</p>
-          <p><strong>Let it breathe</strong> — Take a little space before deciding.</p>
-          <p><strong>Check back in</strong> — When you're ready, review with care.</p>
-          <p><strong>Reflect</strong> — Buy it, let it go, or save it for later — with presence.</p>
-          <p className="text-sm italic">(Optional) Share with a partner for thoughtful decisions together.</p>
+        <div className="text-center space-y-4 text-black dark:text-[#F9F5EB] font-medium">
+          <div className="space-y-2">
+            <p className="font-semibold">Add a pause</p>
+            <p>Save something you're considering. Big or small.</p>
+          </div>
+          
+          <div className="space-y-2">
+            <p className="font-semibold">Let it breathe</p>
+            <p>Take a little space before deciding.</p>
+          </div>
+          
+          <div className="space-y-2">
+            <p className="font-semibold">Check back in</p>
+            <p>When you're ready, review with care.</p>
+          </div>
+          
+          <div className="space-y-2">
+            <p className="font-semibold">Reflect</p>
+            <p>Buy it, let it go, or save it for later — with presence.</p>
+          </div>
+          
+          <p className="text-sm italic pt-2">You can even share with a partner for thoughtful decisions together.</p>
         </div>
       </div>
       
