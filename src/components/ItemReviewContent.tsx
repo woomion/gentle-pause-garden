@@ -87,10 +87,10 @@ const ItemReviewContent = ({
     setNotes('');
   };
 
-  const handleExtendPause = async (duration: string, otherDuration?: string) => {
+  const handleExtendPause = async (duration: string) => {
     try {
       if (user) {
-        await supabasePausedItemsStore.extendPause(item.id, duration, otherDuration);
+        await supabasePausedItemsStore.extendPause(item.id, duration);
       } else {
         // For guest users, use local store
         // Note: This would need implementation in the local store as well
