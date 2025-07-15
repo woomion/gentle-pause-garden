@@ -10,6 +10,7 @@ import { notificationService } from '../services/notificationService';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import FeedbackModal from './FeedbackModal';
 // import PausePartnersSection from './PausePartnersSection';
 
@@ -23,6 +24,7 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
   const { user } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
 
@@ -234,6 +236,24 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
                     Test Notification
                   </Button>
                 )}
+              </div>
+            </div>
+
+            {/* Theme Toggle */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">Appearance</h3>
+              <div className="bg-white/60 dark:bg-white/10 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-black dark:text-[#F9F5EB] font-medium">Dark Mode</span>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Switch between light and dark themes</p>
+                  </div>
+                  <Switch 
+                    checked={isDarkMode} 
+                    onCheckedChange={toggleTheme}
+                    className="ml-4"
+                  />
+                </div>
               </div>
             </div>
           </div>
