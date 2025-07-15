@@ -211,24 +211,24 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
         </h2>
         
         <div className="text-center space-y-4 text-black dark:text-[#F9F5EB] font-medium">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <p className="font-semibold">Add a pause</p>
-            <p>Save something you're considering. Big or small.</p>
+            <p>Add any item you're thinking about buying.</p>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-1">
             <p className="font-semibold">Let it breathe</p>
-            <p>Take a little space before deciding.</p>
+            <p>Set how long you want to wait before deciding.</p>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-1">
             <p className="font-semibold">Check back in</p>
-            <p>When you're ready, review with care.</p>
+            <p>Review your item when the pause period ends.</p>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-1">
             <p className="font-semibold">Reflect</p>
-            <p>Buy it, let it go, or save it for later — with presence.</p>
+            <p>Choose to buy, remove, or pause again.</p>
           </div>
           
           <p className="text-sm italic pt-2">You can even share with a partner for thoughtful decisions together.</p>
