@@ -283,10 +283,10 @@ const PartnerFeedTab = () => {
       {partners.length > 0 ? (
         <Card>
           <Collapsible open={isPartnerSectionOpen} onOpenChange={setIsPartnerSectionOpen}>
-            <CollapsibleTrigger asChild>
+            <CollapsibleTrigger className="w-full">
               <CardHeader className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="text-left">
                     <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
                       <Users className="h-5 w-5" />
                       Shared Pauses
@@ -296,9 +296,9 @@ const PartnerFeedTab = () => {
                     </p>
                   </div>
                   {isPartnerSectionOpen ? (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   ) : (
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   )}
                 </div>
               </CardHeader>
@@ -406,7 +406,7 @@ const PartnerFeedTab = () => {
                 You haven't connected with any pause partners yet.
               </p>
               <p className="text-sm text-muted-foreground mb-4">
-                Click your account icon (circle) in the top right to invite pause partners and start sharing mindful decisions together.
+                Click your account icon in the top right to invite pause partners and start sharing mindful decisions together.
               </p>
             </div>
           </CardContent>
