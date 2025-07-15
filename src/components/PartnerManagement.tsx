@@ -34,6 +34,7 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
   } | null>(null);
   const [sharedItemsToMove, setSharedItemsToMove] = useState<any[]>([]);
   const [showMoveItemsDialog, setShowMoveItemsDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isPartnerSectionOpen, setIsPartnerSectionOpen] = useState(false);
 
   const { partners, invitations, loading, sendInvite, removePartner, resendInvite } = usePausePartners();
@@ -174,12 +175,18 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
     }
 
     setPartnerToRemove({ id: partnerId, email: partnerEmail, name: partnerName });
+    setSharedItemsToMove(sharedPauses || []);
+    
+    // Always show confirmation dialog first
+    setShowConfirmDialog(true);
+  };
 
-    if (sharedPauses && sharedPauses.length > 0) {
-      setSharedItemsToMove(sharedPauses);
+  const handleInitialConfirmation = () => {
+    setShowConfirmDialog(false);
+    
+    if (sharedItemsToMove.length > 0) {
       setShowMoveItemsDialog(true);
     } else {
-      // No shared items, proceed with removal
       handleConfirmRemoval(false);
     }
   };
@@ -237,6 +244,7 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
       setPartnerToRemove(null);
       setSharedItemsToMove([]);
       setShowMoveItemsDialog(false);
+      setShowConfirmDialog(false);
     }
   };
 
@@ -429,6 +437,43 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Remove & Move Items
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Initial confirmation dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {partnerToRemove?.name}?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to remove {partnerToRemove?.name} as your pause partner?
+              </p>
+              <p className="font-medium text-destructive">
+                You will no longer be able to share pauses with them.
+              </p>
+              {sharedItemsToMove.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Note: Any comments or messages on shared items will be removed.
+                </p>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setPartnerToRemove(null);
+              setSharedItemsToMove([]);
+              setShowConfirmDialog(false);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleInitialConfirmation}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove Partner
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
