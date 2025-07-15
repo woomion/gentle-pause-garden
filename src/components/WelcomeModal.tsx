@@ -262,7 +262,7 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
         
         <div className="text-center space-y-4 text-black dark:text-[#F9F5EB] font-medium">
           <div className="space-y-0.5">
-            <p className="font-semibold">Add a pause</p>
+            <p className="font-semibold">Add an item to pause</p>
             <p>Add any item you're thinking about buying.</p>
           </div>
           
