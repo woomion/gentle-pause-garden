@@ -12,6 +12,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Crown, Users, Clock, Tag, Trash2 } from 'lucide-react';
 import PausedItemsCarousel from '@/components/PausedItemsCarousel';
 import PausedItemDetail from '@/components/PausedItemDetail';
+import PartnerItemsReadyBanner from '@/components/PartnerItemsReadyBanner';
+import PartnerReviewModal from '@/components/PartnerReviewModal';
 import { PausedItem } from '@/stores/supabasePausedItemsStore';
 import { calculateCheckInTimeDisplay } from '@/utils/pausedItemsUtils';
 import { extractProductLinkFromNotes, extractActualNotes } from '@/utils/notesMetadataUtils';
@@ -23,6 +25,9 @@ const PartnerFeedTab = () => {
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [partnerReviewModalOpen, setPartnerReviewModalOpen] = useState(false);
+  const [partnerReviewItems, setPartnerReviewItems] = useState<PausedItem[]>([]);
+  const [partnerReviewName, setPartnerReviewName] = useState<string>('');
   
   const { hasPausePartnerAccess } = useSubscription();
   const { toast } = useToast();
@@ -390,6 +395,12 @@ const PartnerFeedTab = () => {
     }
   };
 
+  const handlePartnerItemsReady = (partnerName: string, items: PausedItem[]) => {
+    setPartnerReviewName(partnerName);
+    setPartnerReviewItems(items);
+    setPartnerReviewModalOpen(true);
+  };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
@@ -642,6 +653,13 @@ const PartnerFeedTab = () => {
             </div>
           </CardHeader>
           <CardContent>
+            {/* Partner Items Ready Banner */}
+            <PartnerItemsReadyBanner
+              partners={partners}
+              currentUserId={currentUserId}
+              onItemsReady={handlePartnerItemsReady}
+            />
+            
           {sharedItems.length === 0 ? (
             <div className="text-center py-8">
               <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
@@ -710,6 +728,15 @@ const PartnerFeedTab = () => {
           currentUserId={currentUserId}
         />
       )}
+
+      {/* Partner Review Modal */}
+      <PartnerReviewModal
+        isOpen={partnerReviewModalOpen}
+        onClose={() => setPartnerReviewModalOpen(false)}
+        partnerName={partnerReviewName}
+        items={partnerReviewItems}
+        currentUserId={currentUserId}
+      />
     </div>
   );
 };
