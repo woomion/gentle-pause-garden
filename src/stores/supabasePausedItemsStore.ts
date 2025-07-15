@@ -324,7 +324,8 @@ class SupabasePausedItemsStore {
         .from('paused_items')
         .update({
           pause_duration_days: daysToAdd,
-          review_at: newReviewAt.toISOString()
+          review_at: newReviewAt.toISOString(),
+          status: 'paused'
         })
         .eq('id', itemId);
 
