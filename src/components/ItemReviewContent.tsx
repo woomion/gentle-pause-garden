@@ -137,15 +137,13 @@ const ItemReviewContent = ({
             </div>
           )}
           
-          {/* Add breathing room before decision buttons - only show to item owner */}
-          {isItemOwner && (
-            <div className="mt-8">
-              <ItemReviewDecisionButtons 
-                onDecision={handleDecision} 
-                onExtendPause={() => setShowExtendModal(true)}
-              />
-            </div>
-          )}
+          {/* Decision buttons - always show for individual items, only owner for shared items */}
+          <div className="mt-8">
+            <ItemReviewDecisionButtons 
+              onDecision={handleDecision} 
+              onExtendPause={() => setShowExtendModal(true)}
+            />
+          </div>
         </>
       ) : (
         <ItemReviewFeedbackForm
