@@ -427,7 +427,7 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => handleConfirmRemoval(true)}
-              className="bg-muted text-foreground hover:bg-muted/80"
+              className="bg-gray-600 text-white hover:bg-gray-700"
             >
               Remove Partner & Move Pauses
             </AlertDialogAction>
@@ -470,7 +470,7 @@ const PartnerManagement = ({ onClose }: PartnerManagementProps) => {
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleInitialConfirmation}
-              className="bg-muted text-foreground hover:bg-muted/80"
+              className="bg-gray-600 text-white hover:bg-gray-700"
             >
               Remove Partner
             </AlertDialogAction>
