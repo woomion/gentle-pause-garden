@@ -132,6 +132,12 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen2 = () => (
     <div className="space-y-6 text-center">
+      <img 
+        src="/lovable-uploads/1367d743-1b24-47dd-adba-c17931d597c6.png" 
+        alt="Yellow curved line on cream background"
+        className="w-full max-w-xs mx-auto rounded-lg"
+      />
+      
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
           We're not here to budget.
