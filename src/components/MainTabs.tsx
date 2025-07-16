@@ -42,7 +42,7 @@ const MainTabs = () => {
 
   return (
     <div className="w-full">
-      <div className="flex w-full gap-1 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
+      <div className="flex w-full gap-1 mb-6 h-16 sm:h-10">
         <Button 
           variant="ghost"
           onClick={() => {
@@ -51,7 +51,7 @@ const MainTabs = () => {
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
-            backgroundColor: showMyPauses ? '#BFD1BF' : 'transparent',
+            backgroundColor: showMyPauses ? '#BFD1BF' : '#DDE7DD',
             color: showMyPauses ? '#7A5DD9' : 'inherit'
           }}
         >
@@ -66,7 +66,7 @@ const MainTabs = () => {
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
-            backgroundColor: showPartnerPauses ? '#BFD1BF' : 'transparent',
+            backgroundColor: showPartnerPauses ? '#BFD1BF' : '#DDE7DD',
             color: showPartnerPauses ? '#7A5DD9' : 'inherit'
           }}
         >
