@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tag, Plus, Edit3, Trash2, X, Check } from 'lucide-react';
+import { Tag, Plus, Edit3, Trash2, X, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabasePausedItemsStore } from '@/stores/supabasePausedItemsStore';
 import { pausedItemsStore } from '@/stores/pausedItemsStore';
+import { supabase } from '@/integrations/supabase/client';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface TagData {
   name: string;
@@ -23,6 +35,9 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isTagSectionOpen, setIsTagSectionOpen] = useState(false);
+  const [tagToDelete, setTagToDelete] = useState<TagData | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -180,24 +195,86 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
     const tagData = tags.find(tag => tag.name === tagName);
     if (!tagData) return;
     
-    if (tagData.count > 0) {
-      toast({
-        title: "Cannot delete",
-        description: `This tag is used by ${tagData.count} item${tagData.count === 1 ? '' : 's'}. Remove it from those items first.`,
-        variant: "destructive",
-      });
-      return;
-    }
+    setTagToDelete(tagData);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDeleteTag = async () => {
+    if (!tagToDelete) return;
     
     setIsLoading(true);
     
     try {
+      if (user) {
+        // For authenticated users, update via Supabase
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (!currentUser) return;
+
+        // Get all items that use this tag
+        const { data: itemsToUpdate, error: fetchError } = await supabase
+          .from('paused_items')
+          .select('id, tags')
+          .eq('user_id', currentUser.id)
+          .contains('tags', [tagToDelete.name]);
+
+        if (fetchError) {
+          console.error('Error fetching items:', fetchError);
+          throw fetchError;
+        }
+
+        // Update each item to remove the tag
+        for (const item of itemsToUpdate || []) {
+          if (item.tags) {
+            const updatedTags = item.tags.filter((tag: string) => tag !== tagToDelete.name);
+            
+            const { error: updateError } = await supabase
+              .from('paused_items')
+              .update({ tags: updatedTags })
+              .eq('id', item.id);
+
+            if (updateError) {
+              console.error('Error updating item:', updateError);
+              throw updateError;
+            }
+          }
+        }
+
+        // Refresh the store data
+        await supabasePausedItemsStore.loadItems();
+      } else {
+        // For guest users, update local storage
+        const items = pausedItemsStore.getItems();
+        const itemsToUpdate = items.filter(item => 
+          item.tags && item.tags.includes(tagToDelete.name)
+        );
+        
+        // Update each item to remove the tag
+        for (const item of itemsToUpdate) {
+          if (item.tags) {
+            const updatedTags = item.tags.filter(tag => tag !== tagToDelete.name);
+            
+            // Find and update the item directly in the store
+            const itemIndex = pausedItemsStore['items'].findIndex(i => i.id === item.id);
+            if (itemIndex !== -1) {
+              pausedItemsStore['items'][itemIndex] = {
+                ...pausedItemsStore['items'][itemIndex],
+                tags: updatedTags
+              };
+            }
+          }
+        }
+        
+        // Save to storage and notify listeners
+        pausedItemsStore['saveToStorage']();
+        pausedItemsStore['notifyListeners']();
+      }
+      
       // Remove from local state
-      setTags(prev => prev.filter(tag => tag.name !== tagName));
+      setTags(prev => prev.filter(tag => tag.name !== tagToDelete.name));
       
       toast({
         title: "Tag deleted",
-        description: `Tag "${tagName}" has been removed.`,
+        description: `Tag "${tagToDelete.name}" has been removed${tagToDelete.count > 0 ? ` from ${tagToDelete.count} item${tagToDelete.count === 1 ? '' : 's'}` : ''}.`,
       });
     } catch (error) {
       console.error('Error deleting tag:', error);
@@ -208,6 +285,8 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
       });
     } finally {
       setIsLoading(false);
+      setTagToDelete(null);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -217,13 +296,27 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
   };
 
   return (
-    <div className="border-t border-gray-200 dark:border-white/20 pt-4">
-      <div className="flex items-center gap-2 mb-4">
-        <Tag size={16} className="text-gray-600 dark:text-gray-300" />
-        <h3 className="text-sm font-medium text-black dark:text-[#F9F5EB]">
-          Tag Management
-        </h3>
-      </div>
+    <>
+      <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+        <Collapsible open={isTagSectionOpen} onOpenChange={setIsTagSectionOpen}>
+          <CollapsibleTrigger className="w-full">
+            <div className="flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors rounded p-2 -m-2">
+              <div className="flex items-center gap-2">
+                <Tag size={16} className="text-gray-600 dark:text-gray-300" />
+                <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+                  Tag Management
+                </span>
+              </div>
+              {isTagSectionOpen ? (
+                <ChevronDown size={16} className="text-gray-600 dark:text-gray-300" />
+              ) : (
+                <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
+              )}
+            </div>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent>
+            <div className="mt-4 space-y-3">
       
       {/* Add new tag */}
       <div className="mb-4">
@@ -318,7 +411,7 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
                       size="sm"
                       variant="ghost"
                       className="h-6 w-6 p-0 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
-                      disabled={isLoading || tag.count > 0}
+                      disabled={isLoading}
                     >
                       <Trash2 size={12} />
                     </Button>
@@ -330,12 +423,43 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
         )}
       </div>
       
-      {tags.length > 0 && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          You can only delete tags that aren't being used by any items.
-        </p>
-      )}
-    </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Tag "{tagToDelete?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                This tag is used on {tagToDelete?.count} item{tagToDelete?.count === 1 ? '' : 's'}. 
+                Are you sure you want to delete it?
+              </p>
+              <p className="font-medium">
+                This will remove the tag from all your paused items.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setTagToDelete(null);
+              setShowDeleteDialog(false);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDeleteTag}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Tag
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
