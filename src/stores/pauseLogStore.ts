@@ -53,6 +53,7 @@ class PauseLogStore {
       ...item,
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       letGoDate: new Date().toLocaleDateString('en-US', { 
+        year: 'numeric',
         month: 'short', 
         day: 'numeric' 
       })

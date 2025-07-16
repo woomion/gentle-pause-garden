@@ -42,6 +42,7 @@ export const convertDbToPauseLogItem = (dbItem: DbPausedItem): PauseLogItem => {
     storeName: storeName,
     emotion: dbItem.reason || 'something else',
     letGoDate: new Date(dbItem.created_at).toLocaleDateString('en-US', { 
+      year: 'numeric',
       month: 'short', 
       day: 'numeric' 
     }),

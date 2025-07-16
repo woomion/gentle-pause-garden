@@ -19,9 +19,22 @@ export interface MonthGroup {
 }
 
 export const createHierarchicalStructure = (items: PauseLogItem[]): HierarchicalData => {
+  // Helper function to parse dates that might be in old format (without year)
+  const parseItemDate = (dateString: string): Date => {
+    const parsed = new Date(dateString);
+    // If the year is before 2020, it's likely an old format without year
+    if (parsed.getFullYear() < 2020) {
+      // Assume current year for old format dates
+      const currentYear = new Date().getFullYear();
+      const withCurrentYear = `${dateString}, ${currentYear}`;
+      return new Date(withCurrentYear);
+    }
+    return parsed;
+  };
+
   // Sort all items by date (newest first)
   const sortedItems = [...items].sort((a, b) => 
-    new Date(b.letGoDate).getTime() - new Date(a.letGoDate).getTime()
+    parseItemDate(b.letGoDate).getTime() - parseItemDate(a.letGoDate).getTime()
   );
   
   // Group items by time periods
@@ -31,46 +44,53 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
   let recentItemsHeader = 'Recent';
   
   if (sortedItems.length > 0) {
-    const mostRecentDate = new Date(sortedItems[0].letGoDate);
+    const mostRecentDate = parseItemDate(sortedItems[0].letGoDate);
     
     // Determine the cutoff and header based on the most recent item
-    let cutoffDate: Date;
     if (isThisWeek(mostRecentDate)) {
       recentItemsHeader = 'This week';
-      // All items from this week go to recent
-      cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - 7);
+      sortedItems.forEach(item => {
+        const itemDate = parseItemDate(item.letGoDate);
+        if (isThisWeek(itemDate)) {
+          recentItems.push(item);
+        } else {
+          historicalItems.push(item);
+        }
+      });
     } else if (isThisMonth(mostRecentDate)) {
       recentItemsHeader = format(mostRecentDate, 'MMMM');
-      // All items from this month go to recent
-      cutoffDate = new Date(mostRecentDate.getFullYear(), mostRecentDate.getMonth(), 1);
+      sortedItems.forEach(item => {
+        const itemDate = parseItemDate(item.letGoDate);
+        if (isThisMonth(itemDate)) {
+          recentItems.push(item);
+        } else {
+          historicalItems.push(item);
+        }
+      });
     } else {
+      // For items not in current week or month, group by the most recent month
       recentItemsHeader = format(mostRecentDate, 'MMMM yyyy');
-      // All items from the most recent item's month go to recent
-      cutoffDate = new Date(mostRecentDate.getFullYear(), mostRecentDate.getMonth(), 1);
+      const mostRecentMonth = mostRecentDate.getMonth();
+      const mostRecentYear = mostRecentDate.getFullYear();
+      
+      sortedItems.forEach(item => {
+        const itemDate = parseItemDate(item.letGoDate);
+        if (itemDate.getMonth() === mostRecentMonth && itemDate.getFullYear() === mostRecentYear) {
+          recentItems.push(item);
+        } else {
+          historicalItems.push(item);
+        }
+      });
     }
-    
-    // Separate items based on the cutoff
-    sortedItems.forEach(item => {
-      const itemDate = new Date(item.letGoDate);
-      if (recentItemsHeader === 'This week' && isThisWeek(itemDate)) {
-        recentItems.push(item);
-      } else if (recentItemsHeader !== 'This week' && itemDate >= cutoffDate) {
-        recentItems.push(item);
-      } else {
-        historicalItems.push(item);
-      }
-    });
   }
   
   // Group historical items by year and month
   const yearGroups: { [year: string]: { [monthKey: string]: PauseLogItem[] } } = {};
   
   historicalItems.forEach(item => {
-    const date = new Date(item.letGoDate);
+    const date = parseItemDate(item.letGoDate);
     const year = date.getFullYear().toString();
     const monthKey = format(date, 'yyyy-MM');
-    const monthLabel = format(date, 'MMMM');
     
     if (!yearGroups[year]) {
       yearGroups[year] = {};
@@ -90,7 +110,7 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
           monthKey,
           monthLabel: format(new Date(monthKey + '-01'), 'MMMM'),
           items: items.sort((a, b) => 
-            new Date(b.letGoDate).getTime() - new Date(a.letGoDate).getTime()
+            parseItemDate(b.letGoDate).getTime() - parseItemDate(a.letGoDate).getTime()
           )
         }))
         .sort((a, b) => b.monthKey.localeCompare(a.monthKey)) // Newest months first
