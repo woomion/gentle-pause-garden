@@ -23,17 +23,6 @@ const PausedSection = () => {
         const itemUserId = (item as any).originalUserId || (item as any).user_id;
         const sharedWithPartners = (item as any).sharedWithPartners || [];
         
-        console.log('🔍 PausedSection filter debug:', {
-          itemId: item.id,
-          itemName: item.itemName,
-          itemUserId,
-          currentUserId: user?.id,
-          sharedWithPartners,
-          userMatch: itemUserId === user?.id,
-          notShared: sharedWithPartners.length === 0,
-          willShow: user ? (itemUserId === user.id && sharedWithPartners.length === 0) : true
-        });
-        
         // For authenticated users: show only items created by them that are NOT shared with partners
         if (user) {
           return itemUserId === user.id && sharedWithPartners.length === 0;

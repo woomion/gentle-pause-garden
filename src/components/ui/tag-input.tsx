@@ -20,6 +20,7 @@ export const TagInput: React.FC<TagInputProps> = ({
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const [isSelectingSuggestion, setIsSelectingSuggestion] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -61,10 +62,14 @@ export const TagInput: React.FC<TagInputProps> = ({
   };
 
   const handleBlur = () => {
-    if (inputValue.trim()) {
+    // Don't add partial input if user is selecting a suggestion
+    if (!isSelectingSuggestion && inputValue.trim()) {
       addTag(inputValue);
     }
-    setTimeout(() => setShowSuggestions(false), 200);
+    setTimeout(() => {
+      setShowSuggestions(false);
+      setIsSelectingSuggestion(false);
+    }, 200);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,6 +90,7 @@ export const TagInput: React.FC<TagInputProps> = ({
   };
 
   const handleSuggestionClick = (suggestion: string) => {
+    setIsSelectingSuggestion(true);
     addTag(suggestion);
     inputRef.current?.focus();
   };
