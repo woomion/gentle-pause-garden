@@ -85,6 +85,7 @@ const PartnerReviewModal = ({ isOpen, onClose, partnerName, items, currentUserId
             isLastItem={currentIndex === items.length - 1}
             showFeedback={false}
             setShowFeedback={() => {}} // No-op for partners
+            showDecisionButtons={false} // Partners can't make decisions
           />
         </div>
       </DialogContent>

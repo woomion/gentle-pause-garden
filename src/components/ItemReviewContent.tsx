@@ -22,6 +22,7 @@ interface ItemReviewContentProps {
   isLastItem: boolean;
   showFeedback: boolean;
   setShowFeedback: (show: boolean) => void;
+  showDecisionButtons?: boolean;
 }
 
 const ItemReviewContent = ({
@@ -31,7 +32,8 @@ const ItemReviewContent = ({
   onClose,
   isLastItem,
   showFeedback,
-  setShowFeedback
+  setShowFeedback,
+  showDecisionButtons = true
 }: ItemReviewContentProps) => {
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
   const [notes, setNotes] = useState('');
@@ -141,13 +143,15 @@ const ItemReviewContent = ({
             </div>
           )}
           
-          {/* Decision buttons - always show for individual items, only owner for shared items */}
-          <div className="mt-8">
-            <ItemReviewDecisionButtons 
-              onDecision={handleDecision} 
-              onExtendPause={() => setShowExtendModal(true)}
-            />
-          </div>
+          {/* Decision buttons - only show when allowed */}
+          {showDecisionButtons && (
+            <div className="mt-8">
+              <ItemReviewDecisionButtons 
+                onDecision={handleDecision} 
+                onExtendPause={() => setShowExtendModal(true)}
+              />
+            </div>
+          )}
         </>
       ) : (
         <ItemReviewFeedbackForm
