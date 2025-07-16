@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { User, Library } from 'lucide-react';
+import { User, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -55,7 +55,7 @@ const PauseHeader = () => {
             onClick={handleCourseClick}
             title="Course section"
           >
-            <Library size={20} />
+            <BookOpen size={20} />
           </button>
           
           <button 
