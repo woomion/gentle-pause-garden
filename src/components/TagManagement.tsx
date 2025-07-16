@@ -453,15 +453,18 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setTagToDelete(null);
-              setShowDeleteDialog(false);
-            }}>
+            <AlertDialogCancel 
+              onClick={() => {
+                setTagToDelete(null);
+                setShowDeleteDialog(false);
+              }}
+              className="bg-muted-foreground/70 text-muted hover:bg-muted-foreground/60"
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmDeleteTag}
-              className="bg-muted-foreground text-muted hover:bg-muted-foreground/90"
+              className="bg-muted-foreground/70 text-muted hover:bg-muted-foreground/60"
             >
               Delete Tag
             </AlertDialogAction>
