@@ -1,20 +1,19 @@
 
 import { useState } from 'react';
 import { User, BookOpen } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
 import QuickPauseButton from './QuickPauseButton';
 
-import { useNavigate } from 'react-router-dom';
-
 const PauseHeader = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const firstName = user?.user_metadata?.first_name || '';
   const email = user?.email || '';
@@ -35,7 +34,11 @@ const PauseHeader = () => {
   };
 
   const handleCourseClick = () => {
-    navigate('/courses');
+    if (location.pathname === '/courses') {
+      navigate('/');
+    } else {
+      navigate('/courses');
+    }
   };
 
   return (

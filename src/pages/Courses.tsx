@@ -15,11 +15,38 @@ const Courses = () => {
           </p>
         </div>
         
-        {/* Course content will go here */}
-        <div className="space-y-6">
-          {/* Placeholder for now - you can add course cards here later */}
-          <div className="text-center text-gray-500 dark:text-gray-400 py-12 font-light">
-            Coming soon...
+        {/* Course grid */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          {/* Clear the Clutter */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+            <div className="aspect-square bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-xl mb-3 flex items-center justify-center">
+              <div className="text-blue-600 dark:text-blue-300 text-2xl">🍂</div>
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Clear the Clutter</h3>
+          </div>
+
+          {/* Autumn Abundance */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+            <div className="aspect-square bg-gradient-to-br from-orange-100 to-yellow-200 dark:from-orange-900 dark:to-yellow-800 rounded-xl mb-3 flex items-center justify-center">
+              <div className="text-orange-600 dark:text-orange-300 text-2xl">🍎</div>
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Autumn Abundance</h3>
+          </div>
+
+          {/* Tend Your Time */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+            <div className="aspect-square bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-xl mb-3 flex items-center justify-center">
+              <div className="text-green-600 dark:text-green-300 text-2xl">🌱</div>
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Tend Your Time</h3>
+          </div>
+
+          {/* Pause for Joy */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+            <div className="aspect-square bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900 dark:to-pink-800 rounded-xl mb-3 flex items-center justify-center">
+              <div className="text-purple-600 dark:text-purple-300 text-2xl">🌈</div>
+            </div>
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">Pause for Joy</h3>
           </div>
         </div>
       </div>
