@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { PausedItem } from '@/stores/supabasePausedItemsStore';
 import { ItemReviewContent } from '@/components/ItemReviewContent';
 
@@ -36,14 +36,9 @@ const PartnerReviewModal = ({ isOpen, onClose, partnerName, items, currentUserId
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
         <DialogHeader className="px-6 py-4 border-b">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold">
-              {partnerName}'s Items Ready for Review
-            </DialogTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-lg font-semibold">
+            {partnerName}'s Items Ready for Review
+          </DialogTitle>
           
           {items.length > 1 && (
             <div className="flex items-center justify-between mt-3">
