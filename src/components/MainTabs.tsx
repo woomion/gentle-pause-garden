@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Users, BarChart3 } from 'lucide-react';
-import MyPausesTab from './MyPausesTab';
-import PauseLogSection from './PauseLogSection';
+import { User, Users } from 'lucide-react';
+import PausedSection from './PausedSection';
 import PartnerFeedTab from './PartnerFeedTab';
-import StatsTab from './StatsTab';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useItemComments } from '@/hooks/useItemComments';
 import { useAuth } from '@/contexts/AuthContext';
 
 const MainTabs = () => {
-  const [activeTab, setActiveTab] = useState('paused');
+  const [showMyPauses, setShowMyPauses] = useState(false);
+  const [showPartnerPauses, setShowPartnerPauses] = useState(false);
   const { hasPausePartnerAccess } = useSubscription();
   const { user } = useAuth();
   
@@ -40,47 +38,88 @@ const MainTabs = () => {
   console.log('🔔 MainTabs - Should show badge:', user && totalUnreadCount > 0);
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
-        <TabsTrigger 
-          value="paused" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none data-[state=active]:px-0.5 data-[state=active]:sm:px-2 data-[state=inactive]:px-2 data-[state=inactive]:sm:px-3"
-          style={{ 
-            backgroundColor: activeTab === 'paused' ? '#BFD1BF' : 'transparent',
-            color: activeTab === 'paused' ? '#7A5DD9' : 'inherit'
-          }}
+    <div className="space-y-4">
+      {/* My Pauses Button */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <button
+          onClick={() => setShowMyPauses(!showMyPauses)}
+          className="w-full px-4 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
-          <User className="h-5 w-5 sm:h-5 sm:w-5" />
-          <span className="text-sm sm:text-base">My Pauses</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="partner-feed" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none data-[state=active]:px-0.5 data-[state=active]:sm:px-2 data-[state=inactive]:px-2 data-[state=inactive]:sm:px-3"
-          style={{ 
-            backgroundColor: activeTab === 'partner-feed' ? '#BFD1BF' : 'transparent',
-            color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
-          }}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-base font-medium text-gray-900 dark:text-white">
+                My Pauses
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Items you've paused for now
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {showMyPauses ? 'Hide' : 'Show'}
+            </span>
+            <div className={`w-5 h-5 text-gray-400 transition-transform ${showMyPauses ? 'rotate-90' : ''}`}>
+              ▶
+            </div>
+          </div>
+        </button>
+        
+        {showMyPauses && (
+          <div className="border-t border-gray-200 dark:border-gray-700">
+            <div className="p-4">
+              <PausedSection forceShow={true} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Partner Pauses Button */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <button
+          onClick={() => setShowPartnerPauses(!showPartnerPauses)}
+          className="w-full px-4 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
         >
-          <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
-            <Users className="h-5 w-5 sm:h-5 sm:w-5" />
-            <span className="text-sm sm:text-base">Partner Pauses</span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+              <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-base font-medium text-gray-900 dark:text-white">
+                Partner Pauses
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Shared pauses with your partners
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
             {user && totalUnreadCount > 0 && (
-              <div className="absolute -top-2 -right-2 text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
+              <div className="text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
                 {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
               </div>
             )}
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {showPartnerPauses ? 'Hide' : 'Show'}
+            </span>
+            <div className={`w-5 h-5 text-gray-400 transition-transform ${showPartnerPauses ? 'rotate-90' : ''}`}>
+              ▶
+            </div>
           </div>
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="paused" className="mt-0">
-        <MyPausesTab />
-      </TabsContent>
-
-      <TabsContent value="partner-feed" className="mt-0">
-        <PartnerFeedTab />
-      </TabsContent>
-    </Tabs>
+        </button>
+        
+        {showPartnerPauses && (
+          <div className="border-t border-gray-200 dark:border-gray-700">
+            <div className="p-4">
+              <PartnerFeedTab />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
