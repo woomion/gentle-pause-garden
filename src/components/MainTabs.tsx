@@ -51,7 +51,7 @@ const MainTabs = () => {
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
-            backgroundColor: showMyPauses ? '#BFD1BF' : '#DDE7DD',
+            backgroundColor: showMyPauses ? '#BFD1BF' : '#CDD6CD',
             color: showMyPauses ? '#7A5DD9' : 'inherit'
           }}
         >
@@ -66,7 +66,7 @@ const MainTabs = () => {
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
-            backgroundColor: showPartnerPauses ? '#BFD1BF' : '#DDE7DD',
+            backgroundColor: showPartnerPauses ? '#BFD1BF' : '#CDD6CD',
             color: showPartnerPauses ? '#7A5DD9' : 'inherit'
           }}
         >
