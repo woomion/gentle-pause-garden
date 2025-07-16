@@ -91,7 +91,8 @@ class SupabasePauseLogStore {
         price: null,
         url: null,
         pause_duration_days: 1,
-        review_at: new Date().toISOString()
+        // For completed items, set review_at to a future date to pass validation
+        review_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
       };
 
       console.log('Insert data being sent to database:', insertData);
