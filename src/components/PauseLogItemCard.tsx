@@ -1,5 +1,5 @@
 
-import { ExternalLink, MoreHorizontal, ShoppingCart, Bird } from 'lucide-react';
+import { ExternalLink, MoreHorizontal, ShoppingCart, Wind } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
 import { getEmotionColor } from '../utils/emotionColors';
@@ -43,7 +43,7 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
           {item.status === 'purchased' ? (
             <ShoppingCart size={16} className="text-gray-500 dark:text-gray-400" />
           ) : (
-            <Bird size={16} className="text-gray-500 dark:text-gray-400" />
+            <Wind size={16} className="text-gray-500 dark:text-gray-400" />
           )}
           <p className="text-gray-600 dark:text-gray-400 text-sm">
             {item.status === 'purchased' 
