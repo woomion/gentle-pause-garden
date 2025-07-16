@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { supabasePausedItemsStore } from '@/stores/supabasePausedItemsStore';
-import { pausedItemsStore } from '@/stores/pausedItemsStore';
+import { supabasePausedItemsStore, PausedItem as SupabasePausedItem } from '@/stores/supabasePausedItemsStore';
+import { pausedItemsStore, PausedItem as LocalPausedItem } from '@/stores/pausedItemsStore';
 import { supabase } from '@/integrations/supabase/client';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -42,12 +42,17 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
   const { toast } = useToast();
 
   // Load tags and their usage counts
-  const loadTags = () => {
+  const loadTags = async () => {
     try {
       const items = user ? supabasePausedItemsStore.getItems() : pausedItemsStore.getItems();
       const tagCounts = new Map<string, number>();
       
-      items.forEach(item => {
+      // Filter to only include items owned by the current user
+      const userOwnedItems = user ? 
+        (items as SupabasePausedItem[]).filter(item => item.originalUserId === user.id) : 
+        items; // For guest users, all items are owned by them
+      
+      userOwnedItems.forEach(item => {
         if (item.tags) {
           item.tags.forEach(tag => {
             tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
@@ -144,9 +149,13 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
     setIsLoading(true);
     
     try {
-      // Update all items that use this tag
+      // Update all items that use this tag (only user-owned items)
       const items = user ? supabasePausedItemsStore.getItems() : pausedItemsStore.getItems();
-      const itemsToUpdate = items.filter(item => 
+      const userOwnedItems = user ? 
+        (items as SupabasePausedItem[]).filter(item => item.originalUserId === user.id) : 
+        items; // For guest users, all items are owned by them
+      
+      const itemsToUpdate = userOwnedItems.filter(item => 
         item.tags && item.tags.includes(editingTag)
       );
       
@@ -242,7 +251,7 @@ const TagManagement = ({ onClose }: TagManagementProps) => {
         // Refresh the store data
         await supabasePausedItemsStore.loadItems();
       } else {
-        // For guest users, update local storage
+        // For guest users, update local storage (all items are owned by them)
         const items = pausedItemsStore.getItems();
         const itemsToUpdate = items.filter(item => 
           item.tags && item.tags.includes(tagToDelete.name)
