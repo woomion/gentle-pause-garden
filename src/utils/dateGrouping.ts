@@ -29,22 +29,13 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
 
   // Helper function to parse dates that might be in old format (without year)
   const parseItemDate = (dateString: string): Date => {
-    console.log(`Original date string: "${dateString}"`);
-    
-    // First, check if it's already a proper format with year
-    let parsed = new Date(dateString);
-    if (parsed.getFullYear() >= 2020 && !isNaN(parsed.getTime())) {
-      console.log(`Already good format:`, parsed);
-      return parsed;
-    }
-    
-    // Handle old format dates like "Jun 15"
+    // Handle old format dates like "Jun 15" or "May 20"
     const parts = dateString.trim().split(' ');
     if (parts.length >= 2) {
       const monthStr = parts[0];
       const dayStr = parts[1];
       
-      // Map month abbreviations to month numbers (0-based for JavaScript Date)
+      // Direct month mapping - no ambiguity
       const monthMap: { [key: string]: number } = {
         'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
         'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
@@ -52,19 +43,16 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
       
       const monthNum = monthMap[monthStr];
       const dayNum = parseInt(dayStr, 10);
-      const currentYear = new Date().getFullYear();
       
       if (monthNum !== undefined && !isNaN(dayNum)) {
-        // Create date using constructor parameters to avoid parsing issues
-        parsed = new Date(currentYear, monthNum, dayNum);
-        console.log(`Reconstructed from "${monthStr} ${dayStr}":`, parsed, `Month: ${parsed.getMonth() + 1}`);
-        return parsed;
+        // Use current year, create date directly
+        return new Date(2025, monthNum, dayNum);
       }
     }
     
-    // Fallback to current date if parsing fails
-    console.log(`Fallback to current date for: "${dateString}"`);
-    return new Date();
+    // For any other format, try normal parsing
+    const parsed = new Date(dateString);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
   };
 
   // Sort all items by date (newest first)
@@ -125,9 +113,10 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
   historicalItems.forEach(item => {
     const date = parseItemDate(item.letGoDate);
     const year = date.getFullYear().toString();
-    const monthKey = format(date, 'yyyy-MM');
     
-    console.log(`Item "${item.itemName}": original="${item.letGoDate}", parsed date=${date}, year=${year}, monthKey=${monthKey}, month name=${format(date, 'MMMM')}`);
+    // Get month directly to avoid any formatting issues
+    const month = date.getMonth(); // 0-based (0=Jan, 5=Jun)
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`; // Convert to 1-based for key
     
     if (!yearGroups[year]) {
       yearGroups[year] = {};
@@ -143,13 +132,20 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
     .map(([year, months]) => ({
       year,
       months: Object.entries(months)
-        .map(([monthKey, items]) => ({
-          monthKey,
-          monthLabel: format(new Date(monthKey + '-01'), 'MMMM'),
-          items: items.sort((a, b) => 
-            parseItemDate(b.letGoDate).getTime() - parseItemDate(a.letGoDate).getTime()
-          )
-        }))
+        .map(([monthKey, items]) => {
+          // Extract month number from monthKey (e.g., "2025-06" -> 6)
+          const monthNum = parseInt(monthKey.split('-')[1], 10);
+          const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+          
+          return {
+            monthKey,
+            monthLabel: monthNames[monthNum - 1], // Convert back to 0-based for array access
+            items: items.sort((a, b) => 
+              parseItemDate(b.letGoDate).getTime() - parseItemDate(a.letGoDate).getTime()
+            )
+          };
+        })
         .sort((a, b) => b.monthKey.localeCompare(a.monthKey)) // Newest months first
     }))
     .sort((a, b) => parseInt(b.year) - parseInt(a.year)); // Newest years first
