@@ -30,7 +30,8 @@ class PauseLogStore {
         this.items = parsedItems.map((item: any) => ({
           ...item,
           status: item.status || 'let-go',
-          notes: item.notes || undefined
+          // Clear original form notes - only show reflection notes
+          notes: undefined 
         }));
         this.saveToStorage();
       }
