@@ -11,7 +11,7 @@ import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
+
 import { TagInput } from '@/components/ui/tag-input';
 import { getEmotionColor } from '@/utils/emotionColors';
 import PartnerSharingSection from './PartnerSharingSection';
@@ -45,7 +45,6 @@ const otherPauseLengths = [
 
 const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
   const { user } = useAuth();
-  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     link: '',
     itemName: '',
@@ -309,19 +308,19 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   };
 
   return (
-    <div className="fixed inset-0 bg-cream dark:bg-[#200E3B] z-50 overflow-y-auto transition-colors duration-300">
+    <div className="fixed inset-0 bg-cream z-50 overflow-y-auto transition-colors duration-300">
       <div className="min-h-screen px-6 py-8">
         {/* Header */}
         <header className="relative mb-8">
           <div className="text-center">
-            <div className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2">
+            <div className="text-black font-medium text-lg tracking-wide mb-2">
               POCKET || PAUSE
             </div>
           </div>
           
           <button 
             onClick={onClose}
-            className="absolute top-6 right-0 p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
+            className="absolute top-6 right-0 p-2 text-black hover:text-taupe transition-colors"
           >
             <X size={24} />
           </button>
@@ -329,14 +328,14 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
         {/* Form */}
         <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-semibold text-dark-gray dark:text-[#F9F5EB] text-center mb-8">
+          <h1 className="text-2xl font-semibold text-dark-gray text-center mb-8">
             Add Something to Pause
           </h1>
 
           {/* Guest mode banner */}
           {!user && (
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
-              <p className="text-amber-800 dark:text-amber-200 text-sm text-center">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+              <p className="text-amber-800 text-sm text-center">
                 <strong>Guest Mode:</strong> Your paused items will be stored locally and won't sync across devices. 
                 {!signupModalDismissed && (
                   <button 
@@ -353,7 +352,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           <div className="space-y-4">
             {/* Link Field */}
             <div className="space-y-1">
-              <Label htmlFor="link" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label htmlFor="link" className="text-dark-gray font-medium text-base">
                 Link (paste a product URL)
               </Label>
               <div className="relative">
@@ -363,7 +362,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   placeholder="www.example.com/item"
                   value={formData.link}
                   onChange={(e) => handleLinkChange(e.target.value)}
-                  className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
+                  className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
                 />
                 {isParsingUrl && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -373,7 +372,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               </div>
               {formData.imageUrl && !formData.photo && (
                 <div className="mt-2">
-                  <p className="text-sm text-green-600 dark:text-green-400">✓ Found product image automatically</p>
+                  <p className="text-sm text-green-600">✓ Found product image automatically</p>
                 </div>
               )}
             </div>
@@ -395,7 +394,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                 }}
                 className="h-5 w-5"
               />
-              <Label htmlFor="isCart" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base cursor-pointer">
+              <Label htmlFor="isCart" className="text-dark-gray font-medium text-base cursor-pointer">
                 <div className="flex items-center gap-2">
                   <ShoppingCart size={16} />
                   Mark as Cart (saving multiple items)
@@ -405,7 +404,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
             {/* Item Name Field */}
             <div className="space-y-1">
-              <Label htmlFor="itemName" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label htmlFor="itemName" className="text-dark-gray font-medium text-base">
                 Item Name
               </Label>
               <Input
@@ -414,13 +413,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                 placeholder="What are you thinking of buying?"
                 value={formData.itemName}
                 onChange={(e) => handleInputChange('itemName', e.target.value)}
-                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
             {/* Store Name Field */}
             <div className="space-y-1">
-              <Label htmlFor="storeName" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label htmlFor="storeName" className="text-dark-gray font-medium text-base">
                 Store Name
               </Label>
               <Input
@@ -429,13 +428,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                 placeholder="Where is this item from?"
                 value={formData.storeName}
                 onChange={(e) => handleInputChange('storeName', e.target.value)}
-                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
             {/* Price Field */}
             <div className="space-y-1">
-              <Label htmlFor="price" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label htmlFor="price" className="text-dark-gray font-medium text-base">
                 Price
               </Label>
               <Input
@@ -444,13 +443,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                 placeholder="0.00"
                 value={formData.price}
                 onChange={(e) => handleInputChange('price', e.target.value)}
-                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
             {/* Photo Upload Field */}
             <div className="space-y-1">
-              <Label htmlFor="photo" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
                 Photo (optional)
               </Label>
               
@@ -465,7 +464,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     }}
                     className="h-4 w-4"
                   />
-                  <Label htmlFor="usePlaceholder" className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
+                  <Label htmlFor="usePlaceholder" className="text-sm text-gray-600 cursor-pointer">
                     Use placeholder image
                   </Label>
                 </div>
@@ -562,7 +561,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: getEmotionColor(emotion.name, isDarkMode) }}
+                          style={{ backgroundColor: getEmotionColor(emotion.name) }}
                         />
                         <span className="capitalize">{emotion.name}</span>
                       </div>

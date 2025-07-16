@@ -4,16 +4,13 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
 import { getEmotionColor } from '../utils/emotionColors';
-import { useTheme } from '../contexts/ThemeContext';
-
 interface ItemReviewDetailsProps {
   item: PausedItem | LocalPausedItem;
   onViewItem: (item: PausedItem | LocalPausedItem) => void;
 }
 
 const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
-  const { isDarkMode } = useTheme();
-  const emotionColor = getEmotionColor(item.emotion, isDarkMode);
+  const emotionColor = getEmotionColor(item.emotion);
 
   const imageUrl = (() => {
     // Handle cart placeholder case

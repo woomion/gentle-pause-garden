@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { usePauseLog } from '../hooks/usePauseLog';
 import { useSupabasePauseLog } from '../hooks/useSupabasePauseLog';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+
 import { useToast } from '@/hooks/use-toast';
 import { PauseLogItem } from '../stores/pauseLogStore';
 import PauseLogHeader from '../components/PauseLogHeader';
@@ -18,7 +18,7 @@ import { createHierarchicalStructure, HierarchicalData, YearGroup, MonthGroup } 
 
 const PauseLog = () => {
   const { user } = useAuth();
-  const { isDarkMode } = useTheme();
+  
   const { toast } = useToast();
   
   // Use appropriate hook based on authentication
@@ -262,7 +262,7 @@ const PauseLog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
+    <div className="min-h-screen bg-cream transition-colors duration-300">
       <div className="max-w-md md:max-w-xl lg:max-w-3xl mx-auto px-6 py-8">
         <PauseLogHeader itemCount={items.length} />
         
@@ -281,27 +281,27 @@ const PauseLog = () => {
 
         {/* Active Filters */}
         {activeFilters.length > 0 && (
-          <div className="mb-4 p-4 bg-white/60 dark:bg-white/10 rounded-2xl border border-lavender/30 dark:border-gray-600">
+          <div className="mb-4 p-4 bg-white/60 rounded-2xl border border-lavender/30">
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">Active filters:</span>
+              <span className="text-sm font-medium text-black">Active filters:</span>
               {activeFilters.map((filter) => (
                 <div
                   key={`${filter.type}-${filter.value}`}
                   className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border ${
                     filter.isEmotion 
                       ? 'text-black' 
-                      : 'bg-lavender/20 text-dark-gray dark:text-[#F9F5EB] border-lavender/30'
+                      : 'bg-lavender/20 text-dark-gray border-lavender/30'
                   }`}
                   style={filter.isEmotion ? {
-                    backgroundColor: getEmotionColor(filter.value, isDarkMode),
-                    borderColor: getEmotionColor(filter.value, isDarkMode)
+                    backgroundColor: getEmotionColor(filter.value),
+                    borderColor: getEmotionColor(filter.value)
                   } : undefined}
                 >
                   <span>{filter.label}</span>
                   <button
                     onClick={() => removeFilter(filter.type, filter.value)}
-                    className={`ml-1 hover:text-red-600 dark:hover:text-red-400 text-xs font-bold ${
-                      filter.isEmotion ? 'text-black' : 'text-dark-gray dark:text-[#F9F5EB]'
+                    className={`ml-1 hover:text-red-600 text-xs font-bold ${
+                      filter.isEmotion ? 'text-black' : 'text-dark-gray'
                     }`}
                     aria-label={`Remove ${filter.label} filter`}
                   >
@@ -312,7 +312,7 @@ const PauseLog = () => {
             </div>
             <button
               onClick={clearAllFilters}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-[#F9F5EB] underline"
+              className="text-sm text-gray-600 hover:text-black underline"
             >
               Clear all filters
             </button>
@@ -433,7 +433,7 @@ const PauseLog = () => {
                             
                             {/* Month divider */}
                             {monthIndex < yearGroup.months.length - 1 && (
-                              <div className="my-4 border-t border-dashed border-gray-300 dark:border-gray-500"></div>
+                              <div className="my-4 border-t border-dashed border-gray-300"></div>
                             )}
                           </div>
                         ))}
@@ -443,7 +443,7 @@ const PauseLog = () => {
                   
                   {/* Year divider */}
                   {yearIndex < hierarchicalData.years.length - 1 && (
-                    <div className="my-8 border-t border-dashed border-gray-300 dark:border-gray-500"></div>
+                    <div className="my-8 border-t border-dashed border-gray-300"></div>
                   )}
                 </div>
               ))}

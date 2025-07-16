@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
@@ -8,7 +8,6 @@ import { ItemReviewContent } from './ItemReviewContent';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePausePartners } from '@/hooks/usePausePartners';
-import { useMemo } from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -119,21 +118,21 @@ const ItemReviewModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-cream dark:bg-[#200E3B] rounded-2xl w-full max-w-md mx-auto border border-lavender/30 dark:border-gray-600 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-cream rounded-2xl w-full max-w-md mx-auto border border-lavender/30 relative max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="p-6 border-b border-lavender/30 dark:border-gray-600">
+        <div className="p-6 border-b border-lavender/30">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
+              <h2 className="text-xl font-semibold text-black">
                 Ready to decide?
               </h2>
               <div className="flex items-center gap-3 mt-1">
-                <p className="text-black dark:text-[#F9F5EB] text-sm">
+                <p className="text-black text-sm">
                   {activeIndex + 1} of {items.length}
                 </p>
                 {/* Directional Attribution Badge */}
                 {getAttributionText && (
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs flex items-center justify-center gap-2">
+                  <Badge className="bg-green-100 text-green-800 text-xs flex items-center justify-center gap-2">
                     <span className="text-xs leading-none flex items-center">{getAttributionText.from}</span>
                     <span className="text-lg leading-none flex items-center justify-center h-4">→</span>
                     <span className="text-xs leading-none flex items-center">{getAttributionText.to}</span>
@@ -143,9 +142,9 @@ const ItemReviewModal = ({
             </div>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-lavender/20 dark:hover:bg-gray-700 rounded-full transition-colors"
+              className="p-2 hover:bg-lavender/20 rounded-full transition-colors"
             >
-              <X size={20} className="text-black dark:text-[#F9F5EB]" />
+              <X size={20} className="text-black" />
             </button>
           </div>
         </div>
@@ -172,7 +171,7 @@ const ItemReviewModal = ({
             {/* Carousel Navigation at Bottom */}
             <div className="flex items-center justify-center pb-4 gap-4">
               <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-              <span className="text-sm text-gray-600 dark:text-gray-400 px-4">
+              <span className="text-sm text-gray-600 px-4">
                 Swipe or use arrows to navigate
               </span>
               <CarouselNext className="relative right-0 top-0 translate-y-0 static" />

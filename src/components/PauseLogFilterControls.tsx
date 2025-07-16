@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getEmotionColor } from '../utils/emotionColors';
-import { useTheme } from '../contexts/ThemeContext';
-
 interface PauseLogFilterControlsProps {
   emotionFilters: string[];
   statusFilters: string[];
@@ -28,7 +26,6 @@ const PauseLogFilterControls = ({
   onStatusFiltersChange,
   onTagFiltersChange
 }: PauseLogFilterControlsProps) => {
-  const { isDarkMode } = useTheme();
   
   const handleEmotionToggle = (emotion: string) => {
     if (emotionFilters.includes(emotion)) {
@@ -82,11 +79,11 @@ const PauseLogFilterControls = ({
                   />
                   <label
                     htmlFor={`emotion-${emotion}`}
-                    className="flex items-center gap-2 text-sm cursor-pointer flex-1 text-black dark:text-[#F9F5EB]"
+                    className="flex items-center gap-2 text-sm cursor-pointer flex-1 text-black"
                   >
                     <div 
                       className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: getEmotionColor(emotion, isDarkMode) }}
+                      style={{ backgroundColor: getEmotionColor(emotion) }}
                     />
                     <span className="capitalize">{emotion}</span>
                   </label>

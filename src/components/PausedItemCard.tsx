@@ -7,7 +7,7 @@ import ItemImage from './ItemImage';
 import PauseDurationBanner from './PauseDurationBanner';
 import EmotionBadge from './EmotionBadge';
 import { getEmotionColor } from '../utils/emotionColors';
-import { useTheme } from '../contexts/ThemeContext';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,8 +27,7 @@ interface PausedItemCardProps {
 }
 
 const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: PausedItemCardProps) => {
-  const { isDarkMode } = useTheme();
-  const emotionColor = useMemo(() => getEmotionColor(item.emotion, isDarkMode), [item.emotion, isDarkMode]);
+  const emotionColor = useMemo(() => getEmotionColor(item.emotion), [item.emotion]);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const { hasNewComments, getUnreadCount } = useItemComments(currentUserId || null);
 
@@ -137,7 +136,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
     if (target.parentElement) {
-      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full opacity-50" aria-hidden="true"></div>';
+      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-300 rounded-full opacity-50" aria-hidden="true"></div>';
     }
   };
 
@@ -157,7 +156,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   return (
     <div 
-      className="bg-white/60 dark:bg-white/10 rounded-2xl border border-lavender/30 dark:border-gray-600 cursor-pointer hover:bg-white/80 dark:hover:bg-white/20 transition-colors relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#CAB6F7] focus:ring-offset-2 shadow-sm"
+      className="bg-white/60 rounded-2xl border border-lavender/30 cursor-pointer hover:bg-white/80 transition-colors relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#CAB6F7] focus:ring-offset-2 shadow-sm"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -181,10 +180,10 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       
       <div className="px-4 py-6 pb-12">
         <div className="flex items-start gap-4">
-          <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
             {imageUrl === 'cart-placeholder' ? (
-              <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
+              <div className="w-full h-full bg-blue-100 rounded-xl flex items-center justify-center">
+                <ShoppingCart size={24} className="text-blue-600" />
               </div>
             ) : imageUrl ? (
               <img 
@@ -206,24 +205,24 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
           
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate pr-2">
+              <h3 className="font-medium text-black truncate pr-2">
                 {item.itemName}
               </h3>
               {formattedPrice && (
-                <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0">
+                <span className="text-black font-medium flex-shrink-0">
                   {formattedPrice}
                 </span>
               )}
             </div>
             
-            <p className="text-black dark:text-[#F9F5EB] text-sm mb-1">
+            <p className="text-black text-sm mb-1">
               {item.storeName}
             </p>
             
             {/* Show either shared attribution or partner badges */}
             {getAttributionText ? (
               <div className="flex items-center gap-1 mt-2">
-                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs flex items-center justify-center gap-2">
+                <Badge className="bg-green-100 text-green-800 text-xs flex items-center justify-center gap-2">
                   <span className="text-xs leading-none flex items-center">{getAttributionText.from}</span>
                   <span className="text-lg leading-none flex items-center justify-center h-4">→</span>
                   <span className="text-xs leading-none flex items-center">{getAttributionText.to}</span>
@@ -232,8 +231,8 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
             ) : sharedWithPartners.length > 0 ? (
               <div className="flex flex-wrap gap-1 mt-2">
                 {sharedWithPartners.map((partner) => (
-                  <Avatar key={partner.partner_id} className="h-6 w-6 bg-green-100 border-2 border-green-400 dark:bg-green-900 dark:border-green-500">
-                    <AvatarFallback className="text-xs text-green-800 dark:text-green-200">
+                  <Avatar key={partner.partner_id} className="h-6 w-6 bg-green-100 border-2 border-green-400">
+                    <AvatarFallback className="text-xs text-green-800">
                       {getInitials(partner.partner_name)}
                     </AvatarFallback>
                   </Avatar>
