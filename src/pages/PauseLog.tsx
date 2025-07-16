@@ -320,12 +320,12 @@ const PauseLog = () => {
         )}
 
         {/* Grouped Items List */}
-        <div className="space-y-6">
+        <div className="space-y-8 mt-8">
           {filteredItems.length === 0 ? (
             <PauseLogEmptyState />
           ) : (
             groupedItems.map((group) => (
-              <div key={group.groupTitle} className="space-y-4">
+              <div key={group.groupTitle} className="space-y-2">
                 <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
                   {group.groupTitle}
                 </h2>
