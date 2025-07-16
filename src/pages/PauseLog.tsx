@@ -35,6 +35,7 @@ const PauseLog = () => {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [expandedYears, setExpandedYears] = useState<Set<string>>(new Set());
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
+  const [isFirstSectionExpanded, setIsFirstSectionExpanded] = useState(true);
 
   // Force refresh pause log items when component mounts
   useEffect(() => {
@@ -170,6 +171,10 @@ const PauseLog = () => {
     setSelectedItem(null);
   };
 
+
+  const toggleFirstSection = () => {
+    setIsFirstSectionExpanded(!isFirstSectionExpanded);
+  };
 
   const toggleYearExpansion = (year: string) => {
     setExpandedYears(prev => {
@@ -320,23 +325,42 @@ const PauseLog = () => {
             <PauseLogEmptyState />
           ) : (
             <div className="space-y-6">
-              {/* Recent Items */}
+              {/* Recent Items with Toggle */}
               {hierarchicalData.recentItems.length > 0 && (
                 <div className="space-y-4">
-                  <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
-                    {hierarchicalData.recentItemsHeader}
-                  </h2>
-                  <div className={`space-y-2 ${hierarchicalData.recentItems.length > 7 ? 'max-h-96 overflow-y-auto pr-2' : ''}`}>
-                    {hierarchicalData.recentItems.map((item) => (
-                      <PauseLogItemCard
-                        key={item.id}
-                        item={item}
-                        onDelete={handleDeleteItem}
-                        onViewLink={handleViewLink}
-                        onClick={handleItemClick}
+                  <button
+                    onClick={toggleFirstSection}
+                    className="flex items-center justify-between w-full text-left"
+                  >
+                    <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
+                      {hierarchicalData.recentItemsHeader}
+                    </h2>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {hierarchicalData.recentItems.length} items
+                      </span>
+                      <ChevronDown 
+                        size={16} 
+                        className={`text-gray-600 dark:text-gray-400 transition-transform ${
+                          isFirstSectionExpanded ? 'rotate-180' : ''
+                        }`}
                       />
-                    ))}
-                  </div>
+                    </div>
+                  </button>
+                  
+                  {isFirstSectionExpanded && (
+                    <div className={`space-y-2 ${hierarchicalData.recentItems.length > 7 ? 'max-h-96 overflow-y-auto pr-2' : ''}`}>
+                      {hierarchicalData.recentItems.map((item) => (
+                        <PauseLogItemCard
+                          key={item.id}
+                          item={item}
+                          onDelete={handleDeleteItem}
+                          onViewLink={handleViewLink}
+                          onClick={handleItemClick}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               
