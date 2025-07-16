@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { User, Users, BarChart3 } from 'lucide-react';
 import PausedSection from './PausedSection';
 import PauseLogSection from './PauseLogSection';
@@ -10,7 +10,8 @@ import { useItemComments } from '@/hooks/useItemComments';
 import { useAuth } from '@/contexts/AuthContext';
 
 const MainTabs = () => {
-  const [activeTab, setActiveTab] = useState('paused');
+  const [showMyPauses, setShowMyPauses] = useState(false);
+  const [showPartnerPauses, setShowPartnerPauses] = useState(false);
   const { hasPausePartnerAccess } = useSubscription();
   const { user } = useAuth();
   
@@ -40,25 +41,27 @@ const MainTabs = () => {
   console.log('🔔 MainTabs - Should show badge:', user && totalUnreadCount > 0);
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
-        <TabsTrigger 
-          value="paused" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none data-[state=active]:px-0.5 data-[state=active]:sm:px-2 data-[state=inactive]:px-2 data-[state=inactive]:sm:px-3"
+    <div className="w-full">
+      <div className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
+        <Button 
+          variant="ghost"
+          onClick={() => setShowMyPauses(!showMyPauses)}
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
-            backgroundColor: activeTab === 'paused' ? '#BFD1BF' : 'transparent',
-            color: activeTab === 'paused' ? '#7A5DD9' : 'inherit'
+            backgroundColor: showMyPauses ? '#BFD1BF' : 'transparent',
+            color: showMyPauses ? '#7A5DD9' : 'inherit'
           }}
         >
           <User className="h-5 w-5 sm:h-5 sm:w-5" />
           <span className="text-sm sm:text-base">My Pauses</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="partner-feed" 
-          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full data-[state=active]:border-0 data-[state=active]:font-normal data-[state=inactive]:font-normal data-[state=active]:shadow-none data-[state=active]:px-0.5 data-[state=active]:sm:px-2 data-[state=inactive]:px-2 data-[state=inactive]:sm:px-3"
+        </Button>
+        <Button 
+          variant="ghost"
+          onClick={() => setShowPartnerPauses(!showPartnerPauses)}
+          className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
-            backgroundColor: activeTab === 'partner-feed' ? '#BFD1BF' : 'transparent',
-            color: activeTab === 'partner-feed' ? '#7A5DD9' : 'inherit'
+            backgroundColor: showPartnerPauses ? '#BFD1BF' : 'transparent',
+            color: showPartnerPauses ? '#7A5DD9' : 'inherit'
           }}
         >
           <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
@@ -70,17 +73,21 @@ const MainTabs = () => {
               </div>
             )}
           </div>
-        </TabsTrigger>
-      </TabsList>
+        </Button>
+      </div>
 
-      <TabsContent value="paused" className="mt-0">
-        <PausedSection />
-      </TabsContent>
+      {showMyPauses && (
+        <div className="mt-0 mb-6">
+          <PausedSection />
+        </div>
+      )}
 
-      <TabsContent value="partner-feed" className="mt-0">
-        <PartnerFeedTab />
-      </TabsContent>
-    </Tabs>
+      {showPartnerPauses && (
+        <div className="mt-0">
+          <PartnerFeedTab />
+        </div>
+      )}
+    </div>
   );
 };
 
