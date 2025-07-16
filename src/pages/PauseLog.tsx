@@ -340,9 +340,9 @@ const PauseLog = () => {
           ) : (
             groupedItems.map((group, index) => {
               const isExpanded = expandedGroups.has(group.groupTitle);
-              const shouldShowToggle = group.items.length > 5;
+              const shouldShowToggle = group.items.length > 2; // Temporarily lowered for testing
               const itemsToShow = shouldShowToggle && !isExpanded 
-                ? group.items.slice(0, 5) 
+                ? group.items.slice(0, 2) // Show 2 instead of 5 for testing
                 : group.items;
               
               return (
@@ -364,7 +364,7 @@ const PauseLog = () => {
                             </>
                           ) : (
                             <>
-                              Show {group.items.length - 5} more
+                              Show {group.items.length - 2} more
                               <ChevronDown size={16} />
                             </>
                           )}
