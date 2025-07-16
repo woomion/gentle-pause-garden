@@ -7,10 +7,10 @@ const Courses = () => {
         <PauseHeader />
         
         <div className="text-center mb-8 mt-12">
-          <h1 className="text-black dark:text-[#F9F5EB] font-medium text-3xl tracking-wide mb-3">
+          <h1 className="text-black dark:text-[#F9F5EB] font-medium text-3xl tracking-wide mb-0">
             Pocket Wisdom
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed font-light">
+          <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
             Small lessons for intentional living and spending
           </p>
         </div>
