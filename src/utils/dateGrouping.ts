@@ -15,10 +15,8 @@ export const groupItemsByDate = (items: PauseLogItem[]): GroupedItems[] => {
     
     if (isThisWeek(date)) {
       groupKey = 'This Week';
-    } else if (isThisYear(date)) {
-      groupKey = format(date, 'MMMM'); // Just month name for current year
     } else {
-      groupKey = format(date, 'MMMM yyyy'); // Month and year for previous years
+      groupKey = format(date, 'MMMM'); // Just month name, no year
     }
     
     if (!groups[groupKey]) {
