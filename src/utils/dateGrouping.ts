@@ -24,21 +24,43 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
     new Date(b.letGoDate).getTime() - new Date(a.letGoDate).getTime()
   );
   
-  // Take first 7 items as recent
-  const recentItems = sortedItems.slice(0, 7);
-  const historicalItems = sortedItems.slice(7);
+  // Group items by time periods
+  const recentItems: PauseLogItem[] = [];
+  const historicalItems: PauseLogItem[] = [];
   
-  // Determine header for recent items
   let recentItemsHeader = 'Recent';
-  if (recentItems.length > 0) {
-    const mostRecentDate = new Date(recentItems[0].letGoDate);
+  
+  if (sortedItems.length > 0) {
+    const mostRecentDate = new Date(sortedItems[0].letGoDate);
+    
+    // Determine the cutoff and header based on the most recent item
+    let cutoffDate: Date;
     if (isThisWeek(mostRecentDate)) {
       recentItemsHeader = 'This week';
+      // All items from this week go to recent
+      cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - 7);
     } else if (isThisMonth(mostRecentDate)) {
       recentItemsHeader = format(mostRecentDate, 'MMMM');
+      // All items from this month go to recent
+      cutoffDate = new Date(mostRecentDate.getFullYear(), mostRecentDate.getMonth(), 1);
     } else {
       recentItemsHeader = format(mostRecentDate, 'MMMM yyyy');
+      // All items from the most recent item's month go to recent
+      cutoffDate = new Date(mostRecentDate.getFullYear(), mostRecentDate.getMonth(), 1);
     }
+    
+    // Separate items based on the cutoff
+    sortedItems.forEach(item => {
+      const itemDate = new Date(item.letGoDate);
+      if (recentItemsHeader === 'This week' && isThisWeek(itemDate)) {
+        recentItems.push(item);
+      } else if (recentItemsHeader !== 'This week' && itemDate >= cutoffDate) {
+        recentItems.push(item);
+      } else {
+        historicalItems.push(item);
+      }
+    });
   }
   
   // Group historical items by year and month
