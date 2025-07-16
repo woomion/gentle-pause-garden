@@ -320,24 +320,30 @@ const PauseLog = () => {
         )}
 
         {/* Grouped Items List */}
-        <div className="space-y-8 mt-8">
+        <div className="mt-8">
           {filteredItems.length === 0 ? (
             <PauseLogEmptyState />
           ) : (
-            groupedItems.map((group) => (
-              <div key={group.groupTitle} className="space-y-2">
-                <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
-                  {group.groupTitle}
-                </h2>
-                {group.items.map((item) => (
-                  <PauseLogItemCard
-                    key={item.id}
-                    item={item}
-                    onDelete={handleDeleteItem}
-                    onViewLink={handleViewLink}
-                    onClick={handleItemClick}
-                  />
-                ))}
+            groupedItems.map((group, index) => (
+              <div key={group.groupTitle}>
+                <div className="space-y-2">
+                  <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
+                    {group.groupTitle}
+                  </h2>
+                  {group.items.map((item) => (
+                    <PauseLogItemCard
+                      key={item.id}
+                      item={item}
+                      onDelete={handleDeleteItem}
+                      onViewLink={handleViewLink}
+                      onClick={handleItemClick}
+                    />
+                  ))}
+                </div>
+                {/* Dotted divider between groups, but not after the last group */}
+                {index < groupedItems.length - 1 && (
+                  <div className="my-8 border-t border-dotted border-gray-300 dark:border-gray-600"></div>
+                )}
               </div>
             ))
           )}
