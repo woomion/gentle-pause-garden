@@ -108,8 +108,9 @@ const ItemReviewContent = ({
         description: "Your item will be ready for review later.",
       });
       
-      // Remove item from review queue by calling onItemDecided
-      onItemDecided(item.id);
+      // Don't call onItemDecided for extended items - they should remain in the store
+      // and appear in "my pauses". The extendPause method updates the review date,
+      // so the item will naturally not appear in the review queue anymore.
       
       if (isLastItem) {
         onClose();
