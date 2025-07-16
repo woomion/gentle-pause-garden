@@ -41,7 +41,7 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
         </div>
       </div>
       
-      <div className="flex items-center justify-between mt-1">
+      <div className="flex items-center justify-between mt-0.5">
         <p className="text-gray-600 dark:text-gray-400 text-sm">
           {item.letGoDate}
         </p>

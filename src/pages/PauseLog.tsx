@@ -13,6 +13,7 @@ import PauseLogItemDetail from '../components/PauseLogItemDetail';
 import PauseLogEmptyState from '../components/PauseLogEmptyState';
 import FooterLinks from '../components/FooterLinks';
 import { getEmotionColor } from '../utils/emotionColors';
+import { groupItemsByDate } from '../utils/dateGrouping';
 
 const PauseLog = () => {
   const { user } = useAuth();
@@ -85,6 +86,11 @@ const PauseLog = () => {
 
     return filtered;
   }, [items, emotionFilters, statusFilters, tagFilters, cartFilter, sortOrder]);
+
+  // Group filtered items by date
+  const groupedItems = useMemo(() => {
+    return groupItemsByDate(filteredItems);
+  }, [filteredItems]);
 
   // Get active filters for display
   const activeFilters = useMemo(() => {
@@ -313,19 +319,26 @@ const PauseLog = () => {
           </div>
         )}
 
-        {/* Items List */}
-        <div className="space-y-4">
+        {/* Grouped Items List */}
+        <div className="space-y-6">
           {filteredItems.length === 0 ? (
             <PauseLogEmptyState />
           ) : (
-            filteredItems.map((item) => (
-              <PauseLogItemCard
-                key={item.id}
-                item={item}
-                onDelete={handleDeleteItem}
-                onViewLink={handleViewLink}
-                onClick={handleItemClick}
-              />
+            groupedItems.map((group) => (
+              <div key={group.groupTitle} className="space-y-4">
+                <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
+                  {group.groupTitle}
+                </h2>
+                {group.items.map((item) => (
+                  <PauseLogItemCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteItem}
+                    onViewLink={handleViewLink}
+                    onClick={handleItemClick}
+                  />
+                ))}
+              </div>
             ))
           )}
         </div>
