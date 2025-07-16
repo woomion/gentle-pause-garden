@@ -1,5 +1,5 @@
 
-import { ExternalLink, MoreHorizontal, ShoppingCart, Wind } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
 import { getEmotionColor } from '../utils/emotionColors';
@@ -22,15 +22,14 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
   );
 
   return (
-    <div 
-      className="bg-white/60 dark:bg-white/10 rounded-2xl p-4 border border-lavender/30 dark:border-gray-600 relative cursor-pointer hover:bg-white/70 dark:hover:bg-white/15 transition-colors"
-      onClick={(e) => {
-        console.log('🗑️ PauseLogItemCard: Card clicked for item:', item.id);
-        onClick(item);
-      }}
-    >
-
-      <div className="mb-3">
+    <div className="p-4 relative">
+      <div 
+        className="mb-3 cursor-pointer"
+        onClick={(e) => {
+          console.log('🗑️ PauseLogItemCard: Header clicked for item:', item.id);
+          onClick(item);
+        }}
+      >
         <h3 className="text-black dark:text-[#F9F5EB] text-lg">
           <span className="font-medium">{item.itemName}</span>
           <span className="font-normal"> from {item.storeName}</span>
@@ -39,19 +38,12 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
       
       
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {item.status === 'purchased' ? (
-            <ShoppingCart size={16} className="text-gray-500 dark:text-gray-400" />
-          ) : (
-            <Wind size={16} className="text-gray-500 dark:text-gray-400" />
-          )}
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            {item.status === 'purchased' 
-              ? `Purchased on ${item.letGoDate}`
-              : `Let go of on ${item.letGoDate}`
-            }
-          </p>
-        </div>
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
+          {item.status === 'purchased' 
+            ? `Purchased on ${item.letGoDate}`
+            : `Let go of on ${item.letGoDate}`
+          }
+        </p>
         
         <div className="flex items-center gap-2">
           {hasLink && (
@@ -90,13 +82,6 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
               </AlertDialogContent>
             </AlertDialog>
           )}
-          
-          <button 
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors p-1"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreHorizontal size={16} />
-          </button>
         </div>
       </div>
     </div>
