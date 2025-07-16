@@ -50,11 +50,6 @@ const PauseHeader = () => {
           </Link>
         </div>
         
-        {location.pathname !== '/courses' && (
-          <div className="absolute top-6 left-0">
-            <QuickPauseButton onQuickPause={handleQuickPause} />
-          </div>
-        )}
         
         <div className="absolute top-6 right-0 flex items-center gap-3">
           <button 
