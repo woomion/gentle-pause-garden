@@ -1,5 +1,6 @@
 
 import { useState, useMemo, useEffect } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { usePauseLog } from '../hooks/usePauseLog';
 import { useSupabasePauseLog } from '../hooks/useSupabasePauseLog';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,6 +34,7 @@ const PauseLog = () => {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [selectedItem, setSelectedItem] = useState<PauseLogItem | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   // Force refresh pause log items when component mounts
   useEffect(() => {
@@ -196,6 +198,18 @@ const PauseLog = () => {
     setSortOrder(current => current === 'newest' ? 'oldest' : 'newest');
   };
 
+  const toggleGroupExpansion = (groupTitle: string) => {
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(groupTitle)) {
+        newSet.delete(groupTitle);
+      } else {
+        newSet.add(groupTitle);
+      }
+      return newSet;
+    });
+  };
+
   const handleViewLink = (item: PauseLogItem) => {
     // Check multiple possible locations for the link
     const link = item.originalPausedItem?.link || 
@@ -324,28 +338,56 @@ const PauseLog = () => {
           {filteredItems.length === 0 ? (
             <PauseLogEmptyState />
           ) : (
-            groupedItems.map((group, index) => (
-              <div key={group.groupTitle}>
-                <div className="space-y-2">
-                  <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
-                    {group.groupTitle}
-                  </h2>
-                  {group.items.map((item) => (
-                    <PauseLogItemCard
-                      key={item.id}
-                      item={item}
-                      onDelete={handleDeleteItem}
-                      onViewLink={handleViewLink}
-                      onClick={handleItemClick}
-                    />
-                  ))}
+            groupedItems.map((group, index) => {
+              const isExpanded = expandedGroups.has(group.groupTitle);
+              const shouldShowToggle = group.items.length > 5;
+              const itemsToShow = shouldShowToggle && !isExpanded 
+                ? group.items.slice(0, 5) 
+                : group.items;
+              
+              return (
+                <div key={group.groupTitle}>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
+                        {group.groupTitle}
+                      </h2>
+                      {shouldShowToggle && (
+                        <button
+                          onClick={() => toggleGroupExpansion(group.groupTitle)}
+                          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-[#F9F5EB] transition-colors"
+                        >
+                          {isExpanded ? (
+                            <>
+                              Show less
+                              <ChevronUp size={16} />
+                            </>
+                          ) : (
+                            <>
+                              Show {group.items.length - 5} more
+                              <ChevronDown size={16} />
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    {itemsToShow.map((item) => (
+                      <PauseLogItemCard
+                        key={item.id}
+                        item={item}
+                        onDelete={handleDeleteItem}
+                        onViewLink={handleViewLink}
+                        onClick={handleItemClick}
+                      />
+                    ))}
+                  </div>
+                  {/* Dashed divider between groups, but not after the last group */}
+                  {index < groupedItems.length - 1 && (
+                    <div className="my-8 border-t border-dashed border-gray-300 dark:border-gray-500"></div>
+                  )}
                 </div>
-                {/* Dashed divider between groups, but not after the last group */}
-                {index < groupedItems.length - 1 && (
-                  <div className="my-8 border-t border-dashed border-gray-300 dark:border-gray-500"></div>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
