@@ -11,7 +11,7 @@ const Courses = () => {
             Pocket Wisdom
           </h1>
           <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
-            Small lessons for intentional living and spending
+            Micro courses for intentional living and spending
           </p>
         </div>
         
