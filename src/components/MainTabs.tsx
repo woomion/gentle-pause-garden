@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Users, BarChart3 } from 'lucide-react';
-import PausedSection from './PausedSection';
+import MyPausesTab from './MyPausesTab';
 import PauseLogSection from './PauseLogSection';
 import PartnerFeedTab from './PartnerFeedTab';
 import StatsTab from './StatsTab';
@@ -74,7 +74,7 @@ const MainTabs = () => {
       </TabsList>
 
       <TabsContent value="paused" className="mt-0">
-        <PausedSection />
+        <MyPausesTab />
       </TabsContent>
 
       <TabsContent value="partner-feed" className="mt-0">

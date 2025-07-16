@@ -8,11 +8,15 @@ import PausedItemsCarousel from './PausedItemsCarousel';
 import PausedSectionEmpty from './PausedSectionEmpty';
 import PausedSectionLoading from './PausedSectionLoading';
 
-const PausedSection = () => {
+interface PausedSectionProps {
+  forceShow?: boolean;
+}
+
+const PausedSection = ({ forceShow = false }: PausedSectionProps = {}) => {
   const [pausedItems, setPausedItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
   const [selectedItem, setSelectedItem] = useState<PausedItem | LocalPausedItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showPausedItems, setShowPausedItems] = useState(false);
+  const [showPausedItems, setShowPausedItems] = useState(forceShow);
 
   const { user } = useAuth();
 
@@ -21,7 +25,7 @@ const PausedSection = () => {
       .filter(item => {
         // Only show items that belong to the current user AND are not shared with partners
         // Items shared with partners should only appear in Partner Pauses section
-        const itemUserId = (item as any).originalUserId || (item as any).user_id;
+        const itemUserId = (item as any).originalUserId || (item as any).userId;
         const sharedWithPartners = (item as any).sharedWithPartners || [];
         
         // For authenticated users: show only items created by them that are NOT shared with partners

@@ -276,46 +276,35 @@ const PartnerFeedTab = () => {
   }
 
   return (
-    <div className="mb-8 space-y-8">
+    <div className="space-y-4">
       {/* Show Partner Pauses section */}
       {partners.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <div>
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Shared Pauses
-              </h2>
-              <p className="text-base mb-1" style={{ color: '#6b6b6b' }}>
-                Mindful choices, made together.
-              </p>
-              {sharedItems.length > 0 && (
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-muted-foreground">Viewing with:</span>
-                  <Select value={selectedPartner} onValueChange={setSelectedPartner}>
-                    <SelectTrigger className="w-48 bg-background">
-                      <SelectValue placeholder="All Partners" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border shadow-lg z-40">
-                      <SelectItem value="all">All Partners</SelectItem>
-                      {partners.map((partner) => (
-                        <SelectItem key={partner.partner_id} value={partner.partner_name}>
-                          {partner.partner_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                  <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 </div>
-              )}
+                <div>
+                  <h3 className="text-base font-medium text-gray-900 dark:text-white">
+                    Shared Pauses
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Mindful choices, made together
+                  </p>
+                </div>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
+            
             {/* Partner Items Ready Banner */}
-            <PartnerItemsReadyBanner
-              partners={partners}
-              currentUserId={currentUserId}
-              onItemsReady={handlePartnerItemsReady}
-            />
+            <div className="mt-4">
+              <PartnerItemsReadyBanner
+                partners={partners}
+                currentUserId={currentUserId}
+                onItemsReady={handlePartnerItemsReady}
+              />
+            </div>
             
             {sharedItems.length === 0 ? (
               <div className="text-center py-8">
@@ -326,6 +315,25 @@ const PartnerFeedTab = () => {
               </div>
             ) : (
               <div className="space-y-4">
+                {sharedItems.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Viewing with:</span>
+                    <Select value={selectedPartner} onValueChange={setSelectedPartner}>
+                      <SelectTrigger className="w-48 bg-background">
+                        <SelectValue placeholder="All Partners" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border shadow-lg z-40">
+                        <SelectItem value="all">All Partners</SelectItem>
+                        {partners.map((partner) => (
+                          <SelectItem key={partner.partner_id} value={partner.partner_name}>
+                            {partner.partner_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
                 {(() => {
                   // Filter shared items based on selected partner
                   const filteredItems = selectedPartner === 'all' 
@@ -367,22 +375,25 @@ const PartnerFeedTab = () => {
                 })()}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : (
-        <Card>
-          <CardHeader>
-            <div>
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Partner Pauses
-              </h2>
-              <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
-                Connect with someone you trust to help you reflect before you spend.
-              </p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-medium text-gray-900 dark:text-white">
+                  Partner Pauses
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Connect with someone you trust
+                </p>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
+            
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <p className="text-muted-foreground mb-4">
@@ -392,8 +403,8 @@ const PartnerFeedTab = () => {
                 Click your account icon in the top right to invite pause partners and start sharing mindful decisions together.
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Detail Modal for selected shared item */}
