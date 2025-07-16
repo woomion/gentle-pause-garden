@@ -30,19 +30,20 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
           onClick(item);
         }}
       >
-        <h3 className="text-black dark:text-[#F9F5EB] text-lg">
-          <span className="font-medium">{item.itemName}</span>
-          <span className="font-normal"> from {item.storeName}</span>
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-black dark:text-[#F9F5EB] text-lg">
+            <span className="font-medium">{item.itemName}</span>
+            <span className="font-normal"> from {item.storeName}</span>
+          </h3>
+          <span className="text-gray-600 dark:text-gray-400 text-sm">
+            {item.status === 'purchased' ? 'Purchased' : 'Let go of'}
+          </span>
+        </div>
       </div>
       
-      
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-1">
         <p className="text-gray-600 dark:text-gray-400 text-sm">
-          {item.status === 'purchased' 
-            ? `Purchased on ${item.letGoDate}`
-            : `Let go of on ${item.letGoDate}`
-          }
+          {item.letGoDate}
         </p>
         
         <div className="flex items-center gap-2">
