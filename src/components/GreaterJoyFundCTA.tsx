@@ -13,7 +13,7 @@ const GreaterJoyFundCTA = () => {
           <div className="w-8 h-8 flex items-center justify-center">
             <Heart className="w-4 h-4 text-black dark:text-white" />
           </div>
-          <div>
+          <div className="max-w-32 sm:max-w-none">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Greater Joy Fund</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">See the impact of your mindful choices</p>
           </div>
