@@ -21,14 +21,38 @@ export interface MonthGroup {
 export const createHierarchicalStructure = (items: PauseLogItem[]): HierarchicalData => {
   // Helper function to parse dates that might be in old format (without year)
   const parseItemDate = (dateString: string): Date => {
-    const parsed = new Date(dateString);
-    // If the year is before 2020, it's likely an old format without year
-    if (parsed.getFullYear() < 2020) {
-      // Assume current year for old format dates
+    // Try parsing as-is first
+    let parsed = new Date(dateString);
+    
+    // If the year is before 2020 or invalid, it's likely an old format without year
+    if (parsed.getFullYear() < 2020 || isNaN(parsed.getTime())) {
+      // For old format dates like "Jun 15", use a more direct approach
       const currentYear = new Date().getFullYear();
-      const withCurrentYear = `${dateString}, ${currentYear}`;
-      return new Date(withCurrentYear);
+      
+      // Split the date string and reconstruct it properly
+      const parts = dateString.trim().split(' ');
+      if (parts.length >= 2) {
+        const month = parts[0]; // "Jun"
+        const day = parts[1]; // "15"
+        
+        // Create date in format that JavaScript handles well: "June 15, 2025"
+        const monthNames: { [key: string]: string } = {
+          'Jan': 'January', 'Feb': 'February', 'Mar': 'March', 'Apr': 'April',
+          'May': 'May', 'Jun': 'June', 'Jul': 'July', 'Aug': 'August',
+          'Sep': 'September', 'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
+        };
+        
+        const fullMonth = monthNames[month] || month;
+        const properFormat = `${fullMonth} ${day}, ${currentYear}`;
+        parsed = new Date(properFormat);
+      }
+      
+      // If still invalid, fallback to current date
+      if (isNaN(parsed.getTime())) {
+        parsed = new Date();
+      }
     }
+    
     return parsed;
   };
 
