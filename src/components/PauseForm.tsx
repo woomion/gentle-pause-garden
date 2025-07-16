@@ -476,29 +476,29 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   <img 
                     src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
                     alt="Placeholder preview" 
-                    className="w-20 h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                    className="w-20 h-20 object-cover rounded-lg border border-gray-200"
                   />
-                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">✓ Placeholder image selected</p>
+                  <p className="text-sm text-blue-600 mt-1">✓ Placeholder image selected</p>
                 </div>
               )}
               
               {(formData.imageUrl && !formData.photo) || (formData.isCart && formData.imageUrl === 'cart-placeholder') ? (
-                <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-center">
+                <div className="w-full bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                   {formData.isCart && formData.imageUrl === 'cart-placeholder' ? (
                     <div className="flex flex-col items-center gap-2 mb-3">
-                      <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                        <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
+                      <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <ShoppingCart size={24} className="text-blue-600" />
                       </div>
-                      <p className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                      <p className="text-blue-600 text-sm font-medium">
                         🛒 Cart placeholder image
                       </p>
                     </div>
                   ) : (
-                    <p className="text-green-600 dark:text-green-400 text-sm font-medium">
+                    <p className="text-green-600 text-sm font-medium">
                       ✓ Product image already grabbed automatically
                     </p>
                   )}
-                  <p className="text-green-600 dark:text-green-400 text-xs mt-1">
+                  <p className="text-green-600 text-xs mt-1">
                     You can still upload a different photo if you prefer
                   </p>
                   <input
@@ -506,13 +506,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
-                    className="w-full text-sm text-gray-500 dark:text-gray-300 mt-2
+                    className="w-full text-sm text-gray-500 mt-2
                                file:py-2 file:px-4
                                file:rounded-lg file:border-0
                                file:text-sm file:font-medium
                                file:bg-green-100 file:text-green-700
-                               hover:file:bg-green-200 dark:file:bg-green-800 dark:file:text-green-200
-                               rounded-lg border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/10 h-10
+                               hover:file:bg-green-200
+                               rounded-lg border border-green-200 bg-green-50 h-10
                                overflow-hidden"
                   />
                 </div>
@@ -522,13 +522,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="w-full text-sm text-gray-500 dark:text-gray-300
+                  className="w-full text-sm text-gray-500
                              file:py-3 file:px-4
                              file:rounded-xl file:border-0
                              file:text-sm file:font-medium
                              file:bg-lavender file:text-dark-gray
                              hover:file:bg-lavender/90
-                             rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 h-12
+                             rounded-xl border border-gray-200 bg-white h-12
                              overflow-hidden
                              flex items-center"
                 />
@@ -539,25 +539,25 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   <img 
                     src={photoPreview} 
                     alt="Photo preview" 
-                    className="w-20 h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                    className="w-20 h-20 object-cover rounded-lg border border-gray-200"
                   />
-                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">✓ Photo ready to upload</p>
+                  <p className="text-sm text-green-600 mt-1">✓ Photo ready to upload</p>
                 </div>
               )}
             </div>
 
             {/* Emotion Selection */}
             <div className="space-y-1">
-              <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label className="text-dark-gray font-medium text-base">
                 How are you feeling right now?
               </Label>
               <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
-                <SelectTrigger className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 dark:text-[#F9F5EB]">
-                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base" />
+                <SelectTrigger className="bg-white border-gray-200 rounded-xl py-3 px-4">
+                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-xl max-h-60 overflow-y-auto">
+                <SelectContent className="bg-white border-gray-200 rounded-xl max-h-60 overflow-y-auto">
                   {emotions.map((emotion) => (
-                    <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1 dark:text-[#F9F5EB] dark:focus:bg-white/10">
+                    <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1">
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-4 h-4 rounded-full"
@@ -573,7 +573,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
             {/* Tags Field */}
             <div className="space-y-1">
-              <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label className="text-dark-gray font-medium text-base">
                 Tags (optional)
               </Label>
             <TagInput
@@ -583,7 +583,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               suggestions={existingTags}
               className="w-full"
             />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 md:hidden">
+            <p className="text-xs text-gray-500 mt-1 md:hidden">
               Add a comma or click outside the input to set a tag.
             </p>
             </div>
@@ -596,7 +596,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
             {/* Notes Field */}
             <div className="space-y-1">
-              <Label htmlFor="notes" className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label htmlFor="notes" className="text-dark-gray font-medium text-base">
                 Notes (optional)
               </Label>
               <Textarea
@@ -604,13 +604,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                 placeholder="Why do you want this item?"
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                className="bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base dark:text-[#F9F5EB]"
+                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
               />
             </div>
 
             {/* Pause Duration */}
             <div className="space-y-2">
-              <Label className="text-dark-gray dark:text-[#F9F5EB] font-medium text-base">
+              <Label className="text-dark-gray font-medium text-base">
                 Pause for
               </Label>
               
@@ -623,7 +623,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
                       formData.duration === duration
                         ? 'bg-lavender border-lavender text-dark-gray'
-                        : 'bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-dark-gray dark:text-[#F9F5EB] hover:border-lavender/50'
+                        : 'bg-white border-gray-200 text-dark-gray hover:border-lavender/50'
                     }`}
                   >
                     {duration}
@@ -636,14 +636,14 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                 value={formData.otherDuration} 
                 onValueChange={handleOtherDurationSelect}
               >
-                <SelectTrigger className={`bg-white dark:bg-white/10 border-2 rounded-xl py-3 px-4 transition-all dark:text-[#F9F5EB] ${
-                  formData.otherDuration ? 'border-lavender bg-lavender dark:bg-lavender text-dark-gray' : 'border-gray-200 dark:border-gray-600 hover:border-lavender/50'
+                <SelectTrigger className={`bg-white border-2 rounded-xl py-3 px-4 transition-all ${
+                  formData.otherDuration ? 'border-lavender bg-lavender text-dark-gray' : 'border-gray-200 hover:border-lavender/50'
                 }`}>
-                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base" />
+                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-xl">
+                <SelectContent className="bg-white border-gray-200 rounded-xl">
                   {otherPauseLengths.map((duration) => (
-                    <SelectItem key={duration} value={duration} className="rounded-lg my-1 dark:text-[#F9F5EB] dark:focus:bg-white/10">
+                    <SelectItem key={duration} value={duration} className="rounded-lg my-1">
                       {duration}
                     </SelectItem>
                   ))}
@@ -656,7 +656,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               <Button
                 variant="outline"
                 onClick={onClose}
-                className="flex-1 bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-dark-gray dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
+                className="flex-1 bg-white border-gray-200 text-dark-gray hover:bg-gray-50 rounded-xl py-3"
               >
                 Cancel
               </Button>
