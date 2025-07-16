@@ -355,16 +355,21 @@ const PauseLog = () => {
             <div className="space-y-6">
               {/* Recent Items (7 most recent) */}
               {hierarchicalData.recentItems.length > 0 && (
-                <div className="space-y-2">
-                  {hierarchicalData.recentItems.map((item) => (
-                    <PauseLogItemCard
-                      key={item.id}
-                      item={item}
-                      onDelete={handleDeleteItem}
-                      onViewLink={handleViewLink}
-                      onClick={handleItemClick}
-                    />
-                  ))}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
+                    {hierarchicalData.recentItemsHeader}
+                  </h2>
+                  <div className="space-y-2">
+                    {hierarchicalData.recentItems.map((item) => (
+                      <PauseLogItemCard
+                        key={item.id}
+                        item={item}
+                        onDelete={handleDeleteItem}
+                        onViewLink={handleViewLink}
+                        onClick={handleItemClick}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
               

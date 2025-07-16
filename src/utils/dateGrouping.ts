@@ -1,8 +1,9 @@
-import { format, isThisYear } from 'date-fns';
+import { format, isThisYear, isThisWeek, isThisMonth } from 'date-fns';
 import { PauseLogItem } from '../stores/pauseLogStore';
 
 export interface HierarchicalData {
   recentItems: PauseLogItem[]; // 7 most recent items
+  recentItemsHeader: string; // "This week" or month name
   years: YearGroup[];
 }
 
@@ -26,6 +27,19 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
   // Take first 7 items as recent
   const recentItems = sortedItems.slice(0, 7);
   const historicalItems = sortedItems.slice(7);
+  
+  // Determine header for recent items
+  let recentItemsHeader = 'Recent';
+  if (recentItems.length > 0) {
+    const mostRecentDate = new Date(recentItems[0].letGoDate);
+    if (isThisWeek(mostRecentDate)) {
+      recentItemsHeader = 'This week';
+    } else if (isThisMonth(mostRecentDate)) {
+      recentItemsHeader = format(mostRecentDate, 'MMMM');
+    } else {
+      recentItemsHeader = format(mostRecentDate, 'MMMM yyyy');
+    }
+  }
   
   // Group historical items by year and month
   const yearGroups: { [year: string]: { [monthKey: string]: PauseLogItem[] } } = {};
@@ -63,6 +77,7 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
   
   return {
     recentItems,
+    recentItemsHeader,
     years
   };
 };
