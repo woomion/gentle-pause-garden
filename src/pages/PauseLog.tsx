@@ -340,17 +340,9 @@ const PauseLog = () => {
                     />
                   ))}
                 </div>
-                {/* Dotted divider between groups, but not after the last group */}
+                {/* Dashed divider between groups, but not after the last group */}
                 {index < groupedItems.length - 1 && (
-                  <div 
-                    className="my-8 h-0.5"
-                    style={{
-                      backgroundImage: `radial-gradient(circle, #D1D5DB 1px, transparent 1px)`,
-                      backgroundSize: '8px 4px',
-                      backgroundRepeat: 'repeat-x',
-                      backgroundPosition: 'center'
-                    }}
-                  ></div>
+                  <div className="my-8 border-t border-dashed border-gray-300 dark:border-gray-500"></div>
                 )}
               </div>
             ))
