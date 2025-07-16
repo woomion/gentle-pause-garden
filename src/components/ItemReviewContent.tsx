@@ -61,9 +61,9 @@ const ItemReviewContent = ({
 
     try {
       if (selectedDecision === 'purchase') {
-        await handleBought(item, onItemDecided, () => {});
+        await handleBought(item, onItemDecided, () => {}, notes);
       } else {
-        await handleLetGo(item, onItemDecided, () => {});
+        await handleLetGo(item, onItemDecided, () => {}, notes);
       }
 
       // Don't call onItemDecided again - it's already called by handleBought/handleLetGo

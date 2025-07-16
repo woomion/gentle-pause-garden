@@ -9,13 +9,13 @@ export const useItemDecisions = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const handleLetGo = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void) => {
+  const handleLetGo = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void, reflectionNotes?: string) => {
     console.log('📝 Adding item to pause log (let go):', {
       itemName: item.itemName,
       emotion: item.emotion,
       storeName: item.storeName,
       status: 'let-go',
-      notes: item.notes,
+      notes: reflectionNotes || item.notes,
       user: user ? 'authenticated' : 'guest'
     });
 
@@ -27,7 +27,7 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'let-go',
-          notes: item.notes,
+          notes: reflectionNotes || item.notes,
           tags: item.tags
         });
         console.log('✅ Item added to Supabase pause log');
@@ -37,7 +37,7 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'let-go',
-          notes: item.notes,
+          notes: reflectionNotes || item.notes,
           tags: item.tags
         });
         console.log('✅ Item added to local pause log');
@@ -61,13 +61,13 @@ export const useItemDecisions = () => {
     }
   };
 
-  const handleBought = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void) => {
+  const handleBought = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void, reflectionNotes?: string) => {
     console.log('📝 Adding item to pause log (purchased):', {
       itemName: item.itemName,
       emotion: item.emotion,
       storeName: item.storeName,
       status: 'purchased',
-      notes: item.notes,
+      notes: reflectionNotes || item.notes,
       user: user ? 'authenticated' : 'guest'
     });
 
@@ -79,7 +79,7 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'purchased',
-          notes: item.notes,
+          notes: reflectionNotes || item.notes,
           tags: item.tags
         });
         console.log('✅ Item added to Supabase pause log');
@@ -89,7 +89,7 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'purchased',
-          notes: item.notes,
+          notes: reflectionNotes || item.notes,
           tags: item.tags
         });
         console.log('✅ Item added to local pause log');

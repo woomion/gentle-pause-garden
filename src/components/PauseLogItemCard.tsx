@@ -24,13 +24,13 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
   return (
     <div className="p-4 relative">
       <div 
-        className="mb-3 cursor-pointer"
+        className="cursor-pointer"
         onClick={(e) => {
           console.log('🗑️ PauseLogItemCard: Header clicked for item:', item.id);
           onClick(item);
         }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-1">
           <h3 className="text-black dark:text-[#F9F5EB] text-lg">
             <span className="font-medium">{item.itemName}</span>
             <span className="font-normal"> from {item.storeName}</span>
@@ -39,21 +39,21 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
             {item.status === 'purchased' ? 'Purchased' : 'Let go of'}
           </span>
         </div>
-      </div>
-      
-      {item.notes && (
-        <div className="mb-3 mt-2">
-          <p className="text-gray-600 dark:text-gray-400 text-sm italic">
-            "{item.notes}"
-          </p>
-        </div>
-      )}
-      
-      <div className="flex items-center justify-between mt-0.5">
+        
+        {item.notes && (
+          <div className="mb-1">
+            <p className="text-gray-600 dark:text-gray-400 text-sm italic">
+              "{item.notes}"
+            </p>
+          </div>
+        )}
+        
         <p className="text-gray-600 dark:text-gray-400 text-sm">
           {item.letGoDate}
         </p>
-        
+      </div>
+      
+      <div className="flex items-center justify-end mt-3">
         <div className="flex items-center gap-2">
           {hasLink && (
             <AlertDialog>
