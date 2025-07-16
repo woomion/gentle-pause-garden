@@ -3,7 +3,13 @@ import { PauseLogItem } from '@/stores/supabasePauseLogStore';
 import { DbPausedItem, extractStoreName, extractStoreNameFromNotes, extractActualNotes, formatNotesWithStore } from './pausedItemsUtils';
 
 export const convertDbToPauseLogItem = (dbItem: DbPausedItem): PauseLogItem => {
-  console.log('Converting DB item to local for pause log:', dbItem);
+  console.log('Converting DB item to local for pause log:', {
+    id: dbItem.id,
+    title: dbItem.title,
+    status: dbItem.status,
+    originalNotes: dbItem.notes,
+    storeNameField: dbItem.store_name
+  });
   
   // Use the store name from notes if it was stored there, otherwise try to extract from URL
   let storeName = 'Unknown Store';
@@ -20,6 +26,12 @@ export const convertDbToPauseLogItem = (dbItem: DbPausedItem): PauseLogItem => {
   
   // Extract actual notes (remove store name if it was stored there)
   const actualNotes = extractActualNotes(dbItem.notes);
+  
+  console.log('Extracted notes conversion:', {
+    originalNotes: dbItem.notes,
+    extractedStoreName: storeName,
+    extractedActualNotes: actualNotes
+  });
   
   // Ensure status mapping is correct
   let status: 'purchased' | 'let-go' = 'let-go';
@@ -58,9 +70,16 @@ export const convertPauseLogItemToDb = (
   // Ensure the status is exactly what we expect and matches database values
   const dbStatus = item.status === 'purchased' ? 'purchased' : 'let-go';
   console.log('DB status being saved:', dbStatus);
+  console.log('Converting pause log item to DB:', {
+    itemName: item.itemName,
+    storeName: item.storeName,
+    originalNotes: item.notes,
+    status: dbStatus
+  });
 
   // Store the store name in the notes field with a special format
   const notesWithStore = formatNotesWithStore(item.storeName, item.notes);
+  console.log('Notes with store format:', notesWithStore);
 
   console.log('Insert data being prepared:', {
     title: item.itemName,

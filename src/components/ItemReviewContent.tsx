@@ -59,6 +59,12 @@ const ItemReviewContent = ({
   const handleSubmitDecision = async () => {
     if (!selectedDecision) return;
 
+    console.log('🔍 ItemReviewContent: Submitting decision with reflection notes:', {
+      selectedDecision,
+      reflectionNotes: notes,
+      itemName: item.itemName
+    });
+
     try {
       if (selectedDecision === 'purchase') {
         await handleBought(item, onItemDecided, () => {}, notes);

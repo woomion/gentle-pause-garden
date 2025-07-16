@@ -15,7 +15,8 @@ export const useItemDecisions = () => {
       emotion: item.emotion,
       storeName: item.storeName,
       status: 'let-go',
-      notes: reflectionNotes,
+      originalItemNotes: item.notes,
+      reflectionNotes: reflectionNotes,
       user: user ? 'authenticated' : 'guest'
     });
 
@@ -67,7 +68,8 @@ export const useItemDecisions = () => {
       emotion: item.emotion,
       storeName: item.storeName,
       status: 'purchased',
-      notes: reflectionNotes,
+      originalItemNotes: item.notes,
+      reflectionNotes: reflectionNotes,
       user: user ? 'authenticated' : 'guest'
     });
 
