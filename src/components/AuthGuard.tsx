@@ -22,8 +22,8 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream dark:bg-background flex items-center justify-center">
-        <div className="text-black dark:text-foreground">Loading...</div>
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-black">Loading...</div>
       </div>
     );
   }

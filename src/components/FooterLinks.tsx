@@ -9,13 +9,13 @@ const FooterLinks = () => {
         <div className="flex justify-center gap-4 mt-2">
           <Link 
             to="/about" 
-            className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors underline"
+            className="hover:text-gray-600 transition-colors underline"
           >
             About
           </Link>
           <Link 
             to="/privacy-policy" 
-            className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors underline"
+            className="hover:text-gray-600 transition-colors underline"
           >
             Privacy
           </Link>

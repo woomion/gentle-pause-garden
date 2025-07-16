@@ -11,7 +11,7 @@ import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
+
 import { TagInput } from '@/components/ui/tag-input';
 import { getEmotionColor } from '@/utils/emotionColors';
 import PartnerSharingSection from './PartnerSharingSection';
@@ -45,7 +45,7 @@ const otherPauseLengths = [
 
 const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
   const { user } = useAuth();
-  const { isDarkMode } = useTheme();
+  
   const [formData, setFormData] = useState({
     link: '',
     itemName: '',
@@ -562,7 +562,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: getEmotionColor(emotion.name, isDarkMode) }}
+                          style={{ backgroundColor: getEmotionColor(emotion.name, false) }}
                         />
                         <span className="capitalize">{emotion.name}</span>
                       </div>

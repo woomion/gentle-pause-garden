@@ -3,7 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
 import { getEmotionColor } from '../utils/emotionColors';
-import { useTheme } from '../contexts/ThemeContext';
+
 
 interface PauseLogItemCardProps {
   item: PauseLogItem;
@@ -13,7 +13,7 @@ interface PauseLogItemCardProps {
 }
 
 const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemCardProps) => {
-  const { isDarkMode } = useTheme();
+  
 
   // Check only the originalPausedItem for links
   const hasLink = Boolean(

@@ -21,23 +21,23 @@ const EditIntentionModal = ({ intention, onSave, onClose }: EditIntentionModalPr
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="bg-cream dark:bg-background border-gray-200 dark:border-border max-w-sm mx-auto">
+      <DialogContent className="bg-cream border-gray-200 max-w-sm mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-black dark:text-foreground">
+          <DialogTitle className="text-black">
             Edit Your Intention
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="intention" className="text-black dark:text-foreground">
+            <Label htmlFor="intention" className="text-black">
               What are you reaching for?
             </Label>
             <Input
               id="intention"
               value={newIntention}
               onChange={(e) => setNewIntention(e.target.value)}
-              className="mt-2 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20"
+              className="mt-2 bg-white/60 border-gray-200"
               placeholder="Enter your guiding intention..."
             />
           </div>
@@ -46,7 +46,7 @@ const EditIntentionModal = ({ intention, onSave, onClose }: EditIntentionModalPr
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 bg-white/60 dark:bg-muted border-gray-200 dark:border-border text-black dark:text-foreground hover:bg-white/80 dark:hover:bg-muted/80"
+              className="flex-1 bg-white/60 border-gray-200 text-black hover:bg-white/80"
             >
               Cancel
             </Button>
