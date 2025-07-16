@@ -67,9 +67,19 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   const [isParsingUrl, setIsParsingUrl] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [existingTags, setExistingTags] = useState<string[]>([]);
+  const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // If the user manually edits a field that was auto-filled, remove it from tracking
+    if (autoFilledFields.has(field)) {
+      setAutoFilledFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
+    }
   };
 
   const extractCartPrice = async (url: string): Promise<string | null> => {
@@ -115,6 +125,34 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   const handleLinkChange = async (value: string) => {
     setFormData(prev => ({ ...prev, link: value }));
     
+    // If URL is cleared, clear all auto-filled fields
+    if (!value || value.trim() === '') {
+      const fieldsToReset: any = {};
+      
+      // Clear auto-filled fields
+      if (autoFilledFields.has('itemName')) {
+        fieldsToReset.itemName = '';
+      }
+      if (autoFilledFields.has('storeName')) {
+        fieldsToReset.storeName = '';
+      }
+      if (autoFilledFields.has('price')) {
+        fieldsToReset.price = '';
+      }
+      if (autoFilledFields.has('imageUrl')) {
+        fieldsToReset.imageUrl = '';
+      }
+      
+      // Update form data if we have fields to reset
+      if (Object.keys(fieldsToReset).length > 0) {
+        setFormData(prev => ({ ...prev, ...fieldsToReset }));
+      }
+      
+      // Clear the auto-filled fields tracking
+      setAutoFilledFields(new Set());
+      return;
+    }
+    
     // Check if the value looks like a URL
     if (value && (value.startsWith('http://') || value.startsWith('https://') || value.includes('.'))) {
       setIsParsingUrl(true);
@@ -129,14 +167,33 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           cartPrice = await extractCartPrice(value);
         }
         
+        // Track which fields we're auto-filling
+        const newAutoFilledFields = new Set<string>();
+        const fieldsToUpdate: any = {};
+        
         // Only update fields that are currently empty and we found data for
-        setFormData(prev => ({
-          ...prev,
-          itemName: prev.itemName || productInfo.itemName || prev.itemName,
-          storeName: prev.storeName || productInfo.storeName || prev.storeName,
-          price: prev.price || cartPrice || productInfo.price || prev.price,
-          imageUrl: prev.imageUrl || productInfo.imageUrl || prev.imageUrl,
-        }));
+        if (!formData.itemName && productInfo.itemName) {
+          fieldsToUpdate.itemName = productInfo.itemName;
+          newAutoFilledFields.add('itemName');
+        }
+        if (!formData.storeName && productInfo.storeName) {
+          fieldsToUpdate.storeName = productInfo.storeName;
+          newAutoFilledFields.add('storeName');
+        }
+        if (!formData.price && (cartPrice || productInfo.price)) {
+          fieldsToUpdate.price = cartPrice || productInfo.price;
+          newAutoFilledFields.add('price');
+        }
+        if (!formData.imageUrl && productInfo.imageUrl) {
+          fieldsToUpdate.imageUrl = productInfo.imageUrl;
+          newAutoFilledFields.add('imageUrl');
+        }
+        
+        // Update form data and tracking
+        if (Object.keys(fieldsToUpdate).length > 0) {
+          setFormData(prev => ({ ...prev, ...fieldsToUpdate }));
+          setAutoFilledFields(newAutoFilledFields);
+        }
         
       } catch (error) {
         console.error('Error parsing product URL:', error);
@@ -149,6 +206,16 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData(prev => ({ ...prev, photo: file }));
+    
+    // If user uploads a file, remove imageUrl from auto-filled tracking
+    // since they're now providing their own image
+    if (file && autoFilledFields.has('imageUrl')) {
+      setAutoFilledFields(prev => {
+        const newSet = new Set(prev);
+        newSet.delete('imageUrl');
+        return newSet;
+      });
+    }
     
     // Create preview URL for the uploaded photo
     if (file) {
