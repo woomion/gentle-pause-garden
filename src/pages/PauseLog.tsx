@@ -345,12 +345,8 @@ const PauseLog = () => {
                   <div 
                     className="my-8 h-0.5"
                     style={{
-                      backgroundImage: `radial-gradient(circle, ${
-                        document.documentElement.classList.contains('dark') 
-                          ? '#4B5563' 
-                          : '#9CA3AF'
-                      } 1.5px, transparent 1.5px)`,
-                      backgroundSize: '12px 4px',
+                      backgroundImage: `radial-gradient(circle, #D1D5DB 1px, transparent 1px)`,
+                      backgroundSize: '8px 4px',
                       backgroundRepeat: 'repeat-x',
                       backgroundPosition: 'center'
                     }}
