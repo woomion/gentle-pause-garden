@@ -59,6 +59,8 @@
     --decision-let-go-foreground: 222.2 84% 4.9%;
     --decide-now: 263 57% 88%;
     --decide-now-foreground: 222.2 84% 4.9%;
+    --section-header: 263 30% 95%;
+    --section-header-foreground: 222.2 84% 4.9%;
   }
 
   .dark {
@@ -99,6 +101,8 @@
     --decision-let-go-foreground: 222.2 84% 4.9%;
     --decide-now: 263 57% 88%;
     --decide-now-foreground: 222.2 84% 4.9%;
+    --section-header: 263 20% 25%;
+    --section-header-foreground: 210 40% 98%;
   }
 }
 

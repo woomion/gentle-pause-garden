@@ -95,6 +95,10 @@ export default {
 				'decide-now': {
 					DEFAULT: 'hsl(var(--decide-now))',
 					foreground: 'hsl(var(--decide-now-foreground))'
+				},
+				'section-header': {
+					DEFAULT: 'hsl(var(--section-header))',
+					foreground: 'hsl(var(--section-header-foreground))'
 				}
 			},
 			borderRadius: {

@@ -328,25 +328,27 @@ const PauseLog = () => {
               {/* Recent Items with Toggle */}
               {hierarchicalData.recentItems.length > 0 && (
                 <div className="space-y-4">
-                  <button
-                    onClick={toggleFirstSection}
-                    className="flex items-center justify-between w-full text-left"
-                  >
-                    <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
-                      {hierarchicalData.recentItemsHeader}
-                    </h2>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {hierarchicalData.recentItems.length} items
-                      </span>
-                      <ChevronDown 
-                        size={16} 
-                        className={`text-gray-600 dark:text-gray-400 transition-transform ${
-                          isFirstSectionExpanded ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </div>
-                  </button>
+                  <div className="bg-section-header rounded-lg px-4 py-3 -mx-4">
+                    <button
+                      onClick={toggleFirstSection}
+                      className="flex items-center justify-between w-full text-left"
+                    >
+                      <h2 className="text-xl font-medium text-section-header-foreground">
+                        {hierarchicalData.recentItemsHeader}
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-section-header-foreground/70">
+                          {hierarchicalData.recentItems.length} items
+                        </span>
+                        <ChevronDown 
+                          size={16} 
+                          className={`text-section-header-foreground/70 transition-transform ${
+                            isFirstSectionExpanded ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </div>
+                    </button>
+                  </div>
                   
                   {isFirstSectionExpanded && (
                     <div className={`space-y-2 ${hierarchicalData.recentItems.length > 7 ? 'max-h-96 overflow-y-auto pr-2' : ''}`}>
@@ -369,20 +371,22 @@ const PauseLog = () => {
                 <div key={yearGroup.year}>
                   {/* Year Header */}
                   <div className="space-y-4">
-                    <button
-                      onClick={() => toggleYearExpansion(yearGroup.year)}
-                      className="flex items-center justify-between w-full text-left"
-                    >
-                      <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
-                        {yearGroup.year}
-                      </h2>
-                      <ChevronDown 
-                        size={16} 
-                        className={`text-gray-600 dark:text-gray-400 transition-transform ${
-                          expandedYears.has(yearGroup.year) ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </button>
+                    <div className="bg-section-header rounded-lg px-4 py-3 -mx-4">
+                      <button
+                        onClick={() => toggleYearExpansion(yearGroup.year)}
+                        className="flex items-center justify-between w-full text-left"
+                      >
+                        <h2 className="text-xl font-medium text-section-header-foreground">
+                          {yearGroup.year}
+                        </h2>
+                        <ChevronDown 
+                          size={16} 
+                          className={`text-section-header-foreground/70 transition-transform ${
+                            expandedYears.has(yearGroup.year) ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                    </div>
                     
                     {/* Expanded Year Content */}
                     {expandedYears.has(yearGroup.year) && (
@@ -390,25 +394,27 @@ const PauseLog = () => {
                         {yearGroup.months.map((monthGroup, monthIndex) => (
                           <div key={monthGroup.monthKey}>
                             {/* Month Header */}
-                            <button
-                              onClick={() => toggleMonthExpansion(monthGroup.monthKey)}
-                              className="flex items-center justify-between w-full text-left mb-2"
-                            >
-                              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">
-                                {monthGroup.monthLabel}
-                              </h3>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-500 dark:text-gray-400">
-                                  {monthGroup.items.length} items
-                                </span>
-                                <ChevronDown 
-                                  size={14} 
-                                  className={`text-gray-600 dark:text-gray-400 transition-transform ${
-                                    expandedMonths.has(monthGroup.monthKey) ? 'rotate-180' : ''
-                                  }`}
-                                />
-                              </div>
-                            </button>
+                            <div className="bg-section-header rounded-lg px-4 py-3 -mx-4">
+                              <button
+                                onClick={() => toggleMonthExpansion(monthGroup.monthKey)}
+                                className="flex items-center justify-between w-full text-left"
+                              >
+                                <h3 className="text-lg font-medium text-section-header-foreground">
+                                  {monthGroup.monthLabel}
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-section-header-foreground/70">
+                                    {monthGroup.items.length} items
+                                  </span>
+                                  <ChevronDown 
+                                    size={14} 
+                                    className={`text-section-header-foreground/70 transition-transform ${
+                                      expandedMonths.has(monthGroup.monthKey) ? 'rotate-180' : ''
+                                    }`}
+                                  />
+                                </div>
+                              </button>
+                            </div>
                             
                             {/* Expanded Month Content */}
                             {expandedMonths.has(monthGroup.monthKey) && (
