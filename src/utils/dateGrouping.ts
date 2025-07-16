@@ -19,41 +19,52 @@ export interface MonthGroup {
 }
 
 export const createHierarchicalStructure = (items: PauseLogItem[]): HierarchicalData => {
+  console.log('DEBUG: All items and their dates:', items.map(item => ({ 
+    name: item.itemName, 
+    originalDate: item.letGoDate,
+    parsedDate: new Date(item.letGoDate),
+    parsedMonth: new Date(item.letGoDate).getMonth() + 1,
+    parsedYear: new Date(item.letGoDate).getFullYear()
+  })));
+
   // Helper function to parse dates that might be in old format (without year)
   const parseItemDate = (dateString: string): Date => {
-    // Try parsing as-is first
-    let parsed = new Date(dateString);
+    console.log(`Original date string: "${dateString}"`);
     
-    // If the year is before 2020 or invalid, it's likely an old format without year
-    if (parsed.getFullYear() < 2020 || isNaN(parsed.getTime())) {
-      // For old format dates like "Jun 15", use a more direct approach
+    // First, check if it's already a proper format with year
+    let parsed = new Date(dateString);
+    if (parsed.getFullYear() >= 2020 && !isNaN(parsed.getTime())) {
+      console.log(`Already good format:`, parsed);
+      return parsed;
+    }
+    
+    // Handle old format dates like "Jun 15"
+    const parts = dateString.trim().split(' ');
+    if (parts.length >= 2) {
+      const monthStr = parts[0];
+      const dayStr = parts[1];
+      
+      // Map month abbreviations to month numbers (0-based for JavaScript Date)
+      const monthMap: { [key: string]: number } = {
+        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+      };
+      
+      const monthNum = monthMap[monthStr];
+      const dayNum = parseInt(dayStr, 10);
       const currentYear = new Date().getFullYear();
       
-      // Split the date string and reconstruct it properly
-      const parts = dateString.trim().split(' ');
-      if (parts.length >= 2) {
-        const month = parts[0]; // "Jun"
-        const day = parts[1]; // "15"
-        
-        // Create date in format that JavaScript handles well: "June 15, 2025"
-        const monthNames: { [key: string]: string } = {
-          'Jan': 'January', 'Feb': 'February', 'Mar': 'March', 'Apr': 'April',
-          'May': 'May', 'Jun': 'June', 'Jul': 'July', 'Aug': 'August',
-          'Sep': 'September', 'Oct': 'October', 'Nov': 'November', 'Dec': 'December'
-        };
-        
-        const fullMonth = monthNames[month] || month;
-        const properFormat = `${fullMonth} ${day}, ${currentYear}`;
-        parsed = new Date(properFormat);
-      }
-      
-      // If still invalid, fallback to current date
-      if (isNaN(parsed.getTime())) {
-        parsed = new Date();
+      if (monthNum !== undefined && !isNaN(dayNum)) {
+        // Create date using constructor parameters to avoid parsing issues
+        parsed = new Date(currentYear, monthNum, dayNum);
+        console.log(`Reconstructed from "${monthStr} ${dayStr}":`, parsed, `Month: ${parsed.getMonth() + 1}`);
+        return parsed;
       }
     }
     
-    return parsed;
+    // Fallback to current date if parsing fails
+    console.log(`Fallback to current date for: "${dateString}"`);
+    return new Date();
   };
 
   // Sort all items by date (newest first)
@@ -115,6 +126,8 @@ export const createHierarchicalStructure = (items: PauseLogItem[]): Hierarchical
     const date = parseItemDate(item.letGoDate);
     const year = date.getFullYear().toString();
     const monthKey = format(date, 'yyyy-MM');
+    
+    console.log(`Item "${item.itemName}": original="${item.letGoDate}", parsed date=${date}, year=${year}, monthKey=${monthKey}, month name=${format(date, 'MMMM')}`);
     
     if (!yearGroups[year]) {
       yearGroups[year] = {};
