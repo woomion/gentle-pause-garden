@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { User } from 'lucide-react';
+import { User, Library } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -31,6 +31,11 @@ const PauseHeader = () => {
     console.log('Quick pause in-store triggered');
   };
 
+  const handleCourseClick = () => {
+    // Navigate to course section
+    console.log('Course section clicked');
+  };
+
   return (
     <>
       <header className="relative mb-18">
@@ -44,7 +49,15 @@ const PauseHeader = () => {
           <QuickPauseButton onQuickPause={handleQuickPause} />
         </div>
         
-        <div className="absolute top-6 right-0">
+        <div className="absolute top-6 right-0 flex items-center gap-3">
+          <button 
+            className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
+            onClick={handleCourseClick}
+            title="Course section"
+          >
+            <Library size={20} />
+          </button>
+          
           <button 
             className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
             onClick={handleAccountClick}
