@@ -45,7 +45,10 @@ const MainTabs = () => {
       <div className="grid w-full grid-cols-2 mb-6 h-16 sm:h-10 rounded-full" style={{ backgroundColor: '#DDE7DD' }}>
         <Button 
           variant="ghost"
-          onClick={() => setShowMyPauses(!showMyPauses)}
+          onClick={() => {
+            setShowMyPauses(!showMyPauses);
+            setShowPartnerPauses(false);
+          }}
           className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
             backgroundColor: showMyPauses ? '#BFD1BF' : 'transparent',
@@ -57,7 +60,10 @@ const MainTabs = () => {
         </Button>
         <Button 
           variant="ghost"
-          onClick={() => setShowPartnerPauses(!showPartnerPauses)}
+          onClick={() => {
+            setShowPartnerPauses(!showPartnerPauses);
+            setShowMyPauses(false);
+          }}
           className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
             backgroundColor: showPartnerPauses ? '#BFD1BF' : 'transparent',
