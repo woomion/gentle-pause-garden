@@ -1,47 +1,68 @@
-import { format, isThisWeek, isThisMonth, isThisYear } from 'date-fns';
+import { format, isThisYear } from 'date-fns';
 import { PauseLogItem } from '../stores/pauseLogStore';
 
-export interface GroupedItems {
-  groupTitle: string;
+export interface HierarchicalData {
+  recentItems: PauseLogItem[]; // 7 most recent items
+  years: YearGroup[];
+}
+
+export interface YearGroup {
+  year: string;
+  months: MonthGroup[];
+}
+
+export interface MonthGroup {
+  monthKey: string; // "2025-01" format for sorting
+  monthLabel: string; // "January" for display
   items: PauseLogItem[];
 }
 
-export const groupItemsByDate = (items: PauseLogItem[]): GroupedItems[] => {
-  const groups: { [key: string]: PauseLogItem[] } = {};
+export const createHierarchicalStructure = (items: PauseLogItem[]): HierarchicalData => {
+  // Sort all items by date (newest first)
+  const sortedItems = [...items].sort((a, b) => 
+    new Date(b.letGoDate).getTime() - new Date(a.letGoDate).getTime()
+  );
   
-  items.forEach(item => {
+  // Take first 7 items as recent
+  const recentItems = sortedItems.slice(0, 7);
+  const historicalItems = sortedItems.slice(7);
+  
+  // Group historical items by year and month
+  const yearGroups: { [year: string]: { [monthKey: string]: PauseLogItem[] } } = {};
+  
+  historicalItems.forEach(item => {
     const date = new Date(item.letGoDate);
-    let groupKey: string;
+    const year = date.getFullYear().toString();
+    const monthKey = format(date, 'yyyy-MM');
+    const monthLabel = format(date, 'MMMM');
     
-    if (isThisWeek(date)) {
-      groupKey = 'This Week';
-    } else {
-      groupKey = format(date, 'MMMM'); // Just month name, no year
+    if (!yearGroups[year]) {
+      yearGroups[year] = {};
     }
-    
-    if (!groups[groupKey]) {
-      groups[groupKey] = [];
+    if (!yearGroups[year][monthKey]) {
+      yearGroups[year][monthKey] = [];
     }
-    groups[groupKey].push(item);
+    yearGroups[year][monthKey].push(item);
   });
   
-  // Convert to array and sort groups by recency
-  const groupedArray = Object.entries(groups).map(([groupTitle, items]) => ({
-    groupTitle,
-    items
-  }));
+  // Convert to structured format
+  const years: YearGroup[] = Object.entries(yearGroups)
+    .map(([year, months]) => ({
+      year,
+      months: Object.entries(months)
+        .map(([monthKey, items]) => ({
+          monthKey,
+          monthLabel: format(new Date(monthKey + '-01'), 'MMMM'),
+          items: items.sort((a, b) => 
+            new Date(b.letGoDate).getTime() - new Date(a.letGoDate).getTime()
+          )
+        }))
+        .sort((a, b) => b.monthKey.localeCompare(a.monthKey)) // Newest months first
+    }))
+    .sort((a, b) => parseInt(b.year) - parseInt(a.year)); // Newest years first
   
-  // Sort groups: "This Week" first, then by most recent month
-  groupedArray.sort((a, b) => {
-    if (a.groupTitle === 'This Week') return -1;
-    if (b.groupTitle === 'This Week') return 1;
-    
-    // For months, sort by the most recent item in each group
-    const aLatest = Math.max(...a.items.map(item => new Date(item.letGoDate).getTime()));
-    const bLatest = Math.max(...b.items.map(item => new Date(item.letGoDate).getTime()));
-    
-    return bLatest - aLatest; // Most recent first
-  });
-  
-  return groupedArray;
+  return {
+    recentItems,
+    years
+  };
 };

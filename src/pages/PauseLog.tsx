@@ -14,7 +14,7 @@ import PauseLogItemDetail from '../components/PauseLogItemDetail';
 import PauseLogEmptyState from '../components/PauseLogEmptyState';
 import FooterLinks from '../components/FooterLinks';
 import { getEmotionColor } from '../utils/emotionColors';
-import { groupItemsByDate } from '../utils/dateGrouping';
+import { createHierarchicalStructure, HierarchicalData, YearGroup, MonthGroup } from '../utils/dateGrouping';
 
 const PauseLog = () => {
   const { user } = useAuth();
@@ -35,6 +35,8 @@ const PauseLog = () => {
   const [selectedItem, setSelectedItem] = useState<PauseLogItem | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [expandedYears, setExpandedYears] = useState<Set<string>>(new Set());
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
 
   // Force refresh pause log items when component mounts
   useEffect(() => {
@@ -89,9 +91,9 @@ const PauseLog = () => {
     return filtered;
   }, [items, emotionFilters, statusFilters, tagFilters, cartFilter, sortOrder]);
 
-  // Group filtered items by date
-  const groupedItems = useMemo(() => {
-    return groupItemsByDate(filteredItems);
+  // Create hierarchical structure from filtered items
+  const hierarchicalData = useMemo(() => {
+    return createHierarchicalStructure(filteredItems);
   }, [filteredItems]);
 
   // Get active filters for display
@@ -198,13 +200,25 @@ const PauseLog = () => {
     setSortOrder(current => current === 'newest' ? 'oldest' : 'newest');
   };
 
-  const toggleGroupExpansion = (groupTitle: string) => {
-    setExpandedGroups(prev => {
+  const toggleYearExpansion = (year: string) => {
+    setExpandedYears(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(groupTitle)) {
-        newSet.delete(groupTitle);
+      if (newSet.has(year)) {
+        newSet.delete(year);
       } else {
-        newSet.add(groupTitle);
+        newSet.add(year);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleMonthExpansion = (monthKey: string) => {
+    setExpandedMonths(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(monthKey)) {
+        newSet.delete(monthKey);
+      } else {
+        newSet.add(monthKey);
       }
       return newSet;
     });
@@ -333,61 +347,105 @@ const PauseLog = () => {
           </div>
         )}
 
-        {/* Grouped Items List */}
+        {/* Hierarchical Items List */}
         <div className="mt-8">
           {filteredItems.length === 0 ? (
             <PauseLogEmptyState />
           ) : (
-            groupedItems.map((group, index) => {
-              const isExpanded = expandedGroups.has(group.groupTitle);
-              const shouldShowToggle = group.items.length > 2; // Temporarily lowered for testing
-              const itemsToShow = shouldShowToggle && !isExpanded 
-                ? group.items.slice(0, 2) // Show 2 instead of 5 for testing
-                : group.items;
+            <div className="space-y-6">
+              {/* Recent Items (7 most recent) */}
+              {hierarchicalData.recentItems.length > 0 && (
+                <div className="space-y-2">
+                  {hierarchicalData.recentItems.map((item) => (
+                    <PauseLogItemCard
+                      key={item.id}
+                      item={item}
+                      onDelete={handleDeleteItem}
+                      onViewLink={handleViewLink}
+                      onClick={handleItemClick}
+                    />
+                  ))}
+                </div>
+              )}
               
-              return (
-                <div key={group.groupTitle}>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+              {/* Historical Items by Year */}
+              {hierarchicalData.years.map((yearGroup, yearIndex) => (
+                <div key={yearGroup.year}>
+                  {/* Year Header */}
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => toggleYearExpansion(yearGroup.year)}
+                      className="flex items-center justify-between w-full text-left"
+                    >
                       <h2 className="text-xl font-medium text-black dark:text-[#F9F5EB]">
-                        {group.groupTitle}
+                        {yearGroup.year}
                       </h2>
-                      {shouldShowToggle && (
-                        <button
-                          onClick={() => toggleGroupExpansion(group.groupTitle)}
-                          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-[#F9F5EB] transition-colors"
-                        >
-                          {isExpanded ? (
-                            <>
-                              Show less
-                              <ChevronUp size={16} />
-                            </>
-                          ) : (
-                            <>
-                              Show {group.items.length - 2} more
-                              <ChevronDown size={16} />
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                    {itemsToShow.map((item) => (
-                      <PauseLogItemCard
-                        key={item.id}
-                        item={item}
-                        onDelete={handleDeleteItem}
-                        onViewLink={handleViewLink}
-                        onClick={handleItemClick}
+                      <ChevronDown 
+                        size={16} 
+                        className={`text-gray-600 dark:text-gray-400 transition-transform ${
+                          expandedYears.has(yearGroup.year) ? 'rotate-180' : ''
+                        }`}
                       />
-                    ))}
+                    </button>
+                    
+                    {/* Expanded Year Content */}
+                    {expandedYears.has(yearGroup.year) && (
+                      <div className="space-y-4 ml-4">
+                        {yearGroup.months.map((monthGroup, monthIndex) => (
+                          <div key={monthGroup.monthKey}>
+                            {/* Month Header */}
+                            <button
+                              onClick={() => toggleMonthExpansion(monthGroup.monthKey)}
+                              className="flex items-center justify-between w-full text-left mb-2"
+                            >
+                              <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB]">
+                                {monthGroup.monthLabel}
+                              </h3>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                  {monthGroup.items.length} items
+                                </span>
+                                <ChevronDown 
+                                  size={14} 
+                                  className={`text-gray-600 dark:text-gray-400 transition-transform ${
+                                    expandedMonths.has(monthGroup.monthKey) ? 'rotate-180' : ''
+                                  }`}
+                                />
+                              </div>
+                            </button>
+                            
+                            {/* Expanded Month Content */}
+                            {expandedMonths.has(monthGroup.monthKey) && (
+                              <div className="space-y-2 ml-4 max-h-96 overflow-y-auto">
+                                {monthGroup.items.map((item) => (
+                                  <PauseLogItemCard
+                                    key={item.id}
+                                    item={item}
+                                    onDelete={handleDeleteItem}
+                                    onViewLink={handleViewLink}
+                                    onClick={handleItemClick}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Month divider */}
+                            {monthIndex < yearGroup.months.length - 1 && (
+                              <div className="my-4 border-t border-dashed border-gray-300 dark:border-gray-500"></div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  {/* Dashed divider between groups, but not after the last group */}
-                  {index < groupedItems.length - 1 && (
+                  
+                  {/* Year divider */}
+                  {yearIndex < hierarchicalData.years.length - 1 && (
                     <div className="my-8 border-t border-dashed border-gray-300 dark:border-gray-500"></div>
                   )}
                 </div>
-              );
-            })
+              ))}
+            </div>
           )}
         </div>
 
