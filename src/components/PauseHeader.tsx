@@ -8,10 +8,13 @@ import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
 import QuickPauseButton from './QuickPauseButton';
 
+import { useNavigate } from 'react-router-dom';
+
 const PauseHeader = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const firstName = user?.user_metadata?.first_name || '';
   const email = user?.email || '';
@@ -32,8 +35,7 @@ const PauseHeader = () => {
   };
 
   const handleCourseClick = () => {
-    // Navigate to course section
-    console.log('Course section clicked');
+    navigate('/courses');
   };
 
   return (

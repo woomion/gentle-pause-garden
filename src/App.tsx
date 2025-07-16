@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import PauseLog from "./pages/PauseLog";
 import About from "./pages/About";
+import Courses from "./pages/Courses";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import GreaterJoyFund from "./pages/GreaterJoyFund";
 import NotFound from "./pages/NotFound";
@@ -74,6 +75,11 @@ const App = () => {
                   <Route path="/about" element={
                     <AuthGuard>
                       <About />
+                    </AuthGuard>
+                  } />
+                  <Route path="/courses" element={
+                    <AuthGuard>
+                      <Courses />
                     </AuthGuard>
                   } />
                   <Route path="/greater-joy-fund" element={
