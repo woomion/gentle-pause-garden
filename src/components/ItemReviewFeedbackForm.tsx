@@ -30,10 +30,10 @@ const ItemReviewFeedbackForm = ({
   return (
     <>
       <div className="mb-4">
-        <h3 className="text-lg font-medium text-black dark:text-foreground mb-2">
+        <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-2">
           {randomPhrase}
         </h3>
-        <p className="text-black dark:text-foreground text-sm mb-3">
+        <p className="text-black dark:text-[#F9F5EB] text-sm mb-3">
           {selectedDecision === 'purchase' 
             ? 'Any thoughts about this purchase?'
             : 'What helped you decide to let this go?'
@@ -43,7 +43,7 @@ const ItemReviewFeedbackForm = ({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Optional reflection..."
-          className="w-full p-3 border border-lavender/30 dark:border-gray-600 rounded-xl bg-white/60 dark:bg-muted text-black dark:text-foreground placeholder:text-muted-foreground dark:placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full p-3 border border-lavender/30 dark:border-gray-600 rounded-xl bg-white/60 dark:bg-white/10 text-black dark:text-[#F9F5EB] placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#CAB6F7]"
           rows={2}
         />
       </div>

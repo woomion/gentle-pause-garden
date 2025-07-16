@@ -7,7 +7,7 @@ import ItemImage from './ItemImage';
 import PauseDurationBanner from './PauseDurationBanner';
 import EmotionBadge from './EmotionBadge';
 import { getEmotionColor } from '../utils/emotionColors';
-
+import { useTheme } from '../contexts/ThemeContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +27,8 @@ interface PausedItemCardProps {
 }
 
 const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: PausedItemCardProps) => {
-  const emotionColor = useMemo(() => getEmotionColor(item.emotion, false), [item.emotion]);
+  const { isDarkMode } = useTheme();
+  const emotionColor = useMemo(() => getEmotionColor(item.emotion, isDarkMode), [item.emotion, isDarkMode]);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const { hasNewComments, getUnreadCount } = useItemComments(currentUserId || null);
 

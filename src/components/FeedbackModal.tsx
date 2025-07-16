@@ -43,16 +43,16 @@ const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md mx-auto bg-cream border-gray-200">
+      <DialogContent className="max-w-md mx-auto bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-black">
+          <DialogTitle className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
             Share Your Feedback
           </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="feedback" className="text-black">
+            <Label htmlFor="feedback" className="text-black dark:text-[#F9F5EB]">
               What would you like to tell us about Pocket Pause?
             </Label>
             <Textarea
@@ -60,7 +60,7 @@ const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="Share your thoughts, suggestions, or report any issues..."
-              className="mt-2 min-h-[120px] bg-white/60 border-gray-200 text-black placeholder:text-gray-500"
+              className="mt-2 min-h-[120px] bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] placeholder:text-gray-500 dark:placeholder:text-gray-400"
               disabled={isSubmitting}
             />
           </div>
@@ -70,14 +70,14 @@ const FeedbackModal = ({ open, onOpenChange }: FeedbackModalProps) => {
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 bg-white/60 border-gray-200 text-black hover:bg-white/80"
+              className="flex-1 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-white/80 dark:hover:bg-white/20"
               disabled={isSubmitting}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+              className="flex-1 bg-[#CAB6F7] hover:bg-[#B8A6D2] text-black font-medium"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Sending...' : 'Send Feedback'}

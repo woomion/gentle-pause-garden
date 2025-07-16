@@ -63,12 +63,12 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
                 onChange={(e) => setEditValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder='Give your Joy Fund a name — like "More calm, less clutter" or "Aligned with my values"'
-                className="text-xl font-bold leading-relaxed resize-none min-h-[60px] bg-transparent border-2 border-gray-300 dark:border-gray-600 focus:border-primary dark:focus:border-primary text-black dark:text-foreground pr-12"
+                className="text-xl font-bold leading-relaxed resize-none min-h-[60px] bg-transparent border-2 border-gray-300 dark:border-gray-600 focus:border-[#CAB6F7] dark:focus:border-[#CAB6F7] text-black dark:text-[#F9F5EB] pr-12"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 top-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-foreground h-8 w-8 bg-transparent hover:bg-transparent flex-shrink-0"
+                className="absolute right-2 top-2 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent flex-shrink-0"
                 disabled
               >
                 <Edit2 size={16} />
@@ -78,7 +78,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
               <Button
                 onClick={handleSave}
                 size="sm"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                className="bg-[#CAB6F7] hover:bg-[#B8A3F5] text-black font-medium"
               >
                 <Check size={14} className="mr-1" />
                 Save
@@ -87,7 +87,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
                 onClick={handleCancel}
                 variant="ghost"
                 size="sm"
-                className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-foreground"
+                className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB]"
               >
                 <X size={14} className="mr-1" />
                 Cancel
@@ -100,7 +100,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
               className={`text-xl font-bold leading-relaxed cursor-pointer pr-10 ${
                 isPlaceholder 
                   ? 'text-gray-400 dark:text-gray-500 italic' 
-                  : 'text-black dark:text-foreground'
+                  : 'text-black dark:text-[#F9F5EB]'
               }`}
               onClick={handleEdit}
             >
@@ -110,7 +110,7 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
               variant="ghost"
               size="icon"
               onClick={handleEdit}
-              className="absolute right-0 top-0 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-foreground h-8 w-8 bg-transparent hover:bg-transparent flex-shrink-0"
+              className="absolute right-0 top-0 text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-[#F9F5EB] h-8 w-8 bg-transparent hover:bg-transparent flex-shrink-0"
             >
               <Edit2 size={16} />
             </Button>
@@ -130,13 +130,13 @@ const IntentionSection = ({ intention, onSave }: IntentionSectionProps) => {
                 Need inspiration?
               </button>
             </DialogTrigger>
-            <DialogContent className="bg-cream dark:bg-background border-gray-200 dark:border-border max-w-xs sm:max-w-sm">
+            <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-gray-700 max-w-xs sm:max-w-sm">
               <DialogHeader className="pt-4">
-                <DialogTitle className="text-black dark:text-foreground text-lg leading-relaxed">
+                <DialogTitle className="text-black dark:text-[#F9F5EB] text-lg leading-relaxed">
                   Here are a few ways other people have named their Joy Fund:
                 </DialogTitle>
               </DialogHeader>
-              <div className="space-y-3 text-black dark:text-foreground pb-2">
+              <div className="space-y-3 text-black dark:text-[#F9F5EB] pb-2">
                 <p>&quot;More calm in my day&quot;</p>
                 <p>&quot;Presence &gt; pressure&quot;</p>
                 <p>&quot;One good choice at a time&quot;</p>

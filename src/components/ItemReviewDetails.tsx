@@ -4,6 +4,7 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
 import { getEmotionColor } from '../utils/emotionColors';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ItemReviewDetailsProps {
   item: PausedItem | LocalPausedItem;
@@ -11,7 +12,8 @@ interface ItemReviewDetailsProps {
 }
 
 const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
-  const emotionColor = getEmotionColor(item.emotion, false);
+  const { isDarkMode } = useTheme();
+  const emotionColor = getEmotionColor(item.emotion, isDarkMode);
 
   const imageUrl = (() => {
     // Handle cart placeholder case
@@ -44,17 +46,17 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
     if (target.parentElement) {
-      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-400 rounded-full"></div>';
+      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-400 dark:bg-gray-500 rounded-full"></div>';
     }
   };
 
   return (
     <div className="flex items-start gap-4 mb-6">
       <div className="flex flex-col items-center gap-2">
-        <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
           {imageUrl === 'cart-placeholder' ? (
-            <div className="w-full h-full bg-blue-100 rounded-xl flex items-center justify-center">
-              <ShoppingCart size={24} className="text-blue-600" />
+            <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+              <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
             </div>
            ) : imageUrl ? (
              <img 
@@ -76,7 +78,7 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
         {item.link && item.link.trim() && (
           <button
             onClick={() => onViewItem(item)}
-            className="text-black text-xs underline hover:no-underline transition-all duration-200"
+            className="text-black dark:text-[#F9F5EB] text-xs underline hover:no-underline transition-all duration-200"
           >
             view link
           </button>
@@ -85,21 +87,21 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
       
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="font-medium text-black truncate pr-2">
+          <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate pr-2">
             {item.itemName}
           </h3>
           {item.price && (
-            <span className="text-black font-medium flex-shrink-0">
+            <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0">
               {formatPrice(item.price)}
             </span>
           )}
         </div>
         
-        <p className="text-black text-sm mb-2">
+        <p className="text-black dark:text-[#F9F5EB] text-sm mb-2">
           {item.storeName}
         </p>
         
-        <div className="text-black text-sm mb-3">
+        <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
           <span>Paused while feeling </span>
           <span 
             className="inline-block px-2 py-1 rounded text-xs font-medium"
@@ -113,8 +115,8 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
         </div>
 
         {item.notes && item.notes.trim() && (
-          <div className="pt-2 border-t border-gray-200">
-            <p className="text-gray-600 text-sm">
+          <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
               <strong>Note:</strong> {item.notes}
             </p>
           </div>

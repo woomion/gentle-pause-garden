@@ -27,10 +27,10 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen min-h-[100dvh] bg-cream flex items-center justify-center p-4">
+        <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] flex items-center justify-center p-4">
           <div className="text-center">
-            <div className="text-black text-lg mb-4">Something went wrong</div>
-            <div className="text-sm text-gray-600 mb-4">
+            <div className="text-black dark:text-[#F9F5EB] text-lg mb-4">Something went wrong</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               {this.state.error?.message || 'Unknown error'}
             </div>
             <button 
