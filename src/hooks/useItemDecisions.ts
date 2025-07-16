@@ -15,7 +15,7 @@ export const useItemDecisions = () => {
       emotion: item.emotion,
       storeName: item.storeName,
       status: 'let-go',
-      notes: reflectionNotes || item.notes,
+      notes: reflectionNotes,
       user: user ? 'authenticated' : 'guest'
     });
 
@@ -27,7 +27,7 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'let-go',
-          notes: reflectionNotes || item.notes,
+          notes: reflectionNotes,
           tags: item.tags
         });
         console.log('✅ Item added to Supabase pause log');
@@ -37,7 +37,7 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'let-go',
-          notes: reflectionNotes || item.notes,
+          notes: reflectionNotes,
           tags: item.tags
         });
         console.log('✅ Item added to local pause log');
@@ -67,7 +67,7 @@ export const useItemDecisions = () => {
       emotion: item.emotion,
       storeName: item.storeName,
       status: 'purchased',
-      notes: reflectionNotes || item.notes,
+      notes: reflectionNotes,
       user: user ? 'authenticated' : 'guest'
     });
 
@@ -79,7 +79,7 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'purchased',
-          notes: reflectionNotes || item.notes,
+          notes: reflectionNotes,
           tags: item.tags
         });
         console.log('✅ Item added to Supabase pause log');
@@ -89,7 +89,7 @@ export const useItemDecisions = () => {
           emotion: item.emotion,
           storeName: item.storeName,
           status: 'purchased',
-          notes: reflectionNotes || item.notes,
+          notes: reflectionNotes,
           tags: item.tags
         });
         console.log('✅ Item added to local pause log');

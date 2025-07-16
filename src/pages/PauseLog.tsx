@@ -27,11 +27,9 @@ const PauseLog = () => {
   
   const { items, deleteItem, loadItems } = user ? supabasePauseLog : localPauseLog;
   
-  const [cartFilter, setCartFilter] = useState<string>('all');
   const [emotionFilters, setEmotionFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [tagFilters, setTagFilters] = useState<string[]>([]);
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [selectedItem, setSelectedItem] = useState<PauseLogItem | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -67,29 +65,18 @@ const PauseLog = () => {
       const statusMatch = statusFilters.length === 0 || statusFilters.includes(item.status);
       const tagMatch = tagFilters.length === 0 || (item.tags && item.tags.some(tag => tagFilters.includes(tag)));
       
-      // Cart filter logic - check if item was originally a cart
-      const isItemCart = item.originalPausedItem?.isCart || item.originalPausedItem?.itemType === 'cart' || item.itemName === 'Cart';
-      const cartMatch = cartFilter === 'all' || 
-                       (cartFilter === 'cart' && isItemCart) || 
-                       (cartFilter === 'item' && !isItemCart);
-      
-      return emotionMatch && statusMatch && tagMatch && cartMatch;
+      return emotionMatch && statusMatch && tagMatch;
     });
 
-    // Sort by date decided (letGoDate)
+    // Sort by date decided (letGoDate) - newest first
     filtered = filtered.sort((a, b) => {
       const dateA = new Date(a.letGoDate);
       const dateB = new Date(b.letGoDate);
-      
-      if (sortOrder === 'newest') {
-        return dateB.getTime() - dateA.getTime(); // Newest first
-      } else {
-        return dateA.getTime() - dateB.getTime(); // Oldest first
-      }
+      return dateB.getTime() - dateA.getTime(); // Newest first
     });
 
     return filtered;
-  }, [items, emotionFilters, statusFilters, tagFilters, cartFilter, sortOrder]);
+  }, [items, emotionFilters, statusFilters, tagFilters]);
 
   // Create hierarchical structure from filtered items
   const hierarchicalData = useMemo(() => {
@@ -128,23 +115,13 @@ const PauseLog = () => {
       });
     });
     
-    // Add cart filter
-    if (cartFilter !== 'all') {
-      filters.push({ 
-        type: 'cart', 
-        value: cartFilter, 
-        label: cartFilter === 'cart' ? 'Cart' : 'Item'
-      });
-    }
-    
     return filters;
-  }, [emotionFilters, statusFilters, tagFilters, cartFilter]);
+  }, [emotionFilters, statusFilters, tagFilters]);
 
   const clearAllFilters = () => {
     setEmotionFilters([]);
     setStatusFilters([]);
     setTagFilters([]);
-    setCartFilter('all');
   };
 
   const removeFilter = (filterType: string, value?: string) => {
@@ -163,9 +140,6 @@ const PauseLog = () => {
         if (value) {
           setTagFilters(prev => prev.filter(t => t !== value));
         }
-        break;
-      case 'cart':
-        setCartFilter('all');
         break;
     }
   };
@@ -196,9 +170,6 @@ const PauseLog = () => {
     setSelectedItem(null);
   };
 
-  const toggleSortOrder = () => {
-    setSortOrder(current => current === 'newest' ? 'oldest' : 'newest');
-  };
 
   const toggleYearExpansion = (year: string) => {
     setExpandedYears(prev => {
@@ -295,15 +266,11 @@ const PauseLog = () => {
             emotionFilters={emotionFilters}
             statusFilters={statusFilters}
             tagFilters={tagFilters}
-            cartFilter={cartFilter}
-            sortOrder={sortOrder}
             uniqueEmotions={uniqueEmotions}
             uniqueTags={uniqueTags}
             onEmotionFiltersChange={setEmotionFilters}
             onStatusFiltersChange={setStatusFilters}
             onTagFiltersChange={setTagFilters}
-            onCartFilterChange={setCartFilter}
-            onSortOrderToggle={toggleSortOrder}
           />
         </div>
 

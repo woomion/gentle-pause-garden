@@ -11,30 +11,22 @@ interface PauseLogFilterControlsProps {
   emotionFilters: string[];
   statusFilters: string[];
   tagFilters: string[];
-  cartFilter: string;
-  sortOrder: 'newest' | 'oldest';
   uniqueEmotions: string[];
   uniqueTags: string[];
   onEmotionFiltersChange: (filters: string[]) => void;
   onStatusFiltersChange: (filters: string[]) => void;
   onTagFiltersChange: (filters: string[]) => void;
-  onCartFilterChange: (value: string) => void;
-  onSortOrderToggle: () => void;
 }
 
 const PauseLogFilterControls = ({
   emotionFilters,
   statusFilters,
   tagFilters,
-  cartFilter,
-  sortOrder,
   uniqueEmotions,
   uniqueTags,
   onEmotionFiltersChange,
   onStatusFiltersChange,
-  onTagFiltersChange,
-  onCartFilterChange,
-  onSortOrderToggle
+  onTagFiltersChange
 }: PauseLogFilterControlsProps) => {
   const { isDarkMode } = useTheme();
   
@@ -69,23 +61,6 @@ const PauseLogFilterControls = ({
       </div>
 
       <div className="flex flex-wrap gap-4 items-center">
-        {/* Cart Filter - Primary/First */}
-        <Select value={cartFilter} onValueChange={onCartFilterChange}>
-          <SelectTrigger className="w-40 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 font-medium text-black dark:text-[#F9F5EB]">
-            <SelectValue placeholder="All types" />
-          </SelectTrigger>
-          <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 z-50">
-            <SelectItem value="all" className="text-black dark:text-[#F9F5EB]">
-              <div className="flex items-center gap-2">
-                <Plus size={14} />
-                <span>All types</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="cart" className="text-black dark:text-[#F9F5EB]">Cart only</SelectItem>
-            <SelectItem value="item" className="text-black dark:text-[#F9F5EB]">Item only</SelectItem>
-          </SelectContent>
-        </Select>
-
         {/* Emotions Multi-Select */}
         <Popover>
           <PopoverTrigger asChild>
@@ -182,26 +157,6 @@ const PauseLogFilterControls = ({
             </div>
           </PopoverContent>
         </Popover>
-
-        {/* Sort Order */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onSortOrderToggle}
-          className="flex items-center gap-2 rounded-2xl border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20"
-        >
-          {sortOrder === 'newest' ? (
-            <>
-              <ArrowDown size={16} />
-              Newest first
-            </>
-          ) : (
-            <>
-              <ArrowUp size={16} />
-              Oldest first
-            </>
-          )}
-        </Button>
       </div>
     </>
   );
