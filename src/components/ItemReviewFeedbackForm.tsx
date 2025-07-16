@@ -1,4 +1,6 @@
 
+import { useState } from 'react';
+
 interface ItemReviewFeedbackFormProps {
   selectedDecision: 'purchase' | 'let-go';
   notes: string;
@@ -21,7 +23,9 @@ const ItemReviewFeedbackForm = ({
   onSubmit,
   isLastItem
 }: ItemReviewFeedbackFormProps) => {
-  const randomPhrase = supportivePhrases[Math.floor(Math.random() * supportivePhrases.length)];
+  const [randomPhrase] = useState(() => 
+    supportivePhrases[Math.floor(Math.random() * supportivePhrases.length)]
+  );
 
   return (
     <>
