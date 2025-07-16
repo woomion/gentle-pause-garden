@@ -113,101 +113,94 @@
 
   body {
     @apply bg-background text-foreground font-inter;
-    background-color: #F9F5EB;
-    color: #2B2B2B;
     transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  .dark body {
-    background-color: #200E3B;
-    color: #F9F5EB;
   }
 
   /* Dark mode for main containers */
   .dark .bg-cream {
-    background-color: #200E3B !important;
+    background-color: hsl(var(--background)) !important;
   }
 
   /* Dark mode for emotion badges - keep lavender but use dark text */
   .dark .emotion-badge {
-    color: #2B2B2B !important;
+    color: hsl(var(--primary-foreground)) !important;
   }
 
   /* Dark mode for cards and UI elements */
   .dark .bg-white\/60 {
-    background-color: rgba(249, 245, 235, 0.1) !important;
+    background-color: hsl(var(--muted)) !important;
   }
 
   .dark .bg-white\/80 {
-    background-color: rgba(249, 245, 235, 0.2) !important;
+    background-color: hsl(var(--muted)) !important;
   }
 
   .dark .border-gray-200 {
-    border-color: rgba(249, 245, 235, 0.2) !important;
+    border-color: hsl(var(--border)) !important;
   }
 
   .dark .text-gray-500 {
-    color: rgba(249, 245, 235, 0.7) !important;
+    color: hsl(var(--muted-foreground)) !important;
   }
 
   .dark .text-gray-400 {
-    color: rgba(249, 245, 235, 0.6) !important;
+    color: hsl(var(--muted-foreground)) !important;
   }
 
   .dark .text-gray-600 {
-    color: rgba(249, 245, 235, 0.8) !important;
+    color: hsl(var(--muted-foreground)) !important;
   }
 
   .dark .text-black {
-    color: #F9F5EB !important;
+    color: hsl(var(--foreground)) !important;
   }
 
   /* Dark mode for form elements */
   .dark .text-dark-gray {
-    color: #F9F5EB !important;
+    color: hsl(var(--foreground)) !important;
   }
 
   .dark .placeholder\:text-\[\#B0ABB7\]::placeholder {
-    color: rgba(249, 245, 235, 0.5) !important;
+    color: hsl(var(--muted-foreground)) !important;
   }
 
   /* Dark mode for inputs and form fields */
   .dark input {
-    background-color: rgba(249, 245, 235, 0.1) !important;
-    border-color: rgba(249, 245, 235, 0.2) !important;
-    color: #F9F5EB !important;
+    background-color: hsl(var(--muted)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 
   .dark textarea {
-    background-color: rgba(249, 245, 235, 0.1) !important;
-    border-color: rgba(249, 245, 235, 0.2) !important;
-    color: #F9F5EB !important;
+    background-color: hsl(var(--muted)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 
   .dark select {
-    background-color: rgba(249, 245, 235, 0.1) !important;
-    border-color: rgba(249, 245, 235, 0.2) !important;
-    color: #F9F5EB !important;
+    background-color: hsl(var(--muted)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 
   /* Dark mode for dropdown content */
   .dark [data-radix-select-content] {
-    background-color: rgba(32, 14, 59, 0.95) !important;
-    border-color: rgba(249, 245, 235, 0.2) !important;
+    background-color: hsl(var(--popover)) !important;
+    border-color: hsl(var(--border)) !important;
   }
 
   .dark [data-radix-select-item] {
-    color: #F9F5EB !important;
+    color: hsl(var(--foreground)) !important;
   }
 
   /* Dark mode for file inputs */
   .dark input[type="file"] {
-    color: #F9F5EB !important;
+    color: hsl(var(--foreground)) !important;
   }
 
   .dark input[type="file"]::file-selector-button {
-    background-color: #C8B6E2 !important;
-    color: #2B2B2B !important;
+    background-color: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
   }
 }
 
@@ -238,7 +231,7 @@
   }
 
   .dark .animate-gradient {
-    background: linear-gradient(-45deg, #4A1D6B, #5C2D7A, #6B4C9A, #4A1D6B);
+    background: linear-gradient(-45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)), hsl(var(--primary)));
     background-size: 400% 400%;
     animation: gradient-shift 8s ease infinite;
   }

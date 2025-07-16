@@ -78,7 +78,7 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
         {item.link && item.link.trim() && (
           <button
             onClick={() => onViewItem(item)}
-            className="text-black dark:text-[#F9F5EB] text-xs underline hover:no-underline transition-all duration-200"
+            className="text-black dark:text-foreground text-xs underline hover:no-underline transition-all duration-200"
           >
             view link
           </button>
@@ -87,21 +87,21 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
       
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="font-medium text-black dark:text-[#F9F5EB] truncate pr-2">
+          <h3 className="font-medium text-black dark:text-foreground truncate pr-2">
             {item.itemName}
           </h3>
           {item.price && (
-            <span className="text-black dark:text-[#F9F5EB] font-medium flex-shrink-0">
+            <span className="text-black dark:text-foreground font-medium flex-shrink-0">
               {formatPrice(item.price)}
             </span>
           )}
         </div>
         
-        <p className="text-black dark:text-[#F9F5EB] text-sm mb-2">
+        <p className="text-black dark:text-foreground text-sm mb-2">
           {item.storeName}
         </p>
         
-        <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
+        <div className="text-black dark:text-foreground text-sm mb-3">
           <span>Paused while feeling </span>
           <span 
             className="inline-block px-2 py-1 rounded text-xs font-medium"

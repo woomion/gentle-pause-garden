@@ -38,20 +38,20 @@ const ExtendPauseModal = ({ isOpen, onClose, onExtend, itemName }: ExtendPauseMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20 max-w-sm mx-auto">
+      <DialogContent className="bg-cream dark:bg-background border-gray-200 dark:border-border max-w-sm mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-black dark:text-[#F9F5EB] text-lg">
+          <DialogTitle className="text-black dark:text-foreground text-lg">
             Give it more time
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
-          <p className="text-sm text-black dark:text-[#F9F5EB]">
+          <p className="text-sm text-black dark:text-foreground">
             How much longer would you like to pause <em>{itemName}</em>?
           </p>
           
           <div className="space-y-2">
-            <Label className="text-black dark:text-[#F9F5EB] font-medium text-base">
+            <Label className="text-black dark:text-foreground font-medium text-base">
               Pause for
             </Label>
             
@@ -64,7 +64,7 @@ const ExtendPauseModal = ({ isOpen, onClose, onExtend, itemName }: ExtendPauseMo
                   className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
                     duration === durationOption
                       ? 'bg-lavender border-lavender text-dark-gray'
-                      : 'bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-dark-gray dark:text-[#F9F5EB] hover:border-lavender/50'
+                      : 'bg-white dark:bg-muted border-gray-200 dark:border-border text-dark-gray dark:text-foreground hover:border-lavender/50'
                   }`}
                 >
                   {durationOption === '24-hours' ? '24 hours' : 
@@ -78,14 +78,14 @@ const ExtendPauseModal = ({ isOpen, onClose, onExtend, itemName }: ExtendPauseMo
               value={otherDuration} 
               onValueChange={handleOtherDurationSelect}
             >
-              <SelectTrigger className={`bg-white dark:bg-white/10 border-2 rounded-xl py-3 px-4 transition-all dark:text-[#F9F5EB] z-50 ${
+              <SelectTrigger className={`bg-white dark:bg-muted border-2 rounded-xl py-3 px-4 transition-all dark:text-foreground z-50 ${
                 otherDuration ? 'border-lavender bg-lavender dark:bg-lavender text-dark-gray' : 'border-gray-200 dark:border-gray-600 hover:border-lavender/50'
               }`}>
                 <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 placeholder:font-normal text-base" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-xl z-50">
+              <SelectContent className="bg-white dark:bg-popover border-gray-200 dark:border-border rounded-xl z-50">
                 {otherPauseLengths.map((duration) => (
-                  <SelectItem key={duration} value={duration} className="rounded-lg my-1 dark:text-[#F9F5EB] dark:focus:bg-white/10">
+                  <SelectItem key={duration} value={duration} className="rounded-lg my-1 dark:text-foreground dark:focus:bg-muted">
                     {duration === '2-weeks' ? '2 weeks' :
                      duration === '1-month' ? '1 month' : '3 months'}
                   </SelectItem>
@@ -98,7 +98,7 @@ const ExtendPauseModal = ({ isOpen, onClose, onExtend, itemName }: ExtendPauseMo
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-white/80 dark:hover:bg-white/20"
+              className="flex-1 bg-white/60 dark:bg-muted border-gray-200 dark:border-border text-black dark:text-foreground hover:bg-white/80 dark:hover:bg-muted/80"
             >
               Cancel
             </Button>

@@ -119,16 +119,16 @@ const ItemReviewModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-cream dark:bg-[#200E3B] rounded-2xl w-full max-w-md mx-auto border border-lavender/30 dark:border-gray-600 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-cream dark:bg-background rounded-2xl w-full max-w-md mx-auto border border-lavender/30 dark:border-border relative max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-6 border-b border-lavender/30 dark:border-gray-600">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
+              <h2 className="text-xl font-semibold text-black dark:text-foreground">
                 Ready to decide?
               </h2>
               <div className="flex items-center gap-3 mt-1">
-                <p className="text-black dark:text-[#F9F5EB] text-sm">
+                <p className="text-black dark:text-foreground text-sm">
                   {activeIndex + 1} of {items.length}
                 </p>
                 {/* Directional Attribution Badge */}
@@ -145,7 +145,7 @@ const ItemReviewModal = ({
               onClick={handleClose}
               className="p-2 hover:bg-lavender/20 dark:hover:bg-gray-700 rounded-full transition-colors"
             >
-              <X size={20} className="text-black dark:text-[#F9F5EB]" />
+              <X size={20} className="text-black dark:text-foreground" />
             </button>
           </div>
         </div>

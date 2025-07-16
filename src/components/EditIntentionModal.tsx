@@ -21,16 +21,16 @@ const EditIntentionModal = ({ intention, onSave, onClose }: EditIntentionModalPr
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="bg-cream dark:bg-[#200E3B] border-gray-200 dark:border-white/20 max-w-sm mx-auto">
+      <DialogContent className="bg-cream dark:bg-background border-gray-200 dark:border-border max-w-sm mx-auto">
         <DialogHeader>
-          <DialogTitle className="text-black dark:text-[#F9F5EB]">
+          <DialogTitle className="text-black dark:text-foreground">
             Edit Your Intention
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="intention" className="text-black dark:text-[#F9F5EB]">
+            <Label htmlFor="intention" className="text-black dark:text-foreground">
               What are you reaching for?
             </Label>
             <Input
@@ -46,13 +46,13 @@ const EditIntentionModal = ({ intention, onSave, onClose }: EditIntentionModalPr
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-white/80 dark:hover:bg-white/20"
+              className="flex-1 bg-white/60 dark:bg-muted border-gray-200 dark:border-border text-black dark:text-foreground hover:bg-white/80 dark:hover:bg-muted/80"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSave}
-              className="flex-1 bg-[#C8B6E2] text-black hover:bg-[#B8A6D2]"
+              className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90"
             >
               Save
             </Button>

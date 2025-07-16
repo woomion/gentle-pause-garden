@@ -87,9 +87,9 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md mx-4 rounded-lg bg-[#FAF6F1] dark:bg-[#200E3B] border border-gray-200 dark:border-gray-600">
+      <DialogContent className="max-w-md mx-4 rounded-lg bg-card dark:bg-card border border-gray-200 dark:border-border">
         <DialogHeader className="text-center space-y-4 pt-2">
-          <DialogTitle className="text-lg font-medium text-black dark:text-[#F9F5EB]">
+          <DialogTitle className="text-lg font-medium text-black dark:text-foreground">
             Support Pocket Pause
           </DialogTitle>
           <div className="space-y-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
@@ -110,9 +110,9 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
                   onClick={() => handlePresetSelect(preset.value)}
                   className={`${
                     selectedAmount === preset.value 
-                      ? 'bg-[#CAB6F7] text-black' 
-                      : 'bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]'
-                  } hover:bg-[#B8A3F5] transition-colors`}
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-white/60 dark:bg-muted border-gray-200 dark:border-border text-black dark:text-foreground'
+                  } hover:bg-primary/90 transition-colors`}
                 >
                   {preset.label}
                 </Button>
@@ -120,7 +120,7 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+              <label className="text-sm font-medium text-black dark:text-foreground">
                 Custom Amount
               </label>
               <div className="relative">
@@ -132,7 +132,7 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
                   placeholder="25.00"
                   value={customAmount}
                   onChange={handleCustomAmountChange}
-                  className="pl-7 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]"
+                  className="pl-7 bg-white/60 dark:bg-muted border-gray-200 dark:border-border text-black dark:text-foreground"
                 />
               </div>
             </div>
@@ -140,14 +140,14 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
             <Button
               onClick={handleDonate}
               disabled={loading || (!selectedAmount && !customAmount)}
-              className="w-full bg-[#CAB6F7] hover:bg-[#B8A3F5] text-black font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
             >
               {loading ? 'Processing...' : 'Donate with Stripe'}
             </Button>
 
             <button
               onClick={() => onOpenChange(false)}
-              className="w-full py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors"
+              className="w-full py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-foreground transition-colors"
             >
               Maybe later
             </button>
