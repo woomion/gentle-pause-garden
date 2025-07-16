@@ -12,7 +12,6 @@ const PausedSection = () => {
   const [pausedItems, setPausedItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
   const [selectedItem, setSelectedItem] = useState<PausedItem | LocalPausedItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showPausedItems, setShowPausedItems] = useState(false);
 
   const { user } = useAuth();
 
@@ -137,36 +136,11 @@ const PausedSection = () => {
         show={!user && pausedItems.length > 0}
       />
 
-      {!showPausedItems ? (
-        <div className="text-center py-8">
-          <button
-            onClick={() => setShowPausedItems(true)}
-            className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 px-6 py-3 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors font-medium"
-          >
-            Show Paused Items ({pausedItems.length})
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {pausedItems.length} item{pausedItems.length !== 1 ? 's' : ''} paused
-            </span>
-            <button
-              onClick={() => setShowPausedItems(false)}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-            >
-              Hide items
-            </button>
-          </div>
-          
-          {/* Paused items display */}
-          <PausedItemsCarousel 
-            items={pausedItems}
-            onItemClick={handleItemClick}
-          />
-        </>
-      )}
+      {/* Paused items display */}
+      <PausedItemsCarousel 
+        items={pausedItems}
+        onItemClick={handleItemClick}
+      />
 
       {selectedItem && (
         <PausedItemDetail
