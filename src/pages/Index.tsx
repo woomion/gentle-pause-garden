@@ -106,7 +106,8 @@ const Index = () => {
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           
-          {/* Wisdom Orb Remnant - More Visible */}
+          {/* Wisdom Orb Remnant - Hidden for now */}
+          {/* 
           <div className="relative mb-6">
             <div className="absolute top-0 right-8 z-20">
               <button
@@ -137,6 +138,7 @@ const Index = () => {
               </button>
             </div>
           </div>
+          */}
           <ReviewBanner 
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
