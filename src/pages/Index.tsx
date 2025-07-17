@@ -106,19 +106,19 @@ const Index = () => {
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           
-          {/* Wisdom Orb Remnant */}
+          {/* Wisdom Orb Remnant - More Visible */}
           <div className="relative mb-6">
-            <div className="absolute -top-2 right-4 z-10">
+            <div className="absolute top-0 right-8 z-20">
               <button
                 onClick={() => setWisdomOrbExpanded(!wisdomOrbExpanded)}
                 className="relative group focus:outline-none"
               >
                 {!wisdomOrbExpanded ? (
-                  // Small glowing orb - more visible
+                  // Large glowing orb - very visible
                   <div className="relative">
-                    <div className="absolute inset-0 bg-purple-500/60 dark:bg-purple-400/60 rounded-full blur-md animate-pulse"></div>
-                    <div className="absolute inset-0 bg-purple-500/40 dark:bg-purple-400/40 rounded-full blur-lg animate-pulse"></div>
-                    <div className="relative w-4 h-4 bg-gradient-to-br from-purple-500 to-purple-700 dark:from-purple-400 dark:to-purple-600 rounded-full shadow-lg shadow-purple-500/50 hover:scale-125 transition-transform cursor-pointer animate-pulse"></div>
+                    <div className="absolute inset-0 bg-purple-500 rounded-full blur-xl opacity-75 animate-pulse"></div>
+                    <div className="absolute inset-0 bg-purple-400 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                    <div className="relative w-6 h-6 bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600 rounded-full shadow-2xl shadow-purple-500/80 hover:scale-125 transition-all duration-300 cursor-pointer border-2 border-purple-300/50"></div>
                   </div>
                 ) : (
                   // Expanded message
