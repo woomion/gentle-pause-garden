@@ -133,8 +133,12 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen2 = () => (
     <div className="space-y-6 text-center">
-      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
-        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      <div className="w-full h-48 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+        <img 
+          src="/lovable-uploads/e80ad720-84cd-484f-9a75-4b83ade80b53.png" 
+          alt="Paper cutout illustration of a jar containing shopping items like a cart, t-shirt, and lipstick, representing how Pocket Pause creates space to hold your considerations"
+          className="w-full h-full object-cover rounded-lg"
+        />
       </div>
       
       <div className="space-y-4">
