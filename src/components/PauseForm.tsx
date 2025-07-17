@@ -49,18 +49,18 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   // Body background transition effect
   useEffect(() => {
     const body = document.body;
-    const originalBackground = body.style.backgroundColor;
+    const originalBackground = window.getComputedStyle(body).backgroundColor;
     
     console.log('PauseForm mounted - Original background:', originalBackground);
     console.log('PauseForm mounted - Setting background to whisper-lavender');
     
-    // Apply whisper-lavender background with transition
-    body.style.backgroundColor = 'hsl(260, 47%, 25%)';
+    // Apply whisper-lavender background with transition and !important to override CSS
+    body.style.setProperty('background-color', 'hsl(260, 47%, 25%)', 'important');
     
     // Cleanup on unmount
     return () => {
       console.log('PauseForm unmounted - Restoring background');
-      body.style.backgroundColor = originalBackground;
+      body.style.setProperty('background-color', originalBackground, 'important');
     };
   }, []);
   const [formData, setFormData] = useState({
