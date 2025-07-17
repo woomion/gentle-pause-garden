@@ -335,78 +335,64 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       }
       
       setIsSubmitting(false);
-      console.log('🌟 Item saved successfully, now starting star animation');
+      console.log('🌟 Item saved successfully, closing form and starting star animation');
       
-      // Test if confetti library is working at all
-      try {
-        console.log('🌟 Testing basic confetti...');
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-        console.log('🌟 Basic confetti should have fired!');
-      } catch (error) {
-        console.error('🌟 Confetti error:', error);
-      }
+      // Close form first
+      onClose();
       
-      // Wait a moment then try star rain
+      // Then start star animation on the main screen
       setTimeout(() => {
-        console.log('🌟 Starting star rain animation...');
+        console.log('🌟 Starting star rain on main screen...');
         try {
-          // Simple star rain without complex shapes
-          confetti({
-            particleCount: 50,
-            spread: 60,
-            origin: { x: 0.5, y: 0 },
-            colors: ['#FFD700', '#FFA500', '#FFFF00'],
-            scalar: 0.8,
-            gravity: 0.6,
-            startVelocity: 30
-          });
-          
-          // Another burst from different position
-          setTimeout(() => {
+          // Create falling gold stars from top
+          const createStarRain = () => {
             confetti({
-              particleCount: 30,
+              particleCount: 20,
               spread: 80,
-              origin: { x: 0.3, y: 0 },
-              colors: ['#DAA520', '#F0E68C', '#FF6347'],
+              origin: { x: Math.random(), y: 0 },
+              colors: ['#FFD700', '#FFA500', '#FFFF00', '#DAA520'],
+              shapes: ['star'],
               scalar: 0.6,
-              gravity: 0.5,
-              startVelocity: 25
+              gravity: 0.3,
+              drift: 0.1,
+              startVelocity: 30
             });
-          }, 200);
+          };
           
-          // Third burst
+          // Multiple waves of stars
+          for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+              createStarRain();
+            }, i * 150);
+          }
+          
+          // Add some smaller sparkles
           setTimeout(() => {
             confetti({
               particleCount: 40,
-              spread: 70,
-              origin: { x: 0.7, y: 0 },
-              colors: ['#FFD700', '#FFFF00', '#FFA500'],
-              scalar: 0.7,
+              spread: 100,
+              origin: { x: 0.5, y: 0 },
+              colors: ['#FFFF00', '#F0E68C', '#DAA520'],
+              shapes: ['star'],
+              scalar: 0.4,
               gravity: 0.4,
-              startVelocity: 20
+              drift: 0.2,
+              startVelocity: 25
             });
           }, 400);
           
-          console.log('🌟 All star confetti bursts should have been triggered!');
+          console.log('🌟 All star confetti bursts should be visible on main screen!');
         } catch (error) {
           console.error('🌟 Star rain error:', error);
         }
-      }, 500);
+      }, 200);
       
-      // Close form after stars have time to fall
-      setTimeout(() => {
-        console.log('🌟 Closing form after star animation');
-        onClose();
-        
-        // Only show signup modal if user is not authenticated AND hasn't dismissed it
-        if (!user && !signupModalDismissed && onShowSignup) {
+      // Only show signup modal if user is not authenticated AND hasn't dismissed it
+      if (!user && !signupModalDismissed && onShowSignup) {
+        setTimeout(() => {
           onShowSignup();
-        }
-      }, 2000);
+        }, 2000);
+      }
     }, 1000);
   };
 
