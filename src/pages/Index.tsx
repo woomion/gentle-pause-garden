@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Timer } from 'lucide-react';
 import PauseHeader from '../components/PauseHeader';
@@ -28,6 +28,7 @@ import { useWelcomeFlow } from '../hooks/useWelcomeFlow';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
+  const [wisdomOrbExpanded, setWisdomOrbExpanded] = useState(false);
   
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
@@ -105,20 +106,34 @@ const Index = () => {
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           
-          {/* Wisdom Remnant */}
+          {/* Wisdom Orb Remnant */}
           <div className="relative mb-6">
-            <div className="absolute -top-2 right-4 animate-pulse">
-              <div className="relative">
-                <div className="absolute inset-0 bg-purple-400/20 dark:bg-purple-300/20 rounded-full blur-md animate-pulse"></div>
-                <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-purple-200/50 dark:border-purple-400/30 rounded-lg px-3 py-2 shadow-lg max-w-xs">
-                  <p className="text-xs text-gray-700 dark:text-gray-300 italic">
-                    "I used to have 12 tabs open with carts... now I pause first. It's so freeing." 
-                  </p>
-                  <div className="mt-1 text-[10px] text-purple-600/70 dark:text-purple-400/70">
-                    — another traveler ✨
+            <div className="absolute -top-2 right-4 z-10">
+              <button
+                onClick={() => setWisdomOrbExpanded(!wisdomOrbExpanded)}
+                className="relative group focus:outline-none"
+              >
+                {!wisdomOrbExpanded ? (
+                  // Small glowing orb
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-purple-400/30 dark:bg-purple-300/30 rounded-full blur-sm animate-pulse"></div>
+                    <div className="relative w-3 h-3 bg-gradient-to-br from-purple-400 to-purple-600 dark:from-purple-300 dark:to-purple-500 rounded-full animate-pulse hover:scale-110 transition-transform cursor-pointer"></div>
                   </div>
-                </div>
-              </div>
+                ) : (
+                  // Expanded message
+                  <div className="relative animate-scale-in">
+                    <div className="absolute inset-0 bg-purple-400/20 dark:bg-purple-300/20 rounded-lg blur-md"></div>
+                    <div className="relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-purple-200/50 dark:border-purple-400/30 rounded-lg px-3 py-2 shadow-lg max-w-xs">
+                      <p className="text-xs text-gray-700 dark:text-gray-300 italic">
+                        "I used to have 12 tabs open with carts... now I pause first. It's so freeing." 
+                      </p>
+                      <div className="mt-1 text-[10px] text-purple-600/70 dark:text-purple-400/70">
+                        — another traveler ✨
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </button>
             </div>
           </div>
           <ReviewBanner 
