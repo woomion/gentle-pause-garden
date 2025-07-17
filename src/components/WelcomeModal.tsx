@@ -252,8 +252,12 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen5 = () => (
     <div className="space-y-6 text-center">
-      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
-        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      <div className="w-full h-48 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+        <img 
+          src="/lovable-uploads/8df7c9fc-909d-4562-851c-00c13026f296.png" 
+          alt="Paper cutout illustration of delicate dandelion seeds floating against a purple background, representing lightness and freedom from mental clutter"
+          className="w-full h-full object-cover rounded-lg"
+        />
       </div>
       
       <div className="space-y-4">
