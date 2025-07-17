@@ -338,7 +338,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto transition-all duration-300" 
-         style={{ backgroundColor: 'hsl(260, 47%, 85%)' }}>
+         style={{ backgroundColor: 'hsl(260, 47%, 95%)' }}>
       <div className="min-h-screen px-6 py-8">
         {/* Header */}
         <header className="relative mb-8">
@@ -350,17 +350,16 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               POCKET || PAUSE
             </button>
           </div>
-          
-          <button 
-            onClick={onClose}
-            className="absolute top-6 right-0 md:right-[-24px] p-2 text-black hover:text-taupe transition-colors"
-          >
-            <X size={24} />
-          </button>
         </header>
 
         {/* Form */}
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto relative">
+          <button 
+            onClick={onClose}
+            className="absolute -top-16 right-0 p-2 text-black hover:text-taupe transition-colors"
+          >
+            <X size={24} />
+          </button>
           <h1 className="text-2xl font-semibold text-dark-gray text-center mb-8">
             Add Something to Pause
           </h1>
