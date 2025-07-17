@@ -104,6 +104,23 @@ const Index = () => {
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
+          
+          {/* Wisdom Remnant */}
+          <div className="relative mb-6">
+            <div className="absolute -top-2 right-4 animate-pulse">
+              <div className="relative">
+                <div className="absolute inset-0 bg-purple-400/20 dark:bg-purple-300/20 rounded-full blur-md animate-pulse"></div>
+                <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-purple-200/50 dark:border-purple-400/30 rounded-lg px-3 py-2 shadow-lg max-w-xs">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 italic">
+                    "I used to have 12 tabs open with carts... now I pause first. It's so freeing." 
+                  </p>
+                  <div className="mt-1 text-[10px] text-purple-600/70 dark:text-purple-400/70">
+                    — another traveler ✨
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <ReviewBanner 
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
