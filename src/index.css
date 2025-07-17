@@ -120,6 +120,10 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
+  body.reflective-mode {
+    background-color: hsl(260, 47%, 25%) !important;
+  }
+
   .dark body {
     background-color: #200E3B;
     color: #F9F5EB;

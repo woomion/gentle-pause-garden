@@ -49,18 +49,16 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   // Body background transition effect
   useEffect(() => {
     const body = document.body;
-    const originalBackground = window.getComputedStyle(body).backgroundColor;
     
-    console.log('PauseForm mounted - Original background:', originalBackground);
-    console.log('PauseForm mounted - Setting background to whisper-lavender');
+    console.log('PauseForm mounted - Adding reflective-mode class');
     
-    // Apply whisper-lavender background with transition and !important to override CSS
-    body.style.setProperty('background-color', 'hsl(260, 47%, 25%)', 'important');
+    // Add reflective mode class for smooth transition
+    body.classList.add('reflective-mode');
     
     // Cleanup on unmount
     return () => {
-      console.log('PauseForm unmounted - Restoring background');
-      body.style.setProperty('background-color', originalBackground, 'important');
+      console.log('PauseForm unmounted - Removing reflective-mode class');
+      body.classList.remove('reflective-mode');
     };
   }, []);
   const [formData, setFormData] = useState({
