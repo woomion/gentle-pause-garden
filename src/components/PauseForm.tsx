@@ -303,10 +303,12 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   };
 
   const handleSubmit = async () => {
+    console.log('🌟 handleSubmit called - starting pause submission');
     setIsSubmitting(true);
     
     // Show ripple effect for 1 second
     setTimeout(async () => {
+      console.log('🌟 After 1 second delay - saving item data');
       const itemData = {
         itemName: formData.itemName || 'Unnamed Item',
         storeName: formData.storeName || 'Unknown Store',
@@ -333,60 +335,78 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       }
       
       setIsSubmitting(false);
+      console.log('🌟 Item saved successfully, now starting star animation');
       
-      // Start star rain immediately
-      const createStarRain = () => {
-        // Create multiple bursts of stars from the top
-        for (let i = 0; i < 6; i++) {
+      // Test if confetti library is working at all
+      try {
+        console.log('🌟 Testing basic confetti...');
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+        console.log('🌟 Basic confetti should have fired!');
+      } catch (error) {
+        console.error('🌟 Confetti error:', error);
+      }
+      
+      // Wait a moment then try star rain
+      setTimeout(() => {
+        console.log('🌟 Starting star rain animation...');
+        try {
+          // Simple star rain without complex shapes
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { x: 0.5, y: 0 },
+            colors: ['#FFD700', '#FFA500', '#FFFF00'],
+            scalar: 0.8,
+            gravity: 0.6,
+            startVelocity: 30
+          });
+          
+          // Another burst from different position
           setTimeout(() => {
             confetti({
-              particleCount: 12,
-              spread: 60,
-              origin: { 
-                x: Math.random() * 0.8 + 0.1, // Random position across top
-                y: -0.1 
-              },
-              colors: ['#FFD700', '#FFA500', '#FFFF00', '#F0E68C', '#DAA520', '#FF6347'],
-              scalar: 0.8,
+              particleCount: 30,
+              spread: 80,
+              origin: { x: 0.3, y: 0 },
+              colors: ['#DAA520', '#F0E68C', '#FF6347'],
+              scalar: 0.6,
+              gravity: 0.5,
+              startVelocity: 25
+            });
+          }, 200);
+          
+          // Third burst
+          setTimeout(() => {
+            confetti({
+              particleCount: 40,
+              spread: 70,
+              origin: { x: 0.7, y: 0 },
+              colors: ['#FFD700', '#FFFF00', '#FFA500'],
+              scalar: 0.7,
               gravity: 0.4,
-              drift: 0.1,
               startVelocity: 20
             });
-          }, i * 100);
+          }, 400);
+          
+          console.log('🌟 All star confetti bursts should have been triggered!');
+        } catch (error) {
+          console.error('🌟 Star rain error:', error);
         }
-        
-        // Add some smaller sparkles
-        setTimeout(() => {
-          confetti({
-            particleCount: 30,
-            spread: 80,
-            origin: { x: 0.5, y: -0.1 },
-            colors: ['#FFFF00', '#F0E68C', '#DAA520'],
-            scalar: 0.4,
-            gravity: 0.3,
-            drift: 0.2,
-            startVelocity: 15
-          });
-        }, 300);
-      };
-      
-      // Start the star rain
-      createStarRain();
-      
-      // Add a second wave of stars
-      setTimeout(() => {
-        createStarRain();
       }, 500);
       
       // Close form after stars have time to fall
       setTimeout(() => {
+        console.log('🌟 Closing form after star animation');
         onClose();
         
         // Only show signup modal if user is not authenticated AND hasn't dismissed it
         if (!user && !signupModalDismissed && onShowSignup) {
           onShowSignup();
         }
-      }, 1500);
+      }, 2000);
     }, 1000);
   };
 
