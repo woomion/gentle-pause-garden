@@ -342,48 +342,58 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       
       // Then start star animation on the main screen
       setTimeout(() => {
-        console.log('🌟 Starting star rain on main screen...');
+        console.log('🌟 Starting bright gold star rain on main screen...');
+        
+        // First, ensure confetti canvas is on top
+        setTimeout(() => {
+          const confettiCanvas = document.querySelector('canvas');
+          if (confettiCanvas) {
+            confettiCanvas.style.zIndex = '9999';
+            confettiCanvas.style.pointerEvents = 'none';
+            confettiCanvas.style.position = 'fixed';
+            console.log('🌟 Confetti canvas z-index set to 9999');
+          }
+        }, 50);
+        
         try {
-          // Create falling gold stars from top
+          // Create falling bright gold stars from top
           const createStarRain = () => {
             confetti({
-              particleCount: 20,
-              spread: 80,
+              particleCount: 25,
+              spread: 70,
               origin: { x: Math.random(), y: 0 },
               colors: ['#FFD700', '#FFFF00', '#FFF200', '#FFDF00', '#FFE135'],
               shapes: ['star'],
-              scalar: 0.6,
+              scalar: 0.7,
               gravity: 0.3,
               drift: 0.1,
-              startVelocity: 30,
-              zIndex: 9999
+              startVelocity: 30
             });
           };
           
           // Multiple waves of stars
-          for (let i = 0; i < 8; i++) {
+          for (let i = 0; i < 10; i++) {
             setTimeout(() => {
               createStarRain();
-            }, i * 150);
+            }, i * 120);
           }
           
-          // Add some smaller sparkles
+          // Add some larger sparkles
           setTimeout(() => {
             confetti({
-              particleCount: 40,
-              spread: 100,
+              particleCount: 50,
+              spread: 90,
               origin: { x: 0.5, y: 0 },
-              colors: ['#FFFF00', '#FFD700', '#FFF200', '#FFDF00'],
+              colors: ['#FFFF00', '#FFD700', '#FFF200'],
               shapes: ['star'],
-              scalar: 0.4,
+              scalar: 0.5,
               gravity: 0.4,
               drift: 0.2,
-              startVelocity: 25,
-              zIndex: 9999
+              startVelocity: 25
             });
-          }, 400);
+          }, 300);
           
-          console.log('🌟 All star confetti bursts should be visible on main screen!');
+          console.log('🌟 Bright gold star confetti should be visible on main screen!');
         } catch (error) {
           console.error('🌟 Star rain error:', error);
         }
