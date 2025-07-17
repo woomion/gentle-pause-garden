@@ -46,19 +46,15 @@ const otherPauseLengths = [
 const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
   const { user } = useAuth();
   
-  // Body background transition effect
+  // Form background transition effect
   useEffect(() => {
-    const body = document.body;
+    console.log('PauseForm mounted - Setting up reflective background');
     
-    console.log('PauseForm mounted - Adding reflective-mode class');
+    // No need to modify body since form covers it
+    // The form background will be handled by CSS class
     
-    // Add reflective mode class for smooth transition
-    body.classList.add('reflective-mode');
-    
-    // Cleanup on unmount
     return () => {
-      console.log('PauseForm unmounted - Removing reflective-mode class');
-      body.classList.remove('reflective-mode');
+      console.log('PauseForm unmounted - Cleaning up');
     };
   }, []);
   const [formData, setFormData] = useState({
@@ -341,7 +337,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   };
 
   return (
-    <div className="fixed inset-0 bg-cream z-50 overflow-y-auto transition-colors duration-300">
+    <div className="fixed inset-0 z-50 overflow-y-auto transition-all duration-300" 
+         style={{ backgroundColor: 'hsl(260, 47%, 25%)' }}>
       <div className="min-h-screen px-6 py-8">
         {/* Header */}
         <header className="relative mb-8">
