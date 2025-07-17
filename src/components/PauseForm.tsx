@@ -350,12 +350,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               particleCount: 20,
               spread: 80,
               origin: { x: Math.random(), y: 0 },
-              colors: ['#FFD700', '#FFA500', '#FFFF00', '#DAA520'],
+              colors: ['#FFD700', '#FFFF00', '#FFF200', '#FFDF00', '#FFE135'],
               shapes: ['star'],
               scalar: 0.6,
               gravity: 0.3,
               drift: 0.1,
-              startVelocity: 30
+              startVelocity: 30,
+              zIndex: 9999
             });
           };
           
@@ -372,12 +373,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               particleCount: 40,
               spread: 100,
               origin: { x: 0.5, y: 0 },
-              colors: ['#FFFF00', '#F0E68C', '#DAA520'],
+              colors: ['#FFFF00', '#FFD700', '#FFF200', '#FFDF00'],
               shapes: ['star'],
               scalar: 0.4,
               gravity: 0.4,
               drift: 0.2,
-              startVelocity: 25
+              startVelocity: 25,
+              zIndex: 9999
             });
           }, 400);
           
