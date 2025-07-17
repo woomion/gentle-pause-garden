@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, ShoppingCart } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -85,6 +86,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
   const [currentStep, setCurrentStep] = useState<'pause' | 'details'>('pause');
+  const [isClosing, setIsClosing] = useState(false);
+  const [showMagicalCircle, setShowMagicalCircle] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -332,12 +335,47 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       }
       
       setIsSubmitting(false);
-      onClose();
       
-      // Only show signup modal if user is not authenticated AND hasn't dismissed it
-      if (!user && !signupModalDismissed && onShowSignup) {
-        onShowSignup();
-      }
+      // Start magical closing animation
+      setIsClosing(true);
+      setShowMagicalCircle(true);
+      
+      // Wait for circle to appear and glow
+      setTimeout(() => {
+        // Fire confetti burst
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+        
+        // Additional confetti bursts for magical effect
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.7 }
+          });
+        }, 200);
+        
+        setTimeout(() => {
+          confetti({
+            particleCount: 30,
+            spread: 80,
+            origin: { y: 0.5 }
+          });
+        }, 400);
+        
+        // Close form after confetti
+        setTimeout(() => {
+          onClose();
+          
+          // Only show signup modal if user is not authenticated AND hasn't dismissed it
+          if (!user && !signupModalDismissed && onShowSignup) {
+            onShowSignup();
+          }
+        }, 800);
+      }, 600);
     }, 1000);
   };
 
@@ -753,6 +791,31 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           </div>
         </div>
 
+        {/* Magical Closing Circle Overlay */}
+        {showMagicalCircle && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
+            <div 
+              className="relative"
+              style={{
+                width: '200px',
+                height: '200px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, hsl(260, 47%, 75%) 0%, hsl(260, 47%, 85%) 40%, transparent 70%)',
+                boxShadow: '0 0 60px 20px hsl(260, 47%, 75%), 0 0 100px 40px hsl(260, 47%, 85%)',
+                animation: 'magical-circle 1.4s ease-out forwards',
+              }}
+            >
+              <div 
+                className="absolute inset-0 rounded-full opacity-60"
+                style={{
+                  background: 'radial-gradient(circle, hsl(260, 47%, 90%) 0%, transparent 60%)',
+                  animation: 'magical-pulse 0.8s ease-out forwards',
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="mt-16 text-center text-xs space-y-1" style={{ color: '#A6A1AD' }}>
           <p>|| Pocket Pause—your conscious spending companion</p>
@@ -762,6 +825,39 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           </div>
         </div>
       </div>
+      
+      {/* Magical Circle Animations */}
+      <style>{`
+        @keyframes magical-circle {
+          0% {
+            transform: scale(1);
+            opacity: 0.9;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(0.3);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes magical-pulse {
+          0% {
+            transform: scale(1);
+            opacity: 0.6;
+          }
+          50% {
+            transform: scale(1.3);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(0.1);
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 };
