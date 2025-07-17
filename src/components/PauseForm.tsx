@@ -334,70 +334,59 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       
       setIsSubmitting(false);
       
-      // Wait for form to start closing
-      setTimeout(() => {
-        // Create gentle rain of stars from top
-        const starRain = () => {
-          confetti({
-            particleCount: 15,
-            spread: 40,
-            origin: { x: Math.random(), y: 0 },
-            colors: ['#FFD700', '#FFA500', '#FFFF00', '#F0E68C', '#DAA520'],
-            shapes: ['star', 'circle'],
-            scalar: 0.6,
-            drift: 0.1,
-            gravity: 0.3
-          });
-        };
+      // Start star rain immediately
+      const createStarRain = () => {
+        // Create multiple bursts of stars from the top
+        for (let i = 0; i < 6; i++) {
+          setTimeout(() => {
+            confetti({
+              particleCount: 12,
+              spread: 60,
+              origin: { 
+                x: Math.random() * 0.8 + 0.1, // Random position across top
+                y: -0.1 
+              },
+              colors: ['#FFD700', '#FFA500', '#FFFF00', '#F0E68C', '#DAA520', '#FF6347'],
+              scalar: 0.8,
+              gravity: 0.4,
+              drift: 0.1,
+              startVelocity: 20
+            });
+          }, i * 100);
+        }
         
-        // Start the star rain
-        starRain();
-        
-        // Continue raining stars at intervals
-        const rainInterval = setInterval(starRain, 150);
-        
-        // Add some sparkles mixed in
+        // Add some smaller sparkles
         setTimeout(() => {
           confetti({
-            particleCount: 25,
-            spread: 60,
-            origin: { x: 0.3, y: 0 },
+            particleCount: 30,
+            spread: 80,
+            origin: { x: 0.5, y: -0.1 },
             colors: ['#FFFF00', '#F0E68C', '#DAA520'],
-            shapes: ['circle'],
-            scalar: 0.3,
-            drift: 0.15,
-            gravity: 0.4
+            scalar: 0.4,
+            gravity: 0.3,
+            drift: 0.2,
+            startVelocity: 15
           });
-        }, 100);
+        }, 300);
+      };
+      
+      // Start the star rain
+      createStarRain();
+      
+      // Add a second wave of stars
+      setTimeout(() => {
+        createStarRain();
+      }, 500);
+      
+      // Close form after stars have time to fall
+      setTimeout(() => {
+        onClose();
         
-        setTimeout(() => {
-          confetti({
-            particleCount: 25,
-            spread: 60,
-            origin: { x: 0.7, y: 0 },
-            colors: ['#FFD700', '#FFA500'],
-            shapes: ['star'],
-            scalar: 0.8,
-            drift: 0.1,
-            gravity: 0.3
-          });
-        }, 250);
-        
-        // Clear interval and close form
-        setTimeout(() => {
-          clearInterval(rainInterval);
-        }, 1000);
-        
-        // Close form after confetti
-        setTimeout(() => {
-          onClose();
-          
-          // Only show signup modal if user is not authenticated AND hasn't dismissed it
-          if (!user && !signupModalDismissed && onShowSignup) {
-            onShowSignup();
-          }
-        }, 800);
-      }, 600);
+        // Only show signup modal if user is not authenticated AND hasn't dismissed it
+        if (!user && !signupModalDismissed && onShowSignup) {
+          onShowSignup();
+        }
+      }, 1500);
     }, 1000);
   };
 
