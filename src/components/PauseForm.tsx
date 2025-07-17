@@ -55,7 +55,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     console.log('PauseForm mounted - Setting background to whisper-lavender');
     
     // Apply whisper-lavender background with transition
-    body.style.backgroundColor = 'hsl(260, 47%, 88%)';
+    body.style.backgroundColor = 'hsl(260, 47%, 25%)';
     
     // Cleanup on unmount
     return () => {
