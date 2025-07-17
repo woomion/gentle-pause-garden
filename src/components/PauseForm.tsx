@@ -342,19 +342,25 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       
       // Wait for circle to appear and glow
       setTimeout(() => {
-        // Fire confetti burst
+        // Fire star confetti burst
         confetti({
-          particleCount: 100,
+          particleCount: 80,
           spread: 70,
-          origin: { y: 0.6 }
+          origin: { y: 0.6 },
+          colors: ['#FFD700', '#FFA500', '#FFFF00', '#F0E68C', '#DAA520'],
+          shapes: ['star'],
+          scalar: 0.8
         });
         
-        // Additional confetti bursts for magical effect
+        // Additional sparkle bursts for magical effect
         setTimeout(() => {
           confetti({
-            particleCount: 50,
+            particleCount: 40,
             spread: 60,
-            origin: { y: 0.7 }
+            origin: { y: 0.7 },
+            colors: ['#FFD700', '#FFFF00', '#F0E68C'],
+            shapes: ['star'],
+            scalar: 0.6
           });
         }, 200);
         
@@ -362,9 +368,24 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           confetti({
             particleCount: 30,
             spread: 80,
-            origin: { y: 0.5 }
+            origin: { y: 0.5 },
+            colors: ['#FFA500', '#DAA520', '#FFD700'],
+            shapes: ['star'],
+            scalar: 0.9
           });
         }, 400);
+        
+        // Final sparkle shower
+        setTimeout(() => {
+          confetti({
+            particleCount: 20,
+            spread: 50,
+            origin: { y: 0.4 },
+            colors: ['#FFFF00', '#F0E68C'],
+            shapes: ['star'],
+            scalar: 0.4
+          });
+        }, 600);
         
         // Close form after confetti
         setTimeout(() => {
