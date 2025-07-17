@@ -6,18 +6,27 @@ import './index.css'
 
 console.log('Main.tsx: Starting app');
 
-// Ensure page always starts at top on refresh
-window.addEventListener('beforeunload', () => {
+// Comprehensive scroll restoration
+const scrollToTop = () => {
   window.scrollTo(0, 0);
-});
-
-// Also scroll to top on page load
-window.addEventListener('load', () => {
-  window.scrollTo(0, 0);
-});
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+};
 
 // Immediate scroll to top
-window.scrollTo(0, 0);
+scrollToTop();
+
+// Ensure page always starts at top on refresh/load
+window.addEventListener('beforeunload', scrollToTop);
+window.addEventListener('load', scrollToTop);
+window.addEventListener('pageshow', scrollToTop);
+
+// Additional scroll restoration after DOM is ready
+document.addEventListener('DOMContentLoaded', scrollToTop);
+
+// React-specific scroll restoration
+setTimeout(scrollToTop, 0);
+setTimeout(scrollToTop, 100);
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

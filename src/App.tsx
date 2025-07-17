@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import PauseLog from "./pages/PauseLog";
@@ -23,6 +23,27 @@ import MobileDebugger from "./components/MobileDebugger";
 import { pushNotificationService } from "./services/pushNotificationService";
 
 const queryClient = new QueryClient();
+
+// Component to handle scroll restoration on route changes
+const ScrollToTop = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    
+    scrollToTop();
+    
+    // Additional scroll restoration with delay for mobile
+    setTimeout(scrollToTop, 0);
+    setTimeout(scrollToTop, 100);
+  }, [location]);
+  
+  return null;
+};
 
 const App = () => {
   // Initialize push notifications on app start
@@ -58,6 +79,7 @@ const App = () => {
               <Sonner />
               
               <BrowserRouter>
+                <ScrollToTop />
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
