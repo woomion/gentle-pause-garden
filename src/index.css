@@ -122,6 +122,7 @@
 
   body.reflective-mode {
     background-color: hsl(260, 47%, 25%) !important;
+    color: #F9F5EB !important;
   }
 
   .dark body {

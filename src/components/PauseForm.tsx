@@ -346,14 +346,17 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         {/* Header */}
         <header className="relative mb-8">
           <div className="text-center">
-            <div className="text-black font-medium text-lg tracking-wide mb-2">
+            <button 
+              onClick={onClose}
+              className="text-black font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors"
+            >
               POCKET || PAUSE
-            </div>
+            </button>
           </div>
           
           <button 
             onClick={onClose}
-            className="absolute top-6 right-0 p-2 text-black hover:text-taupe transition-colors"
+            className="absolute top-6 right-0 md:right-[-24px] p-2 text-black hover:text-taupe transition-colors"
           >
             <X size={24} />
           </button>
