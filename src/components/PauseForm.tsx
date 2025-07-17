@@ -51,11 +51,15 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     const body = document.body;
     const originalBackground = body.style.backgroundColor;
     
+    console.log('PauseForm mounted - Original background:', originalBackground);
+    console.log('PauseForm mounted - Setting background to whisper-lavender');
+    
     // Apply whisper-lavender background with transition
-    body.style.backgroundColor = 'hsl(var(--whisper-lavender))';
+    body.style.backgroundColor = '#F4F1FA';
     
     // Cleanup on unmount
     return () => {
+      console.log('PauseForm unmounted - Restoring background');
       body.style.backgroundColor = originalBackground;
     };
   }, []);
