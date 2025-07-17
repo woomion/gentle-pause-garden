@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { X, ShoppingCart } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -335,75 +334,16 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       }
       
       setIsSubmitting(false);
-      console.log('🌟 Item saved successfully, closing form and starting star animation');
+      console.log('🌟 Item saved successfully, closing form');
       
-      // Close form first
+      // Close form
       onClose();
-      
-      // Then start star animation on the main screen
-      setTimeout(() => {
-        console.log('🌟 Starting bright gold star rain on main screen...');
-        
-        // First, ensure confetti canvas is on top
-        setTimeout(() => {
-          const confettiCanvas = document.querySelector('canvas');
-          if (confettiCanvas) {
-            confettiCanvas.style.zIndex = '9999';
-            confettiCanvas.style.pointerEvents = 'none';
-            confettiCanvas.style.position = 'fixed';
-            console.log('🌟 Confetti canvas z-index set to 9999');
-          }
-        }, 50);
-        
-        try {
-          // Create falling bright gold stars from top
-          const createStarRain = () => {
-            confetti({
-              particleCount: 25,
-              spread: 70,
-              origin: { x: Math.random(), y: 0 },
-              colors: ['#FFD700', '#FFFF00', '#FFF200', '#FFDF00', '#FFE135'],
-              shapes: ['star'],
-              scalar: 0.7,
-              gravity: 0.3,
-              drift: 0.1,
-              startVelocity: 30
-            });
-          };
-          
-          // Multiple waves of stars
-          for (let i = 0; i < 10; i++) {
-            setTimeout(() => {
-              createStarRain();
-            }, i * 120);
-          }
-          
-          // Add some larger sparkles
-          setTimeout(() => {
-            confetti({
-              particleCount: 50,
-              spread: 90,
-              origin: { x: 0.5, y: 0 },
-              colors: ['#FFFF00', '#FFD700', '#FFF200'],
-              shapes: ['star'],
-              scalar: 0.5,
-              gravity: 0.4,
-              drift: 0.2,
-              startVelocity: 25
-            });
-          }, 300);
-          
-          console.log('🌟 Bright gold star confetti should be visible on main screen!');
-        } catch (error) {
-          console.error('🌟 Star rain error:', error);
-        }
-      }, 200);
       
       // Only show signup modal if user is not authenticated AND hasn't dismissed it
       if (!user && !signupModalDismissed && onShowSignup) {
         setTimeout(() => {
           onShowSignup();
-        }, 2000);
+        }, 500);
       }
     }, 1000);
   };
