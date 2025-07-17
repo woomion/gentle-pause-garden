@@ -172,8 +172,12 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen3 = () => (
     <div className="space-y-6 text-center">
-      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
-        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      <div className="w-full h-48 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+        <img 
+          src="/lovable-uploads/6b7a9f31-af85-4340-8547-916d543032a7.png" 
+          alt="Paper cutout illustration of a beige coat with a purple pause button symbol, representing the choice to pause before making a purchase decision"
+          className="w-full h-full object-cover rounded-lg"
+        />
       </div>
       
       <div className="space-y-4">
