@@ -86,8 +86,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
   const [currentStep, setCurrentStep] = useState<'pause' | 'details'>('pause');
-  const [isClosing, setIsClosing] = useState(false);
-  const [showMagicalCircle, setShowMagicalCircle] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -336,56 +334,59 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
       
       setIsSubmitting(false);
       
-      // Start magical closing animation
-      setIsClosing(true);
-      setShowMagicalCircle(true);
-      
-      // Wait for circle to appear and glow
+      // Wait for form to start closing
       setTimeout(() => {
-        // Fire star confetti burst
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#FFD700', '#FFA500', '#FFFF00', '#F0E68C', '#DAA520'],
-          shapes: ['star'],
-          scalar: 0.8
-        });
+        // Create gentle rain of stars from top
+        const starRain = () => {
+          confetti({
+            particleCount: 15,
+            spread: 40,
+            origin: { x: Math.random(), y: 0 },
+            colors: ['#FFD700', '#FFA500', '#FFFF00', '#F0E68C', '#DAA520'],
+            shapes: ['star', 'circle'],
+            scalar: 0.6,
+            drift: 0.1,
+            gravity: 0.3
+          });
+        };
         
-        // Additional sparkle bursts for magical effect
+        // Start the star rain
+        starRain();
+        
+        // Continue raining stars at intervals
+        const rainInterval = setInterval(starRain, 150);
+        
+        // Add some sparkles mixed in
         setTimeout(() => {
           confetti({
-            particleCount: 40,
+            particleCount: 25,
             spread: 60,
-            origin: { y: 0.7 },
-            colors: ['#FFD700', '#FFFF00', '#F0E68C'],
-            shapes: ['star'],
-            scalar: 0.6
+            origin: { x: 0.3, y: 0 },
+            colors: ['#FFFF00', '#F0E68C', '#DAA520'],
+            shapes: ['circle'],
+            scalar: 0.3,
+            drift: 0.15,
+            gravity: 0.4
           });
-        }, 200);
+        }, 100);
         
         setTimeout(() => {
           confetti({
-            particleCount: 30,
-            spread: 80,
-            origin: { y: 0.5 },
-            colors: ['#FFA500', '#DAA520', '#FFD700'],
+            particleCount: 25,
+            spread: 60,
+            origin: { x: 0.7, y: 0 },
+            colors: ['#FFD700', '#FFA500'],
             shapes: ['star'],
-            scalar: 0.9
+            scalar: 0.8,
+            drift: 0.1,
+            gravity: 0.3
           });
-        }, 400);
+        }, 250);
         
-        // Final sparkle shower
+        // Clear interval and close form
         setTimeout(() => {
-          confetti({
-            particleCount: 20,
-            spread: 50,
-            origin: { y: 0.4 },
-            colors: ['#FFFF00', '#F0E68C'],
-            shapes: ['star'],
-            scalar: 0.4
-          });
-        }, 600);
+          clearInterval(rainInterval);
+        }, 1000);
         
         // Close form after confetti
         setTimeout(() => {
@@ -812,31 +813,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           </div>
         </div>
 
-        {/* Magical Closing Circle Overlay */}
-        {showMagicalCircle && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
-            <div 
-              className="relative"
-              style={{
-                width: '200px',
-                height: '200px',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, hsl(260, 47%, 75%) 0%, hsl(260, 47%, 85%) 40%, transparent 70%)',
-                boxShadow: '0 0 60px 20px hsl(260, 47%, 75%), 0 0 100px 40px hsl(260, 47%, 85%)',
-                animation: 'magical-circle 1.4s ease-out forwards',
-              }}
-            >
-              <div 
-                className="absolute inset-0 rounded-full opacity-60"
-                style={{
-                  background: 'radial-gradient(circle, hsl(260, 47%, 90%) 0%, transparent 60%)',
-                  animation: 'magical-pulse 0.8s ease-out forwards',
-                }}
-              />
-            </div>
-          </div>
-        )}
-
         {/* Footer */}
         <div className="mt-16 text-center text-xs space-y-1" style={{ color: '#A6A1AD' }}>
           <p>|| Pocket Pause—your conscious spending companion</p>
@@ -846,39 +822,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           </div>
         </div>
       </div>
-      
-      {/* Magical Circle Animations */}
-      <style>{`
-        @keyframes magical-circle {
-          0% {
-            transform: scale(1);
-            opacity: 0.9;
-          }
-          50% {
-            transform: scale(1.1);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(0.3);
-            opacity: 0;
-          }
-        }
-        
-        @keyframes magical-pulse {
-          0% {
-            transform: scale(1);
-            opacity: 0.6;
-          }
-          50% {
-            transform: scale(1.3);
-            opacity: 0.8;
-          }
-          100% {
-            transform: scale(0.1);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 };
