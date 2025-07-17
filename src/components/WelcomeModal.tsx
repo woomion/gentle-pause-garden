@@ -212,8 +212,12 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen4 = () => (
     <div className="space-y-6 text-center">
-      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
-        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      <div className="w-full h-48 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+        <img 
+          src="/lovable-uploads/760792e5-34ff-4bc0-925c-bca522d834ed.png" 
+          alt="Paper cutout illustration of a bright sun with radiating rays emerging from behind soft clouds, representing clarity and reflection after a pause"
+          className="w-full h-full object-cover rounded-lg"
+        />
       </div>
       
       <div className="space-y-4">
