@@ -92,8 +92,12 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen1 = () => (
     <div className="space-y-6 text-center">
-      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
-        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      <div className="w-full h-48 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+        <img 
+          src="/lovable-uploads/fa26fad4-484b-44bb-8724-2aa247b7da6f.png" 
+          alt="Abstract illustration showing the noisy world of shopping with paper cutout style elements including shopping carts, quotation marks, and various symbols in layered wavy patterns"
+          className="w-full h-full object-cover rounded-lg"
+        />
       </div>
       
       <div className="space-y-4">
