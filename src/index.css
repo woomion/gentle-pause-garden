@@ -61,6 +61,7 @@
     --decide-now-foreground: 222.2 84% 4.9%;
     --section-header: 263 35% 88%;
     --section-header-foreground: 222.2 84% 4.9%;
+    --whisper-lavender: 260 47% 96%;
   }
 
   .dark {
@@ -103,6 +104,7 @@
     --decide-now-foreground: 222.2 84% 4.9%;
     --section-header: 263 20% 25%;
     --section-header-foreground: 210 40% 98%;
+    --whisper-lavender: 260 30% 20%;
   }
 }
 

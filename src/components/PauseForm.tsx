@@ -45,6 +45,20 @@ const otherPauseLengths = [
 
 const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
   const { user } = useAuth();
+  
+  // Body background transition effect
+  useEffect(() => {
+    const body = document.body;
+    const originalBackground = body.style.backgroundColor;
+    
+    // Apply whisper-lavender background with transition
+    body.style.backgroundColor = 'hsl(var(--whisper-lavender))';
+    
+    // Cleanup on unmount
+    return () => {
+      body.style.backgroundColor = originalBackground;
+    };
+  }, []);
   const [formData, setFormData] = useState({
     link: '',
     itemName: '',
