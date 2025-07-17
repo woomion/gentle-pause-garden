@@ -114,10 +114,11 @@ const Index = () => {
                 className="relative group focus:outline-none"
               >
                 {!wisdomOrbExpanded ? (
-                  // Small glowing orb
+                  // Small glowing orb - more visible
                   <div className="relative">
-                    <div className="absolute inset-0 bg-purple-400/30 dark:bg-purple-300/30 rounded-full blur-sm animate-pulse"></div>
-                    <div className="relative w-3 h-3 bg-gradient-to-br from-purple-400 to-purple-600 dark:from-purple-300 dark:to-purple-500 rounded-full animate-pulse hover:scale-110 transition-transform cursor-pointer"></div>
+                    <div className="absolute inset-0 bg-purple-500/60 dark:bg-purple-400/60 rounded-full blur-md animate-pulse"></div>
+                    <div className="absolute inset-0 bg-purple-500/40 dark:bg-purple-400/40 rounded-full blur-lg animate-pulse"></div>
+                    <div className="relative w-4 h-4 bg-gradient-to-br from-purple-500 to-purple-700 dark:from-purple-400 dark:to-purple-600 rounded-full shadow-lg shadow-purple-500/50 hover:scale-125 transition-transform cursor-pointer animate-pulse"></div>
                   </div>
                 ) : (
                   // Expanded message
