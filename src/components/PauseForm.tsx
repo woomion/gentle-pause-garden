@@ -337,7 +337,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto transition-all duration-300" 
+    <div className="fixed inset-0 z-50 overflow-y-auto transition-all duration-1000 ease-out" 
          style={{ backgroundColor: 'hsl(260, 47%, 95%)' }}>
       <div className="min-h-screen px-6 py-8">
         {/* Header */}
