@@ -91,61 +91,56 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
   );
 
   const renderScreen1 = () => (
-    <>
-      <div className="space-y-6 text-center">
-        <img 
-          src="/lovable-uploads/da2e57d6-d551-4244-92c8-4ea04dd6a895.png" 
-          alt="Purple folder with white dot on cream background"
-          className="w-full max-w-xs mx-auto rounded-lg"
-        />
-        
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
-            Hi {name || 'there'}, you're here.
-          </h2>
-          
-          <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
-            Pocket Pause is a quiet place to check in before you check out.
-          </p>
-        </div>
-        
-        <div className="flex justify-center gap-3 mt-6">
-          {showNameStep && (
-            <button
-              onClick={handleBack}
-              className="bg-transparent border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200"
-            >
-              ← Back
-            </button>
-          )}
-          <button
-            onClick={handleNext}
-            className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
-            style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
-          >
-            Next →
-          </button>
-        </div>
+    <div className="space-y-6 text-center">
+      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
+        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
       </div>
-    </>
+      
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
+          The world is noisy.
+        </h2>
+        
+        <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
+          Ads, carts, lists, open tabs, endless options.<br />
+          It's easy to forget what you actually want.
+        </p>
+      </div>
+      
+      <div className="flex justify-center gap-3 mt-6">
+        {showNameStep && (
+          <button
+            onClick={handleBack}
+            className="bg-transparent border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200"
+          >
+            ← Back
+          </button>
+        )}
+        <button
+          onClick={handleNext}
+          className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
+          style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
+        >
+          Next →
+        </button>
+      </div>
+    </div>
   );
 
   const renderScreen2 = () => (
     <div className="space-y-6 text-center">
-      <img 
-        src="/lovable-uploads/1367d743-1b24-47dd-adba-c17931d597c6.png" 
-        alt="Yellow curved line on cream background"
-        className="w-full max-w-xs mx-auto rounded-lg"
-      />
+      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
+        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      </div>
       
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
-          We're not here to budget.
+          Pocket Pause clears space.
         </h2>
         
         <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
-          This isn't about tracking every penny.<br />
-          It's about noticing what's pulling at you — and why.
+          This is a space to hold things you're considering and give yourself a little distance before deciding.<br />
+          So you can move slower, and choose with intention.
         </p>
       </div>
       
@@ -169,14 +164,19 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen3 = () => (
     <div className="space-y-6 text-center">
+      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
+        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      </div>
+      
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
-          One pause at a time.
+          Choose your pause.
         </h2>
         
         <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
-          Add anything you're considering — a sweater, a course, a plan.<br />
-          Let it breathe for a day or two. Then check back in.
+          Add something you're considering — a course, a coat, a cart.<br />
+          Set a pause length: a day, a week, a month.<br />
+          Let it breathe.
         </p>
       </div>
       
@@ -200,14 +200,19 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen4 = () => (
     <div className="space-y-6 text-center">
+      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
+        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      </div>
+      
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
-          You don't have to pause alone.
+          Come back and reflect.
         </h2>
         
         <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
-          Share a pause with a partner.<br />
-          Reflect together. Decide with care.
+          When your pause ends, check back in.<br />
+          Do you still want it?<br />
+          A pause gives you space to see what really matters.
         </p>
       </div>
       
@@ -231,13 +236,20 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
 
   const renderScreen5 = () => (
     <div className="space-y-6 text-center">
+      <div className="w-full h-32 bg-muted/50 rounded-lg flex items-center justify-center mb-4">
+        <span className="text-muted-foreground text-sm">[Image placeholder]</span>
+      </div>
+      
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
-          Joy lives in the choosing.
+          A little lighter.
         </h2>
         
         <p className="text-lg text-black dark:text-[#F9F5EB] font-medium">
-          Whether you say yes or no — presence is the point.
+          Fewer impulse buys.<br />
+          Fewer open carts.<br />
+          Fewer mental tabs.<br />
+          More clarity — and calm — in your everyday choices.
         </p>
       </div>
       
@@ -263,31 +275,26 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
     <div className="space-y-6 text-center">
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-black dark:text-[#F9F5EB]">
-          Here's how to use Pocket Pause
+          How to start.
         </h2>
         
-        <div className="text-center space-y-4 text-black dark:text-[#F9F5EB] font-medium">
-          <div className="space-y-0.5">
-            <p className="font-semibold">Add an item to pause</p>
-            <p>Add any item you're thinking about buying.</p>
+        <div className="text-left space-y-3 max-w-md mx-auto text-black dark:text-[#F9F5EB] font-medium">
+          <div className="flex items-start gap-3">
+            <span className="text-black dark:text-[#F9F5EB] mt-1">➤</span>
+            <span>Add something you're considering</span>
           </div>
-          
-          <div className="space-y-0.5">
-            <p className="font-semibold">Let it breathe</p>
-            <p>Set how long you want to wait before deciding.</p>
+          <div className="flex items-start gap-3">
+            <span className="text-black dark:text-[#F9F5EB] mt-1">➤</span>
+            <span>Set a pause length</span>
           </div>
-          
-          <div className="space-y-0.5">
-            <p className="font-semibold">Check back in</p>
-            <p>Review your item when the pause period ends.</p>
+          <div className="flex items-start gap-3">
+            <span className="text-black dark:text-[#F9F5EB] mt-1">➤</span>
+            <span>Come back when it ends</span>
           </div>
-          
-          <div className="space-y-0.5">
-            <p className="font-semibold">Reflect</p>
-            <p>Choose to purchase, let go of, or pause again.</p>
+          <div className="flex items-start gap-3">
+            <span className="text-black dark:text-[#F9F5EB] mt-1">➤</span>
+            <span>Reflect and decide — with presence</span>
           </div>
-          
-          <p className="text-sm italic pt-2">You can also share paused items with a partner for thoughtful decisions together.</p>
         </div>
       </div>
       
@@ -303,7 +310,7 @@ const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalPro
           className="bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
           style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
         >
-          Start Your First Pause →
+          Start Your First Pause
         </button>
       </div>
     </div>
