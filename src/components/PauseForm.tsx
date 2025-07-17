@@ -67,6 +67,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
+  const [currentStep, setCurrentStep] = useState<'pause' | 'details'>('pause');
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -267,6 +268,22 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     }));
   };
 
+  const handlePauseCommit = () => {
+    // Validate essential fields for the pause step
+    if (!formData.emotion || (!formData.duration && !formData.otherDuration)) {
+      return; // Could add validation feedback here
+    }
+    setCurrentStep('details');
+  };
+
+  const handleBackToBasics = () => {
+    setCurrentStep('pause');
+  };
+
+  const isBasicStepValid = () => {
+    return formData.emotion && (formData.duration || formData.otherDuration);
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
@@ -350,331 +367,366 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           )}
 
           <div className="space-y-4">
-            {/* Link Field */}
-            <div className="space-y-1">
-              <Label htmlFor="link" className="text-dark-gray font-medium text-base">
-                Link (paste a product URL)
-              </Label>
-              <div className="relative">
-                <Input
-                  id="link"
-                  type="url"
-                  placeholder="www.example.com/item"
-                  value={formData.link}
-                  onChange={(e) => handleLinkChange(e.target.value)}
-                  className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
-                />
-                {isParsingUrl && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <div className="w-4 h-4 border-2 border-lavender border-t-transparent rounded-full animate-spin"></div>
+            {currentStep === 'pause' ? (
+              // STEP 1: Core pause decision
+              <>
+                {/* Link Field */}
+                <div className="space-y-1">
+                  <Label htmlFor="link" className="text-dark-gray font-medium text-base">
+                    Link (paste a product URL)
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="link"
+                      type="url"
+                      placeholder="www.example.com/item"
+                      value={formData.link}
+                      onChange={(e) => handleLinkChange(e.target.value)}
+                      className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                    />
+                    {isParsingUrl && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="w-4 h-4 border-2 border-lavender border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              {formData.imageUrl && !formData.photo && (
-                <div className="mt-2">
-                  <p className="text-sm text-green-600">✓ Found product image automatically</p>
+                  {formData.imageUrl && !formData.photo && (
+                    <div className="mt-2">
+                      <p className="text-sm text-green-600">✓ Found product details automatically</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Cart Checkbox */}
-            <div className="flex items-center space-x-3 -mt-2 mb-4">
-              <Checkbox
-                id="isCart"
-                checked={formData.isCart}
-                onCheckedChange={(checked) => {
-                  const isChecked = checked === true;
-                  setFormData(prev => ({ 
-                    ...prev, 
-                    isCart: isChecked,
-                    itemType: isChecked ? 'cart' : 'item',
-                    itemName: isChecked && !prev.itemName ? 'Cart' : prev.itemName,
-                    imageUrl: isChecked && !prev.imageUrl && !prev.photo ? 'cart-placeholder' : prev.imageUrl
-                  }));
-                }}
-                className="h-5 w-5"
-              />
-              <Label htmlFor="isCart" className="text-dark-gray font-medium text-base cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <ShoppingCart size={16} />
-                  Mark as Cart (saving multiple items)
-                </div>
-              </Label>
-            </div>
-
-            {/* Item Name Field */}
-            <div className="space-y-1">
-              <Label htmlFor="itemName" className="text-dark-gray font-medium text-base">
-                Item Name
-              </Label>
-              <Input
-                id="itemName"
-                type="text"
-                placeholder="What are you thinking of buying?"
-                value={formData.itemName}
-                onChange={(e) => handleInputChange('itemName', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
-              />
-            </div>
-
-            {/* Store Name Field */}
-            <div className="space-y-1">
-              <Label htmlFor="storeName" className="text-dark-gray font-medium text-base">
-                Store Name
-              </Label>
-              <Input
-                id="storeName"
-                type="text"
-                placeholder="Where is this item from?"
-                value={formData.storeName}
-                onChange={(e) => handleInputChange('storeName', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
-              />
-            </div>
-
-            {/* Price Field */}
-            <div className="space-y-1">
-              <Label htmlFor="price" className="text-dark-gray font-medium text-base">
-                Price
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                placeholder="0.00"
-                value={formData.price}
-                onChange={(e) => handleInputChange('price', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
-              />
-            </div>
-
-            {/* Photo Upload Field */}
-            <div className="space-y-1">
-              <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
-                Photo (optional)
-              </Label>
-              
-              {/* Use Placeholder Checkbox */}
-              {!formData.photo && !formData.imageUrl && (
-                <div className="flex items-center space-x-3 mb-3">
+                {/* Cart Checkbox */}
+                <div className="flex items-center space-x-3 -mt-2 mb-4">
                   <Checkbox
-                    id="usePlaceholder"
-                    checked={formData.usePlaceholder}
+                    id="isCart"
+                    checked={formData.isCart}
                     onCheckedChange={(checked) => {
-                      setFormData(prev => ({ ...prev, usePlaceholder: checked === true }));
+                      const isChecked = checked === true;
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        isCart: isChecked,
+                        itemType: isChecked ? 'cart' : 'item',
+                        itemName: isChecked && !prev.itemName ? 'Cart' : prev.itemName,
+                        imageUrl: isChecked && !prev.imageUrl && !prev.photo ? 'cart-placeholder' : prev.imageUrl
+                      }));
                     }}
-                    className="h-4 w-4"
+                    className="h-5 w-5"
                   />
-                  <Label htmlFor="usePlaceholder" className="text-sm text-gray-600 cursor-pointer">
-                    Use placeholder image
+                  <Label htmlFor="isCart" className="text-dark-gray font-medium text-base cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <ShoppingCart size={16} />
+                      Mark as Cart (saving multiple items)
+                    </div>
                   </Label>
                 </div>
-              )}
-              
-              {/* Show placeholder preview if checked */}
-              {formData.usePlaceholder && !formData.photo && !formData.imageUrl && (
-                <div className="mb-3">
-                  <img 
-                    src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
-                    alt="Placeholder preview" 
-                    className="w-20 h-20 object-cover rounded-lg border border-gray-200"
-                  />
-                  <p className="text-sm text-blue-600 mt-1">✓ Placeholder image selected</p>
+
+                {/* Emotion Selection */}
+                <div className="space-y-1">
+                  <Label className="text-dark-gray font-medium text-base">
+                    How are you feeling right now?
+                  </Label>
+                  <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
+                    <SelectTrigger className="bg-white border-gray-200 rounded-xl py-3 px-4">
+                      <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200 rounded-xl max-h-60 overflow-y-auto">
+                      {emotions.map((emotion) => (
+                        <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-4 h-4 rounded-full"
+                              style={{ backgroundColor: getEmotionColor(emotion.name) }}
+                            />
+                            <span className="capitalize">{emotion.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
-              
-              {(formData.imageUrl && !formData.photo) || (formData.isCart && formData.imageUrl === 'cart-placeholder') ? (
-                <div className="w-full bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                  {formData.isCart && formData.imageUrl === 'cart-placeholder' ? (
-                    <div className="flex flex-col items-center gap-2 mb-3">
-                      <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <ShoppingCart size={24} className="text-blue-600" />
-                      </div>
-                      <p className="text-blue-600 text-sm font-medium">
-                        🛒 Cart placeholder image
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-green-600 text-sm font-medium">
-                      ✓ Product image already grabbed automatically
-                    </p>
-                  )}
-                  <p className="text-green-600 text-xs mt-1">
-                    You can still upload a different photo if you prefer
-                  </p>
-                  <input
-                    id="photo"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="w-full text-sm text-gray-500 mt-2
-                               file:py-2 file:px-4
-                               file:rounded-lg file:border-0
-                               file:text-sm file:font-medium
-                               file:bg-green-100 file:text-green-700
-                               hover:file:bg-green-200
-                               rounded-lg border border-green-200 bg-green-50 h-10
-                               overflow-hidden"
-                  />
+
+                {/* Pause Duration */}
+                <div className="space-y-2">
+                  <Label className="text-dark-gray font-medium text-base">
+                    Pause for
+                  </Label>
+                  
+                  {/* Row of three buttons */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {['24 hours', '3 days', '1 week'].map((duration) => (
+                      <button
+                        key={duration}
+                        onClick={() => handleDurationSelect(duration)}
+                        className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
+                          formData.duration === duration
+                            ? 'bg-lavender border-lavender text-dark-gray'
+                            : 'bg-white border-gray-200 text-dark-gray hover:border-lavender/50'
+                        }`}
+                      >
+                        {duration}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Other pause lengths dropdown */}
+                  <Select 
+                    value={formData.otherDuration} 
+                    onValueChange={handleOtherDurationSelect}
+                  >
+                    <SelectTrigger className={`bg-white border-2 rounded-xl py-3 px-4 transition-all ${
+                      formData.otherDuration ? 'border-lavender bg-lavender text-dark-gray' : 'border-gray-200 hover:border-lavender/50'
+                    }`}>
+                      <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200 rounded-xl">
+                      {otherPauseLengths.map((duration) => (
+                        <SelectItem key={duration} value={duration} className="rounded-lg my-1">
+                          {duration}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              ) : (
-                <input
-                  id="photo"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="w-full text-sm text-gray-500
-                             file:py-3 file:px-4
-                             file:rounded-xl file:border-0
-                             file:text-sm file:font-medium
-                             file:bg-lavender file:text-dark-gray
-                             hover:file:bg-lavender/90
-                             rounded-xl border border-gray-200 bg-white h-12
-                             overflow-hidden
-                             flex items-center"
-                />
-              )}
-              
-              {photoPreview && (
-                <div className="mt-2">
-                  <img 
-                    src={photoPreview} 
-                    alt="Photo preview" 
-                    className="w-20 h-20 object-cover rounded-lg border border-gray-200"
-                  />
-                  <p className="text-sm text-green-600 mt-1">✓ Photo ready to upload</p>
-                </div>
-              )}
-            </div>
 
-            {/* Emotion Selection */}
-            <div className="space-y-1">
-              <Label className="text-dark-gray font-medium text-base">
-                How are you feeling right now?
-              </Label>
-              <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
-                <SelectTrigger className="bg-white border-gray-200 rounded-xl py-3 px-4">
-                  <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200 rounded-xl max-h-60 overflow-y-auto">
-                  {emotions.map((emotion) => (
-                    <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: getEmotionColor(emotion.name) }}
-                        />
-                        <span className="capitalize">{emotion.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Tags Field */}
-            <div className="space-y-1">
-              <Label className="text-dark-gray font-medium text-base">
-                Tags (optional)
-              </Label>
-            <TagInput
-              value={formData.tags}
-              onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
-              placeholder="Add tags like 'apartment', 'clothes', 'fall wardrobe'..."
-              suggestions={existingTags}
-              className="w-full"
-            />
-            <p className="text-xs text-gray-500 mt-1 md:hidden">
-              Add a comma or click outside the input to set a tag.
-            </p>
-            </div>
-
-            {/* Partner Sharing */}
-            <PartnerSharingSection
-              selectedPartners={formData.sharedWithPartners}
-              onPartnersChange={(partners) => setFormData(prev => ({ ...prev, sharedWithPartners: partners }))}
-            />
-
-            {/* Notes Field */}
-            <div className="space-y-1">
-              <Label htmlFor="notes" className="text-dark-gray font-medium text-base">
-                Notes (optional)
-              </Label>
-              <Textarea
-                id="notes"
-                placeholder="Why do you want this item?"
-                value={formData.notes}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
-                className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
-              />
-            </div>
-
-            {/* Pause Duration */}
-            <div className="space-y-2">
-              <Label className="text-dark-gray font-medium text-base">
-                Pause for
-              </Label>
-              
-              {/* Row of three buttons */}
-              <div className="grid grid-cols-3 gap-2">
-                {['24 hours', '3 days', '1 week'].map((duration) => (
-                  <button
-                    key={duration}
-                    onClick={() => handleDurationSelect(duration)}
-                    className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
-                      formData.duration === duration
-                        ? 'bg-lavender border-lavender text-dark-gray'
-                        : 'bg-white border-gray-200 text-dark-gray hover:border-lavender/50'
+                {/* Step 1 Action Buttons */}
+                <div className="flex gap-4 pt-6">
+                  <Button
+                    variant="outline"
+                    onClick={onClose}
+                    className="flex-1 bg-white border-gray-200 text-dark-gray hover:bg-gray-50 rounded-xl py-3"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handlePauseCommit}
+                    disabled={!isBasicStepValid()}
+                    className={`flex-1 bg-lavender text-dark-gray hover:bg-lavender/90 rounded-xl py-3 ${
+                      !isBasicStepValid() ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
-                    {duration}
-                  </button>
-                ))}
-              </div>
-              
-              {/* Other pause lengths dropdown */}
-              <Select 
-                value={formData.otherDuration} 
-                onValueChange={handleOtherDurationSelect}
-              >
-                <SelectTrigger className={`bg-white border-2 rounded-xl py-3 px-4 transition-all ${
-                  formData.otherDuration ? 'border-lavender bg-lavender text-dark-gray' : 'border-gray-200 hover:border-lavender/50'
-                }`}>
-                  <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-gray-200 rounded-xl">
-                  {otherPauseLengths.map((duration) => (
-                    <SelectItem key={duration} value={duration} className="rounded-lg my-1">
-                      {duration}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    Commit to Pause
+                  </Button>
+                </div>
+              </>
+            ) : (
+              // STEP 2: Details and finalization
+              <>
+                {/* Step indicator */}
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <p className="text-green-800 text-sm font-medium">
+                    ✓ Pause committed! Now let's add some details to help you reflect later.
+                  </p>
+                </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-6">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="flex-1 bg-white border-gray-200 text-dark-gray hover:bg-gray-50 rounded-xl py-3"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className={`flex-1 bg-lavender text-dark-gray hover:bg-lavender/90 rounded-xl py-3 relative overflow-hidden ${
-                  isSubmitting ? 'pointer-events-none' : ''
-                }`}
-              >
-                {isSubmitting && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-2 h-2 bg-dark-gray/20 rounded-full animate-ripple"></div>
-                  </div>
-                )}
-                Start Pause
-              </Button>
-            </div>
+                {/* Item Name Field */}
+                <div className="space-y-1">
+                  <Label htmlFor="itemName" className="text-dark-gray font-medium text-base">
+                    Item Name
+                  </Label>
+                  <Input
+                    id="itemName"
+                    type="text"
+                    placeholder="What are you thinking of buying?"
+                    value={formData.itemName}
+                    onChange={(e) => handleInputChange('itemName', e.target.value)}
+                    className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                  />
+                </div>
+
+                {/* Store Name Field */}
+                <div className="space-y-1">
+                  <Label htmlFor="storeName" className="text-dark-gray font-medium text-base">
+                    Store Name
+                  </Label>
+                  <Input
+                    id="storeName"
+                    type="text"
+                    placeholder="Where is this item from?"
+                    value={formData.storeName}
+                    onChange={(e) => handleInputChange('storeName', e.target.value)}
+                    className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                  />
+                </div>
+
+                {/* Price Field */}
+                <div className="space-y-1">
+                  <Label htmlFor="price" className="text-dark-gray font-medium text-base">
+                    Price
+                  </Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    placeholder="0.00"
+                    value={formData.price}
+                    onChange={(e) => handleInputChange('price', e.target.value)}
+                    className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                  />
+                </div>
+
+                {/* Photo Upload Field */}
+                <div className="space-y-1">
+                  <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
+                    Photo (optional)
+                  </Label>
+                  
+                  {/* Use Placeholder Checkbox */}
+                  {!formData.photo && !formData.imageUrl && (
+                    <div className="flex items-center space-x-3 mb-3">
+                      <Checkbox
+                        id="usePlaceholder"
+                        checked={formData.usePlaceholder}
+                        onCheckedChange={(checked) => {
+                          setFormData(prev => ({ ...prev, usePlaceholder: checked === true }));
+                        }}
+                        className="h-4 w-4"
+                      />
+                      <Label htmlFor="usePlaceholder" className="text-sm text-gray-600 cursor-pointer">
+                        Use placeholder image
+                      </Label>
+                    </div>
+                  )}
+                  
+                  {/* Show placeholder preview if checked */}
+                  {formData.usePlaceholder && !formData.photo && !formData.imageUrl && (
+                    <div className="mb-3">
+                      <img 
+                        src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
+                        alt="Placeholder preview" 
+                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                      />
+                      <p className="text-sm text-blue-600 mt-1">✓ Placeholder image selected</p>
+                    </div>
+                  )}
+                  
+                  {(formData.imageUrl && !formData.photo) || (formData.isCart && formData.imageUrl === 'cart-placeholder') ? (
+                    <div className="w-full bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                      {formData.isCart && formData.imageUrl === 'cart-placeholder' ? (
+                        <div className="flex flex-col items-center gap-2 mb-3">
+                          <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <ShoppingCart size={24} className="text-blue-600" />
+                          </div>
+                          <p className="text-blue-600 text-sm font-medium">
+                            🛒 Cart placeholder image
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-green-600 text-sm font-medium">
+                          ✓ Product image already grabbed automatically
+                        </p>
+                      )}
+                      <p className="text-green-600 text-xs mt-1">
+                        You can still upload a different photo if you prefer
+                      </p>
+                      <input
+                        id="photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="w-full text-sm text-gray-500 mt-2
+                                   file:py-2 file:px-4
+                                   file:rounded-lg file:border-0
+                                   file:text-sm file:font-medium
+                                   file:bg-green-100 file:text-green-700
+                                   hover:file:bg-green-200
+                                   rounded-lg border border-green-200 bg-green-50 h-10
+                                   overflow-hidden"
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      id="photo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="w-full text-sm text-gray-500
+                                 file:py-3 file:px-4
+                                 file:rounded-xl file:border-0
+                                 file:text-sm file:font-medium
+                                 file:bg-lavender file:text-dark-gray
+                                 hover:file:bg-lavender/90
+                                 rounded-xl border border-gray-200 bg-white h-12
+                                 overflow-hidden
+                                 flex items-center"
+                    />
+                  )}
+                  
+                  {photoPreview && (
+                    <div className="mt-2">
+                      <img 
+                        src={photoPreview} 
+                        alt="Photo preview" 
+                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                      />
+                      <p className="text-sm text-green-600 mt-1">✓ Photo ready to upload</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tags Field */}
+                <div className="space-y-1">
+                  <Label className="text-dark-gray font-medium text-base">
+                    Tags (optional)
+                  </Label>
+                  <TagInput
+                    value={formData.tags}
+                    onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                    placeholder="Add tags like 'apartment', 'clothes', 'fall wardrobe'..."
+                    suggestions={existingTags}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500 mt-1 md:hidden">
+                    Add a comma or click outside the input to set a tag.
+                  </p>
+                </div>
+
+                {/* Partner Sharing */}
+                <PartnerSharingSection
+                  selectedPartners={formData.sharedWithPartners}
+                  onPartnersChange={(partners) => setFormData(prev => ({ ...prev, sharedWithPartners: partners }))}
+                />
+
+                {/* Notes Field */}
+                <div className="space-y-1">
+                  <Label htmlFor="notes" className="text-dark-gray font-medium text-base">
+                    Notes (optional)
+                  </Label>
+                  <Textarea
+                    id="notes"
+                    placeholder="Why do you want this item?"
+                    value={formData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                  />
+                </div>
+
+                {/* Step 2 Action Buttons */}
+                <div className="flex gap-4 pt-6">
+                  <Button
+                    variant="outline"
+                    onClick={handleBackToBasics}
+                    className="flex-1 bg-white border-gray-200 text-dark-gray hover:bg-gray-50 rounded-xl py-3"
+                  >
+                    ← Back
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className={`flex-1 bg-lavender text-dark-gray hover:bg-lavender/90 rounded-xl py-3 relative overflow-hidden ${
+                      isSubmitting ? 'pointer-events-none' : ''
+                    }`}
+                  >
+                    {isSubmitting && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-dark-gray/20 rounded-full animate-ripple"></div>
+                      </div>
+                    )}
+                    Complete Pause
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
