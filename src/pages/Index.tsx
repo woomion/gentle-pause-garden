@@ -51,19 +51,8 @@ const Index = () => {
   // Update welcome modal visibility for first-time visitors (guests and new users)
   useEffect(() => {
     if (!authLoading) {
-      if (user) {
-        // For authenticated users - show if they haven't completed welcome
-        const hasCompletedWelcome = localStorage.getItem(`hasCompletedWelcome_${user.id}`);
-        if (!hasCompletedWelcome) {
-          modalStates.setShowWelcomeModal(true);
-        }
-      } else {
-        // For guests - show if they haven't completed welcome
-        const hasCompletedWelcome = localStorage.getItem('hasCompletedWelcome_guest');
-        if (!hasCompletedWelcome) {
-          modalStates.setShowWelcomeModal(true);
-        }
-      }
+      // Force show welcome modal for testing
+      modalStates.setShowWelcomeModal(true);
     }
   }, [user, authLoading, modalStates]);
 
