@@ -101,16 +101,16 @@ const Index = () => {
 
   return (
     <>
-      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col">
+      <div className="h-screen h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col overflow-hidden">
         {/* Header section with padding only on desktop */}
-        <div className="px-4 md:px-6 py-4 md:py-8">
+        <div className="px-4 md:px-6 py-2 md:py-8 flex-shrink-0">
           <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
             <PauseHeader showIntroText={true} />
           </div>
         </div>
         
         {/* Review Banners - Full width on mobile, no padding */}
-        <div className="w-full">
+        <div className="w-full flex-shrink-0">
           <ReviewBanner 
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
@@ -125,15 +125,13 @@ const Index = () => {
         </div>
         
         {/* Main Tabs - Full width on mobile, no padding */}
-        <div className="w-full">
+        <div className="w-full flex-shrink-0">
           <MainTabs />
         </div>
         
-        {/* Add Pause Button - Full width, stretches to absolute bottom */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 w-full">
-            <AddPauseButton onAddPause={modalStates.handleAddPause} />
-          </div>
+        {/* Add Pause Button - Takes up all remaining space */}
+        <div className="flex-1 w-full">
+          <AddPauseButton onAddPause={modalStates.handleAddPause} />
         </div>
       </div>
       
