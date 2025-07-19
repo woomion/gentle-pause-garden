@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { User, Users, BarChart3 } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import PausedSection from './PausedSection';
 import PauseLogSection from './PauseLogSection';
 import PartnerFeedTab from './PartnerFeedTab';
@@ -49,14 +49,20 @@ const MainTabs = () => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
           }}
-          className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
+          className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
             backgroundColor: showMyPauses ? '#A8C3A8' : '#CDD6CD',
             color: showMyPauses ? '#7A5DD9' : 'inherit'
           }}
         >
-          <User className="h-5 w-5 sm:h-5 sm:w-5" />
-          <span className="text-sm sm:text-base">My Pauses</span>
+          <div className="flex flex-col items-center gap-0">
+            <span className="text-sm sm:text-base">My Pauses</span>
+            {showMyPauses ? (
+              <ChevronUp className="h-3 w-3 mt-0.5" strokeWidth={3} />
+            ) : (
+              <ChevronDown className="h-3 w-3 mt-0.5" strokeWidth={3} />
+            )}
+          </div>
         </Button>
         <Button 
           variant="ghost"
@@ -64,15 +70,19 @@ const MainTabs = () => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
           }}
-          className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
+          className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
             backgroundColor: showPartnerPauses ? '#A8C3A8' : '#CDD6CD',
             color: showPartnerPauses ? '#7A5DD9' : 'inherit'
           }}
         >
-          <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
-            <Users className="h-5 w-5 sm:h-5 sm:w-5" />
+          <div className="relative flex flex-col items-center gap-0">
             <span className="text-sm sm:text-base">Partner Pauses</span>
+            {showPartnerPauses ? (
+              <ChevronUp className="h-3 w-3 mt-0.5" strokeWidth={3} />
+            ) : (
+              <ChevronDown className="h-3 w-3 mt-0.5" strokeWidth={3} />
+            )}
             {user && totalUnreadCount > 0 && (
               <div className="absolute -top-2 -right-2 text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
                 {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
