@@ -42,14 +42,14 @@ const MainTabs = () => {
 
   return (
     <div className="w-full">
-      <div className="flex w-full h-16">
+      <div className="flex w-full h-16 max-w-none mx-0">
         <Button 
           variant="ghost"
           onClick={() => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
           }}
-          className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full"
+          className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full rounded-none"
           style={{ 
             backgroundColor: showMyPauses ? '#B8D4A8' : '#D0D9A8',
             color: 'black'
@@ -63,7 +63,7 @@ const MainTabs = () => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
           }}
-          className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full relative"
+          className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full relative rounded-none"
           style={{ 
             backgroundColor: showPartnerPauses ? '#B8D4A8' : '#D0D9A8',
             color: 'black'

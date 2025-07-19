@@ -103,7 +103,7 @@ const Index = () => {
     <>
       <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8 w-full flex-1 flex flex-col">
-          <PauseHeader />
+          <PauseHeader showIntroText={true} />
           
           {/* Review Banners - Full width, no gaps */}
           <div className="w-full">
@@ -130,7 +130,6 @@ const Index = () => {
             <AddPauseButton onAddPause={modalStates.handleAddPause} />
           </div>
           
-          <SupportCTA />
           <FooterLinks />
         </div>
       </div>

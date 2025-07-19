@@ -8,7 +8,11 @@ import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
 import QuickPauseButton from './QuickPauseButton';
 
-const PauseHeader = () => {
+interface PauseHeaderProps {
+  showIntroText?: boolean;
+}
+
+const PauseHeader = ({ showIntroText = false }: PauseHeaderProps) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const { user } = useAuth();
@@ -43,14 +47,14 @@ const PauseHeader = () => {
 
   return (
     <>
-      <header className="relative mb-8 w-full pt-12 pb-4">
-        <div className="text-center w-full">
-          <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide hover:text-gray-600 transition-colors inline-block">
-            Hi Michelle — let's check in before you check out
+      <header className="relative w-full">
+        {/* Top section with POCKET || PAUSE and icons */}
+        <div className="flex justify-between items-center mb-8">
+          <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide hover:text-gray-600 transition-colors">
+            POCKET || PAUSE
           </Link>
-        </div>
-        
-        <div className="absolute top-2 right-0 flex items-center gap-3">
+          
+          <div className="flex items-center gap-3">
           <button 
             className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors flex items-center justify-center"
             onClick={handleCourseClick}
@@ -73,7 +77,17 @@ const PauseHeader = () => {
               <User size={24} />
             )}
           </button>
+          </div>
         </div>
+        
+        {/* Conditional intro text */}
+        {showIntroText && (
+          <div className="text-center w-full mb-8 pt-8 pb-4">
+            <h1 className="text-black dark:text-[#F9F5EB] font-medium text-2xl tracking-wide">
+              Hi Michelle — let's check in before you check out
+            </h1>
+          </div>
+        )}
       </header>
       
       <UserProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
