@@ -14,7 +14,7 @@ const WelcomeMessage = ({ firstName }: WelcomeMessageProps) => {
       <h1 className="text-3xl md:text-4xl font-bold text-black leading-tight">
         Hi {displayName}!
       </h1>
-      <p className="text-2xl md:text-3xl font-medium text-black leading-tight mt-1">
+      <p className="text-xl md:text-2xl font-crimson font-normal text-black leading-relaxed mt-1 italic">
         {dynamicGreeting}
       </p>
     </div>
