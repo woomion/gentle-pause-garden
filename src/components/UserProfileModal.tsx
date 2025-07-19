@@ -110,10 +110,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
     setFeedbackOpen(true);
   };
 
-  const handleGreaterJoyFundClick = () => {
-    navigate('/greater-joy-fund');
-    onClose();
-  };
 
   const handleDecisionLogClick = () => {
     navigate('/pause-log');
@@ -193,17 +189,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
             {/* Tag Management Section */}
             <TagManagement onClose={onClose} />
 
-            {/* Greater Joy Fund Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
-              <Button
-                onClick={handleGreaterJoyFundClick}
-                variant="outline"
-                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
-              >
-                <Heart size={16} className="mr-2" />
-                Greater Joy Fund
-              </Button>
-            </div>
 
             {/* Decision Log Section */}
             <div className="border-t border-gray-200 dark:border-white/20 pt-4">
