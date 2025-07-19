@@ -42,7 +42,7 @@ const MainTabs = () => {
 
   return (
     <div className="w-full">
-      <div className="flex w-full h-20 max-w-none mx-0">
+      <div className="flex w-full h-40 max-w-none mx-0">
         <Button 
           variant="ghost"
           onClick={() => {
@@ -55,7 +55,7 @@ const MainTabs = () => {
             color: 'black'
           }}
         >
-          <span className="text-base font-medium">My Pauses</span>
+          <span className="text-lg font-medium">My Pauses</span>
         </Button>
         <Button 
           variant="ghost"
@@ -69,7 +69,7 @@ const MainTabs = () => {
             color: 'black'
           }}
         >
-          <span className="text-base font-medium">Partner Pauses</span>
+          <span className="text-lg font-medium">Partner Pauses</span>
           {user && totalUnreadCount > 0 && (
             <div className="absolute -top-2 -right-2 text-xs h-5 w-5 flex items-center justify-center font-medium" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
               {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
