@@ -53,9 +53,9 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --decision-buy: 185 45% 83%;
+    --decision-buy: 260 35% 85%;
     --decision-buy-foreground: 222.2 84% 4.9%;
-    --decision-let-go: 0 47% 83%;
+    --decision-let-go: 260 35% 85%;
     --decision-let-go-foreground: 222.2 84% 4.9%;
     --decide-now: 263 57% 88%;
     --decide-now-foreground: 222.2 84% 4.9%;
@@ -96,9 +96,9 @@
     --invite-button: 263 100% 86%;
     --invite-button-foreground: 0 0% 0%;
 
-    --decision-buy: 185 45% 83%;
+    --decision-buy: 260 35% 85%;
     --decision-buy-foreground: 222.2 84% 4.9%;
-    --decision-let-go: 0 47% 83%;
+    --decision-let-go: 260 35% 85%;
     --decision-let-go-foreground: 222.2 84% 4.9%;
     --decide-now: 263 57% 88%;
     --decide-now-foreground: 222.2 84% 4.9%;
