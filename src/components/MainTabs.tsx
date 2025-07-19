@@ -5,11 +5,12 @@ import PausedSection from './PausedSection';
 import PauseLogSection from './PauseLogSection';
 import PartnerFeedTab from './PartnerFeedTab';
 import StatsTab from './StatsTab';
+import AddPauseButton from './AddPauseButton';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useItemComments } from '@/hooks/useItemComments';
 import { useAuth } from '@/contexts/AuthContext';
 
-const MainTabs = () => {
+const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
   const [showMyPauses, setShowMyPauses] = useState(false);
   const [showPartnerPauses, setShowPartnerPauses] = useState(false);
   const { hasPausePartnerAccess } = useSubscription();
@@ -41,7 +42,7 @@ const MainTabs = () => {
   console.log('🔔 MainTabs - Should show badge:', user && totalUnreadCount > 0);
 
   return (
-    <div className="w-full">
+    <div className="w-full flex-1 flex flex-col">
       <div className="flex w-full h-40 max-w-none mx-0">
         <Button 
           variant="ghost"
@@ -78,15 +79,33 @@ const MainTabs = () => {
         </Button>
       </div>
 
+      {/* Content sections - no margin bottom to stick to Add Pause button */}
       {showMyPauses && (
-        <div className="mt-0 mb-6">
-          <PausedSection />
+        <div className="flex-1 flex flex-col">
+          <div className="flex-shrink-0">
+            <PausedSection />
+          </div>
+          <div className="flex-1 w-full">
+            <AddPauseButton onAddPause={onAddPause} />
+          </div>
         </div>
       )}
 
       {showPartnerPauses && (
-        <div className="mt-0">
-          <PartnerFeedTab />
+        <div className="flex-1 flex flex-col">
+          <div className="flex-shrink-0">
+            <PartnerFeedTab />
+          </div>
+          <div className="flex-1 w-full">
+            <AddPauseButton onAddPause={onAddPause} />
+          </div>
+        </div>
+      )}
+
+      {/* Show Add Pause button when no tabs are open */}
+      {!showMyPauses && !showPartnerPauses && (
+        <div className="flex-1 w-full">
+          <AddPauseButton onAddPause={onAddPause} />
         </div>
       )}
     </div>

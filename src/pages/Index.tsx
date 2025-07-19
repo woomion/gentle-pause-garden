@@ -124,14 +124,9 @@ const Index = () => {
           )}
         </div>
         
-        {/* Main Tabs - Full width on mobile, no padding */}
-        <div className="w-full flex-shrink-0">
-          <MainTabs />
-        </div>
-        
-        {/* Add Pause Button - Takes up all remaining space */}
-        <div className="flex-1 w-full">
-          <AddPauseButton onAddPause={modalStates.handleAddPause} />
+        {/* Main Tabs - Full width on mobile, includes Add Pause button */}
+        <div className="w-full flex-1 flex flex-col">
+          <MainTabs onAddPause={modalStates.handleAddPause} />
         </div>
       </div>
       
