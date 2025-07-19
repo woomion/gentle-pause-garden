@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
-import { X, Bell, MessageSquare } from 'lucide-react';
+import { X, Bell, MessageSquare, Heart, Timer } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import FeedbackModal from './FeedbackModal';
 import PartnerManagement from './PartnerManagement';
 import TagManagement from './TagManagement';
@@ -22,6 +23,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const { notificationsEnabled, updateNotificationSetting } = useUserSettings();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -106,6 +108,16 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
     setFeedbackOpen(true);
   };
 
+  const handleGreaterJoyFundClick = () => {
+    navigate('/greater-joy-fund');
+    onClose();
+  };
+
+  const handleDecisionLogClick = () => {
+    navigate('/pause-log');
+    onClose();
+  };
+
   if (!isOpen || !user) return null;
 
   const firstName = user.user_metadata?.first_name || '';
@@ -174,6 +186,30 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
 
             {/* Tag Management Section */}
             <TagManagement onClose={onClose} />
+
+            {/* Greater Joy Fund Section */}
+            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+              <Button
+                onClick={handleGreaterJoyFundClick}
+                variant="outline"
+                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
+              >
+                <Heart size={16} className="mr-2" />
+                Greater Joy Fund
+              </Button>
+            </div>
+
+            {/* Decision Log Section */}
+            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+              <Button
+                onClick={handleDecisionLogClick}
+                variant="outline"
+                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
+              >
+                <Timer size={16} className="mr-2" />
+                Decision Log
+              </Button>
+            </div>
 
             {/* Feedback Section */}
             <div className="border-t border-gray-200 dark:border-white/20 pt-4">
