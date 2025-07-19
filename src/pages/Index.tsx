@@ -129,17 +129,10 @@ const Index = () => {
           <MainTabs />
         </div>
         
-        {/* Add Pause Button - Full width, stretches to bottom */}
-        <div className="flex-1 flex flex-col">
+        {/* Add Pause Button - Full width, stretches to absolute bottom */}
+        <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 w-full">
             <AddPauseButton onAddPause={modalStates.handleAddPause} />
-          </div>
-        </div>
-        
-        {/* Footer - Only show on desktop or when there's space */}
-        <div className="hidden md:block px-4 md:px-6 py-4">
-          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
-            <FooterLinks />
           </div>
         </div>
       </div>
