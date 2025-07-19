@@ -112,8 +112,8 @@ const PausedSection = () => {
   // Empty state when no items
   if (pausedItems.length === 0) {
     return (
-      <div className="mb-8">
-        <Card>
+      <div className="mb-0">
+        <Card className="mb-0">
           <CardHeader>
             <div>
               <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
@@ -133,8 +133,8 @@ const PausedSection = () => {
   }
 
   return (
-    <div className="mb-8">
-      <Card>
+    <div className="mb-0">
+      <Card className="mb-0">
         <CardHeader>
           <div>
             <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
