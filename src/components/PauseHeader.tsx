@@ -51,7 +51,7 @@ const PauseHeader = () => {
         </div>
         
         
-        <div className="absolute top-6 right-0 flex items-center gap-3">
+        <div className="absolute top-8 sm:top-6 right-0 flex items-center gap-3">
           <button 
             className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors flex items-center justify-center"
             onClick={handleCourseClick}
