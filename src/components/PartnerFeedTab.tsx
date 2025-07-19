@@ -305,22 +305,20 @@ const PartnerFeedTab = () => {
               </Select>
             </div>
           )}
+          {/* Partner Items Ready Banner */}
+          <PartnerItemsReadyBanner
+            partners={partners}
+            currentUserId={currentUserId}
+            onItemsReady={handlePartnerItemsReady}
+          />
           
           {sharedItems.length === 0 ? (
-            <>
-              <div className="text-center py-8">
-                <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                <p className="text-muted-foreground">
-                  No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
-                </p>
-              </div>
-              {/* Partner Items Ready Banner */}
-              <PartnerItemsReadyBanner
-                partners={partners}
-                currentUserId={currentUserId}
-                onItemsReady={handlePartnerItemsReady}
-              />
-            </>
+            <div className="text-center py-8">
+              <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+              <p className="text-muted-foreground">
+                No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
+              </p>
+            </div>
           ) : (
             <div className="space-y-4">
               {(() => {
@@ -342,40 +340,24 @@ const PartnerFeedTab = () => {
                     });
 
                 return filteredItems.length === 0 ? (
-                  <>
-                    <div className="text-center py-8">
-                      <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                      <p className="text-muted-foreground">
-                        {selectedPartner === 'all' 
-                          ? "No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together."
-                          : `No shared pauses with ${selectedPartner} yet.`
-                        }
-                      </p>
-                    </div>
-                    {/* Partner Items Ready Banner */}
-                    <PartnerItemsReadyBanner
-                      partners={partners}
-                      currentUserId={currentUserId}
-                      onItemsReady={handlePartnerItemsReady}
-                    />
-                  </>
+                  <div className="text-center py-8">
+                    <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                    <p className="text-muted-foreground">
+                      {selectedPartner === 'all' 
+                        ? "No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together."
+                        : `No shared pauses with ${selectedPartner} yet.`
+                      }
+                    </p>
+                  </div>
                 ) : (
-                  <>
-                    <div className="space-y-4">
-                      <PausedItemsCarousel 
-                        items={filteredItems}
-                        onItemClick={(item) => setSelectedItem(item)}
-                        partners={partners}
-                        currentUserId={currentUserId}
-                      />
-                    </div>
-                    {/* Partner Items Ready Banner */}
-                    <PartnerItemsReadyBanner
+                  <div className="space-y-4">
+                    <PausedItemsCarousel 
+                      items={filteredItems}
+                      onItemClick={(item) => setSelectedItem(item)}
                       partners={partners}
                       currentUserId={currentUserId}
-                      onItemsReady={handlePartnerItemsReady}
                     />
-                  </>
+                  </div>
                 );
               })()}
             </div>
