@@ -50,10 +50,6 @@ const MainTabs = () => {
             setShowPartnerPauses(false);
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
-          style={{ 
-            backgroundColor: showMyPauses ? '#A8C3A8' : '#CDD6CD',
-            color: showMyPauses ? '#7A5DD9' : 'inherit'
-          }}
         >
           <div className="flex flex-col items-center gap-0">
             <span className="text-sm sm:text-base">My Pauses</span>
@@ -71,10 +67,6 @@ const MainTabs = () => {
             setShowMyPauses(false);
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
-          style={{ 
-            backgroundColor: showPartnerPauses ? '#A8C3A8' : '#CDD6CD',
-            color: showPartnerPauses ? '#7A5DD9' : 'inherit'
-          }}
         >
           <div className="relative flex flex-col items-center gap-0">
             <span className="text-sm sm:text-base">Partner Pauses</span>
