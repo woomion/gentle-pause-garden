@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { User, BookOpen } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,33 +15,13 @@ interface PauseHeaderProps {
 const PauseHeader = ({ showIntroText = false }: PauseHeaderProps) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const rotatingMessages = [
-    "let's check in before you check out",
-    "take a moment to reflect",
-    "pause and consider your choices",
-    "mindful spending starts here"
-  ];
-
   const firstName = user?.user_metadata?.first_name || '';
   const email = user?.email || '';
-  const displayName = firstName || (user ? email.split('@')[0] : 'Friend');
   const initials = firstName ? firstName.charAt(0).toUpperCase() : email.charAt(0).toUpperCase();
-
-  // Rotate messages every 3 seconds
-  useEffect(() => {
-    if (!showIntroText) return;
-    
-    const interval = setInterval(() => {
-      setCurrentMessageIndex((prev) => (prev + 1) % rotatingMessages.length);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [showIntroText, rotatingMessages.length]);
 
   const handleAccountClick = () => {
     if (user) {
@@ -106,12 +86,9 @@ const PauseHeader = ({ showIntroText = false }: PauseHeaderProps) => {
         {/* Conditional intro text */}
         {showIntroText && (
           <div className="text-center w-full mb-8 pt-4 pb-4">
-            <h1 className="text-black dark:text-[#F9F5EB] font-medium text-2xl tracking-wide mb-2">
-              Hi {displayName}
+            <h1 className="text-black dark:text-[#F9F5EB] font-medium text-2xl tracking-wide">
+              Hi Michelle — let's check in before you check out
             </h1>
-            <p className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide transition-opacity duration-500">
-              {rotatingMessages[currentMessageIndex]}
-            </p>
           </div>
         )}
       </header>
