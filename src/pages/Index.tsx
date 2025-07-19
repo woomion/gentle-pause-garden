@@ -119,16 +119,16 @@ const Index = () => {
             />
           )}
           
-          {/* Add Pause Button - Takes 2/3 of remaining space */}
-          <div className="flex-[2] flex items-center justify-center min-h-[200px] mb-6">
-            <div className="w-full">
-              <AddPauseButton onAddPause={modalStates.handleAddPause} />
-            </div>
+          {/* Main Tabs - Compact */}
+          <div className="mb-4">
+            <MainTabs />
           </div>
           
-          {/* Main Tabs - Full width */}
-          <div className="flex-[1] mb-6">
-            <MainTabs />
+          {/* Add Pause Button - Takes most of the remaining space */}
+          <div className="flex-1 flex items-center justify-center min-h-[300px]">
+            <div className="w-full h-full">
+              <AddPauseButton onAddPause={modalStates.handleAddPause} />
+            </div>
           </div>
           
           <SupportCTA />

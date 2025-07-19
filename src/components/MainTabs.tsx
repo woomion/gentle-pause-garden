@@ -42,8 +42,8 @@ const MainTabs = () => {
 
   return (
     <div className="w-full">
-      <div className="flex w-full mb-6 h-16 sm:h-12">
-        <Button 
+      <div className="flex w-full h-12 sm:h-14">
+        <Button
           variant="ghost"
           onClick={() => {
             setShowMyPauses(!showMyPauses);
