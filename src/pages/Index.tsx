@@ -109,28 +109,24 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Review Banners - Full width on mobile */}
-        <div className="px-4 md:px-6">
-          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
-            <ReviewBanner 
-              itemsCount={itemReview.itemsForReview.length}
-              onStartReview={handleStartReview}
+        {/* Review Banners - Full width on mobile, no padding */}
+        <div className="w-full">
+          <ReviewBanner 
+            itemsCount={itemReview.itemsForReview.length}
+            onStartReview={handleStartReview}
+          />
+          {user && sharedItemsReview.sharedItemsCount > 0 && (
+            <SharedItemsReviewPill
+              sharedItemsCount={sharedItemsReview.sharedItemsCount}
+              partnerNames={sharedItemsReview.partnerNames}
+              onStartReview={handleStartPartnerReview}
             />
-            {user && sharedItemsReview.sharedItemsCount > 0 && (
-              <SharedItemsReviewPill
-                sharedItemsCount={sharedItemsReview.sharedItemsCount}
-                partnerNames={sharedItemsReview.partnerNames}
-                onStartReview={handleStartPartnerReview}
-              />
-            )}
-          </div>
+          )}
         </div>
         
-        {/* Main Tabs - Full width on mobile */}
-        <div className="px-4 md:px-6">
-          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
-            <MainTabs />
-          </div>
+        {/* Main Tabs - Full width on mobile, no padding */}
+        <div className="w-full">
+          <MainTabs />
         </div>
         
         {/* Add Pause Button - Full width, stretches to bottom */}
