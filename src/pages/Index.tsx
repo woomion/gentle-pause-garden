@@ -102,7 +102,7 @@ const Index = () => {
   return (
     <>
       <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col">
-        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8 w-full flex-1 flex flex-col">
+        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto md:px-4 md:py-8 w-full flex-1 flex flex-col">
           <PauseHeader showIntroText={true} />
           
           {/* Review Banners - Full width, no gaps */}
@@ -120,15 +120,15 @@ const Index = () => {
             )}
           </div>
           
-          {/* Main Tabs - No gap, touching Add Pause button */}
-          <div className="w-full">
-            <MainTabs />
-          </div>
-          
           {/* Content area that grows to push button to bottom on mobile */}
           <div className="flex-1 w-full flex flex-col">
-            {/* Add Pause Button - Anchored to bottom on mobile */}
-            <div className="md:flex-1 w-full mt-auto">
+            {/* Main Tabs - No gap, touching Add Pause button */}
+            <div className="w-full">
+              <MainTabs />
+            </div>
+            
+            {/* Add Pause Button - Anchored to bottom on mobile, taller to fill space */}
+            <div className="flex-1 w-full">
               <AddPauseButton onAddPause={modalStates.handleAddPause} />
             </div>
           </div>
