@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { X, Bell, MessageSquare, Heart, Timer, Star } from 'lucide-react';
+import { X, Bell, MessageSquare, Heart, Timer, Star, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -186,21 +186,26 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
             {/* Partner Management Section */}
             <PartnerManagement onClose={onClose} />
 
+            {/* Decision Log Section */}
+            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+              <div 
+                onClick={handleDecisionLogClick}
+                className="flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors rounded p-2 -m-2"
+              >
+                <div className="flex items-center gap-2">
+                  <Timer size={16} className="text-gray-600 dark:text-gray-300" />
+                  <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+                    Decision Log
+                  </span>
+                </div>
+                <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
+              </div>
+            </div>
+
             {/* Tag Management Section */}
             <TagManagement onClose={onClose} />
 
 
-            {/* Decision Log Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
-              <Button
-                onClick={handleDecisionLogClick}
-                variant="outline"
-                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
-              >
-                <Timer size={16} className="mr-2" />
-                Decision Log
-              </Button>
-            </div>
 
             {/* Support Section */}
             <div className="border-t border-gray-200 dark:border-white/20 pt-4">
