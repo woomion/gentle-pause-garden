@@ -42,21 +42,20 @@ const MainTabs = () => {
 
   return (
     <div className="w-full">
-      <div className="flex w-full h-12 sm:h-14">
-        <Button
+      <div className="flex w-full h-16">
+        <Button 
           variant="ghost"
           onClick={() => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
           }}
-          className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-l-xl border-0 font-normal shadow-none px-2 sm:px-4 h-full"
+          className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full"
           style={{ 
             backgroundColor: showMyPauses ? '#A8C3A8' : '#CDD6CD',
             color: showMyPauses ? '#7A5DD9' : 'inherit'
           }}
         >
-          <User className="h-5 w-5 sm:h-5 sm:w-5" />
-          <span className="text-sm sm:text-base font-medium">My Pauses</span>
+          <span className="text-base font-medium">My Pauses</span>
         </Button>
         <Button 
           variant="ghost"
@@ -64,21 +63,18 @@ const MainTabs = () => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
           }}
-          className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-r-xl border-0 font-normal shadow-none px-2 sm:px-4 h-full"
+          className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full relative"
           style={{ 
             backgroundColor: showPartnerPauses ? '#A8C3A8' : '#CDD6CD',
             color: showPartnerPauses ? '#7A5DD9' : 'inherit'
           }}
         >
-          <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
-            <Users className="h-5 w-5 sm:h-5 sm:w-5" />
-            <span className="text-sm sm:text-base font-medium">Partner Pauses</span>
-            {user && totalUnreadCount > 0 && (
-              <div className="absolute -top-2 -right-2 text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
-                {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
-              </div>
-            )}
-          </div>
+          <span className="text-base font-medium">Partner Pauses</span>
+          {user && totalUnreadCount > 0 && (
+            <div className="absolute -top-2 -right-2 text-xs h-5 w-5 flex items-center justify-center font-medium" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
+              {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+            </div>
+          )}
         </Button>
       </div>
 

@@ -104,31 +104,30 @@ const Index = () => {
       <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8 w-full flex-1 flex flex-col">
           <PauseHeader />
-          <WelcomeMessage firstName={userName} />
           
-          {/* Review Banners */}
-          <ReviewBanner 
-            itemsCount={itemReview.itemsForReview.length}
-            onStartReview={handleStartReview}
-          />
-          {user && sharedItemsReview.sharedItemsCount > 0 && (
-            <SharedItemsReviewPill
-              sharedItemsCount={sharedItemsReview.sharedItemsCount}
-              partnerNames={sharedItemsReview.partnerNames}
-              onStartReview={handleStartPartnerReview}
+          {/* Review Banners - Full width, no gaps */}
+          <div className="w-full">
+            <ReviewBanner 
+              itemsCount={itemReview.itemsForReview.length}
+              onStartReview={handleStartReview}
             />
-          )}
+            {user && sharedItemsReview.sharedItemsCount > 0 && (
+              <SharedItemsReviewPill
+                sharedItemsCount={sharedItemsReview.sharedItemsCount}
+                partnerNames={sharedItemsReview.partnerNames}
+                onStartReview={handleStartPartnerReview}
+              />
+            )}
+          </div>
           
-          {/* Main Tabs - Compact */}
-          <div className="mb-4">
+          {/* Main Tabs - No gap, touching Add Pause button */}
+          <div className="w-full">
             <MainTabs />
           </div>
           
-          {/* Add Pause Button - Takes most of the remaining space */}
-          <div className="flex-1 flex items-center justify-center min-h-[300px]">
-            <div className="w-full h-full">
-              <AddPauseButton onAddPause={modalStates.handleAddPause} />
-            </div>
+          {/* Add Pause Button - Takes most of the remaining space, no gap from tabs */}
+          <div className="flex-1 w-full">
+            <AddPauseButton onAddPause={modalStates.handleAddPause} />
           </div>
           
           <SupportCTA />

@@ -43,10 +43,10 @@ const PauseHeader = () => {
 
   return (
     <>
-      <header className="relative mb-8 flex items-center justify-center">
-        <div className="text-center">
+      <header className="relative mb-8 w-full">
+        <div className="text-center w-full">
           <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors inline-block">
-            POCKET || PAUSE
+            Hi Michelle — let's check in before you check out
           </Link>
         </div>
         

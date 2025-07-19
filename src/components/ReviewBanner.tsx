@@ -11,16 +11,14 @@ const ReviewBanner = memo(({ itemsCount, onStartReview }: ReviewBannerProps) => 
   if (itemsCount === 0) return null;
 
   return (
-    <div className="mb-4">
+    <div className="w-full">
       <button 
         onClick={onStartReview}
-        className="rounded-full px-6 py-3 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
-        style={{ backgroundColor: '#E7D9FA' }}
+        className="w-full px-6 py-4 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+        style={{ backgroundColor: '#A3C4E0' }}
       >
-        <div className="text-base font-medium flex items-center gap-2" style={{ color: '#5C47A3' }}>
-          <Search size={16} style={{ color: '#5C47A3' }} />
+        <div className="text-base font-medium text-center text-black">
           {itemsCount} item{itemsCount === 1 ? '' : 's'} ready for review
-          <ArrowRight size={16} style={{ color: '#5C47A3' }} />
         </div>
       </button>
     </div>
