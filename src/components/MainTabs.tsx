@@ -58,9 +58,9 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
         >
           <span className="text-lg font-medium">My Pauses</span>
           {showMyPauses ? (
-            <ChevronUp className="h-4 w-4 -mt-1" strokeWidth={3} />
+            <ChevronUp className="h-4 w-4 mt-0.5" strokeWidth={3} />
           ) : (
-            <ChevronDown className="h-4 w-4 -mt-1" strokeWidth={3} />
+            <ChevronDown className="h-4 w-4 mt-0.5" strokeWidth={3} />
           )}
         </Button>
         <Button 
@@ -77,9 +77,9 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
         >
           <span className="text-lg font-medium">Partner Pauses</span>
           {showPartnerPauses ? (
-            <ChevronUp className="h-4 w-4 -mt-1" strokeWidth={3} />
+            <ChevronUp className="h-4 w-4 mt-0.5" strokeWidth={3} />
           ) : (
-            <ChevronDown className="h-4 w-4 -mt-1" strokeWidth={3} />
+            <ChevronDown className="h-4 w-4 mt-0.5" strokeWidth={3} />
           )}
           {user && totalUnreadCount > 0 && (
             <div className="absolute -top-2 -right-2 text-xs h-5 w-5 flex items-center justify-center font-medium" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
