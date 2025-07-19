@@ -101,44 +101,12 @@ const Index = () => {
 
   return (
     <>
-      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 pb-32">
-        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col">
+        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8 w-full flex-1 flex flex-col">
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           
-          {/* Wisdom Orb Remnant - Hidden for now */}
-          {/* 
-          <div className="relative mb-6">
-            <div className="absolute top-0 right-8 z-20">
-              <button
-                onClick={() => setWisdomOrbExpanded(!wisdomOrbExpanded)}
-                className="relative group focus:outline-none"
-              >
-                {!wisdomOrbExpanded ? (
-                  // Large glowing orb - very visible
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-purple-500 rounded-full blur-xl opacity-75 animate-pulse"></div>
-                    <div className="absolute inset-0 bg-purple-400 rounded-full blur-lg opacity-60 animate-pulse"></div>
-                    <div className="relative w-6 h-6 bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600 rounded-full shadow-2xl shadow-purple-500/80 hover:scale-125 transition-all duration-300 cursor-pointer border-2 border-purple-300/50"></div>
-                  </div>
-                ) : (
-                  // Expanded message
-                  <div className="relative animate-scale-in">
-                    <div className="absolute inset-0 bg-purple-400/20 dark:bg-purple-300/20 rounded-lg blur-md"></div>
-                    <div className="relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-purple-200/50 dark:border-purple-400/30 rounded-lg px-3 py-2 shadow-lg max-w-xs">
-                      <p className="text-xs text-gray-700 dark:text-gray-300 italic">
-                        "I used to have 12 tabs open with carts... now I pause first. It's so freeing." 
-                      </p>
-                      <div className="mt-1 text-[10px] text-purple-600/70 dark:text-purple-400/70">
-                        — another traveler ✨
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </button>
-            </div>
-          </div>
-          */}
+          {/* Review Banners */}
           <ReviewBanner 
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
@@ -150,53 +118,21 @@ const Index = () => {
               onStartReview={handleStartPartnerReview}
             />
           )}
-          <MainTabs />
           
-          {/* Greater Joy Fund Section */}
-          <div className="mb-4">
-            <div className="flex items-center justify-center">
-              <div className="w-full max-w-md">
-                <GreaterJoyFundCTA />
-              </div>
+          {/* Add Pause Button - Takes 2/3 of remaining space */}
+          <div className="flex-[2] flex items-center justify-center min-h-[200px] mb-6">
+            <div className="w-full">
+              <AddPauseButton onAddPause={modalStates.handleAddPause} />
             </div>
           </div>
           
-          {/* Pause Log Section */}
-          <div className="mb-8">
-            <div className="flex items-center justify-center">
-              <div className="w-full max-w-md">
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                  <Link 
-                    to="/pause-log"
-                    className="flex items-center justify-between hover:opacity-80 transition-opacity"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                        <Timer className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Decision Log</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">View your pause history</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors text-sm font-medium">
-                      View Log
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
-                  </Link>
-                </div>
-              </div>
-            </div>
+          {/* Main Tabs - Full width */}
+          <div className="flex-[1] mb-6">
+            <MainTabs />
           </div>
+          
           <SupportCTA />
           <FooterLinks />
-        </div>
-      </div>
-      
-      {/* Sticky Footer with Add Pause Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-cream dark:bg-[#200E3B] border-t border-gray-200 dark:border-gray-700 px-4 pt-4 pb-8">
-        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
-          <AddPauseButton onAddPause={modalStates.handleAddPause} />
         </div>
       </div>
       

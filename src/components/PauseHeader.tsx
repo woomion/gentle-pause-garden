@@ -43,15 +43,14 @@ const PauseHeader = () => {
 
   return (
     <>
-      <header className="relative mb-18">
+      <header className="relative mb-8 flex items-center justify-center">
         <div className="text-center">
           <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors inline-block">
             POCKET || PAUSE
           </Link>
         </div>
         
-        
-        <div className="absolute top-6 right-0 flex items-center gap-3">
+        <div className="absolute top-0 right-0 flex items-center gap-3">
           <button 
             className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors flex items-center justify-center"
             onClick={handleCourseClick}
