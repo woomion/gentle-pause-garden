@@ -64,48 +64,6 @@
     --whisper-lavender: 260 47% 25%;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-
-    --invite-button: 263 100% 86%;
-    --invite-button-foreground: 0 0% 0%;
-
-    --decision-buy: 260 35% 85%;
-    --decision-buy-foreground: 222.2 84% 4.9%;
-    --decision-let-go: 260 35% 85%;
-    --decision-let-go-foreground: 222.2 84% 4.9%;
-    --decide-now: 263 57% 88%;
-    --decide-now-foreground: 222.2 84% 4.9%;
-    --section-header: 263 20% 25%;
-    --section-header-foreground: 210 40% 98%;
-    --whisper-lavender: 260 30% 20%;
-  }
 }
 
 @layer base {
@@ -125,97 +83,6 @@
     color: #F9F5EB !important;
   }
 
-  .dark body {
-    background-color: #200E3B;
-    color: #F9F5EB;
-  }
-
-  /* Dark mode for main containers */
-  .dark .bg-cream {
-    background-color: #200E3B !important;
-  }
-
-  /* Dark mode for emotion badges - keep lavender but use dark text */
-  .dark .emotion-badge {
-    color: #2B2B2B !important;
-  }
-
-  /* Dark mode for cards and UI elements */
-  .dark .bg-white\/60 {
-    background-color: rgba(249, 245, 235, 0.1) !important;
-  }
-
-  .dark .bg-white\/80 {
-    background-color: rgba(249, 245, 235, 0.2) !important;
-  }
-
-  .dark .border-gray-200 {
-    border-color: rgba(249, 245, 235, 0.2) !important;
-  }
-
-  .dark .text-gray-500 {
-    color: rgba(249, 245, 235, 0.7) !important;
-  }
-
-  .dark .text-gray-400 {
-    color: rgba(249, 245, 235, 0.6) !important;
-  }
-
-  .dark .text-gray-600 {
-    color: rgba(249, 245, 235, 0.8) !important;
-  }
-
-  .dark .text-black {
-    color: #F9F5EB !important;
-  }
-
-  /* Dark mode for form elements */
-  .dark .text-dark-gray {
-    color: #F9F5EB !important;
-  }
-
-  .dark .placeholder\:text-\[\#B0ABB7\]::placeholder {
-    color: rgba(249, 245, 235, 0.5) !important;
-  }
-
-  /* Dark mode for inputs and form fields */
-  .dark input {
-    background-color: rgba(249, 245, 235, 0.1) !important;
-    border-color: rgba(249, 245, 235, 0.2) !important;
-    color: #F9F5EB !important;
-  }
-
-  .dark textarea {
-    background-color: rgba(249, 245, 235, 0.1) !important;
-    border-color: rgba(249, 245, 235, 0.2) !important;
-    color: #F9F5EB !important;
-  }
-
-  .dark select {
-    background-color: rgba(249, 245, 235, 0.1) !important;
-    border-color: rgba(249, 245, 235, 0.2) !important;
-    color: #F9F5EB !important;
-  }
-
-  /* Dark mode for dropdown content */
-  .dark [data-radix-select-content] {
-    background-color: rgba(32, 14, 59, 0.95) !important;
-    border-color: rgba(249, 245, 235, 0.2) !important;
-  }
-
-  .dark [data-radix-select-item] {
-    color: #F9F5EB !important;
-  }
-
-  /* Dark mode for file inputs */
-  .dark input[type="file"] {
-    color: #F9F5EB !important;
-  }
-
-  .dark input[type="file"]::file-selector-button {
-    background-color: #C8B6E2 !important;
-    color: #2B2B2B !important;
-  }
 }
 
 @layer utilities {
@@ -240,12 +107,6 @@
 
   .animate-gradient {
     background: linear-gradient(-45deg, #E7D9FA, #F3E8FF, #D6BBF7, #E7D9FA);
-    background-size: 400% 400%;
-    animation: gradient-shift 8s ease infinite;
-  }
-
-  .dark .animate-gradient {
-    background: linear-gradient(-45deg, #4A1D6B, #5C2D7A, #6B4C9A, #4A1D6B);
     background-size: 400% 400%;
     animation: gradient-shift 8s ease infinite;
   }
