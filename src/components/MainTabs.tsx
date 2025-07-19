@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { User, Users, BarChart3 } from 'lucide-react';
+import { User, Users, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
 import PausedSection from './PausedSection';
 import PauseLogSection from './PauseLogSection';
 import PartnerFeedTab from './PartnerFeedTab';
@@ -50,13 +50,18 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
           }}
-          className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full rounded-none"
+          className="flex-1 flex flex-col items-center justify-center border-0 font-medium shadow-none px-4 h-full rounded-none"
           style={{ 
             backgroundColor: showMyPauses ? '#D9E36A' : '#D9E36A',
             color: 'black'
           }}
         >
           <span className="text-lg font-medium">My Pauses</span>
+          {showMyPauses ? (
+            <ChevronUp className="h-4 w-4 mt-1" />
+          ) : (
+            <ChevronDown className="h-4 w-4 mt-1" />
+          )}
         </Button>
         <Button 
           variant="ghost"
@@ -64,13 +69,18 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
           }}
-          className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full relative rounded-none"
+          className="flex-1 flex flex-col items-center justify-center border-0 font-medium shadow-none px-4 h-full relative rounded-none"
           style={{ 
             backgroundColor: showPartnerPauses ? '#D9E36A' : '#D9E36A',
             color: 'black'
           }}
         >
           <span className="text-lg font-medium">Partner Pauses</span>
+          {showPartnerPauses ? (
+            <ChevronUp className="h-4 w-4 mt-1" />
+          ) : (
+            <ChevronDown className="h-4 w-4 mt-1" />
+          )}
           {user && totalUnreadCount > 0 && (
             <div className="absolute -top-2 -right-2 text-xs h-5 w-5 flex items-center justify-center font-medium" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
               {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
