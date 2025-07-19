@@ -11,7 +11,7 @@ const WelcomeMessage = ({ firstName }: WelcomeMessageProps) => {
   
   return (
     <div className="mb-8 mt-16">
-      <h1 className="text-3xl md:text-4xl font-bold text-black leading-tight">
+      <h1 className="text-3xl md:text-4xl font-bold font-inter text-black leading-tight">
         Hi {displayName}!
       </h1>
       <p className="text-xl md:text-xl font-domine font-light text-black leading-relaxed mt-1 italic">
