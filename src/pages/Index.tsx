@@ -125,9 +125,12 @@ const Index = () => {
             <MainTabs />
           </div>
           
-          {/* Add Pause Button - Takes most of the remaining space, no gap from tabs */}
-          <div className="flex-1 w-full">
-            <AddPauseButton onAddPause={modalStates.handleAddPause} />
+          {/* Content area that grows to push button to bottom on mobile */}
+          <div className="flex-1 w-full flex flex-col">
+            {/* Add Pause Button - Anchored to bottom on mobile */}
+            <div className="md:flex-1 w-full mt-auto">
+              <AddPauseButton onAddPause={modalStates.handleAddPause} />
+            </div>
           </div>
           
           <FooterLinks />

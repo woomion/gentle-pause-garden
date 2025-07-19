@@ -48,12 +48,15 @@ const PauseHeader = ({ showIntroText = false }: PauseHeaderProps) => {
   return (
     <>
       <header className="relative w-full">
-        {/* Top section with POCKET || PAUSE and icons */}
-        <div className="flex justify-between items-center mb-8">
+        {/* Top section with centered POCKET || PAUSE */}
+        <div className="text-center mb-4">
           <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide hover:text-gray-600 transition-colors">
             POCKET || PAUSE
           </Link>
-          
+        </div>
+        
+        {/* Icons positioned below and to the right */}
+        <div className="flex justify-end items-center mb-4">
           <div className="flex items-center gap-3">
           <button 
             className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors flex items-center justify-center"
@@ -82,7 +85,7 @@ const PauseHeader = ({ showIntroText = false }: PauseHeaderProps) => {
         
         {/* Conditional intro text */}
         {showIntroText && (
-          <div className="text-center w-full mb-8 pt-8 pb-4">
+          <div className="text-center w-full mb-8 pt-4 pb-4">
             <h1 className="text-black dark:text-[#F9F5EB] font-medium text-2xl tracking-wide">
               Hi Michelle — let's check in before you check out
             </h1>
