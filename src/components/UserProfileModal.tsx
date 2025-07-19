@@ -207,18 +207,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
 
 
 
-            {/* Support Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
-              <Button
-                onClick={handleSupportClick}
-                variant="outline"
-                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
-              >
-                <Star size={16} className="mr-2" />
-                Support the Pause
-              </Button>
-            </div>
-
             {/* Feedback Section */}
             <div className="border-t border-gray-200 dark:border-white/20 pt-4">
               <Button
@@ -232,7 +220,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
             </div>
 
             {/* Sign Out */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+            <div className="pt-4">
               <Button
                 onClick={handleSignOut}
                 disabled={isSigningOut}
@@ -241,6 +229,16 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
               >
                 {isSigningOut ? 'Signing out...' : 'Sign Out'}
               </Button>
+            </div>
+
+            {/* Support Section - moved to bottom */}
+            <div className="pt-6 text-center">
+              <button
+                onClick={handleSupportClick}
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors underline underline-offset-2 decoration-1"
+              >
+                Support the Pause
+              </button>
             </div>
           </div>
         </div>
