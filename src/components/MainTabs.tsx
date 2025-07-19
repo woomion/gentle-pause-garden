@@ -41,7 +41,7 @@ const MainTabs = () => {
   console.log('🔔 MainTabs - Should show badge:', user && totalUnreadCount > 0);
 
   return (
-    <div className="w-full">
+    <div className="w-full mt-4 sm:mt-8">
       <div className="flex w-full gap-1 mb-2 sm:mb-12 h-16 sm:h-10">
         <Button 
           variant="ghost"
