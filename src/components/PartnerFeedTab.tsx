@@ -276,10 +276,10 @@ const PartnerFeedTab = () => {
   }
 
   return (
-    <div className="mb-0 space-y-8">
+    <div className="mb-8 space-y-8">
       {/* Show Partner Pauses section */}
       {partners.length > 0 ? (
-        <Card className="mb-0">
+        <Card>
           <CardHeader>
             <div>
               <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
@@ -370,7 +370,7 @@ const PartnerFeedTab = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="mb-0">
+        <Card>
           <CardHeader>
             <div>
               <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">

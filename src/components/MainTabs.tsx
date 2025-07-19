@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { User, Users, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
+import { User, Users, BarChart3 } from 'lucide-react';
 import PausedSection from './PausedSection';
 import PauseLogSection from './PauseLogSection';
 import PartnerFeedTab from './PartnerFeedTab';
 import StatsTab from './StatsTab';
-import AddPauseButton from './AddPauseButton';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useItemComments } from '@/hooks/useItemComments';
 import { useAuth } from '@/contexts/AuthContext';
 
-const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
+const MainTabs = () => {
   const [showMyPauses, setShowMyPauses] = useState(false);
   const [showPartnerPauses, setShowPartnerPauses] = useState(false);
   const { hasPausePartnerAccess } = useSubscription();
@@ -42,26 +41,22 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
   console.log('🔔 MainTabs - Should show badge:', user && totalUnreadCount > 0);
 
   return (
-    <div className="w-full flex-1 flex flex-col">
-      <div className="flex w-full h-40 max-w-none mx-0">
+    <div className="w-full">
+      <div className="flex w-full gap-1 mb-6 h-16 sm:h-10">
         <Button 
           variant="ghost"
           onClick={() => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
           }}
-          className="flex-1 flex flex-col items-center justify-center border-0 font-medium shadow-none px-4 h-full rounded-none gap-0"
+          className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
-            backgroundColor: showMyPauses ? '#D9E36A' : '#D9E36A',
-            color: 'black'
+            backgroundColor: showMyPauses ? '#A8C3A8' : '#CDD6CD',
+            color: showMyPauses ? '#7A5DD9' : 'inherit'
           }}
         >
-          <span className="text-lg font-medium">My Pauses</span>
-          {showMyPauses ? (
-            <ChevronUp className="h-4 w-4 mt-0.5" strokeWidth={3} />
-          ) : (
-            <ChevronDown className="h-4 w-4 mt-0.5" strokeWidth={3} />
-          )}
+          <User className="h-5 w-5 sm:h-5 sm:w-5" />
+          <span className="text-sm sm:text-base">My Pauses</span>
         </Button>
         <Button 
           variant="ghost"
@@ -69,53 +64,33 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
           }}
-          className="flex-1 flex flex-col items-center justify-center border-0 font-medium shadow-none px-4 h-full relative rounded-none gap-0"
+          className="flex-1 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
           style={{ 
-            backgroundColor: showPartnerPauses ? '#D9E36A' : '#D9E36A',
-            color: 'black'
+            backgroundColor: showPartnerPauses ? '#A8C3A8' : '#CDD6CD',
+            color: showPartnerPauses ? '#7A5DD9' : 'inherit'
           }}
         >
-          <span className="text-lg font-medium">Partner Pauses</span>
-          {showPartnerPauses ? (
-            <ChevronUp className="h-4 w-4 mt-0.5" strokeWidth={3} />
-          ) : (
-            <ChevronDown className="h-4 w-4 mt-0.5" strokeWidth={3} />
-          )}
-          {user && totalUnreadCount > 0 && (
-            <div className="absolute -top-2 -right-2 text-xs h-5 w-5 flex items-center justify-center font-medium" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
-              {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
-            </div>
-          )}
+          <div className="relative flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+            <Users className="h-5 w-5 sm:h-5 sm:w-5" />
+            <span className="text-sm sm:text-base">Partner Pauses</span>
+            {user && totalUnreadCount > 0 && (
+              <div className="absolute -top-2 -right-2 text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
+                {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+              </div>
+            )}
+          </div>
         </Button>
       </div>
 
-      {/* Content sections - no margin bottom to stick to Add Pause button */}
       {showMyPauses && (
-        <div className="flex-1 flex flex-col">
-          <div className="flex-shrink-0">
-            <PausedSection />
-          </div>
-          <div className="flex-1 w-full">
-            <AddPauseButton onAddPause={onAddPause} />
-          </div>
+        <div className="mt-0 mb-6">
+          <PausedSection />
         </div>
       )}
 
       {showPartnerPauses && (
-        <div className="flex-1 flex flex-col">
-          <div className="flex-shrink-0">
-            <PartnerFeedTab />
-          </div>
-          <div className="flex-1 w-full">
-            <AddPauseButton onAddPause={onAddPause} />
-          </div>
-        </div>
-      )}
-
-      {/* Show Add Pause button when no tabs are open */}
-      {!showMyPauses && !showPartnerPauses && (
-        <div className="flex-1 w-full">
-          <AddPauseButton onAddPause={onAddPause} />
+        <div className="mt-0">
+          <PartnerFeedTab />
         </div>
       )}
     </div>

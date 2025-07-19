@@ -8,11 +8,7 @@ import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
 import QuickPauseButton from './QuickPauseButton';
 
-interface PauseHeaderProps {
-  showIntroText?: boolean;
-}
-
-const PauseHeader = ({ showIntroText = false }: PauseHeaderProps) => {
+const PauseHeader = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const { user } = useAuth();
@@ -47,17 +43,15 @@ const PauseHeader = ({ showIntroText = false }: PauseHeaderProps) => {
 
   return (
     <>
-      <header className="relative w-full">
-        {/* Top section with centered POCKET || PAUSE */}
-        <div className="text-center mb-4">
-          <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide hover:text-gray-600 transition-colors">
+      <header className="relative mb-18">
+        <div className="text-center">
+          <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors inline-block">
             POCKET || PAUSE
           </Link>
         </div>
         
-        {/* Icons positioned below and to the right */}
-        <div className="flex justify-end items-center mb-4">
-          <div className="flex items-center gap-3">
+        
+        <div className="absolute top-6 right-0 flex items-center gap-3">
           <button 
             className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors flex items-center justify-center"
             onClick={handleCourseClick}
@@ -80,17 +74,7 @@ const PauseHeader = ({ showIntroText = false }: PauseHeaderProps) => {
               <User size={24} />
             )}
           </button>
-          </div>
         </div>
-        
-        {/* Conditional intro text */}
-        {showIntroText && (
-          <div className="text-center w-full mb-8 pt-4 pb-4">
-            <h1 className="text-black dark:text-[#F9F5EB] font-medium text-2xl tracking-wide">
-              Hi Michelle — let's check in before you check out
-            </h1>
-          </div>
-        )}
       </header>
       
       <UserProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} />

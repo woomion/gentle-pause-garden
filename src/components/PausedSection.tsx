@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabasePausedItemsStore, PausedItem } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore, PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import PausedItemDetail from './PausedItemDetail';
 import GuestModeIndicator from './GuestModeIndicator';
 import PausedItemsCarousel from './PausedItemsCarousel';
@@ -112,51 +111,36 @@ const PausedSection = () => {
   // Empty state when no items
   if (pausedItems.length === 0) {
     return (
-      <div className="mb-0">
-        <Card className="mb-0">
-          <CardHeader>
-            <div>
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-                Paused for now
-              </h2>
-              <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
-                You haven't decided yet and that's okay
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <PausedSectionEmpty isGuest={!user} hasReviewItems={false} />
-          </CardContent>
-        </Card>
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+          Paused for now
+        </h2>
+        <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
+          You haven't decided yet and that's okay
+        </p>
+        <PausedSectionEmpty isGuest={!user} hasReviewItems={false} />
       </div>
     );
   }
 
   return (
-    <div className="mb-0">
-      <Card className="mb-0">
-        <CardHeader>
-          <div>
-            <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
-              Paused for now
-            </h2>
-            <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
-              You haven't decided yet and that's okay
-            </p>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <GuestModeIndicator 
-            show={!user && pausedItems.length > 0}
-          />
+    <div className="mb-8">
+      <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0">
+        Paused for now
+      </h2>
+      <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
+        You haven't decided yet and that's okay
+      </p>
 
-          {/* Paused items display */}
-          <PausedItemsCarousel 
-            items={pausedItems}
-            onItemClick={handleItemClick}
-          />
-        </CardContent>
-      </Card>
+      <GuestModeIndicator 
+        show={!user && pausedItems.length > 0}
+      />
+
+      {/* Paused items display */}
+      <PausedItemsCarousel 
+        items={pausedItems}
+        onItemClick={handleItemClick}
+      />
 
       {selectedItem && (
         <PausedItemDetail

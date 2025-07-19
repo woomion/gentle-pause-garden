@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
-import { X, Bell, MessageSquare, Timer, Heart, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { X, Bell, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -175,46 +174,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
 
             {/* Tag Management Section */}
             <TagManagement onClose={onClose} />
-
-            {/* Decision Log Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
-              <Link 
-                to="/pause-log"
-                onClick={onClose}
-                className="w-full bg-white/60 dark:bg-white/10 border border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3 flex items-center justify-between transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                    <Timer className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">Decision Log</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">View your pause history</div>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            {/* Greater Joy Fund Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
-              <Link 
-                to="/greater-joy-fund"
-                onClick={onClose}
-                className="w-full bg-white/60 dark:bg-white/10 border border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3 flex items-center justify-between transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center">
-                    <Heart className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">Greater Joy Fund</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Support mindful consumption</div>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
 
             {/* Feedback Section */}
             <div className="border-t border-gray-200 dark:border-white/20 pt-4">

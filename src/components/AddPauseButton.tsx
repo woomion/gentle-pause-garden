@@ -20,16 +20,17 @@ const AddPauseButton = ({ onAddPause }: AddPauseButtonProps) => {
   return (
     <button
       onClick={handleClick}
-      className="relative w-full h-full min-h-[200px] md:min-h-[300px] max-w-none mx-0 text-black dark:text-white font-medium transition-all duration-200 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center text-xl md:text-2xl rounded-none pb-8"
+      className="relative w-full text-black dark:text-white font-medium py-6 px-6 transition-all duration-200 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98]"
       style={{ 
-        backgroundColor: '#D6BBF7', 
-        boxShadow: '0 4px 12px rgba(214, 187, 247, 0.3), 0 2px 4px rgba(214, 187, 247, 0.2)'
+        backgroundColor: '#C9B1FF', 
+        boxShadow: '0 4px 12px rgba(201, 177, 255, 0.3), 0 2px 4px rgba(201, 177, 255, 0.2)',
+        borderRadius: '24px 24px 4px 4px'
       }}
     >
       {/* Ripple effect */}
       {showRipple && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-2 h-2 bg-lavender/30 animate-ripple"></div>
+          <div className="w-2 h-2 bg-lavender/30 rounded-full animate-ripple"></div>
         </div>
       )}
       
