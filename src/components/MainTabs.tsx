@@ -51,8 +51,8 @@ const MainTabs = () => {
           }}
           className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full"
           style={{ 
-            backgroundColor: showMyPauses ? '#A8C3A8' : '#CDD6CD',
-            color: showMyPauses ? '#7A5DD9' : 'inherit'
+            backgroundColor: showMyPauses ? '#B8D4A8' : '#D0D9A8',
+            color: 'black'
           }}
         >
           <span className="text-base font-medium">My Pauses</span>
@@ -65,8 +65,8 @@ const MainTabs = () => {
           }}
           className="flex-1 flex items-center justify-center border-0 font-medium shadow-none px-4 h-full relative"
           style={{ 
-            backgroundColor: showPartnerPauses ? '#A8C3A8' : '#CDD6CD',
-            color: showPartnerPauses ? '#7A5DD9' : 'inherit'
+            backgroundColor: showPartnerPauses ? '#B8D4A8' : '#D0D9A8',
+            color: 'black'
           }}
         >
           <span className="text-base font-medium">Partner Pauses</span>

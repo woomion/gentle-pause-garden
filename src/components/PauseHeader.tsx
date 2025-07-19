@@ -43,14 +43,14 @@ const PauseHeader = () => {
 
   return (
     <>
-      <header className="relative mb-8 w-full">
+      <header className="relative mb-8 w-full pt-12 pb-4">
         <div className="text-center w-full">
-          <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors inline-block">
+          <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide hover:text-gray-600 transition-colors inline-block">
             Hi Michelle — let's check in before you check out
           </Link>
         </div>
         
-        <div className="absolute top-0 right-0 flex items-center gap-3">
+        <div className="absolute top-2 right-0 flex items-center gap-3">
           <button 
             className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors flex items-center justify-center"
             onClick={handleCourseClick}
