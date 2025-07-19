@@ -50,7 +50,7 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
           }}
-          className="flex-1 flex flex-col items-center justify-center border-0 font-medium shadow-none px-4 h-full rounded-none"
+          className="flex-1 flex flex-col items-center justify-center border-0 font-medium shadow-none px-4 h-full rounded-none gap-0"
           style={{ 
             backgroundColor: showMyPauses ? '#D9E36A' : '#D9E36A',
             color: 'black'
@@ -58,9 +58,9 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
         >
           <span className="text-lg font-medium">My Pauses</span>
           {showMyPauses ? (
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp className="h-4 w-4 -mt-1" strokeWidth={3} />
           ) : (
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-4 w-4 -mt-1" strokeWidth={3} />
           )}
         </Button>
         <Button 
@@ -69,7 +69,7 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
           }}
-          className="flex-1 flex flex-col items-center justify-center border-0 font-medium shadow-none px-4 h-full relative rounded-none"
+          className="flex-1 flex flex-col items-center justify-center border-0 font-medium shadow-none px-4 h-full relative rounded-none gap-0"
           style={{ 
             backgroundColor: showPartnerPauses ? '#D9E36A' : '#D9E36A',
             color: 'black'
@@ -77,9 +77,9 @@ const MainTabs = ({ onAddPause }: { onAddPause: () => void }) => {
         >
           <span className="text-lg font-medium">Partner Pauses</span>
           {showPartnerPauses ? (
-            <ChevronUp className="h-4 w-4" />
+            <ChevronUp className="h-4 w-4 -mt-1" strokeWidth={3} />
           ) : (
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-4 w-4 -mt-1" strokeWidth={3} />
           )}
           {user && totalUnreadCount > 0 && (
             <div className="absolute -top-2 -right-2 text-xs h-5 w-5 flex items-center justify-center font-medium" style={{ backgroundColor: '#D8B4FE', color: '#000' }}>
