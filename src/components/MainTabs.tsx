@@ -42,7 +42,7 @@ const MainTabs = () => {
 
   return (
     <div className="w-full">
-      <div className="flex w-full gap-1 mb-2 h-16 sm:h-10">
+      <div className="flex w-full gap-1 mb-2 sm:mb-8 h-16 sm:h-10">
         <Button 
           variant="ghost"
           onClick={() => {
