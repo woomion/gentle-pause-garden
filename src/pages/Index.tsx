@@ -101,7 +101,7 @@ const Index = () => {
 
   return (
     <>
-      <div className="h-screen h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col overflow-hidden">
+      <div className="h-screen h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col">
         {/* Header section with padding only on desktop */}
         <div className="px-4 md:px-6 py-2 md:py-8 flex-shrink-0">
           <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">

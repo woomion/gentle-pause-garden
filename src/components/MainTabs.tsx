@@ -79,13 +79,13 @@ const MainTabs = () => {
       </div>
 
       {showMyPauses && (
-        <div className="mt-0 mb-6">
+        <div className="mt-0 mb-6 overflow-y-auto max-h-[50vh] md:max-h-none">
           <PausedSection />
         </div>
       )}
 
       {showPartnerPauses && (
-        <div className="mt-0">
+        <div className="mt-0 overflow-y-auto max-h-[50vh] md:max-h-none">
           <PartnerFeedTab />
         </div>
       )}
