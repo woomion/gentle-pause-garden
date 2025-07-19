@@ -305,12 +305,6 @@ const PartnerFeedTab = () => {
               </Select>
             </div>
           )}
-          {/* Partner Items Ready Banner */}
-          <PartnerItemsReadyBanner
-            partners={partners}
-            currentUserId={currentUserId}
-            onItemsReady={handlePartnerItemsReady}
-          />
           
           {sharedItems.length === 0 ? (
             <div className="text-center py-8">
@@ -349,13 +343,19 @@ const PartnerFeedTab = () => {
                       }
                     </p>
                   </div>
-                ) : (
+                 ) : (
                   <div className="space-y-4">
                     <PausedItemsCarousel 
                       items={filteredItems}
                       onItemClick={(item) => setSelectedItem(item)}
                       partners={partners}
                       currentUserId={currentUserId}
+                    />
+                    {/* Partner Items Ready Banner - moved beneath shared items */}
+                    <PartnerItemsReadyBanner
+                      partners={partners}
+                      currentUserId={currentUserId}
+                      onItemsReady={handlePartnerItemsReady}
                     />
                   </div>
                 );
