@@ -49,14 +49,14 @@ const MainTabs = () => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
           }}
-          className={`flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-l-full border-2 font-normal shadow-none px-0.5 sm:px-2 h-auto ${
-            showMyPauses ? 'border-purple-500' : 'border-transparent'
-          }`}
+          className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
         >
           <div className="flex flex-col items-center gap-0">
-            <span className="text-sm sm:text-base">My Pauses</span>
+            <span className={`text-sm sm:text-base ${showMyPauses ? 'text-purple-600 font-medium' : ''}`}>
+              My Pauses
+            </span>
             {showMyPauses ? (
-              <ChevronUp className="h-3 w-3 mt-0.5" strokeWidth={3} />
+              <ChevronUp className="h-3 w-3 mt-0.5 text-purple-600" strokeWidth={3} />
             ) : (
               <ChevronDown className="h-3 w-3 mt-0.5" strokeWidth={3} />
             )}
@@ -68,14 +68,14 @@ const MainTabs = () => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
           }}
-          className={`flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-2 font-normal shadow-none px-0.5 sm:px-2 h-auto ${
-            showPartnerPauses ? 'border-purple-500' : 'border-transparent'
-          }`}
+          className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
         >
           <div className="relative flex flex-col items-center gap-0">
-            <span className="text-sm sm:text-base">Partner Pauses</span>
+            <span className={`text-sm sm:text-base ${showPartnerPauses ? 'text-purple-600 font-medium' : ''}`}>
+              Partner Pauses
+            </span>
             {showPartnerPauses ? (
-              <ChevronUp className="h-3 w-3 mt-0.5" strokeWidth={3} />
+              <ChevronUp className="h-3 w-3 mt-0.5 text-purple-600" strokeWidth={3} />
             ) : (
               <ChevronDown className="h-3 w-3 mt-0.5" strokeWidth={3} />
             )}
