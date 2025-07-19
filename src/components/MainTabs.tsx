@@ -49,7 +49,9 @@ const MainTabs = () => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
           }}
-          className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
+          className={`flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-l-full border-2 font-normal shadow-none px-0.5 sm:px-2 h-auto ${
+            showMyPauses ? 'border-purple-500' : 'border-transparent'
+          }`}
         >
           <div className="flex flex-col items-center gap-0">
             <span className="text-sm sm:text-base">My Pauses</span>
@@ -66,7 +68,9 @@ const MainTabs = () => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
           }}
-          className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto"
+          className={`flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-2 font-normal shadow-none px-0.5 sm:px-2 h-auto ${
+            showPartnerPauses ? 'border-purple-500' : 'border-transparent'
+          }`}
         >
           <div className="relative flex flex-col items-center gap-0">
             <span className="text-sm sm:text-base">Partner Pauses</span>
