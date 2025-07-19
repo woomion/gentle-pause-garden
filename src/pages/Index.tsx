@@ -102,13 +102,16 @@ const Index = () => {
   return (
     <>
       <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 flex flex-col">
-        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto md:px-4 md:py-8 w-full flex-1 flex flex-col">
-          <div className="px-4 md:px-0">
+        {/* Header section with padding only on desktop */}
+        <div className="px-4 md:px-6 py-4 md:py-8">
+          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
             <PauseHeader showIntroText={true} />
           </div>
-          
-          {/* Review Banners - Full width, no gaps */}
-          <div className="w-full px-4 md:px-0">
+        </div>
+        
+        {/* Review Banners - Full width on mobile */}
+        <div className="px-4 md:px-6">
+          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
             <ReviewBanner 
               itemsCount={itemReview.itemsForReview.length}
               onStartReview={handleStartReview}
@@ -121,21 +124,25 @@ const Index = () => {
               />
             )}
           </div>
-          
-          {/* Content area that grows to push button to bottom on mobile */}
-          <div className="flex-1 w-full flex flex-col">
-            {/* Main Tabs - No gap, touching Add Pause button */}
-            <div className="w-full px-4 md:px-0">
-              <MainTabs />
-            </div>
-            
-            {/* Add Pause Button - Full width, touches bottom edge */}
-            <div className="flex-1 w-full">
-              <AddPauseButton onAddPause={modalStates.handleAddPause} />
-            </div>
+        </div>
+        
+        {/* Main Tabs - Full width on mobile */}
+        <div className="px-4 md:px-6">
+          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
+            <MainTabs />
           </div>
-          
-          <div className="px-4 md:px-0">
+        </div>
+        
+        {/* Add Pause Button - Full width, stretches to bottom */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 w-full">
+            <AddPauseButton onAddPause={modalStates.handleAddPause} />
+          </div>
+        </div>
+        
+        {/* Footer - Only show on desktop or when there's space */}
+        <div className="hidden md:block px-4 md:px-6 py-4">
+          <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
             <FooterLinks />
           </div>
         </div>
