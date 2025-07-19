@@ -5,7 +5,6 @@ import WelcomeMessage from '../components/WelcomeMessage';
 import ReviewBanner from '../components/ReviewBanner';
 import AddPauseButton from '../components/AddPauseButton';
 import MainTabs from '../components/MainTabs';
-import SupportCTA from '../components/SupportCTA';
 import FooterLinks from '../components/FooterLinks';
 import PauseForm from '../components/PauseForm';
 import WelcomeModal from '../components/WelcomeModal';
@@ -148,7 +147,6 @@ const Index = () => {
             />
           )}
           <MainTabs />
-          <SupportCTA />
           <FooterLinks />
         </div>
       </div>
