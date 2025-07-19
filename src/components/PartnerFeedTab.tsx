@@ -279,121 +279,110 @@ const PartnerFeedTab = () => {
     <div className="mb-8 space-y-8">
       {/* Show Partner Pauses section */}
       {partners.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <div>
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Shared Pauses
-              </h2>
-              <p className="text-base mb-1" style={{ color: '#6b6b6b' }}>
-                Mindful choices, made together.
-              </p>
-              {sharedItems.length > 0 && (
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-muted-foreground">Viewing with:</span>
-                  <Select value={selectedPartner} onValueChange={setSelectedPartner}>
-                    <SelectTrigger className="w-48 bg-background">
-                      <SelectValue placeholder="All Partners" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background border shadow-lg z-40">
-                      <SelectItem value="all">All Partners</SelectItem>
-                      {partners.map((partner) => (
-                        <SelectItem key={partner.partner_id} value={partner.partner_name}>
-                          {partner.partner_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+        <div>
+          <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Shared Pauses
+          </h2>
+          <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
+            Mindful choices, made together.
+          </p>
+          {sharedItems.length > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm text-muted-foreground">Viewing with:</span>
+              <Select value={selectedPartner} onValueChange={setSelectedPartner}>
+                <SelectTrigger className="w-48 bg-background">
+                  <SelectValue placeholder="All Partners" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border shadow-lg z-40">
+                  <SelectItem value="all">All Partners</SelectItem>
+                  {partners.map((partner) => (
+                    <SelectItem key={partner.partner_id} value={partner.partner_name}>
+                      {partner.partner_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </CardHeader>
-          <CardContent>
-            {/* Partner Items Ready Banner */}
-            <PartnerItemsReadyBanner
-              partners={partners}
-              currentUserId={currentUserId}
-              onItemsReady={handlePartnerItemsReady}
-            />
-            
-            {sharedItems.length === 0 ? (
-              <div className="text-center py-8">
-                <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                <p className="text-muted-foreground">
-                  No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {(() => {
-                  // Filter shared items based on selected partner
-                  const filteredItems = selectedPartner === 'all' 
-                    ? sharedItems 
-                    : sharedItems.filter(item => {
-                        // Find the partner by name
-                        const selectedPartnerData = partners.find(p => p.partner_name === selectedPartner);
-                        if (!selectedPartnerData) return false;
-                        
-                        // Show items where:
-                        // 1. Current user created the item and shared it with the selected partner
-                        // 2. The selected partner created the item and shared it with current user
-                        return (
-                          (item.originalUserId === currentUserId && item.sharedWithPartners?.includes(selectedPartnerData.partner_id)) ||
-                          (item.originalUserId === selectedPartnerData.partner_id && item.sharedWithPartners?.includes(currentUserId || ''))
-                        );
-                      });
-
-                  return filteredItems.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                      <p className="text-muted-foreground">
-                        {selectedPartner === 'all' 
-                          ? "No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together."
-                          : `No shared pauses with ${selectedPartner} yet.`
-                        }
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <PausedItemsCarousel 
-                        items={filteredItems}
-                        onItemClick={(item) => setSelectedItem(item)}
-                        partners={partners}
-                        currentUserId={currentUserId}
-                      />
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <div>
-              <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Partner Pauses
-              </h2>
-              <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
-                Connect with someone you trust to help you reflect before you spend.
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent>
+          )}
+          {/* Partner Items Ready Banner */}
+          <PartnerItemsReadyBanner
+            partners={partners}
+            currentUserId={currentUserId}
+            onItemsReady={handlePartnerItemsReady}
+          />
+          
+          {sharedItems.length === 0 ? (
             <div className="text-center py-8">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-muted-foreground mb-4">
-                You haven't connected with any pause partners yet.
-              </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Click your account icon in the top right to invite pause partners and start sharing mindful decisions together.
+              <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+              <p className="text-muted-foreground">
+                No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together.
               </p>
             </div>
-          </CardContent>
-        </Card>
+          ) : (
+            <div className="space-y-4">
+              {(() => {
+                // Filter shared items based on selected partner
+                const filteredItems = selectedPartner === 'all' 
+                  ? sharedItems 
+                  : sharedItems.filter(item => {
+                      // Find the partner by name
+                      const selectedPartnerData = partners.find(p => p.partner_name === selectedPartner);
+                      if (!selectedPartnerData) return false;
+                      
+                      // Show items where:
+                      // 1. Current user created the item and shared it with the selected partner
+                      // 2. The selected partner created the item and shared it with current user
+                      return (
+                        (item.originalUserId === currentUserId && item.sharedWithPartners?.includes(selectedPartnerData.partner_id)) ||
+                        (item.originalUserId === selectedPartnerData.partner_id && item.sharedWithPartners?.includes(currentUserId || ''))
+                      );
+                    });
+
+                return filteredItems.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                    <p className="text-muted-foreground">
+                      {selectedPartner === 'all' 
+                        ? "No shared pauses yet. Once connected, you'll see items you've chosen to reflect on together."
+                        : `No shared pauses with ${selectedPartner} yet.`
+                      }
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <PausedItemsCarousel 
+                      items={filteredItems}
+                      onItemClick={(item) => setSelectedItem(item)}
+                      partners={partners}
+                      currentUserId={currentUserId}
+                    />
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div>
+          <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-0 flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Partner Pauses
+          </h2>
+          <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
+            Connect with someone you trust to help you reflect before you spend.
+          </p>
+          
+          <div className="text-center py-8">
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <p className="text-muted-foreground mb-4">
+              You haven't connected with any pause partners yet.
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Click your account icon in the top right to invite pause partners and start sharing mindful decisions together.
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Detail Modal for selected shared item */}
