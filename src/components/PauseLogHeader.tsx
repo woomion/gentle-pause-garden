@@ -1,8 +1,10 @@
 
 import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import PauseHeader from './PauseHeader';
+import { useState } from 'react';
+import UserProfileModal from './UserProfileModal';
 
 interface PauseLogHeaderProps {
   itemCount: number;
@@ -10,19 +12,31 @@ interface PauseLogHeaderProps {
 
 const PauseLogHeader = ({ itemCount }: PauseLogHeaderProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [showUserModal, setShowUserModal] = useState(false);
+
+  const handleBackClick = () => {
+    if (user) {
+      // If authenticated, show the account modal
+      setShowUserModal(true);
+    } else {
+      // If not authenticated, go back to home
+      navigate('/');
+    }
+  };
 
   return (
     <>
       <PauseHeader />
       
       <div className="mb-6 mt-8">
-        <Link 
-          to="/"
+        <button 
+          onClick={handleBackClick}
           className="inline-flex items-center text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors mb-4"
         >
           <ArrowLeft size={20} className="mr-2" />
-          <span className="text-sm">Back to home</span>
-        </Link>
+          <span className="text-sm">Back</span>
+        </button>
         
         <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Paused Decision Log</h1>
         
@@ -35,6 +49,11 @@ const PauseLogHeader = ({ itemCount }: PauseLogHeaderProps) => {
           </div>
         )}
       </div>
+      
+      <UserProfileModal 
+        isOpen={showUserModal} 
+        onClose={() => setShowUserModal(false)} 
+      />
     </>
   );
 };
