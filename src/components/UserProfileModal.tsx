@@ -1,17 +1,13 @@
 
 import { useState } from 'react';
-import { X, Bell, MessageSquare, Heart, Timer, Star, ChevronRight } from 'lucide-react';
+import { X, Timer, MessageSquare, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Switch } from '@/components/ui/switch';
-import { useUserSettings } from '@/hooks/useUserSettings';
-import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import FeedbackModal from './FeedbackModal';
 import DonationModal from './DonationModal';
-import PartnerManagement from './PartnerManagement';
-import TagManagement from './TagManagement';
+import SettingsSection from './SettingsSection';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -23,8 +19,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [donationOpen, setDonationOpen] = useState(false);
-  const { notificationsEnabled, updateNotificationSetting } = useUserSettings();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -37,73 +31,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
     } finally {
       setIsSigningOut(false);
     }
-  };
-
-  const handleNotificationToggle = async (checked: boolean) => {
-    try {
-      if (checked) {
-        // Request browser permission for web notifications
-        if ('Notification' in window) {
-          const permission = await Notification.requestPermission();
-          if (permission !== 'granted') {
-            toast({
-              title: "Notifications blocked",
-              description: "Please enable notifications in your browser settings to receive updates.",
-              variant: "destructive",
-            });
-            return;
-          }
-        }
-      }
-
-      const success = await updateNotificationSetting(checked);
-      
-      if (success) {
-        toast({
-          title: checked ? "Notifications enabled" : "Notifications disabled",
-          description: checked 
-            ? "You'll receive notifications about your paused items." 
-            : "You won't receive any notifications.",
-        });
-      }
-    } catch (error) {
-      console.error('Error updating notification settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update notification settings. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleTestNotification = () => {
-    if (!notificationsEnabled) {
-      toast({
-        title: "Notifications disabled",
-        description: "Please enable notifications first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (Notification.permission !== 'granted') {
-      toast({
-        title: "Notifications not allowed",
-        description: "Please enable notifications in your browser settings.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    new Notification('Test Notification', {
-      body: 'Your notifications are working correctly!',
-      icon: '/favicon.ico'
-    });
-
-    toast({
-      title: "Test notification sent",
-      description: "Check if you received the notification.",
-    });
   };
 
   const handleFeedbackClick = () => {
@@ -128,7 +55,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6">
-      <div className="bg-cream dark:bg-[#200E3B] rounded-2xl max-w-sm w-full p-6 relative">
+      <div className="bg-cream dark:bg-[#200E3B] rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
@@ -154,37 +81,10 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
           <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
             {email}
           </p>
-
-          <div className="space-y-4">
-            {/* Notifications Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Bell size={16} className="text-gray-600 dark:text-gray-300" />
-                  <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
-                    Notifications
-                  </span>
-                </div>
-                <Switch
-                  checked={notificationsEnabled}
-                  onCheckedChange={handleNotificationToggle}
-                />
-              </div>
-              
-              {notificationsEnabled && (
-                <Button
-                  onClick={handleTestNotification}
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20"
-                >
-                  Test Notification
-                </Button>
-              )}
-            </div>
-
-            {/* Partner Management Section */}
-            <PartnerManagement onClose={onClose} />
+          
+          <div className="space-y-6">
+            {/* Settings Section */}
+            <SettingsSection />
 
             {/* Decision Log Section */}
             <div className="border-t border-gray-200 dark:border-white/20 pt-4">
@@ -201,10 +101,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                 <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
               </div>
             </div>
-
-            {/* Tag Management Section */}
-            <TagManagement onClose={onClose} />
-
 
 
             {/* Feedback Section */}
