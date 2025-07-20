@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import PausedSection from './PausedSection';
 import PauseLogSection from './PauseLogSection';
 import PartnerFeedTab from './PartnerFeedTab';
@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const MainTabs = () => {
   const [showMyPauses, setShowMyPauses] = useState(false);
   const [showPartnerPauses, setShowPartnerPauses] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
   const { hasPausePartnerAccess } = useSubscription();
   const { user } = useAuth();
   
@@ -48,6 +49,7 @@ const MainTabs = () => {
           onClick={() => {
             setShowMyPauses(!showMyPauses);
             setShowPartnerPauses(false);
+            setShowAccount(false);
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto hover:bg-transparent focus:bg-transparent active:bg-transparent"
         >
@@ -67,8 +69,9 @@ const MainTabs = () => {
           onClick={() => {
             setShowPartnerPauses(!showPartnerPauses);
             setShowMyPauses(false);
+            setShowAccount(false);
           }}
-          className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto hover:bg-transparent focus:bg-transparent active:bg-transparent"
+          className="flex-1 flex flex-col sm:flex-row items-center gap-0 border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto hover:bg-transparent focus:bg-transparent active:bg-transparent"
         >
           <div className="relative flex flex-col items-center gap-0">
             <span className={`text-base sm:text-base ${showPartnerPauses ? 'text-purple-600 font-medium' : ''}`}>
@@ -86,6 +89,26 @@ const MainTabs = () => {
             )}
           </div>
         </Button>
+        <Button 
+          variant="ghost"
+          onClick={() => {
+            setShowAccount(!showAccount);
+            setShowMyPauses(false);
+            setShowPartnerPauses(false);
+          }}
+          className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto hover:bg-transparent focus:bg-transparent active:bg-transparent"
+        >
+          <div className="flex flex-col items-center gap-0">
+            <span className={`text-base sm:text-base ${showAccount ? 'text-purple-600 font-medium' : ''}`}>
+              Account
+            </span>
+            {showAccount ? (
+              <ChevronUp className="h-3 w-3 mt-0.5 text-purple-600" strokeWidth={3} />
+            ) : (
+              <ChevronDown className="h-3 w-3 mt-0.5" strokeWidth={3} />
+            )}
+          </div>
+        </Button>
       </div>
 
       {showMyPauses && (
@@ -97,6 +120,20 @@ const MainTabs = () => {
       {showPartnerPauses && (
         <div className="mt-0">
           <PartnerFeedTab />
+        </div>
+      )}
+
+      {showAccount && (
+        <div className="mt-0">
+          <StatsTab stats={{
+            totalPauses: 0,
+            weeklyPauses: 0,
+            monthlyPauses: 0,
+            totalAmount: 0,
+            weeklyAmount: 0,
+            monthlyAmount: 0,
+            topEmotion: ''
+          }} />
         </div>
       )}
     </div>
