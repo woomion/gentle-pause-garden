@@ -179,7 +179,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   return (
     <div 
-      className="relative overflow-hidden bg-background rounded-lg border border-[#EDEBE8] cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in"
+      className="relative overflow-hidden bg-white dark:bg-white/10 rounded-lg border border-[#EDEBE8] cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -206,7 +206,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       )}
       
       {/* Main content with specified padding - increased height */}
-      <div className="px-4 py-7">
+      <div className="px-4 py-5">
         {/* Horizontal flex layout */}
         <div className="flex items-center gap-4">
           {/* LEFT: Square image area */}

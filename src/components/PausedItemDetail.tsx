@@ -165,7 +165,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto fixed"
+        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto fixed"
       >
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
