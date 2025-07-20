@@ -106,9 +106,9 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
         }
       }}
     >
-      {/* Attribution pill in top right corner */}
+      {/* Attribution pill in top middle of image */}
       {getAttributionText && (
-        <div className="absolute top-2 right-2 z-10 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-10 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
           <span>{getAttributionText}</span>
         </div>
       )}
