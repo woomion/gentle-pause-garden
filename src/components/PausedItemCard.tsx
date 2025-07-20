@@ -161,49 +161,24 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
             <EmotionBadge emotion={item.emotion} />
           </div>
 
-        {/* Only show notes if they exist and aren't empty after cleaning */}
-        {cleanNotes && cleanNotes.trim() && (
-          <div className="text-sm text-muted-foreground line-clamp-2">
-            <span className="font-medium">Note:</span> {cleanNotes}
-          </div>
-        )}
-
-        {/* Comment activity indicator for shared items */}
-        {showComments && commentCount > 0 && (
-          <div className="pt-2 border-t border-border">
-            <CommentActivityIndicator
-              commentCount={commentCount}
-              unreadCount={unreadCount}
-              hasNewActivity={hasActivity}
-              className="text-sm"
-            />
-          </div>
-        )}
-
-        {/* Partners sharing info */}
-        {sharedWithPartners.length > 0 && (
-          <div className="flex items-center gap-2 pt-2">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <User size={12} />
-              <span>Shared with</span>
+          {/* Only show notes if they exist and aren't empty after cleaning */}
+          {cleanNotes && cleanNotes.trim() && (
+            <div className="text-sm text-muted-foreground line-clamp-2">
+              <span className="font-medium">Note:</span> {cleanNotes}
             </div>
-            <div className="flex items-center gap-1">
-              {sharedWithPartners.slice(0, 3).map((partner) => (
-                <Avatar key={partner.partner_id} className="h-5 w-5">
-                  <AvatarFallback className="text-xs bg-muted text-muted-foreground">
-                    {getInitials(partner.partner_name)}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {sharedWithPartners.length > 3 && (
-                <span className="text-xs text-muted-foreground ml-1">
-                  +{sharedWithPartners.length - 3} more
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+          )}
 
+          {/* Comment activity indicator for shared items */}
+          {showComments && commentCount > 0 && (
+            <div className="pt-2 border-t border-border">
+              <CommentActivityIndicator
+                commentCount={commentCount}
+                unreadCount={unreadCount}
+                hasNewActivity={hasActivity}
+                className="text-sm"
+              />
+            </div>
+          )}
         </div>
       </div>
       
