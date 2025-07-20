@@ -60,10 +60,10 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6">
-      <div className="bg-cream dark:bg-[#200E3B] rounded-2xl max-w-sm w-full p-6 relative">
+      <div className="bg-card rounded-2xl max-w-sm w-full p-6 relative">
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
+          className="absolute top-4 right-4 p-2 text-foreground hover:text-muted-foreground transition-colors"
         >
           <X size={20} />
         </button>
@@ -78,55 +78,55 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
           </div>
 
           {firstName && (
-            <h2 className="text-lg font-semibold text-black dark:text-[#F9F5EB] mb-1">
+            <h2 className="text-lg font-semibold text-foreground mb-1">
               {firstName}
             </h2>
           )}
           
-          <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
+          <p className="text-muted-foreground text-sm mb-6">
             {email}
           </p>
           
           <div className="space-y-4">
             {/* Settings Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+            <div className="border-t border-border pt-4">
               <div 
                 onClick={handleSettingsClick}
                 className="flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors rounded p-2 -m-2"
               >
                 <div className="flex items-center gap-2">
-                  <Settings size={16} className="text-gray-600 dark:text-gray-300" />
-                  <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+                  <Settings size={16} className="text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">
                     Settings
                   </span>
                 </div>
-                <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
+                <ChevronRight size={16} className="text-muted-foreground" />
               </div>
             </div>
 
             {/* Decision Log Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+            <div className="border-t border-border pt-4">
               <div 
                 onClick={handleDecisionLogClick}
                 className="flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors rounded p-2 -m-2"
               >
                 <div className="flex items-center gap-2">
-                  <Timer size={16} className="text-gray-600 dark:text-gray-300" />
-                  <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+                  <Timer size={16} className="text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">
                     Decision Log
                   </span>
                 </div>
-                <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
+                <ChevronRight size={16} className="text-muted-foreground" />
               </div>
             </div>
 
 
             {/* Feedback Section */}
-            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+            <div className="border-t border-border pt-4">
               <Button
                 onClick={handleFeedbackClick}
                 variant="outline"
-                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
+                className="w-full rounded-xl py-3"
               >
                 <MessageSquare size={16} className="mr-2" />
                 Send Feedback
@@ -139,7 +139,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                 onClick={handleSignOut}
                 disabled={isSigningOut}
                 variant="outline"
-                className="w-full bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20 rounded-xl py-3"
+                className="w-full rounded-xl py-3"
               >
                 {isSigningOut ? 'Signing out...' : 'Sign Out'}
               </Button>
@@ -149,7 +149,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
             <div className="pt-6 text-center">
               <button
                 onClick={handleSupportClick}
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors underline underline-offset-2 decoration-1"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2 decoration-1"
               >
                 Support the Pause
               </button>

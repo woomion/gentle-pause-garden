@@ -45,7 +45,7 @@ const PauseHeader = () => {
     <>
       <header className="relative mb-18">
         <div className="text-center">
-          <Link to="/" className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors inline-block">
+          <Link to="/" className="text-foreground font-medium text-lg tracking-wide mb-2 hover:text-muted-foreground transition-colors inline-block">
             POCKET || PAUSE
           </Link>
         </div>
@@ -53,7 +53,7 @@ const PauseHeader = () => {
         
         <div className="absolute top-8 sm:top-6 right-0 flex items-center gap-3">
           <button 
-            className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors flex items-center justify-center"
+            className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
             onClick={handleCourseClick}
             title="Course section"
           >
@@ -61,7 +61,7 @@ const PauseHeader = () => {
           </button>
           
           <button 
-            className="p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors flex items-center justify-center"
+            className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
             onClick={handleAccountClick}
           >
             {user ? (

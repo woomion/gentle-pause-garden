@@ -53,7 +53,7 @@ const SettingsSection = () => {
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-6">
           <Settings className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-bold text-black dark:text-[#F9F5EB]">Settings</h3>
+        <h3 className="text-lg font-bold text-foreground">Settings</h3>
         </div>
         <div className="text-center py-8 text-muted-foreground">Loading settings...</div>
       </div>
@@ -64,13 +64,13 @@ const SettingsSection = () => {
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-6">
         <Settings className="h-5 w-5 text-muted-foreground" />
-        <h3 className="text-lg font-bold text-black dark:text-[#F9F5EB]">Settings</h3>
+        <h3 className="text-lg font-bold text-foreground">Settings</h3>
       </div>
 
       {/* Notifications */}
       <Collapsible open={notificationsOpen} onOpenChange={setNotificationsOpen}>
         <CollapsibleTrigger className="w-full">
-          <Card className="bg-white/40 dark:bg-white/5 border-gray-200 dark:border-white/20 cursor-pointer hover:bg-white/60 dark:hover:bg-white/10 transition-colors">
+          <Card className="bg-card border-border cursor-pointer hover:bg-card/80 transition-colors">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ const SettingsSection = () => {
           </Card>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Card className="bg-white/40 dark:bg-white/5 border-gray-200 dark:border-white/20 border-t-0 rounded-t-none">
+          <Card className="bg-card border-border border-t-0 rounded-t-none">
             <CardContent className="space-y-4 pt-4">
               <div className="flex items-center justify-between">
                 <Label htmlFor="notifications-enabled" className="text-sm font-medium">
@@ -131,7 +131,7 @@ const SettingsSection = () => {
       {/* Account & Profile */}
       <Collapsible open={accountOpen} onOpenChange={setAccountOpen}>
         <CollapsibleTrigger className="w-full">
-          <Card className="bg-white/40 dark:bg-white/5 border-gray-200 dark:border-white/20 cursor-pointer hover:bg-white/60 dark:hover:bg-white/10 transition-colors">
+          <Card className="bg-card border-border cursor-pointer hover:bg-card/80 transition-colors">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -151,12 +151,12 @@ const SettingsSection = () => {
           </Card>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Card className="bg-white/40 dark:bg-white/5 border-gray-200 dark:border-white/20 border-t-0 rounded-t-none">
+          <Card className="bg-card border-border border-t-0 rounded-t-none">
             <CardContent className="space-y-4 pt-4">
               {user && (
                 <div className="text-sm">
                   <Label className="text-muted-foreground">Email</Label>
-                  <p className="font-medium text-black dark:text-[#F9F5EB]">{user.email}</p>
+                  <p className="font-medium text-foreground">{user.email}</p>
                 </div>
               )}
               
@@ -190,7 +190,7 @@ const SettingsSection = () => {
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="space-y-2 pt-2 border-t border-border">
                 <Button
                   variant="outline"
                   size="sm"
@@ -214,7 +214,7 @@ const SettingsSection = () => {
       {/* Organization */}
       <Collapsible open={organizationOpen} onOpenChange={setOrganizationOpen}>
         <CollapsibleTrigger className="w-full">
-          <Card className="bg-white/40 dark:bg-white/5 border-gray-200 dark:border-white/20 cursor-pointer hover:bg-white/60 dark:hover:bg-white/10 transition-colors">
+          <Card className="bg-card border-border cursor-pointer hover:bg-card/80 transition-colors">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -234,7 +234,7 @@ const SettingsSection = () => {
           </Card>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Card className="bg-white/40 dark:bg-white/5 border-gray-200 dark:border-white/20 border-t-0 rounded-t-none">
+          <Card className="bg-card border-border border-t-0 rounded-t-none">
             <CardContent className="pt-4">
               <Button
                 variant="outline"
@@ -252,7 +252,7 @@ const SettingsSection = () => {
       {/* Pause Partners */}
       <Collapsible open={partnersOpen} onOpenChange={setPartnersOpen}>
         <CollapsibleTrigger className="w-full">
-          <Card className="bg-white/40 dark:bg-white/5 border-gray-200 dark:border-white/20 cursor-pointer hover:bg-white/60 dark:hover:bg-white/10 transition-colors">
+          <Card className="bg-card border-border cursor-pointer hover:bg-card/80 transition-colors">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -272,7 +272,7 @@ const SettingsSection = () => {
           </Card>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Card className="bg-white/40 dark:bg-white/5 border-gray-200 dark:border-white/20 border-t-0 rounded-t-none">
+          <Card className="bg-card border-border border-t-0 rounded-t-none">
             <CardContent className="pt-4">
               <Button
                 variant="outline"
@@ -297,10 +297,10 @@ const SettingsSection = () => {
 
       {showTagManagement && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-[#200E3B] rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-black dark:text-[#F9F5EB]">
+                <h2 className="text-lg font-semibold text-foreground">
                   Tag Management
                 </h2>
                 <Button
@@ -320,10 +320,10 @@ const SettingsSection = () => {
 
       {showPartnerManagement && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-[#200E3B] rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-black dark:text-[#F9F5EB]">
+                <h2 className="text-lg font-semibold text-foreground">
                   Partner Management
                 </h2>
                 <Button

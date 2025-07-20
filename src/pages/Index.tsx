@@ -84,10 +84,10 @@ const Index = () => {
   if (authLoading) {
     console.log('Showing auth loading screen');
     return (
-      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] flex items-center justify-center p-4">
+      <div className="min-h-screen min-h-[100dvh] bg-background flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="text-black dark:text-[#F9F5EB] text-lg">Loading...</div>
-          <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">Please wait</div>
+          <div className="text-foreground text-lg">Loading...</div>
+          <div className="mt-2 text-sm text-muted-foreground">Please wait</div>
         </div>
       </div>
     );
@@ -97,7 +97,7 @@ const Index = () => {
 
   return (
     <>
-      <div className="min-h-screen min-h-[100dvh] bg-cream dark:bg-[#200E3B] transition-colors duration-300 pb-40 overflow-y-auto">
+      <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 pb-40 overflow-y-auto">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
@@ -151,7 +151,7 @@ const Index = () => {
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
-      <div className="fixed bottom-0 left-0 right-0 bg-cream dark:bg-[#200E3B] border-t border-gray-200 dark:border-gray-700 px-4 pt-4 pb-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border px-4 pt-4 pb-4">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           <AddPauseButton onAddPause={modalStates.handleAddPause} />
           <FooterLinks />

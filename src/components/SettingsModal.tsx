@@ -13,9 +13,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center px-4">
-      <div className="bg-white dark:bg-[#200E3B] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+      <div className="bg-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB]">
+          <h2 className="text-xl font-semibold text-foreground">
             Settings
           </h2>
           <Button
