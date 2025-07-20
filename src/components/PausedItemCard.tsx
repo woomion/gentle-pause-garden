@@ -4,7 +4,7 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { calculateCheckInTimeDisplay } from '../utils/pausedItemsUtils';
 import EmotionBadge from './EmotionBadge';
 import { getEmotionColor } from '../utils/emotionColors';
-import { Progress } from '@/components/ui/progress';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -285,25 +285,11 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
         </div>
       </div>
       
-      {/* 1px divider */}
-      <div className="border-t border-[#F2F1EF] dark:border-border"></div>
-      
-      {/* Progress bar - 2px lavender, positioned above caption */}
-      <div className="relative">
-        <Progress 
-          value={pauseProgress.progress} 
-          className="h-0.5 rounded-none bg-[#F2F1EF] dark:bg-muted"
-          style={{
-            '--progress-bg': '#D7C7FF',
-          } as any}
-        />
-        
-        {/* Caption showing time until review with date */}
-        <div className="px-4 py-2">
-          <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
-            {pauseProgress.timeDisplay}{pauseProgress.checkInDate && ` (${pauseProgress.checkInDate})`}
-          </p>
-        </div>
+      {/* Caption showing time until review with date */}
+      <div className="px-4 py-2 border-t border-[#F2F1EF] dark:border-border">
+        <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
+          {pauseProgress.timeDisplay}{pauseProgress.checkInDate && ` (${pauseProgress.checkInDate})`}
+        </p>
       </div>
     </div>
   );
