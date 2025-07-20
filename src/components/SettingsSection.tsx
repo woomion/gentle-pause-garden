@@ -172,6 +172,23 @@ const SettingsSection = () => {
                   </Button>
                 </div>
               </div>
+
+              <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs h-8"
+                >
+                  Change Password
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="w-full text-xs h-8"
+                >
+                  Delete Account
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </CollapsibleContent>
