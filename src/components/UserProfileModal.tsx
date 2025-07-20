@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { X, Timer, MessageSquare, ChevronRight } from 'lucide-react';
+import { X, Timer, MessageSquare, ChevronRight, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import FeedbackModal from './FeedbackModal';
 import DonationModal from './DonationModal';
-import SettingsSection from './SettingsSection';
+import SettingsModal from './SettingsModal';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -19,6 +19,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [donationOpen, setDonationOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -35,6 +36,10 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
 
   const handleFeedbackClick = () => {
     setFeedbackOpen(true);
+  };
+
+  const handleSettingsClick = () => {
+    setSettingsOpen(true);
   };
 
 
@@ -55,7 +60,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6">
-      <div className="bg-cream dark:bg-[#200E3B] rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative">
+      <div className="bg-cream dark:bg-[#200E3B] rounded-2xl max-w-sm w-full p-6 relative">
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
@@ -82,9 +87,22 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
             {email}
           </p>
           
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Settings Section */}
-            <SettingsSection />
+            <div className="border-t border-gray-200 dark:border-white/20 pt-4">
+              <div 
+                onClick={handleSettingsClick}
+                className="flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors rounded p-2 -m-2"
+              >
+                <div className="flex items-center gap-2">
+                  <Settings size={16} className="text-gray-600 dark:text-gray-300" />
+                  <span className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+                    Settings
+                  </span>
+                </div>
+                <ChevronRight size={16} className="text-gray-600 dark:text-gray-300" />
+              </div>
+            </div>
 
             {/* Decision Log Section */}
             <div className="border-t border-gray-200 dark:border-white/20 pt-4">
@@ -142,6 +160,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
       
       <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <DonationModal open={donationOpen} onOpenChange={setDonationOpen} />
+      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 };
