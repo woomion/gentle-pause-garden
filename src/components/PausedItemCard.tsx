@@ -1,15 +1,18 @@
 
-import { ShoppingCart, MessageCircle } from 'lucide-react';
-import { memo, useMemo, useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
+import { ExternalLink, MessageCircle, Calendar, User } from 'lucide-react';
+import { formatPrice } from '../utils/priceFormatter';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import { calculateCheckInTimeDisplay } from '../utils/pausedItemsUtils';
-import EmotionBadge from './EmotionBadge';
-import { getEmotionColor } from '../utils/emotionColors';
-
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
-import { useItemComments } from '@/hooks/useItemComments';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useItemActions } from '../hooks/useItemActions';
+import ItemImage from './ItemImage';
+import PauseDurationBanner from './PauseDurationBanner';
+import EmotionBadge from './EmotionBadge';
+import { extractActualNotes } from '../utils/notesMetadataUtils';
+import { useItemComments } from '../hooks/useItemComments';
+import { CommentActivityIndicator } from './CommentActivityIndicator';
 
 interface Partner {
   partner_id: string;
@@ -24,68 +27,13 @@ interface PausedItemCardProps {
   currentUserId?: string;
 }
 
-const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: PausedItemCardProps) => {
-  const emotionColor = useMemo(() => getEmotionColor(item.emotion), [item.emotion]);
-  const [currentUser, setCurrentUser] = useState<string | null>(null);
-  const { hasNewComments, getUnreadCount } = useItemComments(currentUserId || null);
+const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedItemCardProps) => {
+  const [showAlert, setShowAlert] = useState(false);
+  const { handleViewItem } = useItemActions();
+  const { getCommentCount, getUnreadCount, hasNewComments } = useItemComments(currentUserId);
 
-  // Get current user ID
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUser(user?.id || null);
-    };
-    getCurrentUser();
-  }, []);
-
-  // Calculate days left and progress using the proper checkInDate
-  const pauseProgress = useMemo(() => {
-    if (!item.checkInDate) return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '', timeDisplay: 'Pause details unavailable' };
-    
-    try {
-      const now = new Date();
-      const checkInDate = new Date(item.checkInDate);
-      
-      // Check if the date is valid
-      if (isNaN(checkInDate.getTime())) {
-        return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '', timeDisplay: 'Invalid pause date' };
-      }
-      
-      const diffTime = checkInDate.getTime() - now.getTime();
-      const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-      
-      // Calculate progress based on total pause duration (could derive from item.duration)
-      const totalDays = 7; // This should come from parsing item.duration
-      const progress = Math.min(100, Math.max(0, ((totalDays - daysLeft) / totalDays) * 100));
-      
-      // Format check-in date as MMM DD (e.g., "Jul 21")
-      const formattedDate = checkInDate.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      }).replace(',', '');
-      
-      // Use the existing utility to get the time display
-      const timeDisplay = calculateCheckInTimeDisplay(checkInDate);
-      
-      // Format next nudge text
-      const nextNudgeDate = new Date(checkInDate);
-      nextNudgeDate.setDate(nextNudgeDate.getDate() - 1); // Day before check-in
-      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const weekday = weekdays[nextNudgeDate.getDay()];
-      const time = '9:00 AM'; // Default time, should come from user settings
-      
-      return {
-        daysLeft,
-        progress,
-        checkInDate: formattedDate,
-        nextNudgeText: `${weekday} ${time}`,
-        timeDisplay
-      };
-    } catch (error) {
-      console.error('Error calculating pause progress:', error);
-      return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '', timeDisplay: 'Error calculating time' };
-    }
-  }, [item.checkInDate]);
+  const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
+  const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
 
   // Get initials for shared partners
   const getInitials = (name: string) => {
@@ -101,86 +49,61 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     );
   }, [item.sharedWithPartners, partners]);
 
-  // Get sharing attribution text
+  // Get sharing attribution text with direction
   const getAttributionText = useMemo(() => {
-    const userId = currentUser || currentUserId;
-    if (!userId) return null;
+    if (!currentUserId || !item.originalUserId) {
+      return null;
+    }
 
-    const itemOwnerId = item.originalUserId;
-    if (!itemOwnerId) return null;
-
-    const isSharedByCurrentUser = itemOwnerId === userId;
+    const isSharedByCurrentUser = item.originalUserId === currentUserId;
     
     if (isSharedByCurrentUser) {
       if (sharedWithPartners.length > 0) {
         if (sharedWithPartners.length === 1) {
-          return { from: 'You', to: sharedWithPartners[0].partner_name, direction: 'shared-with' };
+          return `You → ${sharedWithPartners[0].partner_name}`;
         } else {
-          return { from: 'You', to: `${sharedWithPartners.length} partners`, direction: 'shared-with' };
+          return `You → ${sharedWithPartners.length} partners`;
         }
       } else if (item.sharedWithPartners && item.sharedWithPartners.length > 0) {
-        return { from: 'You', to: `${item.sharedWithPartners.length} partner${item.sharedWithPartners.length > 1 ? 's' : ''}`, direction: 'shared-with' };
+        return `You → ${item.sharedWithPartners.length} partner${item.sharedWithPartners.length > 1 ? 's' : ''}`;
       }
     } else {
-      const sharer = partners.find(p => p.partner_id === itemOwnerId);
+      const sharer = partners.find(p => p.partner_id === item.originalUserId);
       if (sharer) {
-        return { from: sharer.partner_name, to: 'You', direction: 'shared-by' };
+        return `${sharer.partner_name} → You`;
       } else {
-        return { from: 'Partner', to: 'You', direction: 'shared-by' };
+        return `Partner → You`;
       }
     }
     
     return null;
-  }, [currentUser, currentUserId, item.originalUserId, sharedWithPartners, partners]);
+  }, [currentUserId, item.originalUserId, sharedWithPartners, partners]);
 
-  const imageUrl = useMemo(() => {
-    if (item.isCart && item.imageUrl === 'cart-placeholder') {
-      return 'cart-placeholder';
-    }
-
-    if (item.imageUrl && item.imageUrl !== 'cart-placeholder') {
-      if (item.imageUrl.includes('supabase.co/storage') || item.imageUrl.includes('supabase')) {
-        return item.imageUrl;
-      }
-      try {
-        new URL(item.imageUrl);
-        return item.imageUrl;
-      } catch {
-        // Invalid URL format - continue to next option
-      }
-    }
-    
-    if (item.photoDataUrl) {
-      return item.photoDataUrl;
-    }
-    
-    if (item.photo instanceof File) {
-      return URL.createObjectURL(item.photo);
-    }
-    
-    return null;
-  }, [item.imageUrl, item.photoDataUrl, item.photo, item.id, item.isCart]);
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    target.style.display = 'none';
-    if (target.parentElement) {
-      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-muted rounded-full opacity-50" aria-hidden="true"></div>';
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (item.link) {
+      setShowAlert(true);
     }
   };
 
-  const formattedPrice = useMemo(() => {
-    if (!item.price) return '';
-    
-    const price = parseFloat(item.price);
-    if (isNaN(price)) return '';
-    
-    return `$${price.toFixed(2)}`;
-  }, [item.price]);
+  const handleConfirmLink = () => {
+    handleViewItem(item);
+    setShowAlert(false);
+  };
+
+  // Get comment info for this item
+  const commentCount = currentUserId ? getCommentCount(item.id) : 0;
+  const unreadCount = currentUserId ? getUnreadCount(item.id) : 0;
+  const hasActivity = currentUserId ? hasNewComments(item.id) : false;
+
+  // Show comments section for shared items
+  const showComments = (sharedWithPartners.length > 0 || (item.sharedWithPartners && item.sharedWithPartners.length > 0)) && currentUserId;
 
   return (
     <div 
-      className="relative overflow-hidden bg-card rounded-lg border border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in"
+      className={`relative overflow-hidden bg-card rounded-lg border border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in ${
+        hasActivity ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''
+      }`}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -190,111 +113,129 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
           onClick();
         }
       }}
-      aria-label={`View details for ${item.itemName}`}
-      style={{
-        animationDelay: '0.1s',
-        animationFillMode: 'both'
-      }}
     >
-      {/* New message indicator */}
-      {item.sharedWithPartners && item.sharedWithPartners.length > 0 && hasNewComments(item.id) && (
-        <div className="absolute top-3 right-3 z-10">
-          <div className="flex items-center gap-1 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full shadow-sm">
-            <MessageCircle size={10} />
-            <span className="font-medium">{getUnreadCount(item.id)}</span>
-          </div>
+      {/* Attribution pill in top right corner */}
+      {getAttributionText && (
+        <div className="absolute top-2 right-2 z-10 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
+          <span>{getAttributionText}</span>
         </div>
       )}
-      
-      {/* Main content with specified padding - increased height */}
-      <div className="px-4 py-5">
-        {/* Horizontal flex layout */}
-        <div className="flex items-start gap-4">
-          {/* LEFT: Square image area */}
-          <div className="w-28 h-28 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {imageUrl === 'cart-placeholder' ? (
-              <div className="w-full h-full bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
-              </div>
-            ) : imageUrl ? (
-              <img 
-                src={imageUrl} 
-                alt={item.itemName}
-                className="w-full h-full object-cover rounded-lg"
-                onError={handleImageError}
-                loading="lazy"
-              />
-             ) : (
-               <img 
-                 src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
-                 alt="Placeholder" 
-                 className="w-full h-full object-cover rounded-lg"
-               />
-             )}
+
+      {/* Product image */}
+      <div className="relative">
+        <ItemImage item={item} />
+        {/* Pause Duration Banner - touching bottom of image */}
+        <PauseDurationBanner checkInTime={item.checkInTime} />
+      </div>
+
+      {/* Content */}
+      <div className="p-4 space-y-3">
+        {/* Title and Price */}
+        <div className="flex justify-between items-start">
+          <h3 className="font-medium text-foreground text-base leading-tight pr-2">
+            {item.itemName}
+          </h3>
+          {formattedPrice && (
+            <span className="text-sm font-medium text-foreground whitespace-nowrap">
+              {formattedPrice}
+            </span>
+          )}
+        </div>
+
+        {/* Store name and emotion */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">{item.storeName}</p>
+          <EmotionBadge emotion={item.emotion} />
+        </div>
+
+        {/* Only show notes if they exist and aren't empty after cleaning */}
+        {cleanNotes && cleanNotes.trim() && (
+          <div className="text-sm text-muted-foreground line-clamp-2">
+            <span className="font-medium">Note:</span> {cleanNotes}
           </div>
-          
-          {/* CENTER & RIGHT: Content area */}
-          <div className="flex-1 min-w-0 flex flex-col">
-            {/* Product name - can wrap to 2 lines */}
-            <h3 className="text-base font-semibold text-foreground mb-1 line-clamp-2 leading-tight">
-              {item.itemName}
-            </h3>
-            
-            {/* Brand and Price row */}
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-sm font-normal text-muted-foreground">
-                {item.storeName}
-              </p>
-              {formattedPrice && (
-                <span className="text-sm font-normal text-muted-foreground">
-                  {formattedPrice}
+        )}
+
+        {/* Comment activity indicator for shared items */}
+        {showComments && commentCount > 0 && (
+          <div className="pt-2 border-t border-border">
+            <CommentActivityIndicator
+              commentCount={commentCount}
+              unreadCount={unreadCount}
+              hasNewActivity={hasActivity}
+              className="text-sm"
+            />
+          </div>
+        )}
+
+        {/* Partners sharing info */}
+        {sharedWithPartners.length > 0 && (
+          <div className="flex items-center gap-2 pt-2">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <User size={12} />
+              <span>Shared with</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {sharedWithPartners.slice(0, 3).map((partner) => (
+                <Avatar key={partner.partner_id} className="h-5 w-5">
+                  <AvatarFallback className="text-xs bg-muted text-muted-foreground">
+                    {getInitials(partner.partner_name)}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+              {sharedWithPartners.length > 3 && (
+                <span className="text-xs text-muted-foreground ml-1">
+                  +{sharedWithPartners.length - 3} more
                 </span>
               )}
             </div>
-            
-            {/* Bottom row: Emotion badge and attribution pill */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <EmotionBadge emotion={item.emotion} size="sm" />
-                
-                {!getAttributionText && sharedWithPartners.length > 0 && (
-                  <div className="flex gap-1">
-                    {sharedWithPartners.slice(0, 3).map((partner) => (
-                      <Avatar key={partner.partner_id} className="h-5 w-5 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                        <AvatarFallback className="text-xs text-green-800 dark:text-green-400">
-                          {getInitials(partner.partner_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                    {sharedWithPartners.length > 3 && (
-                      <div className="h-5 w-5 bg-muted rounded-full flex items-center justify-center">
-                        <span className="text-xs text-muted-foreground">+{sharedWithPartners.length - 3}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {getAttributionText && (
-                <Badge className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-xs border-green-200 dark:border-green-800">
-                  {getAttributionText.from} → {getAttributionText.to}
-                </Badge>
-              )}
-            </div>
           </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Calendar size={14} />
+            <span>{item.checkInTime}</span>
+          </div>
+          
+          {item.link && (
+            <button
+              onClick={handleLinkClick}
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted/50 rounded"
+              title={item.isCart ? "View cart" : "View item"}
+            >
+              <ExternalLink size={14} />
+            </button>
+          )}
         </div>
       </div>
-      
-      {/* Caption showing time until review with date */}
-      <div className="px-4 py-2 border-t border-[#F2F1EF] dark:border-border bg-purple-100 dark:bg-purple-950/30">
-        <p className="text-xs text-muted-foreground text-center">
-          {pauseProgress.timeDisplay}{pauseProgress.checkInDate && ` (${pauseProgress.checkInDate})`}
-        </p>
-      </div>
+
+      {/* Link confirmation dialog */}
+      <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
+        <AlertDialogContent className="bg-card border-border rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">
+              {item.isCart ? "View cart?" : "View item?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              This will open the {item.isCart ? "cart" : "item"} in a new tab. Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-2xl bg-card border-border text-foreground hover:bg-muted">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmLink}
+              className="rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {item.isCart ? "View cart" : "View item"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
-});
-
-PausedItemCard.displayName = 'PausedItemCard';
+};
 
 export default PausedItemCard;

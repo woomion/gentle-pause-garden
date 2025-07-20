@@ -1,4 +1,3 @@
-
 import { ExternalLink, ArrowLeft } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -236,7 +235,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     setNotes('');
   };
 
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
@@ -282,13 +280,14 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
               </div>
             )}
 
-            {/* Comments Thread for Shared Items */}
+            {/* Enhanced Comments Thread for Shared Items */}
             {((sharedWithPartners.length > 0) || (item.sharedWithPartners && item.sharedWithPartners.length > 0)) && currentUserId && (
               <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
                 <ItemCommentsThread 
                   itemId={item.id}
                   partners={partners}
                   currentUserId={currentUserId}
+                  autoExpand={true}
                 />
               </div>
             )}
@@ -366,7 +365,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
               ) : null}
             </>
           )}
-
 
           {/* Footer actions */}
           <div className="pt-2 flex items-center justify-between">
