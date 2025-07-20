@@ -14,6 +14,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import GreaterJoyFund from "./pages/GreaterJoyFund";
 import NotFound from "./pages/NotFound";
 import DonationSuccess from "./pages/DonationSuccess";
+import Bookmarklet from "./pages/Bookmarklet";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import AuthGuard from "./components/AuthGuard";
@@ -111,6 +112,11 @@ const App = () => {
                   <Route path="/donation-success" element={
                     <AuthGuard>
                       <DonationSuccess />
+                    </AuthGuard>
+                  } />
+                  <Route path="/bookmarklet" element={
+                    <AuthGuard>
+                      <Bookmarklet />
                     </AuthGuard>
                   } />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

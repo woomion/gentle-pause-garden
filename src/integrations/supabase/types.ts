@@ -84,6 +84,86 @@ export type Database = {
           },
         ]
       }
+      notification_history: {
+        Row: {
+          clicked: boolean | null
+          clicked_at: string | null
+          id: string
+          items_count: number
+          notification_type: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          clicked?: boolean | null
+          clicked_at?: string | null
+          id?: string
+          items_count?: number
+          notification_type: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          clicked?: boolean | null
+          clicked_at?: string | null
+          id?: string
+          items_count?: number
+          notification_type?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_queue: {
+        Row: {
+          body: string
+          created_at: string
+          data: Json | null
+          id: string
+          item_id: string
+          notification_type: string
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          item_id: string
+          notification_type?: string
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          item_id?: string
+          notification_type?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_queue_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "paused_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_invitations: {
         Row: {
           created_at: string
@@ -304,9 +384,15 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          notification_batch_window: number | null
+          notification_profile: string | null
+          notification_schedule_type: string | null
+          notification_time_preference: string | null
           notifications_enabled: boolean
           platform: string | null
           push_token: string | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
           theme: string
           updated_at: string
           user_id: string
@@ -314,9 +400,15 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          notification_batch_window?: number | null
+          notification_profile?: string | null
+          notification_schedule_type?: string | null
+          notification_time_preference?: string | null
           notifications_enabled?: boolean
           platform?: string | null
           push_token?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           theme?: string
           updated_at?: string
           user_id: string
@@ -324,9 +416,15 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          notification_batch_window?: number | null
+          notification_profile?: string | null
+          notification_schedule_type?: string | null
+          notification_time_preference?: string | null
           notifications_enabled?: boolean
           platform?: string | null
           push_token?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           theme?: string
           updated_at?: string
           user_id?: string

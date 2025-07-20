@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { NotificationScheduleSettings } from '@/services/notificationSchedulingService';
 
 export const useUserSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [scheduleSettings, setScheduleSettings] = useState<NotificationScheduleSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,7 +29,15 @@ export const useUserSettings = () => {
     try {
       const { data, error } = await supabase
         .from('user_settings')
-        .select('notifications_enabled')
+        .select(`
+          notifications_enabled,
+          notification_schedule_type,
+          notification_time_preference,
+          notification_batch_window,
+          quiet_hours_start,
+          quiet_hours_end,
+          notification_profile
+        `)
         .eq('user_id', user.id)
         .single();
 
@@ -39,6 +49,14 @@ export const useUserSettings = () => {
         }
       } else {
         setNotificationsEnabled(data.notifications_enabled);
+        setScheduleSettings({
+          notification_schedule_type: (data.notification_schedule_type as any) || 'immediate',
+          notification_time_preference: data.notification_time_preference || '20:00',
+          notification_batch_window: data.notification_batch_window || 30,
+          quiet_hours_start: data.quiet_hours_start || '22:00',
+          quiet_hours_end: data.quiet_hours_end || '08:00',
+          notification_profile: (data.notification_profile as any) || 'default'
+        });
       }
     } catch (error) {
       console.error('Error in fetchUserSettings:', error);
@@ -106,6 +124,7 @@ export const useUserSettings = () => {
 
   return {
     notificationsEnabled,
+    scheduleSettings,
     updateNotificationSetting,
     loading
   };
