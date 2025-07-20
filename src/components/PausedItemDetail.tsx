@@ -165,7 +165,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto fixed"
+        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-card border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto fixed"
       >
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
@@ -188,20 +188,20 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
           {/* Item details */}
           <div className="space-y-2">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-black dark:text-[#F9F5EB] leading-tight">{item.itemName}</h3>
+              <h3 className="text-xl font-bold text-foreground leading-tight">{item.itemName}</h3>
               {formattedPrice && (
-                <span className="text-xl font-bold text-black dark:text-[#F9F5EB] ml-2">{formattedPrice}</span>
+                <span className="text-xl font-bold text-foreground ml-2">{formattedPrice}</span>
               )}
             </div>
             
-            <p className="text-gray-600 dark:text-gray-300 text-base">{item.storeName}</p>
+            <p className="text-muted-foreground text-base">{item.storeName}</p>
             
             <EmotionBadge emotion={item.emotion} />
 
             {/* Only show notes if they exist and aren't empty after cleaning */}
             {cleanNotes && cleanNotes.trim() && (
               <div className="pt-2">
-                <p className="text-gray-600 dark:text-gray-300 text-sm break-words">
+                <p className="text-muted-foreground text-sm break-words">
                   <strong>Note:</strong> {cleanNotes}
                 </p>
               </div>
@@ -251,13 +251,13 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                   {/* Back arrow */}
                   <button
                     onClick={handleBackToDecision}
-                    className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors mb-4"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
                   >
                     <ArrowLeft size={16} />
                     <span className="text-sm">Back to options</span>
                   </button>
                   
-                  <h3 className="text-lg font-medium text-black dark:text-[#F9F5EB] mb-2">
+                  <h3 className="text-lg font-medium text-foreground mb-2">
                     {(() => {
                       const supportivePhrases = [
                         "You've made a conscious choice.",
@@ -268,7 +268,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                       return supportivePhrases[Math.floor(Math.random() * supportivePhrases.length)];
                     })()}
                   </h3>
-                  <p className="text-black dark:text-[#F9F5EB] text-sm mb-4">
+                  <p className="text-foreground text-sm mb-4">
                     {selectedDecision === 'purchase' 
                       ? 'Any thoughts about this purchase?'
                       : 'What helped you decide to let this go?'
@@ -278,12 +278,12 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Optional reflection..."
-                    className="w-full p-3 border border-lavender/30 dark:border-gray-600 rounded-xl bg-white/60 dark:bg-white/10 text-black dark:text-[#F9F5EB] placeholder:text-[#B0ABB7] dark:placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#CAB6F7]"
+                    className="w-full p-3 border border-lavender/30 dark:border-gray-600 rounded-xl bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                     rows={2}
                   />
                   <button
                     onClick={handleSubmitDecision}
-                    className="w-full mt-4 py-3 px-4 bg-[#CAB6F7] hover:bg-[#B5A0F2] text-black font-medium rounded-xl transition-colors"
+                    className="w-full mt-4 py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
                   >
                     Finish
                   </button>
@@ -302,7 +302,7 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
                   e.stopPropagation();
                   handleViewItem(item);
                 }}
-                className="text-gray-600 dark:text-gray-300 text-sm hover:text-black dark:hover:text-[#F9F5EB] transition-colors duration-200 flex items-center gap-1 bg-transparent border-none cursor-pointer"
+                className="text-muted-foreground text-sm hover:text-foreground transition-colors duration-200 flex items-center gap-1 bg-transparent border-none cursor-pointer"
                 type="button"
               >
                 <ExternalLink size={14} />
@@ -314,19 +314,19 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
             
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 text-sm">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400 text-sm">
                   Delete item
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-[#FAF6F1] dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 rounded-3xl">
+              <AlertDialogContent className="bg-background border-border rounded-3xl">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black dark:text-[#F9F5EB]">Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-gray-600 dark:text-gray-300">
+                  <AlertDialogTitle className="text-foreground">Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-muted-foreground">
                     This will permanently delete "{item.itemName}" from your paused items. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-2xl bg-white dark:bg-white/10 border-gray-200 dark:border-gray-600 text-black dark:text-[#F9F5EB] hover:bg-gray-50 dark:hover:bg-white/20">Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="rounded-2xl bg-card border-border text-foreground hover:bg-muted">Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDelete} className="rounded-2xl bg-red-500 hover:bg-red-600 text-white">
                     Delete
                   </AlertDialogAction>

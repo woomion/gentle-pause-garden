@@ -1,3 +1,4 @@
+
 import { ShoppingCart, MessageCircle } from 'lucide-react';
 import { memo, useMemo, useEffect, useState } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
@@ -179,7 +180,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   return (
     <div 
-      className="relative overflow-hidden bg-white dark:bg-white/10 rounded-lg border border-[#EDEBE8] cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in"
+      className="relative overflow-hidden bg-card rounded-lg border border-[#EDEBE8] dark:border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -235,13 +236,13 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
           {/* CENTER & RIGHT: Content area */}
           <div className="flex-1 min-w-0 flex flex-col">
             {/* Product name - can wrap to 2 lines */}
-            <h3 className="text-base font-semibold text-[#1D1D1D] dark:text-foreground mb-1 line-clamp-2 leading-tight">
+            <h3 className="text-base font-semibold text-foreground mb-1 line-clamp-2 leading-tight">
               {item.itemName}
             </h3>
             
             {/* Brand and Price row */}
             <div className="flex justify-between items-center mb-2">
-              <p className="text-sm font-normal text-[#6F6F6F] dark:text-muted-foreground">
+              <p className="text-sm font-normal text-muted-foreground">
                 {item.storeName}
               </p>
               {formattedPrice && (
