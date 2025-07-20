@@ -57,11 +57,11 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       const totalDays = 7; // This should come from parsing item.duration
       const progress = Math.min(100, Math.max(0, ((totalDays - daysLeft) / totalDays) * 100));
       
-      // Format check-in date as MMM DD (e.g., "JUL 21")
+      // Format check-in date as MMM DD (e.g., "Jul 21")
       const formattedDate = checkInDate.toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric' 
-      }).toUpperCase().replace(',', '');
+      }).replace(',', '');
       
       // Use the existing utility to get the time display
       const timeDisplay = calculateCheckInTimeDisplay(checkInDate);
