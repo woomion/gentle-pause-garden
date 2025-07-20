@@ -307,7 +307,7 @@ const SettingsSection = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-black dark:text-[#F9F5EB]">
-                  Pause Partners
+                  Partner Management
                 </h2>
                 <Button
                   variant="ghost"
