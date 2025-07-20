@@ -17,6 +17,8 @@ import { extractProductLinkFromNotes, extractActualNotes } from '@/utils/notesMe
 
 const PartnerFeedTab = () => {
   const [selectedItem, setSelectedItem] = useState<PausedItem | null>(null);
+  const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+  const [filteredSharedItems, setFilteredSharedItems] = useState<PausedItem[]>([]);
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -333,6 +335,9 @@ const PartnerFeedTab = () => {
                       );
                     });
 
+                // Update filtered items state for navigation
+                setFilteredSharedItems(filteredItems);
+
                 return filteredItems.length === 0 ? (
                   <div className="text-center py-8">
                     <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
@@ -344,13 +349,17 @@ const PartnerFeedTab = () => {
                     </p>
                   </div>
                  ) : (
-                  <div className="space-y-4">
-                    <PausedItemsCarousel 
-                      items={filteredItems}
-                      onItemClick={(item) => setSelectedItem(item)}
-                      partners={partners}
-                      currentUserId={currentUserId}
-                    />
+                   <div className="space-y-4">
+                     <PausedItemsCarousel 
+                       items={filteredItems}
+                       onItemClick={(item) => {
+                         const index = filteredItems.findIndex(i => i.id === item.id);
+                         setSelectedItem(item);
+                         setSelectedItemIndex(index);
+                       }}
+                       partners={partners}
+                       currentUserId={currentUserId}
+                     />
                     {/* Partner Items Ready Banner - moved beneath shared items */}
                     <PartnerItemsReadyBanner
                       partners={partners}
@@ -389,11 +398,31 @@ const PartnerFeedTab = () => {
       {selectedItem && (
         <PausedItemDetail
           item={selectedItem}
+          items={filteredSharedItems}
+          currentIndex={selectedItemIndex}
           isOpen={!!selectedItem}
-          onClose={() => setSelectedItem(null)}
+          onClose={() => {
+            setSelectedItem(null);
+            setSelectedItemIndex(0);
+          }}
           onDelete={(id) => {
             // Handle delete if needed - for now just close
             setSelectedItem(null);
+            setSelectedItemIndex(0);
+          }}
+          onNavigateNext={() => {
+            if (selectedItemIndex < filteredSharedItems.length - 1) {
+              const nextIndex = selectedItemIndex + 1;
+              setSelectedItemIndex(nextIndex);
+              setSelectedItem(filteredSharedItems[nextIndex]);
+            }
+          }}
+          onNavigatePrevious={() => {
+            if (selectedItemIndex > 0) {
+              const prevIndex = selectedItemIndex - 1;
+              setSelectedItemIndex(prevIndex);
+              setSelectedItem(filteredSharedItems[prevIndex]);
+            }
           }}
           partners={partners}
           currentUserId={currentUserId}

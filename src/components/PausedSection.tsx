@@ -11,6 +11,7 @@ import PausedSectionLoading from './PausedSectionLoading';
 const PausedSection = () => {
   const [pausedItems, setPausedItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
   const [selectedItem, setSelectedItem] = useState<PausedItem | LocalPausedItem | null>(null);
+  const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const { user } = useAuth();
@@ -87,12 +88,31 @@ const PausedSection = () => {
   }, [sortItemsByDate, user]);
 
   const handleItemClick = useCallback((item: PausedItem | LocalPausedItem) => {
+    const index = pausedItems.findIndex(i => i.id === item.id);
     setSelectedItem(item);
-  }, []);
+    setSelectedItemIndex(index);
+  }, [pausedItems]);
 
   const handleCloseDetail = useCallback(() => {
     setSelectedItem(null);
+    setSelectedItemIndex(0);
   }, []);
+
+  const handleNavigateNext = useCallback(() => {
+    if (selectedItemIndex < pausedItems.length - 1) {
+      const nextIndex = selectedItemIndex + 1;
+      setSelectedItemIndex(nextIndex);
+      setSelectedItem(pausedItems[nextIndex]);
+    }
+  }, [selectedItemIndex, pausedItems]);
+
+  const handleNavigatePrevious = useCallback(() => {
+    if (selectedItemIndex > 0) {
+      const prevIndex = selectedItemIndex - 1;
+      setSelectedItemIndex(prevIndex);
+      setSelectedItem(pausedItems[prevIndex]);
+    }
+  }, [selectedItemIndex, pausedItems]);
 
   const handleDeleteItem = useCallback(async (id: string) => {
     if (user) {
@@ -145,9 +165,13 @@ const PausedSection = () => {
       {selectedItem && (
         <PausedItemDetail
           item={selectedItem}
+          items={pausedItems}
+          currentIndex={selectedItemIndex}
           isOpen={!!selectedItem}
           onClose={handleCloseDetail}
           onDelete={handleDeleteItem}
+          onNavigateNext={handleNavigateNext}
+          onNavigatePrevious={handleNavigatePrevious}
           currentUserId={user?.id}
         />
       )}

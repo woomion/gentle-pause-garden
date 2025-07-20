@@ -23,14 +23,18 @@ interface Partner {
 
 interface PausedItemDetailProps {
   item: PausedItem;
+  items?: PausedItem[];
+  currentIndex?: number;
   isOpen: boolean;
   onClose: () => void;
   onDelete: (id: string) => void;
+  onNavigateNext?: () => void;
+  onNavigatePrevious?: () => void;
   partners?: Partner[];
   currentUserId?: string;
 }
 
-const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], currentUserId }: PausedItemDetailProps) => {
+const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose, onDelete, onNavigateNext, onNavigatePrevious, partners = [], currentUserId }: PausedItemDetailProps) => {
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
   const { markAsRead } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
@@ -44,6 +48,24 @@ const PausedItemDetail = ({ item, isOpen, onClose, onDelete, partners = [], curr
       markAsRead(item.id);
     }
   }, [isOpen, item.id, currentUserId, markAsRead]);
+
+  // Add keyboard navigation
+  useEffect(() => {
+    if (!isOpen || items.length <= 1) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && onNavigatePrevious && currentIndex > 0) {
+        e.preventDefault();
+        onNavigatePrevious();
+      } else if (e.key === 'ArrowRight' && onNavigateNext && currentIndex < items.length - 1) {
+        e.preventDefault();
+        onNavigateNext();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, items.length, currentIndex, onNavigateNext, onNavigatePrevious]);
 
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
   const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
