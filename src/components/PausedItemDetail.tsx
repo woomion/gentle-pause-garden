@@ -240,7 +240,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-card border-gray-200 dark:border-gray-600 max-h-[85vh] overflow-y-auto fixed"
+        className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-background border-border max-h-[85vh] overflow-y-auto fixed"
       >
         <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>

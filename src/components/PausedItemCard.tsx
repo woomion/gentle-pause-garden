@@ -180,7 +180,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   return (
     <div 
-      className="relative overflow-hidden bg-card rounded-lg border border-[#EDEBE8] dark:border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in"
+      className="relative overflow-hidden bg-background rounded-lg border border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in"
       onClick={onClick}
       role="button"
       tabIndex={0}
