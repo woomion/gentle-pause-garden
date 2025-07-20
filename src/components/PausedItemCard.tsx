@@ -192,13 +192,8 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar size={14} />
-            <span>{item.checkInTime}</span>
-          </div>
-          
-          {item.link && (
+        {item.link && (
+          <div className="flex justify-end pt-2">
             <button
               onClick={handleLinkClick}
               className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted/50 rounded"
@@ -206,8 +201,8 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
             >
               <ExternalLink size={14} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Link confirmation dialog */}
