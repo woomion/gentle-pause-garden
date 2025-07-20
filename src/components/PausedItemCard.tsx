@@ -286,7 +286,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       </div>
       
       {/* Caption showing time until review with date */}
-      <div className="px-4 py-2 border-t border-[#F2F1EF] dark:border-border bg-purple-50 dark:bg-purple-950/20">
+      <div className="px-4 py-2 border-t border-[#F2F1EF] dark:border-border bg-purple-100 dark:bg-purple-950/30">
         <p className="text-xs text-muted-foreground text-center">
           {pauseProgress.timeDisplay}{pauseProgress.checkInDate && ` (${pauseProgress.checkInDate})`}
         </p>
