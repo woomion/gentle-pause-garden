@@ -10,15 +10,28 @@ const PauseDurationBanner = ({ checkInTime }: PauseDurationBannerProps) => {
   // Extract and format the date from checkInTime
   const extractAndFormatDate = (timeString: string) => {
     try {
-      // Try to extract date from the string and calculate check-in date
+      // Parse the check-in time string to get the actual date
       // The timeString is usually like "Checking-in in 19 hours" or similar
       const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(now.getDate() + 1);
       
-      // For now, just use tomorrow as the check-in date
-      // In a real app, you'd parse the actual check-in date from the data
-      return format(tomorrow, 'MMM dd');
+      // Extract hours from the string
+      const hoursMatch = timeString.match(/(\d+)\s*hours?/);
+      const daysMatch = timeString.match(/(\d+)\s*days?/);
+      
+      let targetDate = new Date(now);
+      
+      if (daysMatch) {
+        const days = parseInt(daysMatch[1], 10);
+        targetDate.setDate(now.getDate() + days);
+      } else if (hoursMatch) {
+        const hours = parseInt(hoursMatch[1], 10);
+        targetDate.setHours(now.getHours() + hours);
+      } else {
+        // Default to tomorrow if we can't parse
+        targetDate.setDate(now.getDate() + 1);
+      }
+      
+      return format(targetDate, 'MMM dd');
     } catch (error) {
       console.warn('Failed to format date:', timeString);
       return 'Soon';
@@ -27,7 +40,7 @@ const PauseDurationBanner = ({ checkInTime }: PauseDurationBannerProps) => {
 
   return (
     <div 
-      className="absolute bottom-0 left-0 right-0 py-2 px-4 rounded-b-2xl text-center text-xs font-medium flex items-center justify-center gap-2"
+      className="py-2 px-4 rounded-b-lg text-center text-xs font-medium flex items-center justify-center gap-2"
       style={{ 
         backgroundColor: '#eeeaf8',
         color: '#000'
