@@ -232,56 +232,57 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
              )}
           </div>
           
-          {/* CENTER: Vertical stack */}
-          <div className="flex-1 min-w-0">
-            {/* Product name - 16px/600 */}
-            <h3 className="text-base font-semibold text-[#1D1D1D] dark:text-foreground truncate mb-1">
-              {item.itemName}
-            </h3>
-            
-            {/* Brand - 14px/400 */}
-            <p className="text-sm font-normal text-[#6F6F6F] dark:text-muted-foreground mb-2">
-              {item.storeName}
-            </p>
-            
-            {/* Inline emotion badge */}
-            <div className="flex items-center gap-2">
-              <EmotionBadge emotion={item.emotion} size="sm" />
-              
-              {!getAttributionText && sharedWithPartners.length > 0 && (
-                <div className="flex gap-1">
-                  {sharedWithPartners.slice(0, 3).map((partner) => (
-                    <Avatar key={partner.partner_id} className="h-5 w-5 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                      <AvatarFallback className="text-xs text-green-800 dark:text-green-400">
-                        {getInitials(partner.partner_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
-                  {sharedWithPartners.length > 3 && (
-                    <div className="h-5 w-5 bg-muted rounded-full flex items-center justify-center">
-                      <span className="text-xs text-muted-foreground">+{sharedWithPartners.length - 3}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* RIGHT: Price and attribution */}
-          {(formattedPrice || getAttributionText) && (
-            <div className="flex-shrink-0 flex flex-col items-end gap-1">
-              {formattedPrice && (
-                <span className="text-sm font-normal text-muted-foreground">
-                  {formattedPrice}
-                </span>
-              )}
+          {/* CENTER & RIGHT: Content area */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            {/* Top row: Attribution pill (right-aligned) */}
+            <div className="flex justify-end mb-2">
               {getAttributionText && (
                 <Badge className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-xs border-green-200 dark:border-green-800">
                   {getAttributionText.from} → {getAttributionText.to}
                 </Badge>
               )}
             </div>
-          )}
+            
+            {/* Product name - can wrap to 2 lines */}
+            <h3 className="text-base font-semibold text-[#1D1D1D] dark:text-foreground mb-1 line-clamp-2 leading-tight">
+              {item.itemName}
+            </h3>
+            
+            {/* Brand */}
+            <p className="text-sm font-normal text-[#6F6F6F] dark:text-muted-foreground mb-2">
+              {item.storeName}
+            </p>
+            
+            {/* Bottom row: Emotion badge and price */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <EmotionBadge emotion={item.emotion} size="sm" />
+                
+                {!getAttributionText && sharedWithPartners.length > 0 && (
+                  <div className="flex gap-1">
+                    {sharedWithPartners.slice(0, 3).map((partner) => (
+                      <Avatar key={partner.partner_id} className="h-5 w-5 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                        <AvatarFallback className="text-xs text-green-800 dark:text-green-400">
+                          {getInitials(partner.partner_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                    {sharedWithPartners.length > 3 && (
+                      <div className="h-5 w-5 bg-muted rounded-full flex items-center justify-center">
+                        <span className="text-xs text-muted-foreground">+{sharedWithPartners.length - 3}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {formattedPrice && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  {formattedPrice}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       
