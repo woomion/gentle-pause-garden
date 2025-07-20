@@ -1,13 +1,10 @@
-
-import { Timer, ShoppingCart, ArrowRight, MessageCircle } from 'lucide-react';
+import { ShoppingCart, MessageCircle } from 'lucide-react';
 import { memo, useMemo, useEffect, useState } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
-import ItemImage from './ItemImage';
-import PauseDurationBanner from './PauseDurationBanner';
 import EmotionBadge from './EmotionBadge';
 import { getEmotionColor } from '../utils/emotionColors';
-
+import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +37,34 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     getCurrentUser();
   }, []);
 
+  // Calculate days left and progress
+  const pauseProgress = useMemo(() => {
+    if (!item.checkInTime) return { daysLeft: 0, progress: 0, nextNudgeText: '' };
+    
+    const now = new Date();
+    const checkInDate = new Date(item.checkInTime);
+    const diffTime = checkInDate.getTime() - now.getTime();
+    const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    
+    // Calculate progress based on total pause duration (assuming 7 days for now)
+    const totalDays = 7; // This should come from your pause duration logic
+    const progress = Math.min(100, Math.max(0, ((totalDays - daysLeft) / totalDays) * 100));
+    
+    // Format next nudge text
+    const nextNudgeDate = new Date(checkInDate);
+    nextNudgeDate.setDate(nextNudgeDate.getDate() - 1); // Day before check-in
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weekday = weekdays[nextNudgeDate.getDay()];
+    const time = '9:00 AM'; // Default time, should come from user settings
+    
+    return {
+      daysLeft,
+      progress,
+      checkInDate: checkInDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }),
+      nextNudgeText: `${weekday} ${time}`
+    };
+  }, [item.checkInTime]);
+
   // Get initials for shared partners
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -56,22 +81,15 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   // Get sharing attribution text
   const getAttributionText = useMemo(() => {
-    // Use currentUserId prop if currentUser from state isn't ready yet
     const userId = currentUser || currentUserId;
-    if (!userId) {
-      return null;
-    }
+    if (!userId) return null;
 
-    // Use originalUserId for comparison  
     const itemOwnerId = item.originalUserId;
-    if (!itemOwnerId) {
-      return null;
-    }
+    if (!itemOwnerId) return null;
 
     const isSharedByCurrentUser = itemOwnerId === userId;
     
     if (isSharedByCurrentUser) {
-      // Current user shared this item - show who they shared it with
       if (sharedWithPartners.length > 0) {
         if (sharedWithPartners.length === 1) {
           return { from: 'You', to: sharedWithPartners[0].partner_name, direction: 'shared-with' };
@@ -79,16 +97,13 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
           return { from: 'You', to: `${sharedWithPartners.length} partners`, direction: 'shared-with' };
         }
       } else if (item.sharedWithPartners && item.sharedWithPartners.length > 0) {
-        // Fallback: if partners data isn't loaded but we know it's shared
         return { from: 'You', to: `${item.sharedWithPartners.length} partner${item.sharedWithPartners.length > 1 ? 's' : ''}`, direction: 'shared-with' };
       }
     } else {
-      // Partner shared this with current user
       const sharer = partners.find(p => p.partner_id === itemOwnerId);
       if (sharer) {
         return { from: sharer.partner_name, to: 'You', direction: 'shared-by' };
       } else {
-        // Fallback: if partner data isn't loaded but we know it's from a partner
         return { from: 'Partner', to: 'You', direction: 'shared-by' };
       }
     }
@@ -97,22 +112,14 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
   }, [currentUser, currentUserId, item.originalUserId, sharedWithPartners, partners]);
 
   const imageUrl = useMemo(() => {
-    // Handle cart placeholder
     if (item.isCart && item.imageUrl === 'cart-placeholder') {
       return 'cart-placeholder';
     }
 
-    // Priority order for image sources:
-    // 1. Supabase Storage URL (uploaded images)
-    // 2. photoDataUrl (base64 data)
-    // 3. File object (create object URL)
-    
     if (item.imageUrl && item.imageUrl !== 'cart-placeholder') {
-      // Check if this is a Supabase Storage URL
       if (item.imageUrl.includes('supabase.co/storage') || item.imageUrl.includes('supabase')) {
         return item.imageUrl;
       }
-      // Check if it's a valid external URL
       try {
         new URL(item.imageUrl);
         return item.imageUrl;
@@ -136,12 +143,8 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
     if (target.parentElement) {
-      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-300 rounded-full opacity-50" aria-hidden="true"></div>';
+      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-muted rounded-full opacity-50" aria-hidden="true"></div>';
     }
-  };
-
-  const handleImageLoad = () => {
-    // Image loaded successfully
   };
 
   const formattedPrice = useMemo(() => {
@@ -150,13 +153,12 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     const price = parseFloat(item.price);
     if (isNaN(price)) return '';
     
-    // Always show two decimal places
     return `$${price.toFixed(2)}`;
   }, [item.price]);
 
   return (
     <div 
-      className="bg-card/60 rounded-2xl border border-border cursor-pointer hover:bg-card/80 transition-colors relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-lavender focus:ring-offset-2 shadow-sm"
+      className="relative overflow-hidden bg-background rounded-lg border border-[#EDEBE8] cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -167,88 +169,120 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
         }
       }}
       aria-label={`View details for ${item.itemName}`}
+      style={{
+        animationDelay: '0.1s',
+        animationFillMode: 'both'
+      }}
     >
-      {/* New message indicator for shared items */}
+      {/* New message indicator */}
       {item.sharedWithPartners && item.sharedWithPartners.length > 0 && hasNewComments(item.id) && (
-        <div className="absolute top-2 right-2 z-10">
-          <div className="flex items-center gap-1 bg-purple-500 text-white text-xs px-2 py-1 rounded-full shadow-sm">
+        <div className="absolute top-3 right-3 z-10">
+          <div className="flex items-center gap-1 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full shadow-sm">
             <MessageCircle size={10} />
             <span className="font-medium">{getUnreadCount(item.id)}</span>
           </div>
         </div>
       )}
       
-      <div className="px-4 py-6 pb-12">
-        <div className="flex items-start gap-4">
-          <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+      {/* Main content with specified padding */}
+      <div className="px-4 py-3">
+        {/* Horizontal flex layout */}
+        <div className="flex items-center gap-4">
+          {/* LEFT: 56x56px thumbnail */}
+          <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
             {imageUrl === 'cart-placeholder' ? (
-              <div className="w-full h-full bg-blue-100 rounded-xl flex items-center justify-center">
-                <ShoppingCart size={24} className="text-blue-600" />
+              <div className="w-full h-full bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                <ShoppingCart size={20} className="text-blue-600 dark:text-blue-400" />
               </div>
             ) : imageUrl ? (
               <img 
                 src={imageUrl} 
                 alt={item.itemName}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-lg"
                 onError={handleImageError}
-                onLoad={handleImageLoad}
                 loading="lazy"
               />
              ) : (
                <img 
                  src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
                  alt="Placeholder" 
-                 className="w-full h-full object-cover"
+                 className="w-full h-full object-cover rounded-lg"
                />
              )}
           </div>
           
+          {/* CENTER: Vertical stack */}
           <div className="flex-1 min-w-0">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-medium text-foreground truncate pr-2">
-                {item.itemName}
-              </h3>
-              {formattedPrice && (
-                <span className="text-foreground font-medium flex-shrink-0">
-                  {formattedPrice}
-                </span>
-              )}
-            </div>
+            {/* Product name - 16px/600 */}
+            <h3 className="text-base font-semibold text-[#1D1D1D] dark:text-foreground truncate mb-1">
+              {item.itemName}
+            </h3>
             
-            <p className="text-muted-foreground text-sm mb-1">
+            {/* Brand - 14px/400 */}
+            <p className="text-sm font-normal text-[#6F6F6F] dark:text-muted-foreground mb-2">
               {item.storeName}
             </p>
             
-            {/* Show either shared attribution or partner badges */}
-            {getAttributionText ? (
-              <div className="flex items-center gap-1 mt-2">
-                <Badge className="bg-green-100 text-green-800 text-xs flex items-center justify-center gap-2">
-                  <span className="text-xs leading-none flex items-center">{getAttributionText.from}</span>
-                  <span className="text-lg leading-none flex items-center justify-center h-4">→</span>
-                  <span className="text-xs leading-none flex items-center">{getAttributionText.to}</span>
+            {/* Inline emotion badge */}
+            <div className="flex items-center gap-2">
+              <EmotionBadge emotion={item.emotion} size="sm" />
+              
+              {/* Sharing attribution or partner badges */}
+              {getAttributionText && (
+                <Badge className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-xs border-green-200 dark:border-green-800">
+                  {getAttributionText.from} → {getAttributionText.to}
                 </Badge>
-              </div>
-            ) : sharedWithPartners.length > 0 ? (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {sharedWithPartners.map((partner) => (
-                  <Avatar key={partner.partner_id} className="h-6 w-6 bg-green-100 border-2 border-green-400">
-                    <AvatarFallback className="text-xs text-green-800">
-                      {getInitials(partner.partner_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-              </div>
-            ) : null}
-
+              )}
+              
+              {!getAttributionText && sharedWithPartners.length > 0 && (
+                <div className="flex gap-1">
+                  {sharedWithPartners.slice(0, 3).map((partner) => (
+                    <Avatar key={partner.partner_id} className="h-5 w-5 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                      <AvatarFallback className="text-xs text-green-800 dark:text-green-400">
+                        {getInitials(partner.partner_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {sharedWithPartners.length > 3 && (
+                    <div className="h-5 w-5 bg-muted rounded-full flex items-center justify-center">
+                      <span className="text-xs text-muted-foreground">+{sharedWithPartners.length - 3}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
+          
+          {/* RIGHT: Price pill */}
+          {formattedPrice && (
+            <div className="rounded-full h-6 px-2 bg-[#F5F5F7] dark:bg-muted flex items-center justify-center flex-shrink-0">
+              <span className="text-[15px] font-semibold text-[#1D1D1D] dark:text-foreground">
+                {formattedPrice}
+              </span>
+            </div>
+          )}
         </div>
       </div>
       
-      <div 
-        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl bg-secondary text-secondary-foreground"
-      >
-        <Timer size={14} aria-hidden="true" />
-        {item.checkInTime}
+      {/* 1px divider */}
+      <div className="border-t border-[#F2F1EF] dark:border-border"></div>
+      
+      {/* Progress bar - 2px lavender, positioned above caption */}
+      <div className="relative">
+        <Progress 
+          value={pauseProgress.progress} 
+          className="h-0.5 rounded-none bg-[#F2F1EF] dark:bg-muted"
+          style={{
+            '--progress-bg': '#D7C7FF',
+          } as any}
+        />
+        
+        {/* Caption - 12px #6F6F6F */}
+        <div className="px-4 py-2">
+          <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
+            {pauseProgress.daysLeft} d left ({pauseProgress.checkInDate}) · next nudge {pauseProgress.nextNudgeText}
+          </p>
+        </div>
       </div>
     </div>
   );
