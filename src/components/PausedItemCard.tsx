@@ -113,20 +113,17 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
         </div>
       )}
 
-      {/* Product image - full width on desktop, with margin on mobile */}
-      <div className="relative md:p-0 p-3 pb-0">
-        <div className="relative">
-          <ItemImage item={item} />
+      {/* Main content container - horizontal layout on mobile, vertical on desktop */}
+      <div className="flex md:flex-col pb-12">
+        {/* Product image - left side on mobile, full width on desktop */}
+        <div className="relative md:w-full w-32 flex-shrink-0 md:p-0 p-3 pr-0">
+          <div className="relative">
+            <ItemImage item={item} />
+          </div>
         </div>
-      </div>
-      
-      {/* Pause Duration Banner - stretches across bottom of card */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <PauseDurationBanner checkInTime={item.checkInTime} />
-      </div>
 
-      {/* Content */}
-      <div className="p-4 pb-12 space-y-3">
+        {/* Content - right side on mobile, below image on desktop */}
+        <div className="p-4 md:pt-0 space-y-3 flex-1">
         {/* Title and Price */}
         <div className="flex justify-between items-start">
           <h3 className="font-medium text-foreground text-base leading-tight pr-2">
@@ -201,6 +198,12 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
             </button>
           </div>
         )}
+        </div>
+      </div>
+      
+      {/* Pause Duration Banner - stretches across bottom of card */}
+      <div className="absolute bottom-0 left-0 right-0">
+        <PauseDurationBanner checkInTime={item.checkInTime} />
       </div>
     </div>
   );
