@@ -9,7 +9,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useItemComments } from '@/hooks/useItemComments';
 import { useAuth } from '@/contexts/AuthContext';
 
-const MainTabs = () => {
+const MainTabs = ({ onSectionToggle }: { onSectionToggle?: (isAnyOpen: boolean) => void }) => {
   const [showMyPauses, setShowMyPauses] = useState(false);
   const [showPartnerPauses, setShowPartnerPauses] = useState(false);
   const { hasPausePartnerAccess } = useSubscription();
@@ -46,8 +46,10 @@ const MainTabs = () => {
         <Button 
           variant="ghost"
           onClick={() => {
-            setShowMyPauses(!showMyPauses);
+            const newState = !showMyPauses;
+            setShowMyPauses(newState);
             setShowPartnerPauses(false);
+            onSectionToggle?.(newState);
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-l-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto hover:bg-transparent focus:bg-transparent active:bg-transparent"
         >
@@ -65,8 +67,10 @@ const MainTabs = () => {
         <Button 
           variant="ghost"
           onClick={() => {
-            setShowPartnerPauses(!showPartnerPauses);
+            const newState = !showPartnerPauses;
+            setShowPartnerPauses(newState);
             setShowMyPauses(false);
+            onSectionToggle?.(newState);
           }}
           className="flex-1 flex flex-col sm:flex-row items-center gap-0 rounded-r-full border-0 font-normal shadow-none px-0.5 sm:px-2 h-auto hover:bg-transparent focus:bg-transparent active:bg-transparent"
         >

@@ -24,7 +24,7 @@ import { useWelcomeFlow } from '../hooks/useWelcomeFlow';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
-  const [wisdomOrbExpanded, setWisdomOrbExpanded] = useState(false);
+  const [sectionsExpanded, setSectionsExpanded] = useState(false);
   
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
@@ -146,14 +146,14 @@ const Index = () => {
               onStartReview={handleStartPartnerReview}
             />
           )}
-          <MainTabs />
+          <MainTabs onSectionToggle={setSectionsExpanded} />
         </div>
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 pt-3 pb-safe">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
-          <AddPauseButton onAddPause={modalStates.handleAddPause} />
+          <AddPauseButton onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
           <FooterLinks />
         </div>
       </div>
