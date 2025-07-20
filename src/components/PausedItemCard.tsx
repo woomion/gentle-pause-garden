@@ -139,12 +139,12 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
         {/* Content - right side on mobile, below image on desktop */}
         <div className="p-4 md:pt-0 space-y-3 flex-1">
           {/* Title and Price */}
-          <div className="flex justify-between items-start">
-            <h3 className="font-medium text-foreground text-base leading-tight pr-2">
+          <div className="flex justify-between items-start gap-2">
+            <h3 className="font-medium text-foreground text-base leading-tight flex-1 min-w-0">
               {item.itemName}
             </h3>
             {formattedPrice && (
-              <span className="text-sm font-medium text-foreground whitespace-nowrap">
+              <span className="text-sm font-medium text-foreground whitespace-nowrap flex-shrink-0">
                 {formattedPrice}
               </span>
             )}
@@ -156,8 +156,7 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
           </div>
 
           {/* Emotion badge under store name, aligned left */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Paused while feeling</span>
+          <div className="flex items-start">
             <EmotionBadge emotion={item.emotion} />
           </div>
 
