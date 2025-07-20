@@ -202,8 +202,8 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       <div className="px-4 py-4">
         {/* Horizontal flex layout */}
         <div className="flex items-center gap-4">
-          {/* LEFT: 56x72px rectangular thumbnail (taller) */}
-          <div className="w-14 h-18 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+          {/* LEFT: Wider fixed image area */}
+          <div className="w-20 h-18 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
             {imageUrl === 'cart-placeholder' ? (
               <div className="w-full h-full bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
                 <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
@@ -266,16 +266,16 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
               )}
             </div>
           </div>
+          
+          {/* RIGHT: Price */}
+          {formattedPrice && (
+            <div className="flex-shrink-0">
+              <span className="text-sm font-normal text-muted-foreground">
+                {formattedPrice}
+              </span>
+            </div>
+          )}
         </div>
-        
-        {/* Price - not in pill, smaller and not bold */}
-        {formattedPrice && (
-          <div className="mt-2 px-4">
-            <span className="text-sm font-normal text-muted-foreground">
-              {formattedPrice}
-            </span>
-          </div>
-        )}
       </div>
       
       {/* 1px divider */}
