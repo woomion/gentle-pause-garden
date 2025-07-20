@@ -202,8 +202,8 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       <div className="px-4 py-4">
         {/* Horizontal flex layout */}
         <div className="flex items-center gap-4">
-          {/* LEFT: 72x72px thumbnail (increased from 56x56) */}
-          <div className="w-18 h-18 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+          {/* LEFT: 56x72px rectangular thumbnail (taller) */}
+          <div className="w-14 h-18 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
             {imageUrl === 'cart-placeholder' ? (
               <div className="w-full h-full bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
                 <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
