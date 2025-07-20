@@ -37,7 +37,7 @@ const PartnerReviewModal = ({ isOpen, onClose, partnerName, items, currentUserId
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-card rounded-2xl w-full max-w-md mx-auto border border-border relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-background border border-border rounded-2xl w-full max-w-md mx-auto relative max-h-[90vh] overflow-y-auto shadow-lg" style={{ backgroundColor: 'hsl(var(--background))' }}>
         {/* Header */}
         <div className="p-6 border-b border-border">
           <div className="flex justify-between items-center">
