@@ -120,20 +120,6 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
           <div className="relative">
             <ItemImage item={item} />
           </div>
-          
-          {/* View item button directly under image */}
-          {item.link && (
-            <div className="mt-2 flex justify-start">
-              <button
-                onClick={handleLinkClick}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted/50 rounded-lg"
-                title={item.isCart ? "View cart" : "View item"}
-              >
-                <ExternalLink size={14} />
-                <span className="text-sm">View item</span>
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Content - right side on mobile, below image on desktop */}
@@ -155,15 +141,23 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
             <p className="text-sm text-muted-foreground">{item.storeName}</p>
           </div>
 
-          {/* Emotion badge under store name, aligned left */}
-          <div className="flex items-start">
-            <EmotionBadge emotion={item.emotion} />
+          {/* Emotion badge under store name, aligned left with smaller text */}
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-muted-foreground">Paused while feeling</span>
+            <EmotionBadge emotion={item.emotion} size="sm" />
           </div>
 
-          {/* Only show notes if they exist and aren't empty after cleaning */}
-          {cleanNotes && cleanNotes.trim() && (
-            <div className="text-sm text-muted-foreground line-clamp-2">
-              <span className="font-medium">Note:</span> {cleanNotes}
+          {/* View item button aligned with other copy */}
+          {item.link && (
+            <div className="flex justify-start">
+              <button
+                onClick={handleLinkClick}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted/50 rounded-lg"
+                title={item.isCart ? "View cart" : "View item"}
+              >
+                <ExternalLink size={14} />
+                <span className="text-sm">View item</span>
+              </button>
             </div>
           )}
 
