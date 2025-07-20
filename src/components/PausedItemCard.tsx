@@ -39,30 +39,44 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   // Calculate days left and progress
   const pauseProgress = useMemo(() => {
-    if (!item.checkInTime) return { daysLeft: 0, progress: 0, nextNudgeText: '' };
+    if (!item.checkInTime) return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '' };
     
-    const now = new Date();
-    const checkInDate = new Date(item.checkInTime);
-    const diffTime = checkInDate.getTime() - now.getTime();
-    const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-    
-    // Calculate progress based on total pause duration (assuming 7 days for now)
-    const totalDays = 7; // This should come from your pause duration logic
-    const progress = Math.min(100, Math.max(0, ((totalDays - daysLeft) / totalDays) * 100));
-    
-    // Format next nudge text
-    const nextNudgeDate = new Date(checkInDate);
-    nextNudgeDate.setDate(nextNudgeDate.getDate() - 1); // Day before check-in
-    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const weekday = weekdays[nextNudgeDate.getDay()];
-    const time = '9:00 AM'; // Default time, should come from user settings
-    
-    return {
-      daysLeft,
-      progress,
-      checkInDate: checkInDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }),
-      nextNudgeText: `${weekday} ${time}`
-    };
+    try {
+      const now = new Date();
+      const checkInDate = new Date(item.checkInTime);
+      
+      // Check if the date is valid
+      if (isNaN(checkInDate.getTime())) {
+        return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '' };
+      }
+      
+      const diffTime = checkInDate.getTime() - now.getTime();
+      const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+      
+      // Calculate progress based on total pause duration (assuming 7 days for now)
+      const totalDays = 7; // This should come from your pause duration logic
+      const progress = Math.min(100, Math.max(0, ((totalDays - daysLeft) / totalDays) * 100));
+      
+      // Format check-in date
+      const formattedDate = checkInDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+      
+      // Format next nudge text
+      const nextNudgeDate = new Date(checkInDate);
+      nextNudgeDate.setDate(nextNudgeDate.getDate() - 1); // Day before check-in
+      const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const weekday = weekdays[nextNudgeDate.getDay()];
+      const time = '9:00 AM'; // Default time, should come from user settings
+      
+      return {
+        daysLeft,
+        progress,
+        checkInDate: formattedDate,
+        nextNudgeText: `${weekday} ${time}`
+      };
+    } catch (error) {
+      console.error('Error calculating pause progress:', error);
+      return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '' };
+    }
   }, [item.checkInTime]);
 
   // Get initials for shared partners
@@ -184,15 +198,15 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
         </div>
       )}
       
-      {/* Main content with specified padding */}
-      <div className="px-4 py-3">
+      {/* Main content with specified padding - increased height */}
+      <div className="px-4 py-4">
         {/* Horizontal flex layout */}
         <div className="flex items-center gap-4">
-          {/* LEFT: 56x56px thumbnail */}
-          <div className="w-14 h-14 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+          {/* LEFT: 72x72px thumbnail (increased from 56x56) */}
+          <div className="w-18 h-18 bg-muted rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
             {imageUrl === 'cart-placeholder' ? (
               <div className="w-full h-full bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                <ShoppingCart size={20} className="text-blue-600 dark:text-blue-400" />
+                <ShoppingCart size={24} className="text-blue-600 dark:text-blue-400" />
               </div>
             ) : imageUrl ? (
               <img 
@@ -252,16 +266,16 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
               )}
             </div>
           </div>
-          
-          {/* RIGHT: Price pill */}
-          {formattedPrice && (
-            <div className="rounded-full h-6 px-2 bg-[#F5F5F7] dark:bg-muted flex items-center justify-center flex-shrink-0">
-              <span className="text-[15px] font-semibold text-[#1D1D1D] dark:text-foreground">
-                {formattedPrice}
-              </span>
-            </div>
-          )}
         </div>
+        
+        {/* Price - not in pill, smaller and not bold */}
+        {formattedPrice && (
+          <div className="mt-2 px-4">
+            <span className="text-sm font-normal text-muted-foreground">
+              {formattedPrice}
+            </span>
+          </div>
+        )}
       </div>
       
       {/* 1px divider */}
@@ -279,9 +293,15 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
         
         {/* Caption - 12px #6F6F6F */}
         <div className="px-4 py-2">
-          <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
-            {pauseProgress.daysLeft} d left ({pauseProgress.checkInDate}) · next nudge {pauseProgress.nextNudgeText}
-          </p>
+          {pauseProgress.checkInDate ? (
+            <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
+              {pauseProgress.daysLeft} d left ({pauseProgress.checkInDate}) · next nudge {pauseProgress.nextNudgeText}
+            </p>
+          ) : (
+            <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
+              Pause details unavailable
+            </p>
+          )}
         </div>
       </div>
     </div>
