@@ -101,7 +101,7 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
 
   return (
     <div 
-      className={`relative overflow-hidden bg-card rounded-lg border border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in ${
+      className={`relative overflow-hidden bg-card rounded-lg border border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in md:block flex ${
         hasActivity ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''
       }`}
       onClick={onClick}
@@ -122,14 +122,14 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
       )}
 
       {/* Product image */}
-      <div className="relative">
+      <div className="relative md:w-full w-32 flex-shrink-0">
         <ItemImage item={item} />
         {/* Pause Duration Banner - touching bottom of image */}
         <PauseDurationBanner checkInTime={item.checkInTime} />
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-3 md:w-full flex-1">
         {/* Title and Price */}
         <div className="flex justify-between items-start">
           <h3 className="font-medium text-foreground text-base leading-tight pr-2">

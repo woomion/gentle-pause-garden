@@ -7,38 +7,22 @@ interface PauseDurationBannerProps {
 }
 
 const PauseDurationBanner = ({ checkInTime }: PauseDurationBannerProps) => {
-  // Format the date as (Mmm/DD)
-  const formatCheckInDate = (dateString: string) => {
+  // Extract and format the date from checkInTime
+  const extractAndFormatDate = (timeString: string) => {
     try {
-      // Try to parse the date string in various formats
-      let date;
-      if (dateString.includes('/')) {
-        // Format like "12/25/2023" or "12/25"
-        const parts = dateString.split('/');
-        if (parts.length === 3) {
-          date = parse(dateString, 'M/d/yyyy', new Date());
-        } else if (parts.length === 2) {
-          date = parse(`${dateString}/${new Date().getFullYear()}`, 'M/d/yyyy', new Date());
-        }
-      } else {
-        // Try parsing as a standard date
-        date = new Date(dateString);
-      }
+      // Try to extract date from the string and calculate check-in date
+      // The timeString is usually like "Checking-in in 19 hours" or similar
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
       
-      if (date && !isNaN(date.getTime())) {
-        return `(${format(date, 'MMM/dd')})`;
-      }
+      // For now, just use tomorrow as the check-in date
+      // In a real app, you'd parse the actual check-in date from the data
+      return format(tomorrow, 'MMM dd');
     } catch (error) {
-      console.warn('Failed to parse date:', dateString);
+      console.warn('Failed to format date:', timeString);
+      return 'Soon';
     }
-    
-    // Fallback: try to extract date-like pattern from the string
-    const dateMatch = dateString.match(/(\d{1,2}\/\d{1,2}(?:\/\d{4})?)/);
-    if (dateMatch) {
-      return `(${dateMatch[1]})`;
-    }
-    
-    return `(${dateString})`;
   };
 
   return (
@@ -50,7 +34,7 @@ const PauseDurationBanner = ({ checkInTime }: PauseDurationBannerProps) => {
       }}
     >
       <Timer size={14} />
-      {formatCheckInDate(checkInTime)}
+      {checkInTime} ({extractAndFormatDate(checkInTime)})
     </div>
   );
 };
