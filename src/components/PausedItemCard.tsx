@@ -1,7 +1,7 @@
 import { ShoppingCart, MessageCircle } from 'lucide-react';
 import { memo, useMemo, useEffect, useState } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import { formatPrice } from '../utils/priceFormatter';
+import { calculateCheckInTimeDisplay } from '../utils/pausedItemsUtils';
 import EmotionBadge from './EmotionBadge';
 import { getEmotionColor } from '../utils/emotionColors';
 import { Progress } from '@/components/ui/progress';
@@ -37,28 +37,31 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
     getCurrentUser();
   }, []);
 
-  // Calculate days left and progress
+  // Calculate days left and progress using the proper checkInDate
   const pauseProgress = useMemo(() => {
-    if (!item.checkInTime) return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '' };
+    if (!item.checkInDate) return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '', timeDisplay: 'Pause details unavailable' };
     
     try {
       const now = new Date();
-      const checkInDate = new Date(item.checkInTime);
+      const checkInDate = new Date(item.checkInDate);
       
       // Check if the date is valid
       if (isNaN(checkInDate.getTime())) {
-        return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '' };
+        return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '', timeDisplay: 'Invalid pause date' };
       }
       
       const diffTime = checkInDate.getTime() - now.getTime();
       const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
       
-      // Calculate progress based on total pause duration (assuming 7 days for now)
-      const totalDays = 7; // This should come from your pause duration logic
+      // Calculate progress based on total pause duration (could derive from item.duration)
+      const totalDays = 7; // This should come from parsing item.duration
       const progress = Math.min(100, Math.max(0, ((totalDays - daysLeft) / totalDays) * 100));
       
       // Format check-in date
       const formattedDate = checkInDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+      
+      // Use the existing utility to get the time display
+      const timeDisplay = calculateCheckInTimeDisplay(checkInDate);
       
       // Format next nudge text
       const nextNudgeDate = new Date(checkInDate);
@@ -71,13 +74,14 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
         daysLeft,
         progress,
         checkInDate: formattedDate,
-        nextNudgeText: `${weekday} ${time}`
+        nextNudgeText: `${weekday} ${time}`,
+        timeDisplay
       };
     } catch (error) {
       console.error('Error calculating pause progress:', error);
-      return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '' };
+      return { daysLeft: 0, progress: 0, nextNudgeText: '', checkInDate: '', timeDisplay: 'Error calculating time' };
     }
-  }, [item.checkInTime]);
+  }, [item.checkInDate]);
 
   // Get initials for shared partners
   const getInitials = (name: string) => {
@@ -291,17 +295,11 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
           } as any}
         />
         
-        {/* Caption - 12px #6F6F6F */}
+        {/* Caption showing time until review */}
         <div className="px-4 py-2">
-          {pauseProgress.checkInDate ? (
-            <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
-              {pauseProgress.daysLeft} d left ({pauseProgress.checkInDate}) · next nudge {pauseProgress.nextNudgeText}
-            </p>
-          ) : (
-            <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
-              Pause details unavailable
-            </p>
-          )}
+          <p className="text-xs text-[#6F6F6F] dark:text-muted-foreground">
+            {pauseProgress.timeDisplay}
+          </p>
         </div>
       </div>
     </div>
