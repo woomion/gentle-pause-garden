@@ -248,13 +248,6 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
             <div className="flex items-center gap-2">
               <EmotionBadge emotion={item.emotion} size="sm" />
               
-              {/* Sharing attribution or partner badges */}
-              {getAttributionText && (
-                <Badge className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-xs border-green-200 dark:border-green-800">
-                  {getAttributionText.from} → {getAttributionText.to}
-                </Badge>
-              )}
-              
               {!getAttributionText && sharedWithPartners.length > 0 && (
                 <div className="flex gap-1">
                   {sharedWithPartners.slice(0, 3).map((partner) => (
@@ -274,12 +267,19 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
             </div>
           </div>
           
-          {/* RIGHT: Price */}
-          {formattedPrice && (
-            <div className="flex-shrink-0">
-              <span className="text-sm font-normal text-muted-foreground">
-                {formattedPrice}
-              </span>
+          {/* RIGHT: Price and attribution */}
+          {(formattedPrice || getAttributionText) && (
+            <div className="flex-shrink-0 flex flex-col items-end gap-1">
+              {formattedPrice && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  {formattedPrice}
+                </span>
+              )}
+              {getAttributionText && (
+                <Badge className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-xs border-green-200 dark:border-green-800">
+                  {getAttributionText.from} → {getAttributionText.to}
+                </Badge>
+              )}
             </div>
           )}
         </div>
