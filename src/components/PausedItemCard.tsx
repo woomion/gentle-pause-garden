@@ -1,10 +1,8 @@
 
-import { useState, useMemo } from 'react';
-import { ExternalLink, MessageCircle, Calendar, User } from 'lucide-react';
+import { useMemo } from 'react';
+import { ExternalLink, User } from 'lucide-react';
 import { formatPrice } from '../utils/priceFormatter';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useItemActions } from '../hooks/useItemActions';
 import ItemImage from './ItemImage';
@@ -28,7 +26,6 @@ interface PausedItemCardProps {
 }
 
 const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedItemCardProps) => {
-  const [showAlert, setShowAlert] = useState(false);
   const { handleViewItem } = useItemActions();
   const { getCommentCount, getUnreadCount, hasNewComments } = useItemComments(currentUserId);
 
@@ -82,13 +79,8 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
   const handleLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (item.link) {
-      setShowAlert(true);
+      handleViewItem(item);
     }
-  };
-
-  const handleConfirmLink = () => {
-    handleViewItem(item);
-    setShowAlert(false);
   };
 
   // Get comment info for this item
@@ -196,39 +188,15 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
           <div className="flex justify-end pt-2">
             <button
               onClick={handleLinkClick}
-              className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted/50 rounded"
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted/50 rounded-lg"
               title={item.isCart ? "View cart" : "View item"}
             >
               <ExternalLink size={14} />
+              <span className="text-sm">View item</span>
             </button>
           </div>
         )}
       </div>
-
-      {/* Link confirmation dialog */}
-      <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
-        <AlertDialogContent className="bg-card border-border rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">
-              {item.isCart ? "View cart?" : "View item?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
-              This will open the {item.isCart ? "cart" : "item"} in a new tab. Are you sure you want to continue?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-2xl bg-card border-border text-foreground hover:bg-muted">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmLink}
-              className="rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              {item.isCart ? "View cart" : "View item"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
