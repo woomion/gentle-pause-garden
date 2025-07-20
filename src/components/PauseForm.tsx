@@ -349,9 +349,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto transition-all ease-out" 
+    <div className="fixed inset-0 z-50 overflow-y-auto transition-all ease-out bg-background" 
          style={{ 
-           backgroundColor: showReflectiveBackground ? 'hsl(260, 47%, 95%)' : '#F9F5EB',
            transitionDuration: '3000ms' 
          }}>
       <div className="min-h-screen px-6 py-8">
@@ -360,7 +359,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           <div className="text-center">
             <button 
               onClick={onClose}
-              className="text-black font-medium text-lg tracking-wide mb-2 hover:text-gray-600 transition-colors"
+              className="text-foreground font-medium text-lg tracking-wide mb-2 hover:text-muted-foreground transition-colors"
             >
               POCKET || PAUSE
             </button>
@@ -371,11 +370,11 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         <div className="max-w-md mx-auto relative">
           <button 
             onClick={onClose}
-            className="absolute -top-16 right-0 p-2 text-black hover:text-taupe transition-colors"
+            className="absolute -top-16 right-0 p-2 text-foreground hover:text-muted-foreground transition-colors"
           >
             <X size={24} />
           </button>
-          <h1 className="text-2xl font-semibold text-dark-gray text-center mb-8">
+          <h1 className="text-2xl font-semibold text-foreground text-center mb-8">
             Add Something to Pause
           </h1>
 
@@ -402,7 +401,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
               <>
                 {/* Link Field */}
                 <div className="space-y-1">
-                  <Label htmlFor="link" className="text-dark-gray font-medium text-base">
+                  <Label htmlFor="link" className="text-foreground font-medium text-base">
                     Link (paste a product URL)
                   </Label>
                   <div className="relative">
@@ -412,11 +411,11 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                       placeholder="www.example.com/item"
                       value={formData.link}
                       onChange={(e) => handleLinkChange(e.target.value)}
-                      className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                      className="bg-input border-border rounded-xl py-3 px-4 placeholder:text-placeholder placeholder:font-normal text-base"
                     />
                     {isParsingUrl && (
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <div className="w-4 h-4 border-2 border-lavender border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
                       </div>
                     )}
                   </div>
@@ -444,7 +443,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     }}
                     className="h-5 w-5"
                   />
-                  <Label htmlFor="isCart" className="text-dark-gray font-medium text-base cursor-pointer">
+                  <Label htmlFor="isCart" className="text-foreground font-medium text-base cursor-pointer">
                     <div className="flex items-center gap-2">
                       <ShoppingCart size={16} />
                       Mark as Cart (saving multiple items)
@@ -454,14 +453,14 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
                 {/* Emotion Selection */}
                 <div className="space-y-1">
-                  <Label className="text-dark-gray font-medium text-base">
+                  <Label className="text-foreground font-medium text-base">
                     How are you feeling right now?
                   </Label>
                   <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
-                    <SelectTrigger className="bg-white border-gray-200 rounded-xl py-3 px-4">
-                      <SelectValue placeholder="Select emotion" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
+                    <SelectTrigger className="bg-input border-border rounded-xl py-3 px-4">
+                      <SelectValue placeholder="Select emotion" className="placeholder:text-placeholder placeholder:font-normal text-base" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200 rounded-xl max-h-60 overflow-y-auto">
+                    <SelectContent className="bg-popover border-border rounded-xl max-h-60 overflow-y-auto">
                       {emotions.map((emotion) => (
                         <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1">
                           <div className="flex items-center gap-3">
@@ -479,7 +478,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
                 {/* Pause Duration */}
                 <div className="space-y-2">
-                  <Label className="text-dark-gray font-medium text-base">
+                  <Label className="text-foreground font-medium text-base">
                     Pause for
                   </Label>
                   
@@ -491,8 +490,8 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                         onClick={() => handleDurationSelect(duration)}
                         className={`py-3 px-2 rounded-xl border-2 transition-all text-sm ${
                           formData.duration === duration
-                            ? 'bg-lavender border-lavender text-dark-gray'
-                            : 'bg-white border-gray-200 text-dark-gray hover:border-lavender/50'
+                            ? 'bg-accent border-accent text-accent-foreground'
+                            : 'bg-input border-border text-foreground hover:border-accent/50'
                         }`}
                       >
                         {duration}
@@ -505,12 +504,12 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     value={formData.otherDuration} 
                     onValueChange={handleOtherDurationSelect}
                   >
-                    <SelectTrigger className={`bg-white border-2 rounded-xl py-3 px-4 transition-all ${
-                      formData.otherDuration ? 'border-lavender bg-lavender text-dark-gray' : 'border-gray-200 hover:border-lavender/50'
+                    <SelectTrigger className={`bg-input border-2 rounded-xl py-3 px-4 transition-all ${
+                      formData.otherDuration ? 'border-accent bg-accent text-accent-foreground' : 'border-border hover:border-accent/50'
                     }`}>
-                      <SelectValue placeholder="Other pause lengths" className="placeholder:text-[#B0ABB7] placeholder:font-normal text-base" />
+                      <SelectValue placeholder="Other pause lengths" className="placeholder:text-placeholder placeholder:font-normal text-base" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200 rounded-xl">
+                    <SelectContent className="bg-popover border-border rounded-xl">
                       {otherPauseLengths.map((duration) => (
                         <SelectItem key={duration} value={duration} className="rounded-lg my-1">
                           {duration}
@@ -525,14 +524,14 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   <Button
                     variant="outline"
                     onClick={onClose}
-                    className="flex-1 bg-white border-gray-200 text-dark-gray hover:bg-gray-50 rounded-xl py-3"
+                    className="flex-1 bg-secondary border-border text-secondary-foreground hover:bg-secondary/80 rounded-xl py-3"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handlePauseCommit}
                     disabled={!isBasicStepValid()}
-                    className={`flex-1 bg-lavender text-dark-gray hover:bg-lavender/90 rounded-xl py-3 ${
+                    className={`flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl py-3 ${
                       !isBasicStepValid() ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
@@ -552,7 +551,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
                 {/* Item Name Field */}
                 <div className="space-y-1">
-                  <Label htmlFor="itemName" className="text-dark-gray font-medium text-base">
+                  <Label htmlFor="itemName" className="text-foreground font-medium text-base">
                     Item Name
                   </Label>
                   <Input
@@ -561,13 +560,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     placeholder="What are you thinking of buying?"
                     value={formData.itemName}
                     onChange={(e) => handleInputChange('itemName', e.target.value)}
-                    className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                    className="bg-input border-border rounded-xl py-3 px-4 placeholder:text-placeholder placeholder:font-normal text-base"
                   />
                 </div>
 
                 {/* Store Name Field */}
                 <div className="space-y-1">
-                  <Label htmlFor="storeName" className="text-dark-gray font-medium text-base">
+                  <Label htmlFor="storeName" className="text-foreground font-medium text-base">
                     Store Name
                   </Label>
                   <Input
@@ -576,13 +575,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     placeholder="Where is this item from?"
                     value={formData.storeName}
                     onChange={(e) => handleInputChange('storeName', e.target.value)}
-                    className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                    className="bg-input border-border rounded-xl py-3 px-4 placeholder:text-placeholder placeholder:font-normal text-base"
                   />
                 </div>
 
                 {/* Price Field */}
                 <div className="space-y-1">
-                  <Label htmlFor="price" className="text-dark-gray font-medium text-base">
+                  <Label htmlFor="price" className="text-foreground font-medium text-base">
                     Price
                   </Label>
                   <Input
@@ -591,13 +590,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     placeholder="0.00"
                     value={formData.price}
                     onChange={(e) => handleInputChange('price', e.target.value)}
-                    className="bg-white border-gray-200 rounded-xl py-3 px-4 placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                    className="bg-input border-border rounded-xl py-3 px-4 placeholder:text-placeholder placeholder:font-normal text-base"
                   />
                 </div>
 
                 {/* Photo Upload Field */}
                 <div className="space-y-1">
-                  <Label htmlFor="photo" className="text-dark-gray font-medium text-base">
+                  <Label htmlFor="photo" className="text-foreground font-medium text-base">
                     Photo (optional)
                   </Label>
                   
@@ -612,7 +611,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                         }}
                         className="h-4 w-4"
                       />
-                      <Label htmlFor="usePlaceholder" className="text-sm text-gray-600 cursor-pointer">
+                      <Label htmlFor="usePlaceholder" className="text-sm text-muted-foreground cursor-pointer">
                         Use placeholder image
                       </Label>
                     </div>
@@ -624,7 +623,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                       <img 
                         src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
                         alt="Placeholder preview" 
-                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                        className="w-20 h-20 object-cover rounded-lg border border-border"
                       />
                       <p className="text-sm text-blue-600 mt-1">✓ Placeholder image selected</p>
                     </div>
@@ -670,13 +669,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                       type="file"
                       accept="image/*"
                       onChange={handleFileChange}
-                      className="w-full text-sm text-gray-500
+                      className="w-full text-sm text-muted-foreground
                                  file:py-3 file:px-4
                                  file:rounded-xl file:border-0
                                  file:text-sm file:font-medium
-                                 file:bg-lavender file:text-dark-gray
-                                 hover:file:bg-lavender/90
-                                 rounded-xl border border-gray-200 bg-white h-12
+                                 file:bg-accent file:text-accent-foreground
+                                 hover:file:bg-accent/90
+                                 rounded-xl border border-border bg-input h-12
                                  overflow-hidden
                                  flex items-center"
                     />
@@ -687,7 +686,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                       <img 
                         src={photoPreview} 
                         alt="Photo preview" 
-                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                        className="w-20 h-20 object-cover rounded-lg border border-border"
                       />
                       <p className="text-sm text-green-600 mt-1">✓ Photo ready to upload</p>
                     </div>
@@ -696,7 +695,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
                 {/* Tags Field */}
                 <div className="space-y-1">
-                  <Label className="text-dark-gray font-medium text-base">
+                  <Label className="text-foreground font-medium text-base">
                     Tags (optional)
                   </Label>
                   <TagInput
@@ -706,7 +705,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     suggestions={existingTags}
                     className="w-full"
                   />
-                  <p className="text-xs text-gray-500 mt-1 md:hidden">
+                  <p className="text-xs text-muted-foreground mt-1 md:hidden">
                     Add a comma or click outside the input to set a tag.
                   </p>
                 </div>
@@ -719,7 +718,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
 
                 {/* Notes Field */}
                 <div className="space-y-1">
-                  <Label htmlFor="notes" className="text-dark-gray font-medium text-base">
+                  <Label htmlFor="notes" className="text-foreground font-medium text-base">
                     Notes (optional)
                   </Label>
                   <Textarea
@@ -727,7 +726,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     placeholder="Why do you want this item?"
                     value={formData.notes}
                     onChange={(e) => handleInputChange('notes', e.target.value)}
-                    className="bg-white border-gray-200 rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-[#B0ABB7] placeholder:font-normal text-base"
+                    className="bg-input border-border rounded-xl py-3 px-4 min-h-[80px] resize-none placeholder:text-placeholder placeholder:font-normal text-base"
                   />
                 </div>
 
@@ -736,20 +735,20 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   <Button
                     variant="outline"
                     onClick={handleBackToBasics}
-                    className="flex-1 bg-white border-gray-200 text-dark-gray hover:bg-gray-50 rounded-xl py-3"
+                    className="flex-1 bg-secondary border-border text-secondary-foreground hover:bg-secondary/80 rounded-xl py-3"
                   >
                     ← Back
                   </Button>
                   <Button
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className={`flex-1 bg-lavender text-dark-gray hover:bg-lavender/90 rounded-xl py-3 relative overflow-hidden ${
+                    className={`flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl py-3 relative overflow-hidden ${
                       isSubmitting ? 'pointer-events-none' : ''
                     }`}
                   >
                     {isSubmitting && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-2 h-2 bg-dark-gray/20 rounded-full animate-ripple"></div>
+                        <div className="w-2 h-2 bg-foreground/20 rounded-full animate-ripple"></div>
                       </div>
                     )}
                     Complete Pause
@@ -761,11 +760,11 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         </div>
 
         {/* Footer */}
-        <div className="mt-16 text-center text-xs space-y-1" style={{ color: '#A6A1AD' }}>
+        <div className="mt-16 text-center text-xs space-y-1 text-muted-foreground">
           <p>|| Pocket Pause—your conscious spending companion</p>
           <div className="flex justify-center gap-4">
-            <button className="hover:text-taupe transition-colors">Privacy Policy</button>
-            <button className="hover:text-taupe transition-colors">About</button>
+            <button className="hover:text-foreground transition-colors">Privacy Policy</button>
+            <button className="hover:text-foreground transition-colors">About</button>
           </div>
         </div>
       </div>

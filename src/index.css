@@ -7,36 +7,44 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 44 69% 97%;
+    --foreground: 220 13% 18%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 44 69% 97%;
+    --card-foreground: 220 13% 18%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 44 69% 97%;
+    --popover-foreground: 220 13% 18%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 270 47% 25%;
+    --primary-foreground: 44 69% 97%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 270 35% 88%;
+    --secondary-foreground: 220 13% 18%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 270 20% 90%;
+    --muted-foreground: 220 13% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 270 60% 85%;
+    --accent-foreground: 220 13% 18%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 44 69% 97%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 270 20% 88%;
+    --input: 270 20% 88%;
+    --ring: 270 47% 25%;
 
-    --invite-button: 263 100% 86%;
-    --invite-button-foreground: 0 0% 0%;
+    /* App-specific colors */
+    --cream: 44 69% 97%;
+    --lavender: 270 60% 85%;
+    --lavender-hover: 270 50% 75%;
+    --dark-gray: 220 13% 18%;
+    --light-gray: 220 13% 45%;
+    --placeholder: 270 20% 70%;
+
+    --invite-button: 270 60% 85%;
+    --invite-button-foreground: 220 13% 18%;
 
     --shared-review: 152 57% 88%;
     --shared-review-foreground: 152 70% 25%;
@@ -44,79 +52,87 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 44 69% 97%;
+    --sidebar-foreground: 220 13% 18%;
+    --sidebar-primary: 270 47% 25%;
+    --sidebar-primary-foreground: 44 69% 97%;
+    --sidebar-accent: 270 20% 90%;
+    --sidebar-accent-foreground: 220 13% 18%;
+    --sidebar-border: 270 20% 88%;
+    --sidebar-ring: 270 47% 25%;
 
     --decision-buy: 270 60% 85%;
-    --decision-buy-foreground: 222.2 84% 4.9%;
+    --decision-buy-foreground: 220 13% 18%;
     --decision-let-go: 270 60% 85%;
-    --decision-let-go-foreground: 222.2 84% 4.9%;
-    --decide-now: 263 57% 88%;
-    --decide-now-foreground: 222.2 84% 4.9%;
-    --section-header: 263 35% 88%;
-    --section-header-foreground: 222.2 84% 4.9%;
+    --decision-let-go-foreground: 220 13% 18%;
+    --decide-now: 270 60% 85%;
+    --decide-now-foreground: 220 13% 18%;
+    --section-header: 270 35% 88%;
+    --section-header-foreground: 220 13% 18%;
     --whisper-lavender: 260 47% 25%;
   }
 
   .dark {
-    --background: 260 47% 25%;
-    --foreground: 48 100% 96%;
+    --background: 260 47% 15%;
+    --foreground: 44 69% 97%;
 
-    --card: 260 47% 25%;
-    --card-foreground: 48 100% 96%;
+    --card: 260 47% 20%;
+    --card-foreground: 44 69% 97%;
 
-    --popover: 260 47% 25%;
-    --popover-foreground: 48 100% 96%;
+    --popover: 260 47% 20%;
+    --popover-foreground: 44 69% 97%;
 
-    --primary: 48 100% 96%;
-    --primary-foreground: 260 47% 25%;
+    --primary: 44 69% 97%;
+    --primary-foreground: 260 47% 15%;
 
-    --secondary: 260 30% 35%;
-    --secondary-foreground: 48 100% 96%;
+    --secondary: 260 30% 25%;
+    --secondary-foreground: 44 69% 97%;
 
-    --muted: 260 30% 35%;
-    --muted-foreground: 48 50% 80%;
+    --muted: 260 30% 25%;
+    --muted-foreground: 44 50% 80%;
 
-    --accent: 260 30% 35%;
-    --accent-foreground: 48 100% 96%;
+    --accent: 260 30% 30%;
+    --accent-foreground: 44 69% 97%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 44 69% 97%;
 
-    --border: 260 20% 40%;
-    --input: 260 20% 40%;
-    --ring: 48 100% 96%;
+    --border: 260 20% 35%;
+    --input: 260 20% 35%;
+    --ring: 44 69% 97%;
 
-    --invite-button: 263 100% 86%;
-    --invite-button-foreground: 0 0% 0%;
+    /* App-specific dark colors */
+    --cream: 260 47% 20%;
+    --lavender: 270 50% 65%;
+    --lavender-hover: 270 40% 55%;
+    --dark-gray: 44 69% 97%;
+    --light-gray: 44 50% 80%;
+    --placeholder: 260 30% 60%;
 
-    --shared-review: 152 57% 88%;
-    --shared-review-foreground: 152 70% 25%;
-    --shared-review-muted: 152 30% 45%;
+    --invite-button: 270 50% 65%;
+    --invite-button-foreground: 260 47% 15%;
 
-    --sidebar-background: 260 47% 20%;
-    --sidebar-foreground: 48 100% 96%;
-    --sidebar-primary: 48 100% 96%;
-    --sidebar-primary-foreground: 260 47% 25%;
-    --sidebar-accent: 260 30% 30%;
-    --sidebar-accent-foreground: 48 100% 96%;
-    --sidebar-border: 260 20% 40%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --shared-review: 152 57% 40%;
+    --shared-review-foreground: 152 70% 80%;
+    --shared-review-muted: 152 30% 60%;
 
-    --decision-buy: 270 60% 85%;
-    --decision-buy-foreground: 222.2 84% 4.9%;
-    --decision-let-go: 270 60% 85%;
-    --decision-let-go-foreground: 222.2 84% 4.9%;
-    --decide-now: 263 57% 88%;
-    --decide-now-foreground: 222.2 84% 4.9%;
-    --section-header: 263 35% 88%;
-    --section-header-foreground: 222.2 84% 4.9%;
+    --sidebar-background: 260 47% 15%;
+    --sidebar-foreground: 44 69% 97%;
+    --sidebar-primary: 44 69% 97%;
+    --sidebar-primary-foreground: 260 47% 15%;
+    --sidebar-accent: 260 30% 25%;
+    --sidebar-accent-foreground: 44 69% 97%;
+    --sidebar-border: 260 20% 35%;
+    --sidebar-ring: 44 69% 97%;
+
+    --decision-buy: 270 50% 65%;
+    --decision-buy-foreground: 260 47% 15%;
+    --decision-let-go: 270 50% 65%;
+    --decision-let-go-foreground: 260 47% 15%;
+    --decide-now: 270 50% 65%;
+    --decide-now-foreground: 260 47% 15%;
+    --section-header: 270 40% 60%;
+    --section-header-foreground: 44 69% 97%;
   }
 
 }
@@ -128,14 +144,12 @@
 
   body {
     @apply bg-background text-foreground font-inter;
-    background-color: #F9F5EB;
-    color: #2B2B2B;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   body.reflective-mode {
-    background-color: hsl(260, 47%, 25%) !important;
-    color: #F9F5EB !important;
+    background-color: hsl(var(--whisper-lavender)) !important;
+    color: hsl(var(--cream)) !important;
   }
 
 }

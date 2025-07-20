@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const FooterLinks = () => {
   return (
     <div className="pt-4">
-      <div className="text-center text-[10px]" style={{ color: '#A6A1AD' }}>
+      <div className="text-center text-[10px] text-muted-foreground">
         <p className="mb-2">|| Pocket Pause—your conscious spending companion</p>
         <div className="flex justify-center gap-4">
           <Link 

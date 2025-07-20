@@ -118,16 +118,16 @@ const ItemReviewModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-cream rounded-2xl w-full max-w-md mx-auto border border-lavender/30 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-2xl w-full max-w-md mx-auto border border-border relative max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="p-6 border-b border-lavender/30">
+        <div className="p-6 border-b border-border">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-semibold text-black">
+              <h2 className="text-xl font-semibold text-foreground">
                 Ready to decide?
               </h2>
               <div className="flex items-center gap-3 mt-1">
-                <p className="text-black text-sm">
+                <p className="text-muted-foreground text-sm">
                   {activeIndex + 1} of {items.length}
                 </p>
                 {/* Directional Attribution Badge */}
@@ -142,9 +142,9 @@ const ItemReviewModal = ({
             </div>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-lavender/20 rounded-full transition-colors"
+              className="p-2 hover:bg-accent rounded-full transition-colors"
             >
-              <X size={20} className="text-black" />
+              <X size={20} className="text-foreground" />
             </button>
           </div>
         </div>

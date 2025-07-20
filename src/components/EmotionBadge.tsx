@@ -13,7 +13,7 @@ const EmotionBadge = ({ emotion }: EmotionBadgeProps) => {
         className="inline-block px-4 py-2 rounded-full text-sm font-medium"
         style={{ 
           backgroundColor: getEmotionColor(emotion),
-          color: '#000'
+          color: 'hsl(var(--foreground))'
         }}
       >
         {emotion}

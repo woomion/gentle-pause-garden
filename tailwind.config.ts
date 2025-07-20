@@ -26,12 +26,14 @@ export default {
 				'domine': ['Domine', 'serif'],
 			},
 			colors: {
-				// Pocket Pause custom colors
-				cream: '#F9F5EB',
-				lavender: '#D6BBF7',
-				taupe: '#998C75',
-				purple: '#6B4C9A',
-				'dark-gray': '#2B2B2B',
+				// Semantic colors from CSS variables
+				cream: 'hsl(var(--cream))',
+				lavender: 'hsl(var(--lavender))',
+				'lavender-hover': 'hsl(var(--lavender-hover))',
+				'dark-gray': 'hsl(var(--dark-gray))',
+				'light-gray': 'hsl(var(--light-gray))',
+				placeholder: 'hsl(var(--placeholder))',
+				taupe: '#998C75', // Keep this as is since it's used sparingly
 				
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

@@ -87,12 +87,12 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md mx-4 rounded-lg bg-[#FAF6F1] dark:bg-[#200E3B] border border-gray-200 dark:border-gray-600">
+      <DialogContent className="max-w-md mx-4 rounded-lg bg-card border border-border">
         <DialogHeader className="text-center space-y-4 pt-2">
-          <DialogTitle className="text-lg font-medium text-black dark:text-[#F9F5EB]">
+          <DialogTitle className="text-lg font-medium text-foreground">
             Support Pocket Pause
           </DialogTitle>
-          <div className="space-y-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+          <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
             <p>
               Pocket Pause is built independently — one screen, one decision, one moment at a time.
             </p>
@@ -110,9 +110,9 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
                   onClick={() => handlePresetSelect(preset.value)}
                   className={`${
                     selectedAmount === preset.value 
-                      ? 'bg-[#CAB6F7] text-black' 
-                      : 'bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]'
-                  } hover:bg-[#B8A3F5] transition-colors`}
+                      ? 'bg-accent text-accent-foreground' 
+                      : 'bg-secondary text-secondary-foreground border-border'
+                  } hover:bg-accent/80 transition-colors`}
                 >
                   {preset.label}
                 </Button>
@@ -120,11 +120,11 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-black dark:text-[#F9F5EB]">
+              <label className="text-sm font-medium text-foreground">
                 Custom Amount
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
                 <Input
                   type="number"
                   min="1"
@@ -132,7 +132,7 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
                   placeholder="25.00"
                   value={customAmount}
                   onChange={handleCustomAmountChange}
-                  className="pl-7 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]"
+                  className="pl-7 bg-input border-border text-foreground"
                 />
               </div>
             </div>
@@ -140,14 +140,14 @@ const DonationModal = ({ open, onOpenChange }: DonationModalProps) => {
             <Button
               onClick={handleDonate}
               disabled={loading || (!selectedAmount && !customAmount)}
-              className="w-full bg-[#CAB6F7] hover:bg-[#B8A3F5] text-black font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
             >
               {loading ? 'Processing...' : 'Donate with Stripe'}
             </Button>
 
             <button
               onClick={() => onOpenChange(false)}
-              className="w-full py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors"
+              className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Maybe later
             </button>

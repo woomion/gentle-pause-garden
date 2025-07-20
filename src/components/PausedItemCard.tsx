@@ -156,7 +156,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
 
   return (
     <div 
-      className="bg-white/60 rounded-2xl border border-lavender/30 cursor-pointer hover:bg-white/80 transition-colors relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#CAB6F7] focus:ring-offset-2 shadow-sm"
+      className="bg-card/60 rounded-2xl border border-border cursor-pointer hover:bg-card/80 transition-colors relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-lavender focus:ring-offset-2 shadow-sm"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -205,17 +205,17 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
           
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-medium text-black truncate pr-2">
+              <h3 className="font-medium text-foreground truncate pr-2">
                 {item.itemName}
               </h3>
               {formattedPrice && (
-                <span className="text-black font-medium flex-shrink-0">
+                <span className="text-foreground font-medium flex-shrink-0">
                   {formattedPrice}
                 </span>
               )}
             </div>
             
-            <p className="text-black text-sm mb-1">
+            <p className="text-muted-foreground text-sm mb-1">
               {item.storeName}
             </p>
             
@@ -245,8 +245,7 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
       </div>
       
       <div 
-        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl"
-        style={{ backgroundColor: '#eeeaf8', color: '#000' }}
+        className="absolute bottom-0 left-0 right-0 py-2 px-4 text-center text-xs font-medium flex items-center justify-center gap-2 rounded-b-2xl bg-secondary text-secondary-foreground"
       >
         <Timer size={14} aria-hidden="true" />
         {item.checkInTime}
