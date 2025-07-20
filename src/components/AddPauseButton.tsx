@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 
 interface AddPauseButtonProps {
@@ -20,10 +19,7 @@ const AddPauseButton = ({ onAddPause }: AddPauseButtonProps) => {
   return (
     <button
       onClick={handleClick}
-      className="relative w-full bg-lavender hover:bg-lavender-hover text-dark-gray font-medium py-24 sm:py-12 px-6 transition-all duration-200 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
-      style={{ 
-        borderRadius: '24px 24px 4px 4px'
-      }}
+      className="relative w-full bg-lavender hover:bg-lavender-hover text-dark-gray font-medium py-6 sm:py-4 px-6 transition-all duration-200 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg rounded-2xl"
     >
       {/* Ripple effect */}
       {showRipple && (
