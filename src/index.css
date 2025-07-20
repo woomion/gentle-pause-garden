@@ -64,6 +64,61 @@
     --whisper-lavender: 260 47% 25%;
   }
 
+  .dark {
+    --background: 260 47% 25%;
+    --foreground: 48 100% 96%;
+
+    --card: 260 47% 25%;
+    --card-foreground: 48 100% 96%;
+
+    --popover: 260 47% 25%;
+    --popover-foreground: 48 100% 96%;
+
+    --primary: 48 100% 96%;
+    --primary-foreground: 260 47% 25%;
+
+    --secondary: 260 30% 35%;
+    --secondary-foreground: 48 100% 96%;
+
+    --muted: 260 30% 35%;
+    --muted-foreground: 48 50% 80%;
+
+    --accent: 260 30% 35%;
+    --accent-foreground: 48 100% 96%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 260 20% 40%;
+    --input: 260 20% 40%;
+    --ring: 48 100% 96%;
+
+    --invite-button: 263 100% 86%;
+    --invite-button-foreground: 0 0% 0%;
+
+    --shared-review: 152 57% 88%;
+    --shared-review-foreground: 152 70% 25%;
+    --shared-review-muted: 152 30% 45%;
+
+    --sidebar-background: 260 47% 20%;
+    --sidebar-foreground: 48 100% 96%;
+    --sidebar-primary: 48 100% 96%;
+    --sidebar-primary-foreground: 260 47% 25%;
+    --sidebar-accent: 260 30% 30%;
+    --sidebar-accent-foreground: 48 100% 96%;
+    --sidebar-border: 260 20% 40%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --decision-buy: 270 60% 85%;
+    --decision-buy-foreground: 222.2 84% 4.9%;
+    --decision-let-go: 270 60% 85%;
+    --decision-let-go-foreground: 222.2 84% 4.9%;
+    --decide-now: 263 57% 88%;
+    --decide-now-foreground: 222.2 84% 4.9%;
+    --section-header: 263 35% 88%;
+    --section-header-foreground: 222.2 84% 4.9%;
+  }
+
 }
 
 @layer base {

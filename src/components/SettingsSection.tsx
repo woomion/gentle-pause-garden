@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useTheme } from '@/components/ThemeProvider';
 import NotificationSettingsModal from './NotificationSettingsModal';
 import TagManagement from './TagManagement';
 import PartnerManagement from './PartnerManagement';
@@ -28,6 +29,7 @@ const SettingsSection = () => {
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { theme, setTheme, actualTheme } = useTheme();
 
   const handleNotificationToggle = async (enabled: boolean) => {
     if (enabled) {
@@ -161,13 +163,28 @@ const SettingsSection = () => {
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">Theme</Label>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button 
+                    variant={actualTheme === 'light' ? 'default' : 'ghost'} 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setTheme('light')}
+                  >
                     <Sun className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button 
+                    variant={actualTheme === 'dark' ? 'default' : 'ghost'} 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setTheme('dark')}
+                  >
                     <Moon className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button 
+                    variant={theme === 'system' ? 'default' : 'ghost'} 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setTheme('system')}
+                  >
                     <Palette className="h-4 w-4" />
                   </Button>
                 </div>
