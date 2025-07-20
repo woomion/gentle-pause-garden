@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import { formatPrice } from '../utils/priceFormatter';
 import { useItemActions } from '../hooks/useItemActions';
 import ItemImage from './ItemImage';
@@ -41,6 +41,8 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [notes, setNotes] = useState('');
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchEndRef = useRef<{ x: number; y: number } | null>(null);
 
   // Mark comments as read when opening the detail view
   useEffect(() => {
@@ -65,6 +67,57 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, items.length, currentIndex, onNavigateNext, onNavigatePrevious]);
+
+  // Add touch/swipe navigation
+  useEffect(() => {
+    if (!isOpen || items.length <= 1) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+      touchEndRef.current = null;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      touchEndRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const handleTouchEnd = () => {
+      if (!touchStartRef.current || !touchEndRef.current) return;
+
+      const deltaX = touchEndRef.current.x - touchStartRef.current.x;
+      const deltaY = touchEndRef.current.y - touchStartRef.current.y;
+      const minSwipeDistance = 50;
+      const maxVerticalMovement = 100;
+
+      // Only trigger swipe if horizontal movement is greater than vertical movement
+      if (Math.abs(deltaY) > maxVerticalMovement) return;
+
+      if (Math.abs(deltaX) > minSwipeDistance) {
+        if (deltaX > 0 && onNavigatePrevious && currentIndex > 0) {
+          // Swipe right - go to previous
+          onNavigatePrevious();
+        } else if (deltaX < 0 && onNavigateNext && currentIndex < items.length - 1) {
+          // Swipe left - go to next
+          onNavigateNext();
+        }
+      }
+
+      touchStartRef.current = null;
+      touchEndRef.current = null;
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
   }, [isOpen, items.length, currentIndex, onNavigateNext, onNavigatePrevious]);
 
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
