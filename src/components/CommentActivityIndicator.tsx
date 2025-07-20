@@ -1,5 +1,5 @@
 
-import { MessageCircle, Pulse } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface CommentActivityIndicatorProps {
