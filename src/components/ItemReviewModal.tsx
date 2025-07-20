@@ -8,6 +8,7 @@ import { ItemReviewContent } from './ItemReviewContent';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePausePartners } from '@/hooks/usePausePartners';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import {
   Carousel,
   CarouselContent,
@@ -41,6 +42,9 @@ const ItemReviewModal = ({
   );
   const { user } = useAuth();
   const { partners } = usePausePartners();
+  
+  // Lock background scroll when modal is open
+  useScrollLock(isOpen);
 
   const currentItem = items[activeIndex];
   const isLastItem = activeIndex >= items.length - 1;

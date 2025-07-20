@@ -11,6 +11,7 @@ import { parseProductUrl } from '../utils/urlParser';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { useAuth } from '@/contexts/AuthContext';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 import { TagInput } from '@/components/ui/tag-input';
 import { getEmotionColor } from '@/utils/emotionColors';
@@ -45,6 +46,9 @@ const otherPauseLengths = [
 
 const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
   const { user } = useAuth();
+  
+  // Lock background scroll when form is open
+  useScrollLock(true);
   
   const [showReflectiveBackground, setShowReflectiveBackground] = useState(false);
   

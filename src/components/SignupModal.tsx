@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useScrollLock } from '@/hooks/useScrollLock';
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -20,6 +21,9 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
   const [isSignUp, setIsSignUp] = useState(true);
   const { signUp, signIn } = useAuth();
   const { toast } = useToast();
+  
+  // Lock background scroll when modal is open
+  useScrollLock(isOpen);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

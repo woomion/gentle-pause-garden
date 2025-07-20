@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useScrollLock } from '@/hooks/useScrollLock';
 // Using the uploaded image directly from public folder
 
 interface WelcomeModalProps {
@@ -15,6 +16,9 @@ interface WelcomeModalProps {
 const WelcomeModal = ({ open, onComplete, showNameStep = true }: WelcomeModalProps) => {
   const [name, setName] = useState('');
   const [currentScreen, setCurrentScreen] = useState(showNameStep ? 'name' : 1);
+  
+  // Lock background scroll when modal is open
+  useScrollLock(open);
 
   const handleNameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
