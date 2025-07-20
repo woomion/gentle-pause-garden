@@ -234,26 +234,24 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
           
           {/* CENTER & RIGHT: Content area */}
           <div className="flex-1 min-w-0 flex flex-col">
-            {/* Top row: Attribution pill (right-aligned) */}
-            <div className="flex justify-end mb-2">
-              {getAttributionText && (
-                <Badge className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-xs border-green-200 dark:border-green-800">
-                  {getAttributionText.from} → {getAttributionText.to}
-                </Badge>
-              )}
-            </div>
-            
             {/* Product name - can wrap to 2 lines */}
             <h3 className="text-base font-semibold text-[#1D1D1D] dark:text-foreground mb-1 line-clamp-2 leading-tight">
               {item.itemName}
             </h3>
             
-            {/* Brand */}
-            <p className="text-sm font-normal text-[#6F6F6F] dark:text-muted-foreground mb-2">
-              {item.storeName}
-            </p>
+            {/* Brand and Price row */}
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm font-normal text-[#6F6F6F] dark:text-muted-foreground">
+                {item.storeName}
+              </p>
+              {formattedPrice && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  {formattedPrice}
+                </span>
+              )}
+            </div>
             
-            {/* Bottom row: Emotion badge and price */}
+            {/* Bottom row: Emotion badge and attribution pill */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <EmotionBadge emotion={item.emotion} size="sm" />
@@ -276,10 +274,10 @@ const PausedItemCard = memo(({ item, onClick, partners = [], currentUserId }: Pa
                 )}
               </div>
               
-              {formattedPrice && (
-                <span className="text-sm font-normal text-muted-foreground">
-                  {formattedPrice}
-                </span>
+              {getAttributionText && (
+                <Badge className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 text-xs border-green-200 dark:border-green-800">
+                  {getAttributionText.from} → {getAttributionText.to}
+                </Badge>
               )}
             </div>
           </div>
