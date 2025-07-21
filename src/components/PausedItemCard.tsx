@@ -116,45 +116,58 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
         </div>
 
         {/* Content - right side on mobile, below image on desktop */}
-        <div className="p-4 md:pt-0 space-y-3 flex-1">
-          {/* Title and Price */}
-          <div className="flex justify-between items-start gap-2">
-            <h3 className="font-medium text-foreground text-base leading-tight flex-1 min-w-0">
-              {item.itemName}
-            </h3>
-            {formattedPrice && (
-              <span className="text-sm font-medium text-foreground whitespace-nowrap flex-shrink-0">
-                {formattedPrice}
-              </span>
-            )}
-          </div>
+        <div className="p-4 md:pt-0 flex-1 flex flex-col">
+          <div className="space-y-3 flex-1">
+            {/* Title and Price */}
+            <div className="flex justify-between items-start gap-2">
+              <h3 className="font-medium text-foreground text-base leading-tight flex-1 min-w-0">
+                {item.itemName}
+              </h3>
+              {formattedPrice && (
+                <span className="text-sm font-medium text-foreground whitespace-nowrap flex-shrink-0">
+                  {formattedPrice}
+                </span>
+              )}
+            </div>
 
-          {/* Store name */}
-          <div>
-            <p className="text-sm text-muted-foreground">{item.storeName}</p>
-          </div>
+            {/* Store name */}
+            <div>
+              <p className="text-sm text-muted-foreground">{item.storeName}</p>
+            </div>
 
-
-          {/* Attribution and comment activity in same row */}
-          {getAttributionText && (
-            <div className="flex items-center gap-3">
-              <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
-                <span>{getAttributionText}</span>
+            {/* Attribution and comment activity in same row */}
+            {getAttributionText && (
+              <div className="flex items-center gap-3">
+                <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
+                  <span>{getAttributionText}</span>
+                </div>
+                {showComments && commentCount > 0 && (
+                  <CommentActivityIndicator
+                    commentCount={commentCount}
+                    unreadCount={unreadCount}
+                    hasNewActivity={hasActivity}
+                    className="text-xs"
+                  />
+                )}
               </div>
-              {showComments && commentCount > 0 && (
+            )}
+
+            {/* Comment activity indicator for shared items (standalone if no attribution) */}
+            {!getAttributionText && showComments && commentCount > 0 && (
+              <div className="pt-2 border-t border-border">
                 <CommentActivityIndicator
                   commentCount={commentCount}
                   unreadCount={unreadCount}
                   hasNewActivity={hasActivity}
-                  className="text-xs"
+                  className="text-sm"
                 />
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
-          {/* View item button aligned with other copy */}
+          {/* View item button aligned to bottom of image */}
           {item.link && (
-            <div className="flex justify-start">
+            <div className="flex justify-start mt-auto">
               <button
                 onClick={handleLinkClick}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted/50 rounded-lg"
@@ -163,18 +176,6 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
                 <ExternalLink size={14} />
                 <span className="text-sm">View item</span>
               </button>
-            </div>
-          )}
-
-          {/* Comment activity indicator for shared items (standalone if no attribution) */}
-          {!getAttributionText && showComments && commentCount > 0 && (
-            <div className="pt-2 border-t border-border">
-              <CommentActivityIndicator
-                commentCount={commentCount}
-                unreadCount={unreadCount}
-                hasNewActivity={hasActivity}
-                className="text-sm"
-              />
             </div>
           )}
         </div>
