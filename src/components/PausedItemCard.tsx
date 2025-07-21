@@ -106,19 +106,18 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
         }
       }}
     >
-      {/* Attribution pill in top right corner */}
-      {getAttributionText && (
-        <div className="absolute top-2 right-2 z-10 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
-          <span>{getAttributionText}</span>
-        </div>
-      )}
-
       {/* Main content container - horizontal layout on mobile, vertical on desktop */}
       <div className="flex md:flex-col pb-12">
         {/* Product image - left side on mobile, full width on desktop */}
         <div className="relative md:w-full w-32 flex-shrink-0 md:p-0 p-3 pr-0">
           <div className="relative">
             <ItemImage item={item} />
+            {/* Attribution pill at bottom center of image */}
+            {getAttributionText && (
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-10 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
+                <span>{getAttributionText}</span>
+              </div>
+            )}
           </div>
         </div>
 
