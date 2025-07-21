@@ -112,12 +112,6 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
         <div className="relative md:w-full w-32 flex-shrink-0 md:p-0 p-3 pr-0">
           <div className="relative">
             <ItemImage item={item} />
-            {/* Attribution pill at bottom center of image */}
-            {getAttributionText && (
-              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-10 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
-                <span>{getAttributionText}</span>
-              </div>
-            )}
           </div>
         </div>
 
@@ -146,6 +140,23 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
             <EmotionBadge emotion={item.emotion} size="sm" />
           </div>
 
+          {/* Attribution and comment activity in same row */}
+          {getAttributionText && (
+            <div className="flex items-center gap-3">
+              <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
+                <span>{getAttributionText}</span>
+              </div>
+              {showComments && commentCount > 0 && (
+                <CommentActivityIndicator
+                  commentCount={commentCount}
+                  unreadCount={unreadCount}
+                  hasNewActivity={hasActivity}
+                  className="text-xs"
+                />
+              )}
+            </div>
+          )}
+
           {/* View item button aligned with other copy */}
           {item.link && (
             <div className="flex justify-start">
@@ -160,8 +171,8 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
             </div>
           )}
 
-          {/* Comment activity indicator for shared items */}
-          {showComments && commentCount > 0 && (
+          {/* Comment activity indicator for shared items (standalone if no attribution) */}
+          {!getAttributionText && showComments && commentCount > 0 && (
             <div className="pt-2 border-t border-border">
               <CommentActivityIndicator
                 commentCount={commentCount}
