@@ -134,11 +134,6 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
             <p className="text-sm text-muted-foreground">{item.storeName}</p>
           </div>
 
-          {/* Emotion badge under store name, aligned left with smaller text */}
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-muted-foreground">Paused while feeling</span>
-            <EmotionBadge emotion={item.emotion} size="sm" />
-          </div>
 
           {/* Attribution and comment activity in same row */}
           {getAttributionText && (
