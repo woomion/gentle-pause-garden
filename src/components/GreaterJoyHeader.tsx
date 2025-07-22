@@ -7,7 +7,7 @@ const GreaterJoyHeader = () => {
     <header className="relative mb-8">
       <Link 
         to="/"
-        className="absolute left-0 top-6 p-2 text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors"
+        className="absolute left-0 top-6 p-2 text-foreground hover:text-muted-foreground transition-colors"
       >
         <ArrowLeft size={24} />
       </Link>
@@ -15,7 +15,7 @@ const GreaterJoyHeader = () => {
       <div className="text-center">
         <Link 
           to="/"
-          className="text-black dark:text-[#F9F5EB] font-medium text-lg tracking-wide mb-2 hover:text-taupe transition-colors"
+          className="text-foreground font-medium text-lg tracking-wide mb-2 hover:text-muted-foreground transition-colors"
         >
           POCKET || PAUSE
         </Link>

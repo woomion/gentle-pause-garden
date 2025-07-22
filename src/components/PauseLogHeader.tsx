@@ -32,13 +32,13 @@ const PauseLogHeader = ({ itemCount }: PauseLogHeaderProps) => {
       <div className="mb-6 mt-8">
         <button 
           onClick={handleBackClick}
-          className="inline-flex items-center text-black dark:text-[#F9F5EB] hover:text-taupe transition-colors mb-4"
+          className="inline-flex items-center text-foreground hover:text-muted-foreground transition-colors mb-4"
         >
           <ArrowLeft size={20} className="mr-2" />
           <span className="text-sm">Back</span>
         </button>
         
-        <h1 className="text-2xl font-semibold text-black dark:text-cream mb-4">Your Paused Decision Log</h1>
+        <h1 className="text-2xl font-semibold text-foreground mb-4">Your Paused Decision Log</h1>
         
         {/* Show auth status for debugging */}
         {!user && itemCount > 0 && (
