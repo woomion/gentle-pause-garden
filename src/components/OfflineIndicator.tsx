@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { WifiOff, Wifi, Sync } from 'lucide-react';
+import { WifiOff, Wifi, RefreshCw } from 'lucide-react';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { offlineQueueStore } from '../stores/offlineQueueStore';
 import { offlineSyncService } from '../services/offlineSyncService';
@@ -59,7 +59,7 @@ const OfflineIndicator = () => {
                   className="ml-2 p-1 hover:bg-white/20 rounded"
                   aria-label="Manual sync"
                 >
-                  <Sync size={14} />
+                  <RefreshCw size={14} />
                 </button>
               </>
             )}
