@@ -191,4 +191,17 @@
       background-position: 0% 50%;
     }
   }
+
+  /* Animation delay utilities */
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-1000 {
+    animation-delay: 1000ms;
+  }
+
+  .animation-delay-1500 {
+    animation-delay: 1500ms;
+  }
 }

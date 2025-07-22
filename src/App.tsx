@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+
+import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import DonationSuccess from "./pages/DonationSuccess";
 import Bookmarklet from "./pages/Bookmarklet";
 import OfflineIndicator from "./components/OfflineIndicator";
+import LoadingScreen from "./components/LoadingScreen";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -49,6 +51,8 @@ const ScrollToTop = () => {
 };
 
 const App = () => {
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+
   // Initialize push notifications on app start
   useEffect(() => {
     let mounted = true;
@@ -77,6 +81,21 @@ const App = () => {
     console.log('🔄 Initializing offline sync service');
     offlineSyncService.startPeriodicSync();
   }, []);
+
+  const handleLoadingComplete = () => {
+    setShowLoadingScreen(false);
+  };
+
+  // Show loading screen
+  if (showLoadingScreen) {
+    return (
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="light">
+          <LoadingScreen onComplete={handleLoadingComplete} />
+        </ThemeProvider>
+      </ErrorBoundary>
+    );
+  }
   
   return (
     <ErrorBoundary>
