@@ -97,8 +97,8 @@ const Index = () => {
 
   return (
     <>
-      <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 pb-28 overflow-y-auto">
-        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 pb-36 sm:pb-32 overflow-y-auto">
+        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-12 sm:pt-16">
           <PauseHeader />
           <WelcomeMessage firstName={userName} />
           
@@ -151,7 +151,7 @@ const Index = () => {
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 pt-3 pb-safe">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           <AddPauseButton onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
           <FooterLinks />

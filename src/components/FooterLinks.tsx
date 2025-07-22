@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 
 const FooterLinks = () => {
   return (
-    <div className="pt-4">
+    <div className="pt-6 pb-2 sm:pt-4 sm:pb-0">
       <div className="text-center text-[10px] text-muted-foreground">
-        <p className="mb-2">Pocket Pause—your conscious spending companion</p>
+        <p className="mb-3 sm:mb-2">Pocket Pause—your conscious spending companion</p>
         <div className="flex justify-center gap-4">
           <Link 
             to="/about" 

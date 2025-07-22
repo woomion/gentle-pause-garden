@@ -10,7 +10,7 @@ const WelcomeMessage = ({ firstName }: WelcomeMessageProps) => {
   const dynamicGreeting = useDynamicGreeting();
   
   return (
-    <div className="mb-8 mt-16">
+    <div className="mb-8 mt-8 sm:mt-12">
       <h1 className="text-3xl md:text-4xl font-bold font-inter text-foreground leading-tight">
         Hi {displayName}!
       </h1>
