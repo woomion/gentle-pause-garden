@@ -1,3 +1,4 @@
+
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
@@ -12,6 +13,13 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
     }
+  },
+  ios: {
+    contentInset: 'always',
+    scheme: 'App',
+    limitsNavigationsToAppBoundDomains: true,
+    // Add verbose logging for iOS
+    minVersion: '13.0'
   }
 };
 
