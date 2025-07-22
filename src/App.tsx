@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,6 +14,7 @@ import GreaterJoyFund from "./pages/GreaterJoyFund";
 import NotFound from "./pages/NotFound";
 import DonationSuccess from "./pages/DonationSuccess";
 import Bookmarklet from "./pages/Bookmarklet";
+import OfflineIndicator from "./components/OfflineIndicator";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -23,6 +23,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import MobileDebugger from "./components/MobileDebugger";
 
 import { pushNotificationService } from "./services/pushNotificationService";
+import { offlineSyncService } from "./services/offlineSyncService";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,12 @@ const App = () => {
       mounted = false;
     };
   }, []);
+
+  // Initialize offline sync service
+  useEffect(() => {
+    console.log('🔄 Initializing offline sync service');
+    offlineSyncService.startPeriodicSync();
+  }, []);
   
   return (
     <ErrorBoundary>
@@ -78,6 +85,7 @@ const App = () => {
           <ThemeProvider defaultTheme="light">
             <TooltipProvider>
               <MobileDebugger />
+              <OfflineIndicator />
               <Toaster />
               <Sonner />
               

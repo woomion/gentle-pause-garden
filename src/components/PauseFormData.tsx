@@ -1,7 +1,9 @@
 
-import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
+import { usePausedItems } from '../hooks/usePausedItems';
 
 export const usePauseFormSubmission = () => {
+  const { addItem } = usePausedItems();
+
   const handleSubmit = async (formData: {
     itemName: string;
     storeName: string;
@@ -14,7 +16,7 @@ export const usePauseFormSubmission = () => {
     photo?: File | null;
   }) => {
     try {
-      await supabasePausedItemsStore.addItem({
+      await addItem({
         itemName: formData.itemName,
         storeName: formData.storeName,
         price: formData.price,
