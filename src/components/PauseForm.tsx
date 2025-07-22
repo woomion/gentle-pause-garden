@@ -359,11 +359,11 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
          }}>
       <div className="min-h-screen px-6 py-8">
         {/* Header */}
-        <header className="relative mb-8">
-          <div className="text-center">
+        <header className="relative mb-8 sm:mb-12">
+          <div className="text-center pt-2 sm:pt-4">
             <button 
               onClick={onClose}
-              className="text-foreground font-medium text-lg tracking-wide mb-2 hover:text-muted-foreground transition-colors"
+              className="text-foreground font-medium text-lg tracking-wide mb-6 sm:mb-8 hover:text-muted-foreground transition-colors inline-block"
             >
               POCKET || PAUSE
             </button>
@@ -763,14 +763,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-16 text-center text-xs space-y-1 text-muted-foreground">
-          <p>|| Pocket Pause—your conscious spending companion</p>
-          <div className="flex justify-center gap-4">
-            <button className="hover:text-foreground transition-colors">Privacy Policy</button>
-            <button className="hover:text-foreground transition-colors">About</button>
-          </div>
-        </div>
       </div>
     </div>
   );

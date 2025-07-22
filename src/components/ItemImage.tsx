@@ -22,12 +22,12 @@ const ItemImage = ({ item }: ItemImageProps) => {
     <img 
       src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
       alt="Placeholder" 
-      className="w-full h-full object-cover rounded-2xl"
+      className="w-full h-full object-cover rounded-2xl rounded-b-none"
     />
   );
 
   return (
-    <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center overflow-hidden">
+    <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl rounded-b-none flex items-center justify-center overflow-hidden">
       {imageUrl === 'cart-placeholder' ? (
         <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
           <ShoppingCart size={48} className="text-blue-600 dark:text-blue-400" />
@@ -57,7 +57,7 @@ const ItemImage = ({ item }: ItemImageProps) => {
       
       {/* Fallback placeholder - always present but hidden by default */}
       <div 
-        className={`fallback-placeholder w-full h-full rounded-2xl ${imageUrl && imageUrl !== 'cart-placeholder' ? 'hidden' : 'flex'}`}
+        className={`fallback-placeholder w-full h-full rounded-2xl rounded-b-none ${imageUrl && imageUrl !== 'cart-placeholder' ? 'hidden' : 'flex'}`}
       >
         <PlaceholderImage />
       </div>
