@@ -7,21 +7,46 @@ interface LoadingScreenProps {
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
   React.useEffect(() => {
-    // Check if user has seen the loading screen before
-    const hasSeenLoading = localStorage.getItem('pocket-pause-seen-loading');
+    console.log('🎬 LoadingScreen: Starting...');
     
-    const duration = hasSeenLoading ? 500 : 1500; // 0.5s for returning users, 1.5s for new users
-    
-    const timer = setTimeout(() => {
-      // Mark that user has seen the loading screen
-      if (!hasSeenLoading) {
-        localStorage.setItem('pocket-pause-seen-loading', 'true');
-      }
-      onComplete();
-    }, duration);
+    try {
+      // Check if user has seen the loading screen before
+      const hasSeenLoading = localStorage.getItem('pocket-pause-seen-loading');
+      console.log('🎬 LoadingScreen: Has seen before:', !!hasSeenLoading);
+      
+      const duration = hasSeenLoading ? 500 : 1500; // 0.5s for returning users, 1.5s for new users
+      console.log('🎬 LoadingScreen: Duration set to:', duration + 'ms');
+      
+      const timer = setTimeout(() => {
+        try {
+          console.log('🎬 LoadingScreen: Timer completed, marking as seen and calling onComplete');
+          
+          // Mark that user has seen the loading screen
+          if (!hasSeenLoading) {
+            localStorage.setItem('pocket-pause-seen-loading', 'true');
+            console.log('🎬 LoadingScreen: Marked as seen in localStorage');
+          }
+          
+          onComplete();
+        } catch (error) {
+          console.error('❌ LoadingScreen: Error in timer completion:', error);
+          // Still call onComplete to avoid getting stuck
+          onComplete();
+        }
+      }, duration);
 
-    return () => clearTimeout(timer);
+      return () => {
+        console.log('🎬 LoadingScreen: Cleanup - clearing timer');
+        clearTimeout(timer);
+      };
+    } catch (error) {
+      console.error('❌ LoadingScreen: Error in useEffect:', error);
+      // If anything fails, just complete immediately
+      setTimeout(onComplete, 100);
+    }
   }, [onComplete]);
+
+  console.log('🎬 LoadingScreen: Rendering...');
 
   return (
     <div className="fixed inset-0 bg-background flex items-center justify-center z-50">
