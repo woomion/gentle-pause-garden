@@ -2,7 +2,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
-import { notificationService } from '../services/notificationService';
+import { platformNotificationService } from '../services/platformNotificationService';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,30 +15,8 @@ export const useNotifications = (enabled: boolean) => {
   // Sync notification service with settings when enabled state changes
   useEffect(() => {
     try {
-      console.log('🔔 Settings sync - enabled:', enabled, 'permission:', Notification.permission);
-      if (enabled) {
-        // If notifications are enabled in settings but browser permission isn't granted, request it
-        if (Notification.permission === 'default') {
-          console.log('🔔 Requesting notification permission...');
-          Notification.requestPermission().then(permission => {
-            console.log('🔔 Permission result:', permission);
-            if (permission === 'granted') {
-              notificationService.setEnabled(true);
-              console.log('✅ Notification service enabled after permission grant');
-            } else {
-              console.log('❌ Notification permission denied');
-            }
-          });
-        } else if (Notification.permission === 'granted') {
-          notificationService.setEnabled(true);
-          console.log('✅ Notification service enabled via settings sync');
-        } else {
-          console.log('❌ Notification permission denied, cannot enable service');
-        }
-      } else {
-        notificationService.setEnabled(false);
-        console.log('❌ Notification service disabled via settings sync');
-      }
+      console.log('🔔 Settings sync - enabled:', enabled, 'platform:', platformNotificationService.getPlatformName());
+      platformNotificationService.setEnabled(enabled);
     } catch (error) {
       console.error('Error syncing notification service:', error);
     }
@@ -71,28 +49,18 @@ export const useNotifications = (enabled: boolean) => {
     try {
       const now = Date.now();
       console.log('🔍 Starting notification check at:', new Date(now).toISOString());
-      console.log('🔔 enabled:', enabled, 'service enabled:', notificationService.getEnabled());
+      console.log('🔔 enabled:', enabled, 'platform enabled:', platformNotificationService.getEnabled());
       console.log('🔔 user authenticated:', !!user);
-      console.log('🔔 browser permission:', Notification.permission);
-      console.log('🔔 time since last check:', now - lastCheckTimeRef.current, 'ms');
+      console.log('🔔 platform:', platformNotificationService.getPlatformName());
       
       if (!enabled) {
         console.log('⏭️ Skipping notification check - notifications disabled in settings');
         return;
       }
       
-      if (Notification.permission !== 'granted') {
-        console.log('⏭️ Skipping notification check - browser permission denied');
+      if (!platformNotificationService.getEnabled()) {
+        console.log('⏭️ Skipping notification check - platform service not enabled');
         return;
-      }
-      
-      if (!notificationService.getEnabled()) {
-        console.log('⏭️ Skipping notification check - service not enabled, attempting to enable...');
-        notificationService.setEnabled(true);
-        if (!notificationService.getEnabled()) {
-          console.log('❌ Failed to enable notification service');
-          return;
-        }
       }
 
       // Use the correct store based on authentication status
@@ -101,27 +69,11 @@ export const useNotifications = (enabled: boolean) => {
         : pausedItemsStore.getItemsForReview();
       
       console.log('📋 Items for review found:', itemsForReview.length);
-      console.log('📋 Items details:', itemsForReview.map(item => ({ 
-        name: item.itemName, 
-        id: item.id, 
-        checkInDate: item.checkInDate,
-        checkInTime: item.checkInTime,
-        isPastDue: item.checkInDate <= new Date()
-      })));
-      console.log('📋 Last notification count:', lastNotificationCountRef.current);
       
       // Only send notification if there are items AND (the count has changed OR it's been more than 2 hours since last notification)
       const timeSinceLastCheck = now - lastCheckTimeRef.current;
       const shouldNotifyForNewItems = itemsForReview.length > 0 && itemsForReview.length !== lastNotificationCountRef.current;
       const shouldRemindAfterDelay = itemsForReview.length > 0 && timeSinceLastCheck > 2 * 60 * 60 * 1000; // 2 hours
-      
-      console.log('🔔 Notification decision:', {
-        itemCount: itemsForReview.length,
-        lastCount: lastNotificationCountRef.current,
-        timeSinceLastCheck: Math.round(timeSinceLastCheck / (1000 * 60)), // minutes
-        shouldNotifyForNewItems,
-        shouldRemindAfterDelay
-      });
       
       if (shouldNotifyForNewItems || shouldRemindAfterDelay) {
         const title = itemsForReview.length === 1 
@@ -132,35 +84,26 @@ export const useNotifications = (enabled: boolean) => {
           ? `"${itemsForReview[0].itemName}" is ready for a thoughtful decision.`
           : 'Some of your paused items are ready for thoughtful decisions.';
 
-        console.log('🚀 Attempting to show notification...');
-        console.log('📧 Title:', title);
-        console.log('📧 Body:', body);
-        console.log('🔔 Reason:', shouldNotifyForNewItems ? 'new items' : 'reminder after delay');
-
-        // Send browser notification
-        console.log('🚀 Sending browser notification...');
-        const notification = notificationService.showNotification(title, {
+        console.log('🚀 Sending notification via platform service...');
+        
+        // Send notification via platform service
+        await platformNotificationService.showNotification(title, {
           body,
           tag: 'pocket-pause-review',
           requireInteraction: false
         });
 
         // Send push notification to user's devices (for authenticated users)
-        console.log('🚀 Sending push notification...');
         await sendPushNotification(title, body, {
           action: 'review_items',
           count: itemsForReview.length
         });
-
-        console.log('📱 Notification object created:', notification);
 
         lastNotificationCountRef.current = itemsForReview.length;
         lastCheckTimeRef.current = now;
       } else if (itemsForReview.length === 0) {
         lastNotificationCountRef.current = 0;
         console.log('📭 No items ready for review');
-      } else {
-        console.log('🔄 Item count unchanged and not time for reminder, skipping notification');
       }
     } catch (error) {
       console.error('❌ Error in checkForReadyItems:', error);
@@ -222,7 +165,7 @@ export const useNotifications = (enabled: boolean) => {
 
   const enableNotifications = async () => {
     try {
-      return await notificationService.requestPermission();
+      return await platformNotificationService.requestPermission();
     } catch (error) {
       console.error('Error enabling notifications:', error);
       return false;
@@ -231,25 +174,19 @@ export const useNotifications = (enabled: boolean) => {
 
   const testNotification = () => {
     try {
-      console.log('🧪 Test notification triggered');
-      console.log('🧪 Service enabled:', notificationService.getEnabled());
-      console.log('🧪 Permission:', Notification.permission);
-      console.log('🧪 Page visibility:', document.visibilityState);
+      console.log('🧪 Test notification triggered via platform service');
       
-      if (notificationService.getEnabled()) {
-        console.log('🧪 Showing test notification...');
-        const notification = notificationService.showNotification('Test Notification', {
+      if (platformNotificationService.getEnabled()) {
+        platformNotificationService.showNotification('Test Notification', {
           body: 'This is a test to make sure notifications are working on your device!',
           tag: 'pocket-pause-test',
           requireInteraction: false
         });
-        console.log('🧪 Test notification created:', notification);
         
         // Also trigger a check for real items
-        console.log('🧪 Also checking for real items...');
         setTimeout(checkForReadyItems, 1000);
       } else {
-        console.log('Notifications not enabled, would show: Test Notification');
+        console.log('Platform notification service not enabled');
       }
     } catch (error) {
       console.error('Error in test notification:', error);

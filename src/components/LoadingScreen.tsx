@@ -7,9 +7,18 @@ interface LoadingScreenProps {
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
   React.useEffect(() => {
+    // Check if user has seen the loading screen before
+    const hasSeenLoading = localStorage.getItem('pocket-pause-seen-loading');
+    
+    const duration = hasSeenLoading ? 500 : 1500; // 0.5s for returning users, 1.5s for new users
+    
     const timer = setTimeout(() => {
+      // Mark that user has seen the loading screen
+      if (!hasSeenLoading) {
+        localStorage.setItem('pocket-pause-seen-loading', 'true');
+      }
       onComplete();
-    }, 2500); // Show for 2.5 seconds
+    }, duration);
 
     return () => clearTimeout(timer);
   }, [onComplete]);

@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
-import { notificationService } from '../services/notificationService';
+import { platformNotificationService } from '../services/platformNotificationService';
 import { notificationSchedulingService } from '../services/notificationSchedulingService';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,20 +15,8 @@ export const useEnhancedNotifications = (enabled: boolean) => {
   // Sync notification service with settings when enabled state changes
   useEffect(() => {
     try {
-      console.log('🔔 Enhanced notifications sync - enabled:', enabled);
-      if (enabled) {
-        if (Notification.permission === 'default') {
-          Notification.requestPermission().then(permission => {
-            if (permission === 'granted') {
-              notificationService.setEnabled(true);
-            }
-          });
-        } else if (Notification.permission === 'granted') {
-          notificationService.setEnabled(true);
-        }
-      } else {
-        notificationService.setEnabled(false);
-      }
+      console.log('🔔 Enhanced notifications sync - enabled:', enabled, 'platform:', platformNotificationService.getPlatformName());
+      platformNotificationService.setEnabled(enabled);
     } catch (error) {
       console.error('Error syncing enhanced notification service:', error);
     }
@@ -82,10 +70,10 @@ export const useEnhancedNotifications = (enabled: boolean) => {
       // Create batched notification content
       const batchedContent = await notificationSchedulingService.createBatchedNotification(batchedNotifications);
 
-      // Send the notification
+      // Send the notification using platform service
       console.log('🚀 Sending batched notification:', batchedContent.title);
       
-      const notification = notificationService.showNotification(batchedContent.title, {
+      await platformNotificationService.showNotification(batchedContent.title, {
         body: batchedContent.body,
         tag: 'pocket-pause-scheduled',
         requireInteraction: false
@@ -229,7 +217,7 @@ export const useEnhancedNotifications = (enabled: boolean) => {
 
   const enableNotifications = async () => {
     try {
-      return await notificationService.requestPermission();
+      return await platformNotificationService.requestPermission();
     } catch (error) {
       console.error('Error enabling notifications:', error);
       return false;
@@ -238,13 +226,13 @@ export const useEnhancedNotifications = (enabled: boolean) => {
 
   const testNotification = () => {
     try {
-      if (notificationService.getEnabled()) {
-        const notification = notificationService.showNotification('Test Notification', {
+      if (platformNotificationService.getEnabled()) {
+        platformNotificationService.showNotification('Test Notification', {
           body: 'Enhanced notifications are working! 🎉',
           tag: 'pocket-pause-test',
           requireInteraction: false
         });
-        console.log('🧪 Test notification created:', notification);
+        console.log('🧪 Test notification sent via platform service');
       }
     } catch (error) {
       console.error('Error in test notification:', error);
