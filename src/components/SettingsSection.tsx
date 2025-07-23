@@ -108,7 +108,11 @@ const SettingsSection = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowNotificationSettings(true)}
+                    onClick={() => {
+                      console.log('🔔 Opening notification settings modal');
+                      console.log('🔔 Platform:', navigator.userAgent);
+                      setShowNotificationSettings(true);
+                    }}
                     className="flex-1 text-xs h-8"
                   >
                     Notification Schedule
