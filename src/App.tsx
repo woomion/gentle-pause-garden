@@ -90,9 +90,7 @@ const App = () => {
   if (showLoadingScreen) {
     return (
       <ErrorBoundary>
-        <ThemeProvider defaultTheme="light">
-          <LoadingScreen onComplete={handleLoadingComplete} />
-        </ThemeProvider>
+        <LoadingScreen onComplete={handleLoadingComplete} />
       </ErrorBoundary>
     );
   }
