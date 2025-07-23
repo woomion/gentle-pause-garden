@@ -81,7 +81,14 @@ export class PushNotificationService {
       }
 
       const permStatus = await PushNotifications.checkPermissions();
-      return permStatus.receive;
+      const status = permStatus.receive;
+      
+      // Handle the additional 'prompt-with-rationale' state by treating it as 'prompt'
+      if (status === 'prompt-with-rationale') {
+        return 'prompt';
+      }
+      
+      return status as 'granted' | 'denied' | 'prompt';
     } catch (error) {
       console.error('❌ PushNotificationService: Error checking permissions:', error);
       return 'denied';
