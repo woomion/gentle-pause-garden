@@ -16,7 +16,9 @@ export class PlatformNotificationService {
   }
 
   isNativePlatform(): boolean {
-    return Capacitor.isNativePlatform();
+    const isNative = Capacitor.isNativePlatform();
+    console.log('🔔 Platform check: isNativePlatform =', isNative, 'platform =', Capacitor.getPlatform());
+    return isNative;
   }
 
   async requestPermission(): Promise<boolean> {

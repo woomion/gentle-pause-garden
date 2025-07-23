@@ -27,6 +27,10 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
   const platformName = platformNotificationService.getPlatformName();
 
   const handleToggle = async (enabled: boolean) => {
+    console.log('🔔 NotificationSettingsModal: handleToggle called with enabled:', enabled);
+    console.log('🔔 NotificationSettingsModal: Current platform enabled status:', platformNotificationService.getEnabled());
+    console.log('🔔 NotificationSettingsModal: Is native platform:', isNative);
+    
     if (enabled && !platformNotificationService.getEnabled()) {
       setIsRequesting(true);
       try {
@@ -41,6 +45,7 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
           const errorMessage = isNative 
             ? `Please enable notifications for Pocket Pause in your ${platformName} device settings. Go to Settings → Notifications → Pocket Pause and make sure notifications are allowed.`
             : 'Please allow notifications in your browser settings to enable this feature. Click the notification icon in your browser\'s address bar or check your browser settings.';
+          console.log('🔔 NotificationSettingsModal: Showing error message:', errorMessage);
           alert(errorMessage);
         }
       } catch (error) {
