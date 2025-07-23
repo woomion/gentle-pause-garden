@@ -22,9 +22,11 @@ export class PlatformNotificationService {
   async requestPermission(): Promise<boolean> {
     if (this.isNativePlatform()) {
       // On native platforms, use push notifications
+      console.log('🔔 Platform service: Requesting push notification permission');
       return await pushNotificationService.initialize();
     } else {
       // On web, use browser notifications
+      console.log('🔔 Platform service: Requesting browser notification permission');
       return await notificationService.requestPermission();
     }
   }
@@ -53,8 +55,11 @@ export class PlatformNotificationService {
 
   getEnabled(): boolean {
     if (this.isNativePlatform()) {
-      // For native platforms, we assume notifications are available if initialized
-      return true;
+      // Check if push notification service is initialized and has permission
+      const isInitialized = pushNotificationService.isServiceInitialized();
+      const hasPermission = pushNotificationService.getPermissionStatus();
+      console.log('🔔 Platform service: Push service initialized:', isInitialized, 'has permission:', hasPermission);
+      return isInitialized && hasPermission;
     } else {
       return notificationService.getEnabled();
     }

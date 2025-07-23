@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 export class PushNotificationService {
   private static instance: PushNotificationService;
   private isInitialized = false;
+  private hasPermission = false;
 
   public static getInstance(): PushNotificationService {
     if (!PushNotificationService.instance) {
@@ -19,7 +20,7 @@ export class PushNotificationService {
     
     if (this.isInitialized) {
       console.log('🔔 PushNotificationService: Already initialized');
-      return true;
+      return this.hasPermission;
     }
 
     try {
@@ -31,38 +32,68 @@ export class PushNotificationService {
 
       console.log('🔔 PushNotificationService: Native platform detected, proceeding...');
 
-      // Request permission
-      console.log('🔔 PushNotificationService: Checking permissions...');
-      let permStatus = await PushNotifications.checkPermissions();
-      console.log('🔔 PushNotificationService: Current permission status:', permStatus);
+      // Check current permission status
+      const permissionStatus = await this.checkPermissionStatus();
       
-      if (permStatus.receive === 'prompt') {
+      if (permissionStatus === 'granted') {
+        this.hasPermission = true;
+        console.log('🔔 PushNotificationService: Permission already granted');
+        
+        // Register and set up listeners
+        await PushNotifications.register();
+        this.setupListeners();
+        this.isInitialized = true;
+        return true;
+      }
+
+      // If permission is prompt, request it
+      if (permissionStatus === 'prompt') {
         console.log('🔔 PushNotificationService: Requesting permissions...');
-        permStatus = await PushNotifications.requestPermissions();
+        const permStatus = await PushNotifications.requestPermissions();
         console.log('🔔 PushNotificationService: Permission request result:', permStatus);
-      }
-      
-      if (permStatus.receive !== 'granted') {
-        console.log('🔔 PushNotificationService: Permissions not granted:', permStatus.receive);
-        return false;
+        
+        if (permStatus.receive === 'granted') {
+          this.hasPermission = true;
+          await PushNotifications.register();
+          this.setupListeners();
+          this.isInitialized = true;
+          return true;
+        }
       }
 
-      // Register with FCM/APNs
-      console.log('🔔 PushNotificationService: Registering with FCM/APNs...');
-      await PushNotifications.register();
-
-      // Set up listeners
-      console.log('🔔 PushNotificationService: Setting up listeners...');
-      this.setupListeners();
-      
+      console.log('🔔 PushNotificationService: Permissions not granted');
+      this.hasPermission = false;
       this.isInitialized = true;
-      console.log('🔔 PushNotificationService: Successfully initialized');
-      return true;
+      return false;
 
     } catch (error) {
       console.error('❌ PushNotificationService: Error initializing push notifications:', error);
+      this.hasPermission = false;
+      this.isInitialized = true;
       return false;
     }
+  }
+
+  public async checkPermissionStatus(): Promise<'granted' | 'denied' | 'prompt'> {
+    try {
+      if (!Capacitor.isNativePlatform()) {
+        return 'denied';
+      }
+
+      const permStatus = await PushNotifications.checkPermissions();
+      return permStatus.receive;
+    } catch (error) {
+      console.error('❌ PushNotificationService: Error checking permissions:', error);
+      return 'denied';
+    }
+  }
+
+  public getPermissionStatus(): boolean {
+    return this.hasPermission;
+  }
+
+  public isServiceInitialized(): boolean {
+    return this.isInitialized;
   }
 
   private setupListeners(): void {
@@ -88,6 +119,7 @@ export class PushNotificationService {
     // Registration failed
     PushNotifications.addListener('registrationError', (error) => {
       console.error('❌ PushNotificationService: Registration error:', JSON.stringify(error));
+      this.hasPermission = false;
     });
 
     // Notification received while app is in foreground

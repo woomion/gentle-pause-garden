@@ -30,19 +30,22 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
     if (enabled && !platformNotificationService.getEnabled()) {
       setIsRequesting(true);
       try {
+        console.log('🔔 NotificationSettingsModal: Requesting permission for platform:', platformName);
         const success = await platformNotificationService.requestPermission();
+        console.log('🔔 NotificationSettingsModal: Permission request result:', success);
+        
         if (success) {
           onNotificationsToggle(true);
         } else {
           // Show platform-specific error message
           const errorMessage = isNative 
-            ? `Please enable notifications for Pocket Pause in your ${platformName} device settings.`
-            : 'Please allow notifications in your browser settings to enable this feature.';
+            ? `Please enable notifications for Pocket Pause in your ${platformName} device settings. Go to Settings → Notifications → Pocket Pause and make sure notifications are allowed.`
+            : 'Please allow notifications in your browser settings to enable this feature. Click the notification icon in your browser\'s address bar or check your browser settings.';
           alert(errorMessage);
         }
       } catch (error) {
         console.error('Error requesting notification permission:', error);
-        alert('Failed to enable notifications. Please try again.');
+        alert('Failed to enable notifications. Please try again or check your device settings.');
       } finally {
         setIsRequesting(false);
       }
@@ -115,12 +118,12 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
             {isNative ? (
               <div>
                 <p className="font-medium mb-1">For {platformName} devices:</p>
-                <p>If notifications aren't working, check your device Settings → Notifications → Pocket Pause and ensure notifications are enabled.</p>
+                <p>If notifications aren't working, go to your device Settings → Notifications → Pocket Pause and ensure notifications are enabled. You may also need to allow notifications when prompted by the app.</p>
               </div>
             ) : (
               <div>
                 <p className="font-medium mb-1">For web browsers:</p>
-                <p>If you don't see the permission prompt, check your browser's notification settings and allow notifications for this site.</p>
+                <p>If you don't see the permission prompt, look for a notification icon in your browser's address bar, or check your browser's notification settings and allow notifications for this site.</p>
               </div>
             )}
           </div>
