@@ -292,7 +292,8 @@ const SettingsSection = () => {
         isOpen={showNotificationSettings}
         onClose={() => setShowNotificationSettings(false)}
         notificationsEnabled={notificationsEnabled}
-        onNotificationToggle={handleNotificationToggle}
+        onNotificationsToggle={handleNotificationToggle}
+        onTestNotification={() => {}}
       />
 
       {showTagManagement && (
