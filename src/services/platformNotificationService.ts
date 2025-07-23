@@ -21,6 +21,11 @@ export class PlatformNotificationService {
     return isNative;
   }
 
+  isMobileWeb(): boolean {
+    const userAgent = navigator.userAgent;
+    return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  }
+
   async requestPermission(): Promise<boolean> {
     if (this.isNativePlatform()) {
       // On native platforms, use push notifications
