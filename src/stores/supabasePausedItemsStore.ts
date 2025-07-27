@@ -23,7 +23,7 @@ export interface PausedItem {
   checkInDate: Date;
   isCart?: boolean;
   itemType?: 'item' | 'cart';
-  sharedWithPartners?: string[];
+  
   originalUserId?: string; // Added to track who originally created the item
   usePlaceholder?: boolean;
 }

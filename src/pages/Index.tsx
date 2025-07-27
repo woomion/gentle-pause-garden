@@ -13,11 +13,9 @@ import ItemReviewModal from '../components/ItemReviewModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../contexts/AuthContext';
-import { useInvitationHandler } from '../hooks/useInvitationHandler';
+
 import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
-import { useSharedItemsReview } from '../hooks/useSharedItemsReview';
-import SharedItemsReviewPill from '../components/SharedItemsReviewPill';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useWelcomeFlow } from '../hooks/useWelcomeFlow';
 
@@ -29,11 +27,9 @@ const Index = () => {
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
   const itemReview = useItemReview();
-  const sharedItemsReview = useSharedItemsReview();
+  
   const { userName, handleWelcomeComplete, shouldShowWelcomeModal, shouldShowNameStep } = useWelcomeFlow();
   
-  // Handle invitation acceptance from URL
-  useInvitationHandler();
   
   // Handle redirects for invitations
   useIndexRedirects();
@@ -58,10 +54,6 @@ const Index = () => {
     modalStates.handleStartReview('solo');
   };
 
-  const handleStartPartnerReview = () => {
-    itemReview.resetReviewIndex();
-    modalStates.handleStartReview('partner');
-  };
 
   const handleCloseReview = () => {
     modalStates.handleCloseReview();
@@ -139,13 +131,6 @@ const Index = () => {
             itemsCount={itemReview.itemsForReview.length}
             onStartReview={handleStartReview}
           />
-          {user && sharedItemsReview.sharedItemsCount > 0 && (
-            <SharedItemsReviewPill
-              sharedItemsCount={sharedItemsReview.sharedItemsCount}
-              partnerNames={sharedItemsReview.partnerNames}
-              onStartReview={handleStartPartnerReview}
-            />
-          )}
           <MainTabs onSectionToggle={setSectionsExpanded} />
         </div>
       </div>
@@ -179,7 +164,7 @@ const Index = () => {
       
       {modalStates.showReviewModal && (
         <ItemReviewModal
-          items={modalStates.reviewType === 'partner' ? sharedItemsReview.sharedItemsForReview : itemReview.itemsForReview}
+          items={itemReview.itemsForReview}
           currentIndex={itemReview.currentReviewIndex}
           isOpen={modalStates.showReviewModal}
           onClose={handleCloseReview}

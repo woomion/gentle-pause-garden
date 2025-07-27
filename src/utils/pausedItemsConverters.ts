@@ -75,7 +75,7 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     checkInDate: reviewAt,
     isCart: dbItem.is_cart || dbItem.title === 'Cart' || false,
     itemType: (dbItem.item_type === 'cart' ? 'cart' : 'item') as 'cart' | 'item',
-    sharedWithPartners: dbItem.shared_with_partners || [],
+    
     originalUserId: dbItem.user_id
   };
 };
@@ -126,7 +126,7 @@ export const convertLocalToDb = (
     review_at: reviewAt.toISOString(),
     status: 'paused',
     tags: item.tags || [],
-    shared_with_partners: item.sharedWithPartners || [],
+    shared_with_partners: [],
     emotion: item.emotion,
     image_url: imageUrl || item.imageUrl || '',
     is_cart: item.isCart || false,

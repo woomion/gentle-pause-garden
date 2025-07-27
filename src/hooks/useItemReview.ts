@@ -21,7 +21,7 @@ export const useItemReview = () => {
         // Filter for solo items (items owned by current user that are NOT shared)
         const soloItems = allReviewItems.filter(item => {
           const isOwned = item.originalUserId === user.id;
-          const isNotShared = (!item.sharedWithPartners || item.sharedWithPartners.length === 0);
+          const isNotShared = true;
           const isSolo = isOwned && isNotShared;
           
           console.log('🔍 useItemReview: Item filter check:', {
@@ -29,7 +29,7 @@ export const useItemReview = () => {
             itemName: item.itemName,
             originalUserId: item.originalUserId,
             currentUserId: user.id,
-            sharedWithPartners: item.sharedWithPartners,
+            
             isOwned,
             isNotShared,
             isSolo

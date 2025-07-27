@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useTheme } from '@/components/ThemeProvider';
 import NotificationSettingsModal from './NotificationSettingsModal';
 import TagManagement from './TagManagement';
-import PartnerManagement from './PartnerManagement';
+
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,13 +17,13 @@ import { useToast } from '@/hooks/use-toast';
 const SettingsSection = () => {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showTagManagement, setShowTagManagement] = useState(false);
-  const [showPartnerManagement, setShowPartnerManagement] = useState(false);
+  
   
   // Collapsible state for each section
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [organizationOpen, setOrganizationOpen] = useState(false);
-  const [partnersOpen, setPartnersOpen] = useState(false);
+  
   
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
@@ -253,43 +253,6 @@ const SettingsSection = () => {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Pause Partners */}
-      <Collapsible open={partnersOpen} onOpenChange={setPartnersOpen}>
-        <CollapsibleTrigger className="w-full">
-          <Card className="bg-card border-border cursor-pointer hover:bg-card/80 transition-colors">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Pause Partners
-                </div>
-                {partnersOpen ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                )}
-              </CardTitle>
-              <CardDescription className="text-sm text-left">
-                Connect with partners and share your mindful shopping journey
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="bg-card border-border border-t-0 rounded-t-none">
-            <CardContent className="pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPartnerManagement(true)}
-                className="w-full text-xs h-8"
-              >
-                Manage Partners
-              </Button>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
 
       {/* Modals */}
       <NotificationSettingsModal
@@ -323,28 +286,6 @@ const SettingsSection = () => {
         </div>
       )}
 
-      {showPartnerManagement && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Partner Management
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowPartnerManagement(false)}
-                  className="h-8 w-8 p-0"
-                >
-                  ×
-                </Button>
-              </div>
-              <PartnerManagement onClose={() => setShowPartnerManagement(false)} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

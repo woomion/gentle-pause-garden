@@ -15,7 +15,7 @@ import { useScrollLock } from '@/hooks/useScrollLock';
 
 import { TagInput } from '@/components/ui/tag-input';
 import { getEmotionColor } from '@/utils/emotionColors';
-import PartnerSharingSection from './PartnerSharingSection';
+
 
 interface PauseFormProps {
   onClose: () => void;
@@ -80,7 +80,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     tags: [] as string[],
     isCart: false,
     itemType: 'item' as 'item' | 'cart',
-    sharedWithPartners: [] as string[],
+    
     usePlaceholder: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -326,7 +326,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
         tags: formData.tags,
         isCart: formData.isCart,
         itemType: formData.itemType,
-        sharedWithPartners: formData.sharedWithPartners,
+        
         usePlaceholder: formData.usePlaceholder
       };
 
@@ -714,11 +714,6 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                   </p>
                 </div>
 
-                {/* Partner Sharing */}
-                <PartnerSharingSection
-                  selectedPartners={formData.sharedWithPartners}
-                  onPartnersChange={(partners) => setFormData(prev => ({ ...prev, sharedWithPartners: partners }))}
-                />
 
                 {/* Notes Field */}
                 <div className="space-y-1">

@@ -11,7 +11,7 @@ import ItemReviewFeedbackForm from './ItemReviewFeedbackForm';
 import ExtendPauseModal from './ExtendPauseModal';
 import { ItemCommentsThread } from './ItemCommentsThread';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePausePartners } from '@/hooks/usePausePartners';
+
 import { toast } from '@/hooks/use-toast';
 
 interface ItemReviewContentProps {
@@ -40,12 +40,10 @@ const ItemReviewContent = ({
   const [showExtendModal, setShowExtendModal] = useState(false);
 
   const { user } = useAuth();
-  const { partners } = usePausePartners();
+  
   const { handleViewItem } = useItemNavigation();
   const { handleBought, handleLetGo } = useItemActions();
 
-  // Check if item is shared
-  const isSharedItem = 'sharedWithPartners' in item && item.sharedWithPartners && item.sharedWithPartners.length > 0;
   
   // Check if current user is the owner of the item (not just a partner viewing it)
   const isItemOwner = user?.id && (
@@ -133,16 +131,6 @@ const ItemReviewContent = ({
         <>
           <ItemReviewDetails item={item} onViewItem={handleViewItem} />
           
-          {/* Comments Thread for Shared Items */}
-          {isSharedItem && user?.id && (
-            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-              <ItemCommentsThread 
-                itemId={item.id}
-                partners={partners}
-                currentUserId={user.id}
-              />
-            </div>
-          )}
           
           {/* Decision buttons - only show when allowed */}
           {showDecisionButtons && (

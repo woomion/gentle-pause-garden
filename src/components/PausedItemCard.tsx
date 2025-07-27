@@ -38,13 +38,6 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
   };
 
   // Get partner info for the badges
-  const sharedWithPartners = useMemo(() => {
-    if (!item.sharedWithPartners || item.sharedWithPartners.length === 0) return [];
-    
-    return partners.filter(partner => 
-      item.sharedWithPartners.includes(partner.partner_id)
-    );
-  }, [item.sharedWithPartners, partners]);
 
   // Get sharing attribution text with direction
   const getAttributionText = useMemo(() => {
@@ -55,15 +48,6 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
     const isSharedByCurrentUser = item.originalUserId === currentUserId;
     
     if (isSharedByCurrentUser) {
-      if (sharedWithPartners.length > 0) {
-        if (sharedWithPartners.length === 1) {
-          return `You → ${sharedWithPartners[0].partner_name}`;
-        } else {
-          return `You → ${sharedWithPartners.length} partners`;
-        }
-      } else if (item.sharedWithPartners && item.sharedWithPartners.length > 0) {
-        return `You → ${item.sharedWithPartners.length} partner${item.sharedWithPartners.length > 1 ? 's' : ''}`;
-      }
     } else {
       const sharer = partners.find(p => p.partner_id === item.originalUserId);
       if (sharer) {
@@ -74,7 +58,7 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
     }
     
     return null;
-  }, [currentUserId, item.originalUserId, sharedWithPartners, partners]);
+  }, [currentUserId, item.originalUserId, partners]);
 
   const handleLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -89,7 +73,7 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
   const hasActivity = currentUserId ? hasNewComments(item.id) : false;
 
   // Show comments section for shared items
-  const showComments = (sharedWithPartners.length > 0 || (item.sharedWithPartners && item.sharedWithPartners.length > 0)) && currentUserId;
+  const showComments = false;
 
   return (
     <div 

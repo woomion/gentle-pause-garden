@@ -128,13 +128,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   };
 
   // Get partner info for the badges
-  const sharedWithPartners = useMemo(() => {
-    if (!item.sharedWithPartners || item.sharedWithPartners.length === 0) return [];
-    
-    return partners.filter(partner => 
-      item.sharedWithPartners.includes(partner.partner_id)
-    );
-  }, [item.sharedWithPartners, partners]);
 
   // Get sharing attribution text with direction
   const getAttributionText = useMemo(() => {
@@ -147,16 +140,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     
     if (isSharedByCurrentUser) {
       // Current user shared this item - show who they shared it with
-      if (sharedWithPartners.length > 0) {
-        if (sharedWithPartners.length === 1) {
-          return `You → ${sharedWithPartners[0].partner_name}`;
-        } else {
-          return `You → ${sharedWithPartners.length} partners`;
-        }
-      } else if (item.sharedWithPartners && item.sharedWithPartners.length > 0) {
-        // Fallback: if partners data isn't loaded but we know it's shared
-        return `You → ${item.sharedWithPartners.length} partner${item.sharedWithPartners.length > 1 ? 's' : ''}`;
-      }
     } else {
       // Partner shared this with current user
       const sharer = partners.find(p => p.partner_id === item.originalUserId);
@@ -169,21 +152,19 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     }
     
     return null;
-  }, [currentUserId, item.originalUserId, sharedWithPartners, partners]);
+  }, [currentUserId, item.originalUserId, partners]);
 
   // Debug logging
   useEffect(() => {
     console.log('🔍 PausedItemDetail Debug:', {
-      sharedWithPartnersLength: sharedWithPartners.length,
       currentUserId: currentUserId,
-      itemSharedWith: item.sharedWithPartners,
-      shouldShowComments: (sharedWithPartners.length > 0 || (item.sharedWithPartners && item.sharedWithPartners.length > 0)) && currentUserId,
+      shouldShowComments: false,
       partners: partners.length,
       itemName: item.itemName,
-      isSharedItem: item.sharedWithPartners && item.sharedWithPartners.length > 0,
+      isSharedItem: false,
       attributionText: getAttributionText
     });
-  }, [sharedWithPartners, currentUserId, item.sharedWithPartners, partners, item.itemName, getAttributionText]);
+  }, [currentUserId, partners, item.itemName, getAttributionText]);
 
   console.log('🔍 PausedItemDetail rendered:', {
     isOpen,
@@ -281,7 +262,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             )}
 
             {/* Enhanced Comments Thread for Shared Items */}
-            {((sharedWithPartners.length > 0) || (item.sharedWithPartners && item.sharedWithPartners.length > 0)) && currentUserId && (
+            {false && (
               <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
                 <ItemCommentsThread 
                   itemId={item.id}

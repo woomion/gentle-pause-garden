@@ -41,7 +41,7 @@ export const useItemComments = (userId: string | null) => {
         const { data: items, error: itemsError } = await supabase
           .from('paused_items')
           .select('id')
-          .or(`user_id.eq.${userId},shared_with_partners.cs.{${userId}}`);
+          .eq('user_id', userId);
 
         if (!isMounted) return; // Check if still mounted after async operation
 
