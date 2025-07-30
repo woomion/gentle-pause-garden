@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
 
 interface AddPauseButtonProps {
@@ -12,6 +12,7 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
   const [url, setUrl] = useState('');
   const [isParsingUrl, setIsParsingUrl] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
+  const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,27 +27,41 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
   const handleUrlChange = async (value: string) => {
     setUrl(value);
     
+    // Clear any existing timeout
+    if (parseTimeoutRef.current) {
+      clearTimeout(parseTimeoutRef.current);
+    }
+    
     if (value.trim()) {
       if (value.includes('http') || value.includes('www.')) {
-        // This looks like a URL - parse it
+        // This looks like a URL - parse it with debounce
         setIsParsingUrl(true);
-        try {
-          const productInfo = await parseProductUrl(value);
-          setParsedData({
-            itemName: productInfo.itemName,
-            storeName: productInfo.storeName,
-            price: productInfo.price,
-            imageUrl: productInfo.imageUrl,
-            link: value
-          });
-        } catch (error) {
-          console.error('Error parsing URL:', error);
-          setParsedData(null);
-        } finally {
-          setIsParsingUrl(false);
-        }
+        parseTimeoutRef.current = setTimeout(async () => {
+          try {
+            const productInfo = await parseProductUrl(value);
+            setParsedData({
+              itemName: productInfo.itemName,
+              storeName: productInfo.storeName,
+              price: productInfo.price,
+              imageUrl: productInfo.imageUrl,
+              link: value
+            });
+          } catch (error) {
+            console.error('Error parsing URL:', error);
+            setParsedData({
+              itemName: '',
+              storeName: '',
+              price: '',
+              imageUrl: '',
+              link: value
+            });
+          } finally {
+            setIsParsingUrl(false);
+          }
+        }, 300); // 300ms debounce
       } else {
-        // This looks like a manual item name
+        // This looks like a manual item name - immediate
+        setIsParsingUrl(false);
         setParsedData({
           itemName: value,
           storeName: '',
@@ -56,18 +71,35 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
         });
       }
     } else {
+      setIsParsingUrl(false);
       setParsedData(null);
     }
   };
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (parseTimeoutRef.current) {
+        clearTimeout(parseTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleClick = () => {
+    // Stop any ongoing parsing
+    if (parseTimeoutRef.current) {
+      clearTimeout(parseTimeoutRef.current);
+      setIsParsingUrl(false);
+    }
+    
     setShowRipple(true);
     
     // Reset ripple after animation
     setTimeout(() => setShowRipple(false), 600);
     
-    // Pass parsed data if available
-    onAddPause(parsedData || { link: url.trim() || undefined });
+    // Pass current data (parsed or partial) and current URL
+    const dataToPass = parsedData || (url.trim() ? { itemName: url.trim(), link: url.trim() } : {});
+    onAddPause(dataToPass);
   };
 
   // Determine if button should be compact

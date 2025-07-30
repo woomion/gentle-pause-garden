@@ -1,13 +1,11 @@
-
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemReviewCarousel } from '../hooks/useItemReviewCarousel';
 import { ItemReviewContent } from './ItemReviewContent';
-import { Badge } from '@/components/ui/badge';
+import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 import { useAuth } from '@/contexts/AuthContext';
-
 import { useScrollLock } from '@/hooks/useScrollLock';
 import {
   Carousel,
@@ -42,7 +40,6 @@ const ItemReviewModal = ({
   );
   const { user } = useAuth();
   
-  
   // Lock background scroll when modal is open
   useScrollLock(isOpen);
 
@@ -55,7 +52,6 @@ const ItemReviewModal = ({
       setShowFeedback(false);
     }
   }, [isOpen, activeIndex]);
-
 
   if (!isOpen || !currentItem) return null;
 
@@ -105,32 +101,45 @@ const ItemReviewModal = ({
 
         {/* Content */}
         {items.length > 1 ? (
-          <Carousel className="w-full" setApi={setApi} opts={{ startIndex: activeIndex }}>
-            <CarouselContent>
-              {items.map((item, index) => (
-                <CarouselItem key={item.id}>
-                  <ItemReviewContent
-                    item={item}
-                    onItemDecided={onItemDecided}
-                    onNavigateNext={handleNavigateNext}
-                    onClose={onClose}
-                    isLastItem={index >= items.length - 1}
-                    showFeedback={showFeedback}
-                    setShowFeedback={setShowFeedback}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
+          <>
+            <Carousel className="w-full" setApi={setApi} opts={{ startIndex: activeIndex }}>
+              <CarouselContent>
+                {items.map((item, index) => (
+                  <CarouselItem key={item.id}>
+                    <ItemReviewContent
+                      item={item}
+                      onItemDecided={onItemDecided}
+                      onNavigateNext={handleNavigateNext}
+                      onClose={onClose}
+                      isLastItem={index >= items.length - 1}
+                      showFeedback={showFeedback}
+                      setShowFeedback={setShowFeedback}
+                      showDecisionButtons={false}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              
+              {/* Carousel Navigation */}
+              <div className="flex items-center justify-center pb-4 gap-4 border-b border-border">
+                <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
+                <span className="text-sm text-gray-600 px-4">
+                  Swipe or use arrows to navigate
+                </span>
+                <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
+              </div>
+            </Carousel>
             
-            {/* Carousel Navigation at Bottom */}
-            <div className="flex items-center justify-center pb-4 gap-4">
-              <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-              <span className="text-sm text-gray-600 px-4">
-                Swipe or use arrows to navigate
-              </span>
-              <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
-            </div>
-          </Carousel>
+            {/* Static Decision Buttons for Current Item */}
+            {!showFeedback && (
+              <div className="p-6 pt-0">
+                <ItemReviewDecisionButtons 
+                  onDecision={(decision) => setShowFeedback(true)} 
+                  onExtendPause={() => {}}
+                />
+              </div>
+            )}
+          </>
         ) : (
           <ItemReviewContent
             item={currentItem}
