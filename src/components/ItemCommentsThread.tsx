@@ -20,20 +20,13 @@ interface Comment {
   user_id: string;
 }
 
-interface Partner {
-  partner_id: string;
-  partner_email: string;
-  partner_name: string;
-}
-
 interface ItemCommentsThreadProps {
   itemId: string;
-  partners: Partner[];
   currentUserId: string;
   autoExpand?: boolean;
 }
 
-export function ItemCommentsThread({ itemId, partners, currentUserId, autoExpand = false }: ItemCommentsThreadProps) {
+export function ItemCommentsThread({ itemId, currentUserId, autoExpand = false }: ItemCommentsThreadProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -52,8 +45,7 @@ export function ItemCommentsThread({ itemId, partners, currentUserId, autoExpand
       return 'You';
     }
     
-    const partner = partners.find(p => p.partner_id === userId);
-    return partner?.partner_name || 'Partner';
+    return 'User';
   };
 
   const getUserInitials = (userId: string) => {
@@ -61,9 +53,7 @@ export function ItemCommentsThread({ itemId, partners, currentUserId, autoExpand
       return 'Y';
     }
     
-    const partner = partners.find(p => p.partner_id === userId);
-    const name = partner?.partner_name || 'Partner';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return 'U';
   };
 
   // Load comments
@@ -84,12 +74,12 @@ export function ItemCommentsThread({ itemId, partners, currentUserId, autoExpand
 
       setComments(data || []);
       
-      // Auto-expand if there are new comments from partners
+      // Auto-expand if there are new comments from other users
       if (data && data.length > lastCommentCount) {
         const newComments = data.slice(lastCommentCount);
-        const hasNewPartnerComments = newComments.some(comment => comment.user_id !== currentUserId);
+        const hasNewOtherComments = newComments.some(comment => comment.user_id !== currentUserId);
         
-        if (hasNewPartnerComments) {
+        if (hasNewOtherComments) {
           setIsOpen(true);
           // Scroll to new comments after a brief delay
           setTimeout(() => {
@@ -194,7 +184,7 @@ export function ItemCommentsThread({ itemId, partners, currentUserId, autoExpand
 
   const unreadCount = getUnreadCount(itemId);
   const lastComment = comments.length > 0 ? comments[comments.length - 1] : null;
-  const lastCommentFromPartner = lastComment && lastComment.user_id !== currentUserId ? lastComment : null;
+  const lastCommentFromOther = lastComment && lastComment.user_id !== currentUserId ? lastComment : null;
 
   if (isLoading) {
     return (
@@ -257,12 +247,12 @@ export function ItemCommentsThread({ itemId, partners, currentUserId, autoExpand
             <p className="text-sm text-muted-foreground">
               You can reflect together now, or wait until the timer ends — whatever feels right.
             </p>
-            {lastCommentFromPartner && !isOpen && (
+            {lastCommentFromOther && !isOpen && (
               <div className="p-2 bg-muted/50 rounded-lg border-l-2 border-blue-500">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {getUserDisplayName(lastCommentFromPartner.user_id)} commented:
+                  {getUserDisplayName(lastCommentFromOther.user_id)} commented:
                 </p>
-                <p className="text-sm truncate">"{lastCommentFromPartner.content}"</p>
+                <p className="text-sm truncate">"{lastCommentFromOther.content}"</p>
               </div>
             )}
           </div>

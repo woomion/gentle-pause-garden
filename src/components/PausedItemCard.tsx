@@ -1,9 +1,8 @@
-
 import { useMemo } from 'react';
-import { ExternalLink, User } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { formatPrice } from '../utils/priceFormatter';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemActions } from '../hooks/useItemActions';
 import ItemImage from './ItemImage';
 import PauseDurationBanner from './PauseDurationBanner';
@@ -12,53 +11,18 @@ import { extractActualNotes } from '../utils/notesMetadataUtils';
 import { useItemComments } from '../hooks/useItemComments';
 import { CommentActivityIndicator } from './CommentActivityIndicator';
 
-interface Partner {
-  partner_id: string;
-  partner_email: string;
-  partner_name: string;
-}
-
 interface PausedItemCardProps {
-  item: PausedItem;
-  onClick: () => void;
-  partners?: Partner[];
+  item: PausedItem | LocalPausedItem;
+  onClick: (item: PausedItem | LocalPausedItem) => void;
   currentUserId?: string;
 }
 
-const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedItemCardProps) => {
+const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) => {
   const { handleViewItem } = useItemActions();
   const { getCommentCount, getUnreadCount, hasNewComments } = useItemComments(currentUserId);
 
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
   const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
-
-  // Get initials for shared partners
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
-
-  // Get partner info for the badges
-
-  // Get sharing attribution text with direction
-  const getAttributionText = useMemo(() => {
-    if (!currentUserId || !item.originalUserId) {
-      return null;
-    }
-
-    const isSharedByCurrentUser = item.originalUserId === currentUserId;
-    
-    if (isSharedByCurrentUser) {
-    } else {
-      const sharer = partners.find(p => p.partner_id === item.originalUserId);
-      if (sharer) {
-        return `${sharer.partner_name} → You`;
-      } else {
-        return `Partner → You`;
-      }
-    }
-    
-    return null;
-  }, [currentUserId, item.originalUserId, partners]);
 
   const handleLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -80,13 +44,13 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
       className={`relative overflow-hidden bg-card rounded-lg border border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in ${
         hasActivity ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''
       }`}
-      onClick={onClick}
+      onClick={() => onClick(item)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onClick();
+          onClick(item);
         }
       }}
     >
@@ -118,35 +82,6 @@ const PausedItemCard = ({ item, onClick, partners = [], currentUserId }: PausedI
             <div>
               <p className="text-sm text-muted-foreground">{item.storeName}</p>
             </div>
-
-            {/* Attribution and comment activity in same row */}
-            {getAttributionText && (
-              <div className="flex items-center gap-3">
-                <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-2 py-1 rounded-full shadow-sm">
-                  <span>{getAttributionText}</span>
-                </div>
-                {showComments && commentCount > 0 && (
-                  <CommentActivityIndicator
-                    commentCount={commentCount}
-                    unreadCount={unreadCount}
-                    hasNewActivity={hasActivity}
-                    className="text-xs"
-                  />
-                )}
-              </div>
-            )}
-
-            {/* Comment activity indicator for shared items (standalone if no attribution) */}
-            {!getAttributionText && showComments && commentCount > 0 && (
-              <div className="pt-2 border-t border-border">
-                <CommentActivityIndicator
-                  commentCount={commentCount}
-                  unreadCount={unreadCount}
-                  hasNewActivity={hasActivity}
-                  className="text-sm"
-                />
-              </div>
-            )}
           </div>
 
           {/* View item button aligned to bottom of image */}

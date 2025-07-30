@@ -1,23 +1,16 @@
-
 import { memo, useState, useEffect } from 'react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from '@/components/ui/carousel';
 import PausedItemCard from './PausedItemCard';
-import { PausedItem } from '../stores/pausedItemsStore';
-
-interface Partner {
-  partner_id: string;
-  partner_email: string;
-  partner_name: string;
-}
+import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 
 interface PausedItemsCarouselProps {
-  items: PausedItem[];
-  onItemClick: (item: PausedItem) => void;
-  partners?: Partner[];
+  items: (PausedItem | LocalPausedItem)[];
+  onItemClick: (item: PausedItem | LocalPausedItem) => void;
   currentUserId?: string;
 }
 
-const PausedItemsCarousel = memo(({ items, onItemClick, partners = [], currentUserId }: PausedItemsCarouselProps) => {
+const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId }: PausedItemsCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
 
   useEffect(() => {
@@ -50,7 +43,6 @@ const PausedItemsCarousel = memo(({ items, onItemClick, partners = [], currentUs
           <PausedItemCard 
             item={items[0]} 
             onClick={() => onItemClick(items[0])} 
-            partners={partners}
             currentUserId={currentUserId}
           />
         </div>
@@ -72,7 +64,6 @@ const PausedItemsCarousel = memo(({ items, onItemClick, partners = [], currentUs
                 <PausedItemCard 
                   item={item} 
                   onClick={() => onItemClick(item)} 
-                  partners={partners}
                   currentUserId={currentUserId}
                 />
               </CarouselItem>
@@ -93,7 +84,6 @@ const PausedItemsCarousel = memo(({ items, onItemClick, partners = [], currentUs
                       key={item.id}
                       item={item} 
                       onClick={() => onItemClick(item)}
-                      partners={partners}
                       currentUserId={currentUserId}
                     />
                   ))}

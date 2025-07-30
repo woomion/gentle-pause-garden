@@ -51,7 +51,7 @@ export class CommentNotificationService {
       // Check if the user can see this item
       const { data: item, error } = await supabase
         .from('paused_items')
-        .select('title, shared_with_partners, user_id')
+        .select('title, user_id')
         .eq('id', comment.item_id)
         .single();
 
@@ -60,9 +60,8 @@ export class CommentNotificationService {
         return;
       }
 
-      // Check if current user has access to this item
-      const hasAccess = item.user_id === currentUserId || 
-                       (item.shared_with_partners && item.shared_with_partners.includes(currentUserId));
+      // Check if current user has access to this item (only own items)
+      const hasAccess = item.user_id === currentUserId;
 
       if (!hasAccess) {
         return;

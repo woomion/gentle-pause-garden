@@ -1,9 +1,9 @@
 import { ExternalLink, ArrowLeft } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useMemo, useEffect, useState, useRef } from 'react';
 import { formatPrice } from '../utils/priceFormatter';
 import { useItemActions } from '../hooks/useItemActions';
@@ -14,26 +14,19 @@ import { extractActualNotes } from '../utils/notesMetadataUtils';
 import { ItemCommentsThread } from './ItemCommentsThread';
 import { useItemComments } from '../hooks/useItemComments';
 
-interface Partner {
-  partner_id: string;
-  partner_email: string;
-  partner_name: string;
-}
-
 interface PausedItemDetailProps {
-  item: PausedItem;
-  items?: PausedItem[];
+  item: PausedItem | LocalPausedItem;
+  items?: (PausedItem | LocalPausedItem)[];
   currentIndex?: number;
   isOpen: boolean;
   onClose: () => void;
   onDelete: (id: string) => void;
   onNavigateNext?: () => void;
   onNavigatePrevious?: () => void;
-  partners?: Partner[];
   currentUserId?: string;
 }
 
-const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose, onDelete, onNavigateNext, onNavigatePrevious, partners = [], currentUserId }: PausedItemDetailProps) => {
+const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose, onDelete, onNavigateNext, onNavigatePrevious, currentUserId }: PausedItemDetailProps) => {
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
   const { markAsRead } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
@@ -122,68 +115,8 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
   const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
 
-  // Get initials for shared partners
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
-
-  // Get partner info for the badges
-
-  // Get sharing attribution text with direction
-  const getAttributionText = useMemo(() => {
-    // Use currentUserId if available
-    if (!currentUserId || !item.originalUserId) {
-      return null;
-    }
-
-    const isSharedByCurrentUser = item.originalUserId === currentUserId;
-    
-    if (isSharedByCurrentUser) {
-      // Current user shared this item - show who they shared it with
-    } else {
-      // Partner shared this with current user
-      const sharer = partners.find(p => p.partner_id === item.originalUserId);
-      if (sharer) {
-        return `${sharer.partner_name} → You`;
-      } else {
-        // Fallback: if partner data isn't loaded but we know it's from a partner
-        return `Partner → You`;
-      }
-    }
-    
-    return null;
-  }, [currentUserId, item.originalUserId, partners]);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('🔍 PausedItemDetail Debug:', {
-      currentUserId: currentUserId,
-      shouldShowComments: false,
-      partners: partners.length,
-      itemName: item.itemName,
-      isSharedItem: false,
-      attributionText: getAttributionText
-    });
-  }, [currentUserId, partners, item.itemName, getAttributionText]);
-
-  console.log('🔍 PausedItemDetail rendered:', {
-    isOpen,
-    itemName: item.itemName,
-    hasNotes: !!item.notes,
-    cleanNotes: cleanNotes,
-    notesLength: item.notes?.length || 0,
-    link: item.link,
-    hasLink: !!item.link,
-    windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'undefined',
-    windowHeight: typeof window !== 'undefined' ? window.innerHeight : 'undefined'
-  });
-
   const handleDelete = () => {
     onDelete(item.id);
-    onClose();
-  };
-
-  const handleKeepPaused = () => {
     onClose();
   };
 
@@ -229,12 +162,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           {/* Product image */}
           <div className="relative">
             <ItemImage item={item} />
-            {/* Attribution pill in top right corner */}
-            {getAttributionText && (
-              <div className="absolute top-2 right-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs px-3 py-1 rounded-full shadow-sm animate-fade-in">
-                <span>{getAttributionText}</span>
-              </div>
-            )}
             {/* Pause Duration Banner - touching bottom of image */}
             <PauseDurationBanner checkInTime={item.checkInTime} />
           </div>
@@ -261,21 +188,20 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
               </div>
             )}
 
-            {/* Enhanced Comments Thread for Shared Items */}
+            {/* Comments disabled since partner functionality removed */}
             {false && (
               <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
                 <ItemCommentsThread 
                   itemId={item.id}
-                  partners={partners}
-                  currentUserId={currentUserId}
+                  currentUserId={currentUserId!}
                   autoExpand={true}
                 />
               </div>
             )}
           </div>
 
-          {/* Decision buttons - only show to item owner, not partners */}
-          {currentUserId === item.originalUserId && (
+          {/* Decision buttons - show to all users */}
+          {(
             <>
               {!showDecisionButtons && !showFeedback ? (
                 <div className="pt-2">
