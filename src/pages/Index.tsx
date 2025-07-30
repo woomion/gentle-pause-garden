@@ -148,6 +148,7 @@ const Index = () => {
           onClose={modalStates.handleCloseForm} 
           onShowSignup={handleShowSignupInternal}
           signupModalDismissed={modalStates.signupModalDismissed}
+          initialData={modalStates.formInitialData}
         />
       )}
       

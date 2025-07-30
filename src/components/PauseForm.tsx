@@ -21,6 +21,13 @@ interface PauseFormProps {
   onClose: () => void;
   onShowSignup?: () => void;
   signupModalDismissed?: boolean;
+  initialData?: {
+    itemName?: string;
+    storeName?: string;
+    price?: string;
+    imageUrl?: string;
+    link?: string;
+  };
 }
 
 const emotions = [
@@ -44,7 +51,7 @@ const otherPauseLengths = [
   '3 months'
 ];
 
-const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: PauseFormProps) => {
+const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initialData }: PauseFormProps) => {
   const { user } = useAuth();
   
   // Lock background scroll when form is open
@@ -88,7 +95,22 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
-  const [currentStep, setCurrentStep] = useState<'pause' | 'details'>('pause');
+  const [currentStep, setCurrentStep] = useState<'duration' | 'emotion' | 'details'>('duration');
+
+  // Initialize form with any provided data
+  useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        ...initialData,
+        itemName: initialData.itemName || prev.itemName,
+        storeName: initialData.storeName || prev.storeName,
+        price: initialData.price || prev.price,
+        imageUrl: initialData.imageUrl || prev.imageUrl,
+        link: initialData.link || prev.link
+      }));
+    }
+  }, [initialData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -289,20 +311,27 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
     }));
   };
 
-  const handlePauseCommit = () => {
-    // Validate essential fields for the pause step
-    if (!formData.emotion || (!formData.duration && !formData.otherDuration)) {
-      return; // Could add validation feedback here
+  const handleDurationNext = () => {
+    if (!formData.duration && !formData.otherDuration) {
+      return;
     }
+    setCurrentStep('emotion');
+  };
+
+  const handleEmotionNext = () => {
     setCurrentStep('details');
   };
 
-  const handleBackToBasics = () => {
-    setCurrentStep('pause');
+  const handleBackToDuration = () => {
+    setCurrentStep('duration');
   };
 
-  const isBasicStepValid = () => {
-    return formData.emotion && (formData.duration || formData.otherDuration);
+  const handleBackToEmotion = () => {
+    setCurrentStep('emotion');
+  };
+
+  const isDurationStepValid = () => {
+    return formData.duration || formData.otherDuration;
   };
 
   const handleSubmit = async () => {
@@ -400,90 +429,13 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
           )}
 
           <div className="space-y-4">
-            {currentStep === 'pause' ? (
-              // STEP 1: Core pause decision
+            {currentStep === 'duration' ? (
+              // STEP 1: Duration selection
               <>
-                {/* Link Field */}
-                <div className="space-y-1">
-                  <Label htmlFor="link" className="text-foreground font-medium text-base">
-                    Link (paste a product URL)
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="link"
-                      type="url"
-                      placeholder="www.example.com/item"
-                      value={formData.link}
-                      onChange={(e) => handleLinkChange(e.target.value)}
-                      className="bg-input border-border rounded-xl py-3 px-4 placeholder:text-placeholder placeholder:font-normal text-base"
-                    />
-                    {isParsingUrl && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    )}
-                  </div>
-                  {formData.imageUrl && !formData.photo && (
-                    <div className="mt-2">
-                      <p className="text-sm text-green-600">✓ Found product details automatically</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Cart Checkbox */}
-                <div className="flex items-center space-x-3 -mt-2 mb-4">
-                  <Checkbox
-                    id="isCart"
-                    checked={formData.isCart}
-                    onCheckedChange={(checked) => {
-                      const isChecked = checked === true;
-                      setFormData(prev => ({ 
-                        ...prev, 
-                        isCart: isChecked,
-                        itemType: isChecked ? 'cart' : 'item',
-                        itemName: isChecked && !prev.itemName ? 'Cart' : prev.itemName,
-                        imageUrl: isChecked && !prev.imageUrl && !prev.photo ? 'cart-placeholder' : prev.imageUrl
-                      }));
-                    }}
-                    className="h-5 w-5"
-                  />
-                  <Label htmlFor="isCart" className="text-foreground font-medium text-base cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <ShoppingCart size={16} />
-                      Mark as Cart (saving multiple items)
-                    </div>
-                  </Label>
-                </div>
-
-                {/* Emotion Selection */}
-                <div className="space-y-1">
-                  <Label className="text-foreground font-medium text-base">
-                    How are you feeling right now?
-                  </Label>
-                  <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
-                    <SelectTrigger className="bg-input border-border rounded-xl py-3 px-4">
-                      <SelectValue placeholder="Select emotion" className="placeholder:text-placeholder placeholder:font-normal text-base" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border rounded-xl max-h-60 overflow-y-auto">
-                      {emotions.map((emotion) => (
-                        <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1">
-                          <div className="flex items-center gap-3">
-                            <div 
-                              className="w-4 h-4 rounded-full"
-                              style={{ backgroundColor: getEmotionColor(emotion.name) }}
-                            />
-                            <span className="capitalize">{emotion.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Pause Duration */}
                 <div className="space-y-2">
                   <Label className="text-foreground font-medium text-base">
-                    Pause for
+                    How long do you want to pause for?
                   </Label>
                   
                   {/* Row of three buttons */}
@@ -533,18 +485,63 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                     Cancel
                   </Button>
                   <Button
-                    onClick={handlePauseCommit}
-                    disabled={!isBasicStepValid()}
+                    onClick={handleDurationNext}
+                    disabled={!isDurationStepValid()}
                     className={`flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl py-3 ${
-                      !isBasicStepValid() ? 'opacity-50 cursor-not-allowed' : ''
+                      !isDurationStepValid() ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
-                    Commit to Pause
+                    Next →
+                  </Button>
+                </div>
+              </>
+            ) : currentStep === 'emotion' ? (
+              // STEP 2: Emotion selection
+              <>
+                {/* Emotion Selection */}
+                <div className="space-y-1">
+                  <Label className="text-foreground font-medium text-base">
+                    How are you feeling right now? (optional)
+                  </Label>
+                  <Select value={formData.emotion} onValueChange={(value) => handleInputChange('emotion', value)}>
+                    <SelectTrigger className="bg-input border-border rounded-xl py-3 px-4">
+                      <SelectValue placeholder="Select emotion (or skip)" className="placeholder:text-placeholder placeholder:font-normal text-base" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border rounded-xl max-h-60 overflow-y-auto">
+                      {emotions.map((emotion) => (
+                        <SelectItem key={emotion.name} value={emotion.name} className="rounded-lg my-1">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-4 h-4 rounded-full"
+                              style={{ backgroundColor: getEmotionColor(emotion.name) }}
+                            />
+                            <span className="capitalize">{emotion.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Step 2 Action Buttons */}
+                <div className="flex gap-4 pt-6">
+                  <Button
+                    variant="outline"
+                    onClick={handleBackToDuration}
+                    className="flex-1 bg-secondary border-border text-secondary-foreground hover:bg-secondary/80 rounded-xl py-3"
+                  >
+                    ← Back
+                  </Button>
+                  <Button
+                    onClick={handleEmotionNext}
+                    className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90 rounded-xl py-3"
+                  >
+                    Next →
                   </Button>
                 </div>
               </>
             ) : (
-              // STEP 2: Details and finalization
+              // STEP 3: Details and finalization
               <>
                 {/* Step indicator */}
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
@@ -733,7 +730,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false }: Paus
                 <div className="flex gap-4 pt-6">
                   <Button
                     variant="outline"
-                    onClick={handleBackToBasics}
+                    onClick={handleBackToEmotion}
                     className="flex-1 bg-secondary border-border text-secondary-foreground hover:bg-secondary/80 rounded-xl py-3"
                   >
                     ← Back

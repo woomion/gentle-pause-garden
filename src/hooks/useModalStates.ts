@@ -7,8 +7,10 @@ export const useModalStates = () => {
   const [signupModalDismissed, setSignupModalDismissed] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewType, setReviewType] = useState<'solo' | 'partner'>('solo');
+  const [formInitialData, setFormInitialData] = useState<any>(null);
 
-  const handleAddPause = () => {
+  const handleAddPause = (parsedData?: any) => {
+    setFormInitialData(parsedData);
     // Delay to allow ripple animation to complete
     setTimeout(() => {
       setShowForm(true);
@@ -17,6 +19,7 @@ export const useModalStates = () => {
 
   const handleCloseForm = () => {
     setShowForm(false);
+    setFormInitialData(null); // Clear initial data when closing
   };
 
   const handleShowSignup = () => {
@@ -48,6 +51,7 @@ export const useModalStates = () => {
     signupModalDismissed,
     showReviewModal,
     reviewType,
+    formInitialData,
     
     // Actions
     setShowWelcomeModal,
