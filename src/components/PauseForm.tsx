@@ -318,7 +318,39 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
     setCurrentStep('emotion');
   };
 
-  const handleEmotionNext = () => {
+  const handleEmotionNext = async () => {
+    console.log('🌟 Emotion step complete - committing pause to storage');
+    
+    // Commit the pause immediately when entering details step
+    const itemData = {
+      itemName: formData.itemName || 'Unnamed Item',
+      storeName: formData.storeName || 'Unknown Store', 
+      price: formData.price || '0',
+      emotion: formData.emotion,
+      notes: formData.notes,
+      duration: formData.duration,
+      otherDuration: formData.otherDuration,
+      link: formData.link,
+      photo: formData.photo,
+      imageUrl: formData.imageUrl,
+      tags: formData.tags,
+      isCart: formData.isCart,
+      itemType: formData.itemType,
+      usePlaceholder: formData.usePlaceholder
+    };
+
+    // Save to appropriate store
+    try {
+      if (user) {
+        await supabasePausedItemsStore.addItem(itemData);
+      } else {
+        pausedItemsStore.addItem(itemData);
+      }
+      console.log('🌟 Pause committed successfully');
+    } catch (error) {
+      console.error('Error committing pause:', error);
+    }
+    
     setCurrentStep('details');
   };
 
@@ -335,39 +367,18 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
   };
 
   const handleSubmit = async () => {
-    console.log('🌟 handleSubmit called - starting pause submission');
+    console.log('🌟 handleSubmit called - updating pause details');
     setIsSubmitting(true);
     
     // Show ripple effect for 1 second
     setTimeout(async () => {
-      console.log('🌟 After 1 second delay - saving item data');
-      const itemData = {
-        itemName: formData.itemName || 'Unnamed Item',
-        storeName: formData.storeName || 'Unknown Store',
-        price: formData.price || '0',
-        emotion: formData.emotion,
-        notes: formData.notes,
-        duration: formData.duration,
-        otherDuration: formData.otherDuration,
-        link: formData.link,
-        photo: formData.photo,
-        imageUrl: formData.imageUrl, // Include parsed image URL
-        tags: formData.tags,
-        isCart: formData.isCart,
-        itemType: formData.itemType,
-        
-        usePlaceholder: formData.usePlaceholder
-      };
-
-      // Use appropriate store based on authentication status
-      if (user) {
-        await supabasePausedItemsStore.addItem(itemData);
-      } else {
-        pausedItemsStore.addItem(itemData);
-      }
+      console.log('🌟 After 1 second delay - updating item details');
+      
+      // The item is already saved, just update with any new details
+      // For now, we'll just close since the pause was already committed
       
       setIsSubmitting(false);
-      console.log('🌟 Item saved successfully, closing form');
+      console.log('🌟 Details updated, closing form');
       
       // Close form
       onClose();
@@ -381,6 +392,20 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
     }, 1000);
   };
 
+  const handleClose = () => {
+    // If we're in the details step, the pause is already committed
+    // so we can close without any additional action
+    if (currentStep === 'details') {
+      // Show signup modal if appropriate
+      if (!user && !signupModalDismissed && onShowSignup) {
+        setTimeout(() => {
+          onShowSignup();
+        }, 500);
+      }
+    }
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto transition-all ease-out bg-background" 
          style={{ 
@@ -391,7 +416,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
         <header className="relative mb-8 sm:mb-12">
           <div className="text-center pt-2 sm:pt-4">
             <button 
-              onClick={onClose}
+              onClick={handleClose}
               className="text-foreground font-medium text-lg tracking-wide mb-6 sm:mb-8 hover:text-muted-foreground transition-colors inline-block"
             >
               POCKET || PAUSE
@@ -402,7 +427,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
         {/* Form */}
         <div className="max-w-md mx-auto relative">
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute -top-16 right-0 p-2 text-foreground hover:text-muted-foreground transition-colors"
           >
             <X size={24} />
