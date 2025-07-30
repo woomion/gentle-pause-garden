@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface AddPauseButtonProps {
   onAddPause: (parsedData?: any) => void;
@@ -13,6 +14,7 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
   const [isParsingUrl, setIsParsingUrl] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
   const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -102,8 +104,9 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
     onAddPause(dataToPass);
   };
 
-  // Determine if button should be compact
-  const shouldBeCompact = isCompact || isScrolled;
+  // On mobile, only use isCompact prop (My Pauses toggle), ignore scroll
+  // On desktop, use scroll behavior
+  const shouldBeCompact = isMobile ? isCompact : (isCompact || isScrolled);
 
   return (
     <div className={`relative w-full bg-lavender hover:bg-lavender-hover text-dark-gray font-medium px-6 transition-all duration-300 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg rounded-2xl ${
