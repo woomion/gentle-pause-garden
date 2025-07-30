@@ -34,44 +34,32 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
       clearTimeout(parseTimeoutRef.current);
     }
     
-    if (value.trim()) {
-      if (value.includes('http') || value.includes('www.')) {
-        // This looks like a URL - parse it with debounce
-        setIsParsingUrl(true);
-        parseTimeoutRef.current = setTimeout(async () => {
-          try {
-            const productInfo = await parseProductUrl(value);
-            setParsedData({
-              itemName: productInfo.itemName,
-              storeName: productInfo.storeName,
-              price: productInfo.price,
-              imageUrl: productInfo.imageUrl,
-              link: value
-            });
-          } catch (error) {
-            console.error('Error parsing URL:', error);
-            setParsedData({
-              itemName: '',
-              storeName: '',
-              price: '',
-              imageUrl: '',
-              link: value
-            });
-          } finally {
-            setIsParsingUrl(false);
-          }
-        }, 300); // 300ms debounce
-      } else {
-        // This looks like a manual item name - immediate
-        setIsParsingUrl(false);
-        setParsedData({
-          itemName: value,
-          storeName: '',
-          price: '',
-          imageUrl: '',
-          link: ''
-        });
-      }
+    if (value.trim() && (value.includes('http') || value.includes('www.'))) {
+      // This looks like a URL - parse it with debounce
+      setIsParsingUrl(true);
+      parseTimeoutRef.current = setTimeout(async () => {
+        try {
+          const productInfo = await parseProductUrl(value);
+          setParsedData({
+            itemName: productInfo.itemName,
+            storeName: productInfo.storeName,
+            price: productInfo.price,
+            imageUrl: productInfo.imageUrl,
+            link: value
+          });
+        } catch (error) {
+          console.error('Error parsing URL:', error);
+          setParsedData({
+            itemName: '',
+            storeName: '',
+            price: '',
+            imageUrl: '',
+            link: value
+          });
+        } finally {
+          setIsParsingUrl(false);
+        }
+      }, 300); // 300ms debounce
     } else {
       setIsParsingUrl(false);
       setParsedData(null);
@@ -99,8 +87,8 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
     // Reset ripple after animation
     setTimeout(() => setShowRipple(false), 600);
     
-    // Pass current data (parsed or partial) and current URL
-    const dataToPass = parsedData || (url.trim() ? { itemName: url.trim(), link: url.trim() } : {});
+    // Pass parsed data if available, otherwise just the URL
+    const dataToPass = parsedData || (url.trim() ? { link: url.trim() } : {});
     onAddPause(dataToPass);
   };
 
@@ -120,7 +108,7 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
           type="text"
           value={url}
           onChange={(e) => handleUrlChange(e.target.value)}
-          placeholder="Paste a product link or describe what you're pausing"
+          placeholder="Paste a product URL"
           className="w-full px-4 py-3 rounded-xl border-2 border-white/20 bg-white/10 text-dark-gray placeholder-dark-gray/60 focus:outline-none focus:border-white/40 transition-colors"
         />
         {isParsingUrl && (
@@ -130,10 +118,7 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
         )}
         {parsedData && (
           <div className="mt-2 text-sm text-dark-gray/70">
-            {parsedData.link ? 
-              `Found: ${parsedData.itemName || 'Product'}${parsedData.storeName ? ` from ${parsedData.storeName}` : ''}` :
-              `Ready to pause: ${parsedData.itemName}`
-            }
+            Found: {parsedData.itemName || 'Product'}{parsedData.storeName ? ` from ${parsedData.storeName}` : ''}
           </div>
         )}
       </div>
