@@ -26,22 +26,34 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
   const handleUrlChange = async (value: string) => {
     setUrl(value);
     
-    if (value.trim() && (value.includes('http') || value.includes('www.'))) {
-      setIsParsingUrl(true);
-      try {
-        const productInfo = await parseProductUrl(value);
+    if (value.trim()) {
+      if (value.includes('http') || value.includes('www.')) {
+        // This looks like a URL - parse it
+        setIsParsingUrl(true);
+        try {
+          const productInfo = await parseProductUrl(value);
+          setParsedData({
+            itemName: productInfo.itemName,
+            storeName: productInfo.storeName,
+            price: productInfo.price,
+            imageUrl: productInfo.imageUrl,
+            link: value
+          });
+        } catch (error) {
+          console.error('Error parsing URL:', error);
+          setParsedData(null);
+        } finally {
+          setIsParsingUrl(false);
+        }
+      } else {
+        // This looks like a manual item name
         setParsedData({
-          itemName: productInfo.itemName,
-          storeName: productInfo.storeName,
-          price: productInfo.price,
-          imageUrl: productInfo.imageUrl,
-          link: value
+          itemName: value,
+          storeName: '',
+          price: '',
+          imageUrl: '',
+          link: ''
         });
-      } catch (error) {
-        console.error('Error parsing URL:', error);
-        setParsedData(null);
-      } finally {
-        setIsParsingUrl(false);
       }
     } else {
       setParsedData(null);
@@ -73,7 +85,7 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
           type="text"
           value={url}
           onChange={(e) => handleUrlChange(e.target.value)}
-          placeholder="Paste a product link (optional)"
+          placeholder="Paste a product link or describe what you're pausing"
           className="w-full px-4 py-3 rounded-xl border-2 border-white/20 bg-white/10 text-dark-gray placeholder-dark-gray/60 focus:outline-none focus:border-white/40 transition-colors"
         />
         {isParsingUrl && (
@@ -83,7 +95,10 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
         )}
         {parsedData && (
           <div className="mt-2 text-sm text-dark-gray/70">
-            Found: {parsedData.itemName || 'Product'} {parsedData.storeName && `from ${parsedData.storeName}`}
+            {parsedData.link ? 
+              `Found: ${parsedData.itemName || 'Product'}${parsedData.storeName ? ` from ${parsedData.storeName}` : ''}` :
+              `Ready to pause: ${parsedData.itemName}`
+            }
           </div>
         )}
       </div>
