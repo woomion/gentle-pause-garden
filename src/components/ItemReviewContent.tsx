@@ -23,7 +23,6 @@ interface ItemReviewContentProps {
   showFeedback: boolean;
   setShowFeedback: (show: boolean) => void;
   showDecisionButtons?: boolean;
-  externalSelectedDecision?: 'purchase' | 'let-go' | null;
 }
 
 const ItemReviewContent = ({
@@ -34,8 +33,7 @@ const ItemReviewContent = ({
   isLastItem,
   showFeedback,
   setShowFeedback,
-  showDecisionButtons = true,
-  externalSelectedDecision
+  showDecisionButtons = true
 }: ItemReviewContentProps) => {
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
   const [notes, setNotes] = useState('');
@@ -146,7 +144,7 @@ const ItemReviewContent = ({
         </>
       ) : (
         <ItemReviewFeedbackForm
-          selectedDecision={externalSelectedDecision || selectedDecision!}
+          selectedDecision={selectedDecision!}
           notes={notes}
           setNotes={setNotes}
           onSubmit={handleSubmitDecision}
