@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
 import { X } from 'lucide-react';
@@ -8,7 +8,11 @@ interface AddPauseButtonProps {
   isCompact?: boolean;
 }
 
-const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) => {
+export interface AddPauseButtonRef {
+  clearUrl: () => void;
+}
+
+const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onAddPause, isCompact = false }, ref) => {
   const [showRipple, setShowRipple] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [url, setUrl] = useState('');
@@ -136,6 +140,11 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
     }
   };
 
+  // Expose the clear function to parent via ref
+  useImperativeHandle(ref, () => ({
+    clearUrl: handleClearUrl
+  }));
+
   // On mobile, only use isCompact prop (My Pauses toggle), ignore scroll
   // On desktop, use scroll behavior
   const shouldBeCompact = isMobile ? isCompact : (isCompact || isScrolled);
@@ -192,6 +201,8 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
       </button>
     </div>
   );
-};
+});
+
+AddPauseButton.displayName = 'AddPauseButton';
 
 export default AddPauseButton;
