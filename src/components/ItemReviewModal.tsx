@@ -33,6 +33,7 @@ const ItemReviewModal = ({
   onNext
 }: ItemReviewModalProps) => {
   const [showFeedback, setShowFeedback] = useState(false);
+  const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
   const { activeIndex, api, setApi, navigateToNext } = useItemReviewCarousel(
     currentIndex,
     isOpen,
@@ -50,6 +51,7 @@ const ItemReviewModal = ({
   useEffect(() => {
     if (isOpen) {
       setShowFeedback(false);
+      setSelectedDecision(null);
     }
   }, [isOpen, activeIndex]);
 
@@ -58,16 +60,23 @@ const ItemReviewModal = ({
   const handleNavigateNext = () => {
     // Reset feedback state when navigating
     setShowFeedback(false);
+    setSelectedDecision(null);
     const nextIndex = navigateToNext();
     if (nextIndex === null) {
       onClose();
     }
   };
 
+  const handleDecision = (decision: 'purchase' | 'let-go') => {
+    setSelectedDecision(decision);
+    setShowFeedback(true);
+  };
+
   const handleClose = () => {
     if (showFeedback) {
       // If in feedback mode, go back to decision buttons
       setShowFeedback(false);
+      setSelectedDecision(null);
     } else {
       // If not in feedback mode, close the modal
       onClose();
@@ -134,8 +143,25 @@ const ItemReviewModal = ({
             {!showFeedback && (
               <div className="p-6 pt-0">
                 <ItemReviewDecisionButtons 
-                  onDecision={(decision) => setShowFeedback(true)} 
+                  onDecision={handleDecision} 
                   onExtendPause={() => {}}
+                />
+              </div>
+            )}
+            
+            {/* Feedback Form for Current Item */}
+            {showFeedback && selectedDecision && (
+              <div className="p-6 pt-0">
+                <ItemReviewContent
+                  item={currentItem}
+                  onItemDecided={onItemDecided}
+                  onNavigateNext={handleNavigateNext}
+                  onClose={onClose}
+                  isLastItem={isLastItem}
+                  showFeedback={true}
+                  setShowFeedback={setShowFeedback}
+                  showDecisionButtons={false}
+                  externalSelectedDecision={selectedDecision}
                 />
               </div>
             )}
