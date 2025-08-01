@@ -45,10 +45,10 @@ const Index = () => {
   // Update welcome modal visibility for first-time visitors (guests and new users)
   useEffect(() => {
     if (!authLoading) {
-      // Force show welcome modal for testing
-      modalStates.setShowWelcomeModal(true);
+      // Welcome modal will be shown automatically by useWelcomeFlow hook
+      // based on user state and localStorage flags
     }
-  }, [user, authLoading, modalStates]);
+  }, [user, authLoading]);
 
   const handleStartReview = () => {
     itemReview.resetReviewIndex();
