@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
+import { X } from 'lucide-react';
 
 interface AddPauseButtonProps {
   onAddPause: (parsedData?: any) => void;
@@ -126,6 +127,15 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
     onAddPause(dataToPass);
   };
 
+  const handleClearUrl = () => {
+    setUrl('');
+    setParsedData(null);
+    setIsParsingUrl(false);
+    if (parseTimeoutRef.current) {
+      clearTimeout(parseTimeoutRef.current);
+    }
+  };
+
   // On mobile, only use isCompact prop (My Pauses toggle), ignore scroll
   // On desktop, use scroll behavior
   const shouldBeCompact = isMobile ? isCompact : (isCompact || isScrolled);
@@ -137,14 +147,23 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
         : 'py-6 sm:py-8'
     }`}>
       {/* URL Input Field */}
-      <div className="mb-4">
+      <div className="mb-4 relative">
         <input
           type="text"
           value={url}
           onChange={(e) => handleUrlChange(e.target.value)}
           placeholder="Paste a product URL"
-          className="w-full px-4 py-3 rounded-xl border-2 border-white/20 bg-white/10 text-dark-gray placeholder-dark-gray/60 focus:outline-none focus:border-white/40 transition-colors"
+          className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/10 text-dark-gray placeholder-dark-gray/60 focus:outline-none focus:border-white/40 transition-colors"
         />
+        {url && (
+          <button
+            onClick={handleClearUrl}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
+            type="button"
+          >
+            <X size={16} className="text-dark-gray/60" />
+          </button>
+        )}
         {isParsingUrl && (
           <div className="mt-2 text-sm text-dark-gray/70">
             Parsing product details...
