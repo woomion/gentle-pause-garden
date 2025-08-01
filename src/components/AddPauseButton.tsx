@@ -85,8 +85,11 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   useEffect(() => {
     const checkClipboard = async () => {
       try {
-        // Check if clipboard API is available and we have permission
-        if (!navigator.clipboard || !navigator.clipboard.readText) {
+        // Check if we're in a browser environment and clipboard API is available
+        if (typeof window === 'undefined' || 
+            !navigator?.clipboard || 
+            !navigator.clipboard.readText ||
+            !window.isSecureContext) {
           return;
         }
 
@@ -98,13 +101,15 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
           setShowClipboardSuggestion(true);
         }
       } catch (error) {
-        // Silently fail if clipboard permission is denied
+        // Silently fail if clipboard permission is denied or any other error
         console.log('Clipboard access not available or denied');
       }
     };
 
-    // Check clipboard when component mounts
-    checkClipboard();
+    // Only check clipboard after component has mounted
+    if (typeof window !== 'undefined') {
+      checkClipboard();
+    }
   }, [url]);
 
   // Helper function to validate URLs
