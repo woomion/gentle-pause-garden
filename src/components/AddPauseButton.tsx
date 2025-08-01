@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
-import { X, Clipboard } from 'lucide-react';
+import { useUrlShortener } from '../hooks/useUrlShortener';
+import { X, Clipboard, ExternalLink } from 'lucide-react';
 
 interface AddPauseButtonProps {
   onAddPause: (parsedData?: any) => void;
@@ -22,6 +23,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const [showClipboardSuggestion, setShowClipboardSuggestion] = useState(false);
   const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
+  const { expandUrl, isExpanding } = useUrlShortener();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,7 +51,12 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
       parseTimeoutRef.current = setTimeout(async () => {
         try {
           console.log('Calling parseProductUrl with:', value);
-          const productInfo = await parseProductUrl(value);
+          
+          // First, try to expand if it's a shortened URL
+          const expandedUrl = await expandUrl(value);
+          console.log('URL after expansion:', expandedUrl);
+          
+          const productInfo = await parseProductUrl(expandedUrl);
           console.log('Parse result:', productInfo);
           
           const parsedData = {
@@ -81,7 +88,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
     }
   };
 
-  // Check clipboard for URLs when component mounts or becomes visible
+  // Enhanced clipboard detection with better mobile support
   useEffect(() => {
     const checkClipboard = async () => {
       try {
@@ -97,18 +104,40 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         
         // Check if clipboard contains a URL
         if (clipboardText && isValidUrl(clipboardText) && !url) {
+          console.log('📋 Found URL in clipboard:', clipboardText);
           setClipboardUrl(clipboardText);
           setShowClipboardSuggestion(true);
+          
+          // Add haptic feedback on mobile if available
+          if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+          }
         }
       } catch (error) {
-        // Silently fail if clipboard permission is denied or any other error
-        console.log('Clipboard access not available or denied');
+        // Enhanced fallback - try to detect mobile browsers and show helpful message
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+          console.log('📋 Clipboard access restricted on mobile - user must paste manually');
+        } else {
+          console.log('📋 Clipboard access not available or denied');
+        }
       }
     };
 
     // Only check clipboard after component has mounted
     if (typeof window !== 'undefined') {
       checkClipboard();
+      
+      // Re-check clipboard when user focuses the input (mobile optimization)
+      const handleFocus = () => {
+        setTimeout(checkClipboard, 100);
+      };
+      
+      const inputElement = document.querySelector('input[placeholder*="product"]');
+      if (inputElement) {
+        inputElement.addEventListener('focus', handleFocus);
+        return () => inputElement.removeEventListener('focus', handleFocus);
+      }
     }
   }, [url]);
 
