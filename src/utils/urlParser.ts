@@ -218,17 +218,21 @@ const extractFromUrlStructure = (url: string, hostname: string): Partial<Product
     }
   }
   
-  // Etsy specific URL parsing
+  // Etsy specific URL parsing - improved
   if (hostname.includes('etsy')) {
-    const match = url.match(/\/listing\/\d+\/([^\/\?]+)/);
+    const match = url.match(/\/listing\/\d+\/([^\/\?#]+)/);
     if (match) {
       const titlePart = decodeURIComponent(match[1]);
       const readableTitle = titlePart
         .replace(/-/g, ' ')
+        .replace(/\+/g, ' ')
+        .replace(/\s+/g, ' ')
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+        .join(' ')
+        .trim();
       info.itemName = readableTitle;
+      console.log('Extracted Etsy product name from URL:', readableTitle);
     }
   }
   
@@ -352,6 +356,10 @@ const extractItemName = (doc: Document): string | undefined => {
     '.x-item-title-label', // eBay
     '[data-automation-id="product-title"]', // Target
     '[data-testid="product-title"]',
+    'h1[data-test-id="listing-page-title"]', // Etsy
+    '[data-testid="listing-page-title"]', // Etsy alternative
+    '.listing-page-title h1', // Etsy fallback
+    '.shop2-listing-page-title', // Etsy legacy
     '.product-title',
     '#product-title',
     '.pdp-product-name',
@@ -362,6 +370,7 @@ const extractItemName = (doc: Document): string | undefined => {
     '[class*="ProductTitle"]',
     '[class*="product-title"]',
     '[class*="item-title"]',
+    '[class*="listing-page-title"]',
     
     // Generic headings
     'h1[class*="title"]',
@@ -426,6 +435,14 @@ const extractPrice = (doc: Document): string | undefined => {
     '[data-product-price]',
     '.product__price .price',
     '.product-price-value',
+    
+    // Etsy-specific price selectors
+    '[data-testid="price-current"]', // Etsy current
+    '.currency-value', // Etsy price
+    '.shop2-listing-price .currency-value', // Etsy legacy
+    '.listing-page-price .currency-value', // Etsy alternative
+    'p.wt-text-title-03', // Etsy price text
+    '[class*="listing-page-price"]', // Etsy generic
     
     // Store-specific selectors
     '.a-price-whole', // Amazon whole price
