@@ -83,7 +83,9 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
     };
   }, []);
 
-  const handleClick = () => {
+  const handleClick = async () => {
+    console.log('Add to Pause clicked');
+    
     // Stop any ongoing parsing
     if (parseTimeoutRef.current) {
       clearTimeout(parseTimeoutRef.current);
@@ -95,8 +97,32 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
     // Reset ripple after animation
     setTimeout(() => setShowRipple(false), 600);
     
+    // If we have a URL but no parsed data yet, try to parse it immediately
+    if (url.trim() && (url.includes('http') || url.includes('www.')) && !parsedData) {
+      console.log('No parsed data yet, attempting immediate parse...');
+      try {
+        const productInfo = await parseProductUrl(url);
+        const immediateData = {
+          itemName: productInfo.itemName,
+          storeName: productInfo.storeName,
+          price: productInfo.price,
+          imageUrl: productInfo.imageUrl,
+          link: url
+        };
+        console.log('Immediate parse result:', immediateData);
+        onAddPause(immediateData);
+        return;
+      } catch (error) {
+        console.error('Immediate parse failed:', error);
+        // Fall back to passing just the URL
+        onAddPause({ link: url.trim() });
+        return;
+      }
+    }
+    
     // Pass parsed data if available, otherwise just the URL
     const dataToPass = parsedData || (url.trim() ? { link: url.trim() } : {});
+    console.log('Passing data to form:', dataToPass);
     onAddPause(dataToPass);
   };
 

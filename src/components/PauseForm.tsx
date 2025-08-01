@@ -97,9 +97,10 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
   const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
   const [currentStep, setCurrentStep] = useState<'duration' | 'emotion' | 'details'>('duration');
 
-  // Initialize form with any provided data
+  // Initialize form with any provided data and parse URLs
   useEffect(() => {
     if (initialData) {
+      console.log('PauseForm received initial data:', initialData);
       setFormData(prev => ({
         ...prev,
         ...initialData,
@@ -109,8 +110,58 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
         imageUrl: initialData.imageUrl || prev.imageUrl,
         link: initialData.link || prev.link
       }));
+
+      // If we have a link but no parsed data, try to parse it
+      if (initialData.link && !initialData.itemName && !isParsingUrl) {
+        console.log('Found URL without parsed data, parsing now:', initialData.link);
+        parseUrlInForm(initialData.link);
+      }
     }
   }, [initialData]);
+
+  const parseUrlInForm = async (url: string) => {
+    if (!url || (!url.includes('http') && !url.includes('www.'))) return;
+    
+    setIsParsingUrl(true);
+    try {
+      console.log('Parsing URL in form:', url);
+      const productInfo = await parseProductUrl(url);
+      console.log('Form parse result:', productInfo);
+      
+      const updatedFields = new Set<string>();
+      
+      setFormData(prev => {
+        const updated = { ...prev };
+        
+        if (productInfo.itemName && !prev.itemName) {
+          updated.itemName = productInfo.itemName;
+          updatedFields.add('itemName');
+        }
+        if (productInfo.storeName && !prev.storeName) {
+          updated.storeName = productInfo.storeName;
+          updatedFields.add('storeName');
+        }
+        if (productInfo.price && !prev.price) {
+          updated.price = productInfo.price;
+          updatedFields.add('price');
+        }
+        if (productInfo.imageUrl && !prev.imageUrl) {
+          updated.imageUrl = productInfo.imageUrl;
+          updatedFields.add('imageUrl');
+        }
+        
+        return updated;
+      });
+      
+      setAutoFilledFields(prev => new Set([...prev, ...updatedFields]));
+      console.log('Form fields updated with parsed data');
+      
+    } catch (error) {
+      console.error('Error parsing URL in form:', error);
+    } finally {
+      setIsParsingUrl(false);
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
