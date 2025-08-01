@@ -99,7 +99,7 @@ const Index = () => {
   return (
     <>
       <div className={`min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 overflow-y-auto ${
-        sectionsExpanded ? 'pb-48 sm:pb-32' : 'pb-36 sm:pb-32'
+        sectionsExpanded ? 'pb-60 sm:pb-32' : 'pb-36 sm:pb-32'
       }`}>
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-12 sm:pt-16">
           <PauseHeader />
