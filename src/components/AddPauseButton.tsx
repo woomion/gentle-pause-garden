@@ -28,6 +28,7 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
 
   const handleUrlChange = async (value: string) => {
     setUrl(value);
+    console.log('URL input changed:', value);
     
     // Clear any existing timeout
     if (parseTimeoutRef.current) {
@@ -35,18 +36,24 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
     }
     
     if (value.trim() && (value.includes('http') || value.includes('www.'))) {
+      console.log('Detected URL, starting parse...');
       // This looks like a URL - parse it with debounce
       setIsParsingUrl(true);
       parseTimeoutRef.current = setTimeout(async () => {
         try {
+          console.log('Calling parseProductUrl with:', value);
           const productInfo = await parseProductUrl(value);
-          setParsedData({
+          console.log('Parse result:', productInfo);
+          
+          const parsedData = {
             itemName: productInfo.itemName,
             storeName: productInfo.storeName,
             price: productInfo.price,
             imageUrl: productInfo.imageUrl,
             link: value
-          });
+          };
+          console.log('Setting parsed data:', parsedData);
+          setParsedData(parsedData);
         } catch (error) {
           console.error('Error parsing URL:', error);
           setParsedData({
@@ -61,6 +68,7 @@ const AddPauseButton = ({ onAddPause, isCompact = false }: AddPauseButtonProps) 
         }
       }, 300); // 300ms debounce
     } else {
+      console.log('Not a URL, clearing parsed data');
       setIsParsingUrl(false);
       setParsedData(null);
     }
