@@ -3,6 +3,8 @@ import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
 import { X } from 'lucide-react';
 import FirstUseTooltip from './FirstUseTooltip';
+import ClipboardButton from './ClipboardButton';
+import ShareButton from './ShareButton';
 
 interface AddPauseButtonProps {
   onAddPause: (parsedData?: any) => void;
@@ -177,7 +179,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         ? 'py-4 sm:py-3' 
         : 'py-6 sm:py-8'
     }`}>
-      {/* URL Input Field */}
+      {/* URL Input Field with action buttons */}
       <div className="mb-4 relative">
         <FirstUseTooltip 
           show={showFirstUseTooltip} 
@@ -186,22 +188,31 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
             localStorage.setItem('hasSeenFirstUseTooltip', 'true');
           }} 
         />
-        <input
-          type="text"
-          value={url}
-          onChange={(e) => handleUrlChange(e.target.value)}
-          placeholder="Paste a product URL"
-          className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/10 text-dark-gray placeholder-dark-gray/60 focus:outline-none focus:border-white/40 transition-colors"
-        />
-        {url && (
-          <button
-            onClick={handleClearUrl}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
-            type="button"
-          >
-            <X size={16} className="text-dark-gray/60" />
-          </button>
-        )}
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={url}
+              onChange={(e) => handleUrlChange(e.target.value)}
+              placeholder="Paste a product URL"
+              className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/10 text-dark-gray placeholder-dark-gray/60 focus:outline-none focus:border-white/40 transition-colors"
+            />
+            {url && (
+              <button
+                onClick={handleClearUrl}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
+                type="button"
+              >
+                <X size={16} className="text-dark-gray/60" />
+              </button>
+            )}
+          </div>
+          
+          {/* Action buttons */}
+          <ClipboardButton onUrlPasted={handleUrlChange} />
+          {url && <ShareButton url={url} text={parsedData?.itemName} />}
+        </div>
+        
         {isParsingUrl && (
           <div className="mt-2 text-sm text-dark-gray/70">
             Parsing product details...
