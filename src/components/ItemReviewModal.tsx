@@ -121,7 +121,7 @@ const ItemReviewModal = ({
                       onNavigateNext={handleNavigateNext}
                       onClose={onClose}
                       isLastItem={index >= items.length - 1}
-                      showFeedback={showFeedback}
+                      showFeedback={false}
                       setShowFeedback={setShowFeedback}
                       showDecisionButtons={false}
                     />

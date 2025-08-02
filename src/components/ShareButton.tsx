@@ -5,14 +5,19 @@ import { toast } from '@/hooks/use-toast';
 interface ShareButtonProps {
   url?: string;
   text?: string;
+  itemName?: string;
+  price?: string;
+  storeName?: string;
 }
 
-const ShareButton = ({ url, text }: ShareButtonProps) => {
+const ShareButton = ({ url, text, itemName, price, storeName }: ShareButtonProps) => {
   const handleShare = async () => {
     try {
       const shareData = {
         title: 'Pause this item',
-        text: text || 'I want to pause this purchase decision',
+        text: text || (itemName && price 
+          ? `Should I buy this ${itemName} for ${price}${storeName ? ` from ${storeName}` : ''}? Help me decide!`
+          : 'I want to pause this purchase decision'),
         url: url || ''
       };
 
@@ -25,7 +30,9 @@ const ShareButton = ({ url, text }: ShareButtonProps) => {
         try {
           await navigator.share({
             title: 'Pause this item',
-            text: text || 'I want to pause this purchase decision',
+            text: text || (itemName && price 
+              ? `Should I buy this ${itemName} for ${price}${storeName ? ` from ${storeName}` : ''}? Help me decide!`
+              : 'I want to pause this purchase decision'),
             url: url || ''
           });
         } catch (webShareError) {

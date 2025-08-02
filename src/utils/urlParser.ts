@@ -8,7 +8,19 @@ interface ProductInfo {
 
 export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   try {
-    const urlObj = new URL(url);
+    console.log('Parsing URL:', url);
+    
+    // Clean the URL first
+    let cleanUrl = url.trim();
+    if (!cleanUrl) {
+      throw new Error('Empty URL provided');
+    }
+
+    // Resolve redirects for short URLs
+    cleanUrl = await resolveRedirects(cleanUrl);
+    console.log('Resolved URL:', cleanUrl);
+
+    const urlObj = new URL(cleanUrl);
     const hostname = urlObj.hostname.toLowerCase();
     
     // Extract store name from hostname
@@ -172,6 +184,41 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   } catch (error) {
     console.error('Error parsing URL:', error);
     return {};
+  }
+};
+
+// Resolve redirects for short URLs
+const resolveRedirects = async (url: string): Promise<string> => {
+  const shortUrlPatterns = [
+    'amzn.to',
+    'bit.ly', 
+    'tinyurl.com',
+    't.co',
+    'goo.gl',
+    'ow.ly',
+    'short.link'
+  ];
+
+  try {
+    const urlObj = new URL(url);
+    const isShortUrl = shortUrlPatterns.some(pattern => 
+      urlObj.hostname.includes(pattern)
+    );
+
+    if (!isShortUrl) {
+      return url;
+    }
+
+    // Use a redirect resolver service
+    const response = await fetch(`https://httpbin.org/redirect-to?url=${encodeURIComponent(url)}`, {
+      method: 'HEAD',
+      redirect: 'follow'
+    });
+    
+    return response.url || url;
+  } catch (error) {
+    console.warn('Could not resolve redirect for:', url, error);
+    return url;
   }
 };
 

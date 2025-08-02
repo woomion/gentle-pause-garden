@@ -16,12 +16,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
+import { useSharedContent } from '../hooks/useSharedContent';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
   const [sectionsExpanded, setSectionsExpanded] = useState(false);
   const addPauseButtonRef = useRef<AddPauseButtonRef>(null);
+  const { sharedContent, clearSharedContent } = useSharedContent();
   
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
@@ -36,6 +38,14 @@ const Index = () => {
 
   // Initialize notifications
   useNotifications(notificationsEnabled);
+
+  // Handle shared content from other apps
+  useEffect(() => {
+    if (sharedContent?.url && addPauseButtonRef.current) {
+      modalStates.handleAddPause({ url: sharedContent.url });
+      clearSharedContent();
+    }
+  }, [sharedContent]);
 
   const handleStartReview = () => {
     itemReview.resetReviewIndex();
