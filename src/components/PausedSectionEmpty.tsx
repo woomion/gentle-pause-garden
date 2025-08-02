@@ -4,12 +4,17 @@ import { memo } from 'react';
 interface PausedSectionEmptyProps {
   isGuest: boolean;
   hasReviewItems: boolean;
+  isFirstTime?: boolean;
 }
 
-const PausedSectionEmpty = memo(({ isGuest, hasReviewItems }: PausedSectionEmptyProps) => {
+const PausedSectionEmpty = memo(({ isGuest, hasReviewItems, isFirstTime }: PausedSectionEmptyProps) => {
   const getMessage = () => {
     if (hasReviewItems) {
       return "All your paused items are ready for review!";
+    }
+    
+    if (isFirstTime) {
+      return "Ready to pause your first purchase? Add a link below!";
     }
     
     return "Your pause list is clear, how lovely";
@@ -20,9 +25,14 @@ const PausedSectionEmpty = memo(({ isGuest, hasReviewItems }: PausedSectionEmpty
       <p className="text-gray-500 dark:text-gray-400">
         {getMessage()}
       </p>
-      {isGuest && !hasReviewItems && (
+      {isGuest && !hasReviewItems && !isFirstTime && (
         <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
           Guest mode - items stored locally
+        </p>
+      )}
+      {isFirstTime && (
+        <p className="text-primary/60 text-sm mt-2">
+          Paste any shopping link to get started ✨
         </p>
       )}
     </div>

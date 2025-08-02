@@ -7,7 +7,6 @@ import AddPauseButton, { AddPauseButtonRef } from '../components/AddPauseButton'
 import MainTabs from '../components/MainTabs';
 import FooterLinks from '../components/FooterLinks';
 import PauseForm from '../components/PauseForm';
-import WelcomeModal from '../components/WelcomeModal';
 import SignupModal from '../components/SignupModal';
 import ItemReviewModal from '../components/ItemReviewModal';
 import { useNotifications } from '../hooks/useNotifications';
@@ -17,7 +16,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
-import { useWelcomeFlow } from '../hooks/useWelcomeFlow';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -29,9 +27,6 @@ const Index = () => {
   const modalStates = useModalStates();
   const itemReview = useItemReview();
   
-  const { userName, handleWelcomeComplete, shouldShowWelcomeModal, shouldShowNameStep } = useWelcomeFlow();
-  
-  
   // Handle redirects for invitations
   useIndexRedirects();
 
@@ -42,14 +37,6 @@ const Index = () => {
   // Initialize notifications
   useNotifications(notificationsEnabled);
 
-  // Update welcome modal visibility for first-time visitors (guests and new users)
-  useEffect(() => {
-    if (!authLoading) {
-      // Force show welcome modal for testing
-      modalStates.setShowWelcomeModal(true);
-    }
-  }, [user, authLoading, modalStates]);
-
   const handleStartReview = () => {
     itemReview.resetReviewIndex();
     modalStates.handleStartReview('solo');
@@ -59,11 +46,6 @@ const Index = () => {
   const handleCloseReview = () => {
     modalStates.handleCloseReview();
     itemReview.resetReviewIndex();
-  };
-
-  const handleWelcomeCompleteInternal = (name: string) => {
-    handleWelcomeComplete(name);
-    modalStates.setShowWelcomeModal(false);
   };
 
   const handleShowSignupInternal = () => {
@@ -103,7 +85,7 @@ const Index = () => {
       }`}>
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-12 sm:pt-16">
           <PauseHeader />
-          <WelcomeMessage firstName={userName} />
+          <WelcomeMessage firstName={user?.user_metadata?.first_name} />
           
           {/* Wisdom Orb Remnant - Hidden for now */}
           {/* 
@@ -162,12 +144,6 @@ const Index = () => {
           initialData={modalStates.formInitialData}
         />
       )}
-      
-      <WelcomeModal 
-        open={shouldShowWelcomeModal(modalStates.showWelcomeModal)} 
-        onComplete={handleWelcomeCompleteInternal}
-        showNameStep={shouldShowNameStep()}
-      />
       
       <SignupModal 
         isOpen={modalStates.showSignupModal} 

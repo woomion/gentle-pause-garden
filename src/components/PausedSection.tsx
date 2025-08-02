@@ -114,6 +114,12 @@ const PausedSection = () => {
     return <PausedSectionLoading />;
   }
 
+  // Check if this is a first-time user (no items ever created)
+  const allItemsEver = user 
+    ? supabasePausedItemsStore.getItems().length + supabasePausedItemsStore.getItemsForReview().length
+    : pausedItems.length + pausedItemsStore.getItemsForReview().length;
+  const isFirstTime = allItemsEver === 0;
+
   // Empty state when no items
   if (pausedItems.length === 0) {
     return (
@@ -124,7 +130,7 @@ const PausedSection = () => {
         <p className="text-base mb-3" style={{ color: '#6b6b6b' }}>
           You haven't decided yet and that's okay
         </p>
-        <PausedSectionEmpty isGuest={!user} hasReviewItems={false} />
+        <PausedSectionEmpty isGuest={!user} hasReviewItems={false} isFirstTime={isFirstTime} />
       </div>
     );
   }

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 're
 import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
 import { X } from 'lucide-react';
+import FirstUseTooltip from './FirstUseTooltip';
 
 interface AddPauseButtonProps {
   onAddPause: (parsedData?: any) => void;
@@ -18,8 +19,17 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const [url, setUrl] = useState('');
   const [isParsingUrl, setIsParsingUrl] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
+  const [showFirstUseTooltip, setShowFirstUseTooltip] = useState(false);
   const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
+
+  // Check if this is first time user
+  useEffect(() => {
+    const hasEverPaused = localStorage.getItem('pausedItems') || localStorage.getItem('hasSeenFirstUseTooltip');
+    if (!hasEverPaused) {
+      setShowFirstUseTooltip(true);
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,6 +44,12 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const handleUrlChange = async (value: string) => {
     setUrl(value);
     console.log('URL input changed:', value);
+    
+    // Dismiss tooltip when user starts typing
+    if (showFirstUseTooltip && value.trim()) {
+      setShowFirstUseTooltip(false);
+      localStorage.setItem('hasSeenFirstUseTooltip', 'true');
+    }
     
     // Clear any existing timeout
     if (parseTimeoutRef.current) {
@@ -90,6 +106,12 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
 
   const handleClick = async () => {
     console.log('Add to Pause clicked');
+    
+    // Dismiss first use tooltip if showing
+    if (showFirstUseTooltip) {
+      setShowFirstUseTooltip(false);
+      localStorage.setItem('hasSeenFirstUseTooltip', 'true');
+    }
     
     // Stop any ongoing parsing
     if (parseTimeoutRef.current) {
@@ -157,6 +179,13 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
     }`}>
       {/* URL Input Field */}
       <div className="mb-4 relative">
+        <FirstUseTooltip 
+          show={showFirstUseTooltip} 
+          onDismiss={() => {
+            setShowFirstUseTooltip(false);
+            localStorage.setItem('hasSeenFirstUseTooltip', 'true');
+          }} 
+        />
         <input
           type="text"
           value={url}

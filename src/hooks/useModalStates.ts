@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 export const useModalStates = () => {
   const [showForm, setShowForm] = useState(false);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [signupModalDismissed, setSignupModalDismissed] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -46,7 +45,6 @@ export const useModalStates = () => {
   return {
     // State
     showForm,
-    showWelcomeModal,
     showSignupModal,
     signupModalDismissed,
     showReviewModal,
@@ -54,7 +52,6 @@ export const useModalStates = () => {
     formInitialData,
     
     // Actions
-    setShowWelcomeModal,
     handleAddPause,
     handleCloseForm,
     handleShowSignup,
