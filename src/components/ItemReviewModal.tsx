@@ -4,6 +4,7 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemReviewCarousel } from '../hooks/useItemReviewCarousel';
 import { ItemReviewContent } from './ItemReviewContent';
+import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import {
@@ -32,6 +33,7 @@ const ItemReviewModal = ({
   onNext
 }: ItemReviewModalProps) => {
   const [showFeedback, setShowFeedback] = useState(false);
+  const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
   const { activeIndex, api, setApi, navigateToNext } = useItemReviewCarousel(
     currentIndex,
     isOpen,
@@ -49,6 +51,7 @@ const ItemReviewModal = ({
   useEffect(() => {
     if (isOpen) {
       setShowFeedback(false);
+      setSelectedDecision(null);
     }
   }, [isOpen, activeIndex]);
 
@@ -57,16 +60,23 @@ const ItemReviewModal = ({
   const handleNavigateNext = () => {
     // Reset feedback state when navigating
     setShowFeedback(false);
+    setSelectedDecision(null);
     const nextIndex = navigateToNext();
     if (nextIndex === null) {
       onClose();
     }
   };
 
+  const handleDecision = (decision: 'purchase' | 'let-go') => {
+    setSelectedDecision(decision);
+    setShowFeedback(true);
+  };
+
   const handleClose = () => {
     if (showFeedback) {
       // If in feedback mode, go back to decision buttons
       setShowFeedback(false);
+      setSelectedDecision(null);
     } else {
       // If not in feedback mode, close the modal
       onClose();
@@ -113,7 +123,7 @@ const ItemReviewModal = ({
                       isLastItem={index >= items.length - 1}
                       showFeedback={showFeedback}
                       setShowFeedback={setShowFeedback}
-                      showDecisionButtons={true}
+                      showDecisionButtons={false}
                     />
                   </CarouselItem>
                 ))}
@@ -128,6 +138,33 @@ const ItemReviewModal = ({
                 <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
               </div>
             </Carousel>
+            
+            {/* Static Decision Buttons for Current Item */}
+            {!showFeedback && (
+              <div className="p-6 pt-0">
+                <ItemReviewDecisionButtons 
+                  onDecision={handleDecision} 
+                  onExtendPause={() => {}}
+                />
+              </div>
+            )}
+            
+            {/* Feedback Form for Current Item */}
+            {showFeedback && selectedDecision && (
+              <div className="p-6 pt-0">
+                <ItemReviewContent
+                  item={currentItem}
+                  onItemDecided={onItemDecided}
+                  onNavigateNext={handleNavigateNext}
+                  onClose={onClose}
+                  isLastItem={isLastItem}
+                  showFeedback={true}
+                  setShowFeedback={setShowFeedback}
+                  showDecisionButtons={false}
+                  externalSelectedDecision={selectedDecision}
+                />
+              </div>
+            )}
           </>
         ) : (
           <ItemReviewContent

@@ -18,7 +18,6 @@ import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useWelcomeFlow } from '../hooks/useWelcomeFlow';
-import { useShareTarget } from '../hooks/useShareTarget';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -35,12 +34,6 @@ const Index = () => {
   
   // Handle redirects for invitations
   useIndexRedirects();
-  
-  // Handle shared URLs from other apps (Web Share Target API)
-  useShareTarget((sharedUrl, title) => {
-    console.log('📲 Received shared content:', { sharedUrl, title });
-    modalStates.handleAddPause({ url: sharedUrl, title: title || '' });
-  });
 
   console.log('Index page render - Auth loading:', authLoading, 'Settings loading:', settingsLoading, 'User:', !!user);
   console.log('Mobile check - User agent:', navigator.userAgent);
@@ -52,10 +45,10 @@ const Index = () => {
   // Update welcome modal visibility for first-time visitors (guests and new users)
   useEffect(() => {
     if (!authLoading) {
-      // Welcome modal will be shown automatically by useWelcomeFlow hook
-      // based on user state and localStorage flags
+      // Force show welcome modal for testing
+      modalStates.setShowWelcomeModal(true);
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, modalStates]);
 
   const handleStartReview = () => {
     itemReview.resetReviewIndex();
@@ -171,7 +164,7 @@ const Index = () => {
       )}
       
       <WelcomeModal 
-        open={shouldShowWelcomeModal()} 
+        open={shouldShowWelcomeModal(modalStates.showWelcomeModal)} 
         onComplete={handleWelcomeCompleteInternal}
         showNameStep={shouldShowNameStep()}
       />

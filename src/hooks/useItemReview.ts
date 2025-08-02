@@ -9,23 +9,40 @@ export const useItemReview = () => {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const { user } = useAuth();
 
-  // Track items for review - load immediately for guest mode
+  // Track items for review (solo items only - exclude shared items)
   useEffect(() => {
     const updateItemsForReview = () => {
+      console.log('🔍 useItemReview: updateItemsForReview called, user:', !!user);
+      
       if (user) {
         const allReviewItems = supabasePausedItemsStore.getItemsForReview();
+        console.log('🔍 useItemReview: All review items from store:', allReviewItems.length, allReviewItems);
         
         // Filter for solo items (items owned by current user that are NOT shared)
         const soloItems = allReviewItems.filter(item => {
           const isOwned = item.originalUserId === user.id;
           const isNotShared = true;
-          return isOwned && isNotShared;
+          const isSolo = isOwned && isNotShared;
+          
+          console.log('🔍 useItemReview: Item filter check:', {
+            itemId: item.id,
+            itemName: item.itemName,
+            originalUserId: item.originalUserId,
+            currentUserId: user.id,
+            
+            isOwned,
+            isNotShared,
+            isSolo
+          });
+          
+          return isSolo;
         });
         
+        console.log('🔍 useItemReview: Solo items after filtering:', soloItems.length, soloItems);
         setItemsForReview(soloItems);
       } else {
-        // Guest mode - load immediately
         const reviewItems = pausedItemsStore.getItemsForReview();
+        console.log('🔍 useItemReview: Guest items for review:', reviewItems.length, reviewItems);
         setItemsForReview(reviewItems);
       }
     };
@@ -37,11 +54,10 @@ export const useItemReview = () => {
 
     if (user) {
       unsubscribe = supabasePausedItemsStore.subscribe(updateItemsForReview);
-      // Reduced interval frequency for better performance
-      interval = setInterval(updateItemsForReview, 120000); // 2 minutes instead of 1
+      interval = setInterval(updateItemsForReview, 60000);
     } else {
       unsubscribe = pausedItemsStore.subscribe(updateItemsForReview);
-      interval = setInterval(updateItemsForReview, 120000);
+      interval = setInterval(updateItemsForReview, 60000);
     }
 
     return () => {
@@ -51,6 +67,9 @@ export const useItemReview = () => {
   }, [user]);
 
   const handleItemDecided = async (id: string) => {
+    console.log('🔍 useItemReview: handleItemDecided called for item:', id);
+    console.log('🔍 useItemReview: current items count:', itemsForReview.length);
+    
     // Store the current length before removal
     const currentLength = itemsForReview.length;
     
@@ -62,6 +81,7 @@ export const useItemReview = () => {
     
     // Update the items list
     const updatedItems = itemsForReview.filter(item => item.id !== id);
+    console.log('🔍 useItemReview: updated items count:', updatedItems.length);
     setItemsForReview(updatedItems);
     
     // If this was the last item (currentLength was 1), trigger confetti

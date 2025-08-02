@@ -26,17 +26,17 @@ export const useWelcomeFlow = () => {
     }
   };
 
-  const shouldShowWelcomeModal = (): boolean => {
+  const shouldShowWelcomeModal = (showWelcomeModal: boolean): boolean => {
     if (authLoading) return false;
     
     if (user) {
       // For authenticated users - show if they haven't completed welcome
       const hasCompletedWelcome = localStorage.getItem(`hasCompletedWelcome_${user.id}`);
-      return !hasCompletedWelcome;
+      return showWelcomeModal && !hasCompletedWelcome;
     } else {
       // For guests - show if they haven't completed welcome
       const hasCompletedWelcome = localStorage.getItem('hasCompletedWelcome_guest');
-      return !hasCompletedWelcome;
+      return showWelcomeModal && !hasCompletedWelcome;
     }
   };
 

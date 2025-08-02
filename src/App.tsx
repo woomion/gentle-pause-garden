@@ -101,8 +101,16 @@ const App = () => {
     };
   }, []);
 
-  // Initialize offline sync service only for authenticated users
-  // This will be handled in the auth context instead
+  // Initialize offline sync service with error handling
+  useEffect(() => {
+    try {
+      console.log('🔄 Initializing offline sync service');
+      offlineSyncService.startPeriodicSync();
+    } catch (error) {
+      console.error('❌ Failed to initialize offline sync (non-blocking):', error);
+      // Don't block app for this either
+    }
+  }, []);
 
   const handleLoadingComplete = () => {
     console.log('✅ Loading screen completed');

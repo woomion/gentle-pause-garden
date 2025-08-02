@@ -1,5 +1,4 @@
 
-// Enhanced URL detection with mobile app support
 export const isImageUrl = (url: string): boolean => {
   // Check if it's a Supabase storage URL
   if (url.includes('supabase.co/storage')) {
@@ -21,37 +20,10 @@ export const isImageUrl = (url: string): boolean => {
     /\/assets\//i,
     /\/cdn\//i,
     /\/uploads\//i,
-    /\/content\//i,
-    /\.cloudfront\.net/i,
-    /img\./i,
-    /image\./i
+    /\/content\//i
   ];
   
   return imagePathPatterns.some(pattern => pattern.test(url));
-};
-
-// Enhanced URL normalization for mobile apps and shortened URLs
-export const normalizeUrl = (url: string): string => {
-  // Handle app-specific URLs (convert to web URLs)
-  const appUrlMappings: Record<string, string> = {
-    'amazon://': 'https://amazon.com/',
-    'target://': 'https://target.com/',
-    'etsy://': 'https://etsy.com/',
-    'ebay://': 'https://ebay.com/',
-  };
-  
-  for (const [appScheme, webUrl] of Object.entries(appUrlMappings)) {
-    if (url.startsWith(appScheme)) {
-      return url.replace(appScheme, webUrl);
-    }
-  }
-  
-  // Add https if missing
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    return `https://${url}`;
-  }
-  
-  return url;
 };
 
 export const isSupabaseStorageUrl = (url: string): boolean => {
@@ -70,23 +42,21 @@ export const processUrls = (dbUrl: string | null, notesProductLink?: string) => 
   
   // First, check if we have a product link from notes
   if (notesProductLink) {
-    productLink = normalizeUrl(notesProductLink);
-    console.log('🖼️ Product link from notes (normalized):', productLink);
+    productLink = notesProductLink;
+    console.log('🖼️ Product link from notes:', productLink);
   }
   
   // Then process the main URL field
   if (dbUrl) {
-    const normalizedDbUrl = normalizeUrl(dbUrl);
-    
-    if (isImageUrl(normalizedDbUrl)) {
+    if (isImageUrl(dbUrl)) {
       // This is an image URL (either Supabase storage or external image)
-      imageUrl = normalizedDbUrl;
+      imageUrl = dbUrl;
       console.log('🖼️ Detected as image URL:', imageUrl);
     } else {
       // This is a product link (fallback if no link in notes)
       if (!productLink) {
-        productLink = normalizedDbUrl;
-        console.log('🖼️ Detected as product link (normalized):', productLink);
+        productLink = dbUrl;
+        console.log('🖼️ Detected as product link:', productLink);
       }
     }
   }

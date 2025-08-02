@@ -9,11 +9,13 @@ class OfflineSyncService {
 
   async syncPendingOperations(): Promise<void> {
     if (this.syncInProgress) {
+      console.log('🔄 Sync already in progress, skipping');
       return;
     }
 
     const queue = offlineQueueStore.getQueue();
     if (queue.length === 0) {
+      console.log('🔄 No pending operations to sync');
       return;
     }
 

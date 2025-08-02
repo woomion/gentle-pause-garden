@@ -8,13 +8,13 @@ import { useNetworkStatus } from './useNetworkStatus';
 
 export const usePausedItems = () => {
   const [items, setItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
-  const [loading, setLoading] = useState(false); // Start false for immediate load
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { isOnline } = useNetworkStatus();
 
   useEffect(() => {
     if (!user) {
-      // Guest mode - load immediately from local storage
+      // Guest mode - use local storage only
       const updateItems = () => {
         const allItems = pausedItemsStore.getItems();
         setItems(allItems);
@@ -26,37 +26,20 @@ export const usePausedItems = () => {
       return unsubscribe;
     }
 
-    // Authenticated mode - hybrid approach with optimized loading
-    let isInitialLoad = true;
-    
+    // Authenticated mode - hybrid approach
     const updateItems = () => {
       const allItems = supabasePausedItemsStore.getItems();
       setItems(allItems);
       
-      // For initial load, wait for data to be loaded
-      // For subsequent updates, show immediately
-      if (!isInitialLoad || supabasePausedItemsStore.isDataLoaded()) {
+      if (supabasePausedItemsStore.isDataLoaded()) {
         setLoading(false);
-      }
-      
-      if (isInitialLoad) {
-        isInitialLoad = false;
       }
     };
 
     updateItems();
     const unsubscribe = supabasePausedItemsStore.subscribe(updateItems);
 
-    // Set a maximum loading time to prevent hanging
-    const loadingTimeout = setTimeout(() => {
-      console.warn('⚠️ Loading timeout reached, showing current data');
-      setLoading(false);
-    }, 5000); // 5 second timeout
-
-    return () => {
-      unsubscribe();
-      clearTimeout(loadingTimeout);
-    };
+    return unsubscribe;
   }, [user]);
 
   const addItem = async (item: Omit<PausedItem | LocalPausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>) => {

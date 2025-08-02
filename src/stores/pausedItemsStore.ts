@@ -35,15 +35,19 @@ class PausedItemsStore {
   private loadFromStorage(): void {
     try {
       const stored = localStorage.getItem(this.storageKey);
+      console.log('🔍 Loading from localStorage:', stored ? 'Found data' : 'No data found');
       if (stored) {
         const parsedItems = JSON.parse(stored);
+        console.log('🔍 Parsed items from localStorage:', parsedItems);
         this.items = parsedItems.map((item: any) => ({
           ...item,
           pausedAt: new Date(item.pausedAt),
           checkInDate: new Date(item.checkInDate || item.pausedAt)
         }));
         this.updateCheckInTimes();
+        console.log('🔍 Final loaded items:', this.items);
       } else {
+        console.log('🔍 No items in localStorage, creating test item for debugging');
         // Create a test item that's already ready for review for debugging
         const testItem = {
           id: 'test-ready-item',
@@ -58,6 +62,7 @@ class PausedItemsStore {
         };
         this.items = [testItem];
         this.saveToStorage();
+        console.log('🔍 Created test item:', testItem);
       }
     } catch (error) {
       console.error('Failed to load paused items from storage:', error);
@@ -162,7 +167,18 @@ class PausedItemsStore {
 
   getItemsForReview(): PausedItem[] {
     const now = new Date();
-    return this.items.filter(item => item.checkInDate <= now);
+    console.log('🔍 getItemsForReview - Current time:', now);
+    console.log('🔍 getItemsForReview - All items:', this.items.map(item => ({
+      id: item.id,
+      itemName: item.itemName,
+      checkInDate: item.checkInDate,
+      checkInTime: item.checkInTime,
+      isReady: item.checkInDate <= now
+    })));
+    
+    const reviewItems = this.items.filter(item => item.checkInDate <= now);
+    console.log('🔍 getItemsForReview - Items ready for review:', reviewItems.length);
+    return reviewItems;
   }
 
   removeItem(id: string): void {

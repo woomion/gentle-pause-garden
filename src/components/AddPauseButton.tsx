@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
-import { useUrlShortener } from '../hooks/useUrlShortener';
-import { X, Clipboard, ExternalLink } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface AddPauseButtonProps {
   onAddPause: (parsedData?: any) => void;
@@ -19,11 +18,8 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const [url, setUrl] = useState('');
   const [isParsingUrl, setIsParsingUrl] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
-  const [clipboardUrl, setClipboardUrl] = useState<string>('');
-  const [showClipboardSuggestion, setShowClipboardSuggestion] = useState(false);
   const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
-  const { expandUrl, isExpanding } = useUrlShortener();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,12 +47,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
       parseTimeoutRef.current = setTimeout(async () => {
         try {
           console.log('Calling parseProductUrl with:', value);
-          
-          // First, try to expand if it's a shortened URL
-          const expandedUrl = await expandUrl(value);
-          console.log('URL after expansion:', expandedUrl);
-          
-          const productInfo = await parseProductUrl(expandedUrl);
+          const productInfo = await parseProductUrl(value);
           console.log('Parse result:', productInfo);
           
           const parsedData = {
@@ -86,72 +77,6 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
       setIsParsingUrl(false);
       setParsedData(null);
     }
-  };
-
-  // Enhanced clipboard detection with better mobile support
-  useEffect(() => {
-    const checkClipboard = async () => {
-      try {
-        // Check if we're in a browser environment and clipboard API is available
-        if (typeof window === 'undefined' || 
-            !navigator?.clipboard || 
-            !navigator.clipboard.readText ||
-            !window.isSecureContext) {
-          return;
-        }
-
-        const clipboardText = await navigator.clipboard.readText();
-        
-        // Check if clipboard contains a URL
-        if (clipboardText && isValidUrl(clipboardText) && !url) {
-          console.log('📋 Found URL in clipboard:', clipboardText);
-          setClipboardUrl(clipboardText);
-          setShowClipboardSuggestion(true);
-          
-          // Add haptic feedback on mobile if available
-          if ('vibrate' in navigator) {
-            navigator.vibrate(50);
-          }
-        }
-      } catch (error) {
-        // Enhanced fallback - try to detect mobile browsers and show helpful message
-        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) {
-          console.log('📋 Clipboard access restricted on mobile - user must paste manually');
-        } else {
-          console.log('📋 Clipboard access not available or denied');
-        }
-      }
-    };
-
-    // Only check clipboard after component has mounted
-    if (typeof window !== 'undefined') {
-      checkClipboard();
-      
-      // Re-check clipboard when user focuses the input (mobile optimization)
-      const handleFocus = () => {
-        setTimeout(checkClipboard, 100);
-      };
-      
-      const inputElement = document.querySelector('input[placeholder*="product"]');
-      if (inputElement) {
-        inputElement.addEventListener('focus', handleFocus);
-        return () => inputElement.removeEventListener('focus', handleFocus);
-      }
-    }
-  }, [url]);
-
-  // Helper function to validate URLs
-  const isValidUrl = (text: string): boolean => {
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-    return urlPattern.test(text.trim()) && (text.includes('http') || text.includes('www.') || text.includes('.com') || text.includes('.net') || text.includes('.org'));
-  };
-
-  // Handle using clipboard URL
-  const handleUseClipboardUrl = () => {
-    setUrl(clipboardUrl);
-    setShowClipboardSuggestion(false);
-    handleUrlChange(clipboardUrl);
   };
 
   // Cleanup timeout on unmount
@@ -259,35 +184,6 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
           </div>
         )}
       </div>
-
-      {/* Clipboard Suggestion */}
-      {showClipboardSuggestion && !url && (
-        <div className="mb-4 p-3 bg-white/10 rounded-xl border border-white/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-dark-gray/80">
-              <Clipboard size={16} />
-              <span>Found link in clipboard</span>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleUseClipboardUrl}
-                className="px-3 py-1 bg-white/20 hover:bg-white/30 text-dark-gray text-sm rounded-lg transition-colors"
-              >
-                Use it
-              </button>
-              <button
-                onClick={() => setShowClipboardSuggestion(false)}
-                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <X size={14} className="text-dark-gray/60" />
-              </button>
-            </div>
-          </div>
-          <div className="mt-2 text-xs text-dark-gray/60 truncate">
-            {clipboardUrl}
-          </div>
-        </div>
-      )}
 
       {/* Add to Pause Button */}
       <button
