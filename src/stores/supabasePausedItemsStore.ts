@@ -48,13 +48,9 @@ class SupabasePausedItemsStore {
 
   async loadItems(): Promise<void> {
     try {
-      console.log('🔍 Store loadItems: Starting to load paused items from Supabase...');
-      
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('🔍 Store loadItems: Auth check result:', { user: !!user, userId: user?.id });
       
       if (!user) {
-        console.log('🔍 Store loadItems: No authenticated user, skipping load');
         this.items = [];
         this.isLoaded = true;
         this.notifyListeners();
@@ -69,49 +65,25 @@ class SupabasePausedItemsStore {
 
       if (error) {
         console.error('Error loading paused items:', error);
+        this.isLoaded = true; // Set loaded even on error to prevent infinite loading
+        this.notifyListeners();
         return;
       }
-
-      console.log('Raw paused items data from Supabase:', data);
-      
-      // Debug tags from database
-      data?.forEach((item, index) => {
-        console.log(`🏷️ DB Item ${index + 1} (${item.title}):`, {
-          id: item.id,
-          tags: item.tags,
-          tagsType: typeof item.tags,
-          tagsIsArray: Array.isArray(item.tags),
-          tagsLength: item.tags?.length || 0
-        });
-      });
 
       this.items = data?.map(item => convertDbToLocal(item)) || [];
       this.updateCheckInTimes();
       this.isLoaded = true;
       
-      console.log('Converted paused items:', this.items);
-      
-      // Debug converted tags
-      this.items.forEach((item, index) => {
-        console.log(`🏷️ Converted Item ${index + 1} (${item.itemName}):`, {
-          id: item.id,
-          tags: item.tags,
-          tagsType: typeof item.tags,
-          tagsIsArray: Array.isArray(item.tags),
-          tagsLength: item.tags?.length || 0
-        });
-      });
-      
       this.notifyListeners();
     } catch (error) {
       console.error('Error in loadItems:', error);
+      this.isLoaded = true; // Set loaded even on error to prevent infinite loading
+      this.notifyListeners();
     }
   }
 
   async addItem(item: Omit<PausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>): Promise<void> {
     try {
-      console.log('=== ADD ITEM DEBUG START ===');
-      
       // Step 1: Check authentication
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -119,92 +91,34 @@ class SupabasePausedItemsStore {
         return;
       }
 
-      console.log('1. Adding item for user:', user.id, 'with data:', {
-        itemName: item.itemName,
-        storeName: item.storeName,
-        emotion: item.emotion,
-        hasPhoto: !!item.photo,
-        hasImageUrl: !!item.imageUrl,
-        imageUrlValue: item.imageUrl,
-        hasLink: !!item.link,
-        photoSize: item.photo?.size,
-        photoName: item.photo?.name,
-        photoType: item.photo?.type,
-        tags: item.tags,
-        tagsLength: item.tags?.length || 0
-      });
-
       // Step 2: Handle image upload if provided
       let uploadedImageUrl: string | null = null;
       if (item.photo) {
-        console.log('2. Photo detected, starting upload process...');
         uploadedImageUrl = await uploadImage(item.photo);
-        console.log('2a. Upload result:', { 
-          success: !!uploadedImageUrl, 
-          url: uploadedImageUrl 
-        });
-      } else {
-        console.log('2. No photo to upload');
       }
 
-      // Step 3: Convert to database format
+      // Step 3: Convert to database format and save
       const dbItem = convertLocalToDb(item, uploadedImageUrl || undefined);
-      console.log('3. Database item prepared:', dbItem);
-      console.log('3a. Tags specifically:', { 
-        originalTags: item.tags, 
-        dbItemTags: dbItem.tags,
-        tagsType: typeof dbItem.tags,
-        tagsIsArray: Array.isArray(dbItem.tags)
-      });
-      
-      // Step 4: Save to database
-      console.log('4. Saving to database...');
-      const insertData = {
-        ...dbItem,
-        user_id: user.id
-      };
-      console.log('4a. Final insert data:', insertData);
-      console.log('4b. Insert data tags:', { 
-        tags: insertData.tags, 
-        tagsType: typeof insertData.tags,
-        tagsIsArray: Array.isArray(insertData.tags)
-      });
       
       const { data, error } = await supabase
         .from('paused_items')
-        .insert(insertData)
+        .insert({
+          ...dbItem,
+          user_id: user.id
+        })
         .select()
         .single();
 
       if (error) {
-        console.error('4a. ❌ Database save failed:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-          fullError: error
-        });
+        console.error('❌ Database save failed:', error);
         return;
       }
 
-      console.log('4b. ✅ Database save successful:', data);
-
-      // Step 5: Update local state
+      // Step 4: Update local state
       const newItem = convertDbToLocal(data);
       this.items.unshift(newItem);
       this.updateCheckInTimes();
       this.notifyListeners();
-      
-      console.log('5. ✅ Item successfully added with final data:', {
-        id: newItem.id,
-        storeName: newItem.storeName,
-        imageUrl: newItem.imageUrl,
-        emotion: newItem.emotion,
-        tags: newItem.tags,
-        tagsLength: newItem.tags?.length || 0
-      });
-      
-      console.log('=== ADD ITEM DEBUG END ===');
     } catch (error) {
       console.error('❌ Unexpected error in addItem:', error);
     }
@@ -216,52 +130,28 @@ class SupabasePausedItemsStore {
   }
 
   getItemsForReview(): PausedItem[] {
-    console.log('🔍 Store getItemsForReview: isLoaded:', this.isLoaded, 'items length:', this.items.length);
-    
     // Return empty array if not loaded or no items
     if (!this.isLoaded || !this.items.length) {
-      console.log('🔍 Store getItemsForReview: Early return - not loaded or no items');
       return [];
     }
 
     try {
       const now = new Date();
-      console.log('🔍 Store getItemsForReview: Current time:', now.toISOString());
       
       const reviewItems = this.items.filter(item => {
         try {
           // Ensure item has required properties
           if (!item || !item.checkInDate) {
-            console.log('🔍 Store getItemsForReview: Item missing required properties:', {
-              itemId: item?.id,
-              itemName: item?.itemName,
-              hasCheckInDate: !!item?.checkInDate
-            });
             return false;
           }
           
-          const checkInTimestamp = item.checkInDate.getTime();
-          const nowTimestamp = now.getTime();
-          const isReady = checkInTimestamp <= nowTimestamp;
-          
-          console.log('🔍 Store getItemsForReview: Item time check:', {
-            itemId: item.id,
-            itemName: item.itemName,
-            checkInDate: item.checkInDate.toISOString(),
-            checkInTimestamp,
-            nowTimestamp,
-            timeDiff: nowTimestamp - checkInTimestamp,
-            isReady
-          });
-          
-          return isReady;
+          return item.checkInDate.getTime() <= now.getTime();
         } catch (error) {
-          console.error('Error filtering review item:', error, item);
+          console.error('Error filtering review item:', error);
           return false;
         }
       });
       
-      console.log('🔍 Store getItemsForReview: Final review items:', reviewItems.length, reviewItems);
       return reviewItems;
     } catch (error) {
       console.error('Error in getItemsForReview:', error);

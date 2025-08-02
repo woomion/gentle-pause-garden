@@ -13,6 +13,9 @@ export const usePausedItems = () => {
   const { isOnline } = useNetworkStatus();
 
   useEffect(() => {
+    // Set loading to true at the start
+    setLoading(true);
+    
     if (!user) {
       // Guest mode - use local storage only
       const updateItems = () => {
@@ -26,20 +29,37 @@ export const usePausedItems = () => {
       return unsubscribe;
     }
 
-    // Authenticated mode - hybrid approach
+    // Authenticated mode - hybrid approach with optimized loading
+    let isInitialLoad = true;
+    
     const updateItems = () => {
       const allItems = supabasePausedItemsStore.getItems();
       setItems(allItems);
       
-      if (supabasePausedItemsStore.isDataLoaded()) {
+      // For initial load, wait for data to be loaded
+      // For subsequent updates, show immediately
+      if (!isInitialLoad || supabasePausedItemsStore.isDataLoaded()) {
         setLoading(false);
+      }
+      
+      if (isInitialLoad) {
+        isInitialLoad = false;
       }
     };
 
     updateItems();
     const unsubscribe = supabasePausedItemsStore.subscribe(updateItems);
 
-    return unsubscribe;
+    // Set a maximum loading time to prevent hanging
+    const loadingTimeout = setTimeout(() => {
+      console.warn('⚠️ Loading timeout reached, showing current data');
+      setLoading(false);
+    }, 5000); // 5 second timeout
+
+    return () => {
+      unsubscribe();
+      clearTimeout(loadingTimeout);
+    };
   }, [user]);
 
   const addItem = async (item: Omit<PausedItem | LocalPausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>) => {
