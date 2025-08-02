@@ -150,6 +150,7 @@ const ItemReviewContent = ({
           notes={notes}
           setNotes={setNotes}
           onSubmit={handleSubmitDecision}
+          onBack={() => setShowFeedback(false)}
           isLastItem={isLastItem}
         />
       )}

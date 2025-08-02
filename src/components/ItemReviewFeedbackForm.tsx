@@ -6,6 +6,7 @@ interface ItemReviewFeedbackFormProps {
   notes: string;
   setNotes: (notes: string) => void;
   onSubmit: () => void;
+  onBack?: () => void;
   isLastItem: boolean;
 }
 
@@ -21,6 +22,7 @@ const ItemReviewFeedbackForm = ({
   notes,
   setNotes,
   onSubmit,
+  onBack,
   isLastItem
 }: ItemReviewFeedbackFormProps) => {
   const [randomPhrase] = useState(() => 
@@ -48,12 +50,22 @@ const ItemReviewFeedbackForm = ({
         />
       </div>
 
-      <button
-        onClick={onSubmit}
-        className="w-full py-3 px-4 bg-[#CAB6F7] hover:bg-[#B5A0F2] text-black font-medium rounded-xl transition-colors"
-      >
-        {isLastItem ? 'Finish' : 'Continue'}
-      </button>
+      <div className="flex gap-3">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="flex-1 py-3 px-4 bg-muted hover:bg-muted/80 text-muted-foreground font-medium rounded-xl transition-colors"
+          >
+            Back
+          </button>
+        )}
+        <button
+          onClick={onSubmit}
+          className={`${onBack ? 'flex-1' : 'w-full'} py-3 px-4 bg-[#CAB6F7] hover:bg-[#B5A0F2] text-black font-medium rounded-xl transition-colors`}
+        >
+          {isLastItem ? 'Finish' : 'Continue'}
+        </button>
+      </div>
     </>
   );
 };

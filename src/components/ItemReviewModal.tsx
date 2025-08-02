@@ -162,12 +162,11 @@ const ItemReviewModal = ({
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              
               {/* Carousel Navigation */}
-              <div className="flex items-center justify-center pb-4 gap-4 border-b border-border">
+              <div className="flex items-center justify-center py-2 gap-4">
                 <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-                <span className="text-sm text-gray-600 px-4">
-                  Swipe or use arrows to navigate
+                <span className="text-xs text-muted-foreground px-2">
+                  Swipe or use arrows
                 </span>
                 <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
               </div>
@@ -175,7 +174,7 @@ const ItemReviewModal = ({
             
             {/* Static Decision Buttons for Current Item */}
             {!showFeedback && (
-              <div className="p-6 pt-0">
+              <div className="p-6 pt-4">
                 <ItemReviewDecisionButtons 
                   onDecision={handleDecision} 
                   onExtendPause={() => setShowExtendModal(true)}
@@ -185,7 +184,7 @@ const ItemReviewModal = ({
             
             {/* Feedback Form for Current Item */}
             {showFeedback && selectedDecision && (
-              <div className="p-6 pt-0">
+              <div className="p-6 pt-4">
                 <ItemReviewContent
                   item={currentItem}
                   onItemDecided={onItemDecided}
