@@ -8,7 +8,7 @@ interface ItemReviewDecisionButtonsProps {
 
 const ItemReviewDecisionButtons = ({ onDecision, onExtendPause }: ItemReviewDecisionButtonsProps) => {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 mt-6">
       <button
         onClick={() => onDecision('purchase')}
         className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"

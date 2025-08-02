@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
+import { PausedItem as LocalPausedItem, pausedItemsStore } from '../stores/pausedItemsStore';
+import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { useItemReviewCarousel } from '../hooks/useItemReviewCarousel';
 import { ItemReviewContent } from './ItemReviewContent';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
+import ExtendPauseModal from './ExtendPauseModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import { toast } from '@/hooks/use-toast';
 import {
   Carousel,
   CarouselContent,
@@ -34,6 +37,7 @@ const ItemReviewModal = ({
 }: ItemReviewModalProps) => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
+  const [showExtendModal, setShowExtendModal] = useState(false);
   const { activeIndex, api, setApi, navigateToNext } = useItemReviewCarousel(
     currentIndex,
     isOpen,
@@ -80,6 +84,36 @@ const ItemReviewModal = ({
     } else {
       // If not in feedback mode, close the modal
       onClose();
+    }
+  };
+
+  const handleExtendPause = async (duration: string) => {
+    try {
+      if (user) {
+        await supabasePausedItemsStore.extendPause(currentItem.id, duration);
+      } else {
+        pausedItemsStore.extendPause(currentItem.id, duration);
+      }
+      
+      toast({
+        title: "Pause extended",
+        description: "Your item will be ready for review later.",
+      });
+      
+      setShowExtendModal(false);
+      
+      if (isLastItem) {
+        onClose();
+      } else {
+        handleNavigateNext();
+      }
+    } catch (error) {
+      console.error('Error extending pause:', error);
+      toast({
+        title: "Error",
+        description: "Failed to extend pause. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -144,7 +178,7 @@ const ItemReviewModal = ({
               <div className="p-6 pt-0">
                 <ItemReviewDecisionButtons 
                   onDecision={handleDecision} 
-                  onExtendPause={() => {}}
+                  onExtendPause={() => setShowExtendModal(true)}
                 />
               </div>
             )}
@@ -177,6 +211,13 @@ const ItemReviewModal = ({
             setShowFeedback={setShowFeedback}
           />
         )}
+        
+        <ExtendPauseModal
+          isOpen={showExtendModal}
+          onClose={() => setShowExtendModal(false)}
+          onExtend={handleExtendPause}
+          itemName={'itemName' in currentItem ? currentItem.itemName : (currentItem as any).title || 'item'}
+        />
       </div>
     </div>
   );
