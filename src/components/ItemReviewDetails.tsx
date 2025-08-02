@@ -48,7 +48,7 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
   };
 
   return (
-    <div className="flex items-start gap-4 mb-6">
+    <div className="flex items-start gap-4 mb-2">
       <div className="flex flex-col items-center gap-2">
         <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
           {imageUrl === 'cart-placeholder' ? (
