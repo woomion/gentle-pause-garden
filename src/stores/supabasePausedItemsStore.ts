@@ -36,8 +36,8 @@ class SupabasePausedItemsStore {
   private isLoaded = false;
 
   constructor() {
-    // Load items when store is created
-    this.loadItems();
+    // Don't auto-load on construction to prevent delays
+    this.isLoaded = true; // Set as loaded initially for guest mode
   }
 
   private updateCheckInTimes(): void {
@@ -56,6 +56,8 @@ class SupabasePausedItemsStore {
         this.notifyListeners();
         return;
       }
+
+      this.isLoaded = false; // Set to false only when we actually need to load
 
       const { data, error } = await supabase
         .from('paused_items')

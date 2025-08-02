@@ -8,16 +8,13 @@ import { useNetworkStatus } from './useNetworkStatus';
 
 export const usePausedItems = () => {
   const [items, setItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start false for immediate load
   const { user } = useAuth();
   const { isOnline } = useNetworkStatus();
 
   useEffect(() => {
-    // Set loading to true at the start
-    setLoading(true);
-    
     if (!user) {
-      // Guest mode - use local storage only
+      // Guest mode - load immediately from local storage
       const updateItems = () => {
         const allItems = pausedItemsStore.getItems();
         setItems(allItems);

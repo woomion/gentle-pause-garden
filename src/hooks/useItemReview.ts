@@ -9,7 +9,7 @@ export const useItemReview = () => {
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const { user } = useAuth();
 
-  // Track items for review (solo items only - exclude shared items)
+  // Track items for review - load immediately for guest mode
   useEffect(() => {
     const updateItemsForReview = () => {
       if (user) {
@@ -24,6 +24,7 @@ export const useItemReview = () => {
         
         setItemsForReview(soloItems);
       } else {
+        // Guest mode - load immediately
         const reviewItems = pausedItemsStore.getItemsForReview();
         setItemsForReview(reviewItems);
       }
