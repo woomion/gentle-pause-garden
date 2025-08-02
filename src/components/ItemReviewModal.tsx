@@ -163,7 +163,7 @@ const ItemReviewModal = ({
                 ))}
               </CarouselContent>
               {/* Carousel Navigation */}
-              <div className="flex items-center justify-center py-1 gap-4">
+              <div className="flex items-center justify-center gap-4">
                 <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
                 <span className="text-xs text-muted-foreground px-2">
                   Swipe or use arrows
