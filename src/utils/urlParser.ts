@@ -716,13 +716,31 @@ const extractItemName = (doc: Document): string | undefined => {
 };
 
 const extractPrice = (doc: Document): string | undefined => {
-  // Try various selectors for price in order of preference
+  // Enhanced selectors for price with better store coverage
   const selectors = [
     // Meta tags (most reliable)
     'meta[property="product:price:amount"]',
     'meta[property="og:price:amount"]',
     'meta[property="product:price"]',
     'meta[name="price"]',
+    
+    // ThriftBooks specific selectors (high priority)
+    '.SearchResultListItem-price', // ThriftBooks search results
+    '.AllEditionsItem-price', // ThriftBooks book page
+    '.work-price', // ThriftBooks
+    '.price-value', // ThriftBooks
+    '.item-price', // ThriftBooks
+    '.book-price', // ThriftBooks
+    '.condition-price', // ThriftBooks by condition
+    '.product-price .price', // ThriftBooks product page
+    '[data-testid="price"]', // ThriftBooks modern
+    '.price-current', // ThriftBooks current price
+    
+    // Barnes & Noble specific
+    '.price-display', // B&N
+    '.price-main', // B&N
+    '.current-price-value', // B&N
+    '.pdp-price .price', // B&N
     
     // Shopify-specific selectors (high priority for Shopify stores)
     '.price--highlight .price-item--regular',
@@ -744,14 +762,20 @@ const extractPrice = (doc: Document): string | undefined => {
     'p.wt-text-title-03', // Etsy price text
     '[class*="listing-page-price"]', // Etsy generic
     
-    // Store-specific selectors
+    // Amazon selectors
     '.a-price-whole', // Amazon whole price
     '.a-price .a-offscreen', // Amazon full price
     '#priceblock_dealprice', // Amazon deal price
     '#priceblock_saleprice', // Amazon sale price
     '#price_inside_buybox', // Amazon buybox price
+    '.a-price-range', // Amazon price range
+    
+    // eBay selectors
     '.notranslate', // eBay price
     '.u-flL.condText', // eBay price
+    '.price-current .price', // eBay current
+    
+    // Store-specific selectors
     '.display-price', // Best Buy
     '[data-automation-id="product-price"]', // Target
     '[data-testid="price"]',
@@ -889,13 +913,30 @@ const extractPrice = (doc: Document): string | undefined => {
 };
 
 const extractImageUrl = (doc: Document, origin: string): string | undefined => {
-  // Try various selectors for product images with improved priority
+  // Enhanced selectors for product images with better store coverage
   const selectors = [
     // Meta tags (most reliable)
     'meta[property="og:image"]',
     'meta[name="twitter:image"]',
     'meta[property="og:image:url"]',
     'meta[property="product:image"]',
+    
+    // ThriftBooks specific image selectors (high priority)
+    '.SearchResultListItem-image img', // ThriftBooks search results
+    '.AllEditionsItem-image img', // ThriftBooks book page
+    '.work-image img', // ThriftBooks
+    '.book-image img', // ThriftBooks
+    '.product-image img', // ThriftBooks product page
+    '.item-image img', // ThriftBooks
+    '.book-cover img', // ThriftBooks cover
+    '.cover-image img', // ThriftBooks cover
+    '[data-testid="book-cover"] img', // ThriftBooks modern
+    '.main-book-image img', // ThriftBooks main
+    
+    // Barnes & Noble specific
+    '.pdp-product-image img', // B&N
+    '.product-image-main img', // B&N
+    '.book-jacket img', // B&N
     
     // Store-specific high-quality image selectors
     '#landingImage', // Amazon main product image
@@ -909,6 +950,16 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
     '.pdp-image img',
     '.main-product-image img',
     
+    // Etsy specific
+    '[data-testid="listing-page-image"] img', // Etsy
+    '.listing-page-image img', // Etsy
+    '.shop2-listing-page-image img', // Etsy legacy
+    
+    // Shopify specific
+    '.product__main-photos img', // Shopify
+    '.product-single__photo img', // Shopify
+    '.featured-image img', // Shopify
+    
     // Generic product image selectors
     '.product-image img',
     '#product-image img',
@@ -921,10 +972,14 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
     '[class*="hero"] img',
     '[class*="main"] img',
     '[class*="primary"] img',
+    '[class*="book"] img',
+    '[class*="cover"] img',
     
-    // Alt text based selectors
+    // Alt text based selectors (enhanced for books)
     'img[alt*="product" i]',
     'img[alt*="item" i]',
+    'img[alt*="book" i]',
+    'img[alt*="cover" i]',
     'img[alt*="buy" i]',
     'img[alt*="shop" i]',
     
@@ -932,7 +987,10 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
     'img[src*="product"]',
     'img[src*="item"]',
     'img[src*="catalog"]',
+    'img[src*="book"]',
+    'img[src*="cover"]',
     'img[class*="product"]',
+    'img[class*="book"]',
     
     // Fallback: any reasonably sized image
     'img[width]:not([width="1"]):not([width="0"])',
