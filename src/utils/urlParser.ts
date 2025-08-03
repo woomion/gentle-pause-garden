@@ -81,28 +81,41 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
         }
       }
       
-      // Fallback to proxy services with more reliable options
+      // Enhanced proxy services with better reliability and timeout handling
       const proxyServices = [
         `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://cors-anywhere.herokuapp.com/${url}`,
         `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`,
-        // Direct fetch as backup (may work for some sites)
+        // Direct fetch as backup (may work for some CORS-enabled sites)
         url
       ];
       
-      // Try each proxy service
+      // Try each proxy service with enhanced timeout and error handling
       for (let i = 0; i < proxyServices.length; i++) {
         const proxyUrl = proxyServices[i];
         try {
-          console.log('Trying fetch method:', i === proxyServices.length - 1 ? 'direct' : 'proxy');
+          console.log('Trying fetch method:', i === proxyServices.length - 1 ? 'direct' : `proxy ${i + 1}`);
           
           let response;
+          const fetchOptions = {
+            signal: AbortSignal.timeout(8000), // 8 second timeout
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Accept-Language': 'en-US,en;q=0.5',
+              'Accept-Encoding': 'gzip, deflate, br',
+              'DNT': '1',
+              'Connection': 'keep-alive',
+              'Upgrade-Insecure-Requests': '1'
+            }
+          };
+          
           if (i === proxyServices.length - 1) {
             // Last attempt: direct fetch (may work for some CORS-enabled sites)
             response = await fetch(proxyUrl, {
-              mode: 'cors',
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-              }
+              ...fetchOptions,
+              mode: 'cors'
             });
             
             if (response.ok) {
@@ -112,27 +125,35 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
             }
           } else {
             // Proxy attempt
-            response = await fetch(proxyUrl, {
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-              }
-            });
+            response = await fetch(proxyUrl, fetchOptions);
             
             if (response.ok) {
-              const data = await response.json();
-              if (data.contents) {
-                htmlContent = data.contents;
-                console.log('Successfully fetched content via proxy');
-                break;
-              } else if (typeof data === 'string' && data.includes('<html')) {
-                htmlContent = data;
-                console.log('Successfully fetched content via proxy (direct HTML)');
-                break;
+              let data;
+              const contentType = response.headers.get('content-type');
+              
+              if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+                if (data.contents) {
+                  htmlContent = data.contents;
+                  console.log('Successfully fetched content via proxy (JSON response)');
+                  break;
+                } else if (data.response) {
+                  htmlContent = data.response;
+                  console.log('Successfully fetched content via proxy (response field)');
+                  break;
+                }
+              } else {
+                // Direct HTML response from proxy
+                htmlContent = await response.text();
+                if (htmlContent && htmlContent.includes('<html')) {
+                  console.log('Successfully fetched content via proxy (direct HTML)');
+                  break;
+                }
               }
             }
           }
         } catch (proxyError) {
-          console.log('Fetch method failed, trying next:', proxyError.message);
+          console.log(`Fetch method ${i + 1} failed, trying next:`, proxyError.message);
           continue;
         }
       }
@@ -187,35 +208,68 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   }
 };
 
-// Resolve redirects for short URLs
+// Enhanced redirect resolution with multiple fallback services
 const resolveRedirects = async (url: string): Promise<string> => {
   const shortUrlPatterns = [
-    'amzn.to',
-    'bit.ly', 
-    'tinyurl.com',
-    't.co',
-    'goo.gl',
-    'ow.ly',
-    'short.link'
+    'amzn.to', 'amazon.com/dp', 'amazon.com/gp',
+    'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'short.link',
+    'rb.gy', 'is.gd', 'v.gd', 'rebrand.ly', 'tiny.cc'
   ];
 
   try {
     const urlObj = new URL(url);
     const isShortUrl = shortUrlPatterns.some(pattern => 
-      urlObj.hostname.includes(pattern)
+      urlObj.hostname.includes(pattern) || url.includes(pattern)
     );
 
     if (!isShortUrl) {
       return url;
     }
 
-    // Use a redirect resolver service
-    const response = await fetch(`https://httpbin.org/redirect-to?url=${encodeURIComponent(url)}`, {
-      method: 'HEAD',
-      redirect: 'follow'
-    });
+    console.log('Resolving redirect for short URL:', url);
+
+    // Multiple redirect resolution services with timeout
+    const redirectServices = [
+      async () => {
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://httpbin.org/redirect-to?url=${encodeURIComponent(url)}`)}`, {
+          signal: AbortSignal.timeout(5000)
+        });
+        return response.url;
+      },
+      async () => {
+        // Direct HEAD request to the short URL
+        const response = await fetch(url, {
+          method: 'HEAD',
+          redirect: 'follow',
+          signal: AbortSignal.timeout(5000)
+        });
+        return response.url;
+      },
+      async () => {
+        // Use a different redirect resolver
+        const response = await fetch(`https://unshorten.me/json/${encodeURIComponent(url)}`, {
+          signal: AbortSignal.timeout(5000)
+        });
+        const data = await response.json();
+        return data.resolved_url || data.url;
+      }
+    ];
+
+    // Try each service with timeout
+    for (const service of redirectServices) {
+      try {
+        const resolvedUrl = await service();
+        if (resolvedUrl && resolvedUrl !== url && resolvedUrl.length > url.length) {
+          console.log('Successfully resolved redirect:', resolvedUrl);
+          return resolvedUrl;
+        }
+      } catch (serviceError) {
+        console.log('Redirect service failed, trying next:', serviceError.message);
+        continue;
+      }
+    }
     
-    return response.url || url;
+    return url;
   } catch (error) {
     console.warn('Could not resolve redirect for:', url, error);
     return url;
@@ -225,38 +279,94 @@ const resolveRedirects = async (url: string): Promise<string> => {
 const extractFromUrlStructure = (url: string, hostname: string): Partial<ProductInfo> => {
   const info: Partial<ProductInfo> = {};
   
-  // Amazon specific URL parsing
+  // Amazon specific URL parsing (enhanced for different Amazon URL formats)
   if (hostname.includes('amazon')) {
-    const match = url.match(/\/([^\/]+)\/dp\/([A-Z0-9]{10})/);
-    if (match) {
-      const titlePart = match[1];
-      // Convert URL-encoded title to readable format
-      const decodedTitle = decodeURIComponent(titlePart.replace(/-/g, ' '));
-      info.itemName = decodedTitle.split(' ').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-      ).join(' ');
+    // Standard Amazon product URLs
+    let match = url.match(/\/([^\/]+)\/dp\/([A-Z0-9]{10})/);
+    if (!match) {
+      // Alternative Amazon URLs like /gp/product/
+      match = url.match(/\/gp\/product\/([A-Z0-9]{10})/);
+      if (match) {
+        // For /gp/product/ URLs, we don't have the title in the URL
+        info.itemName = 'Amazon Product';
+      }
+    }
+    if (!match) {
+      // Amazon short URLs or other formats
+      match = url.match(/\/([A-Z0-9]{10})/);
+    }
+    
+    if (match && match[1] && match[1].length > 5) {
+      if (!info.itemName) {
+        const titlePart = match[1];
+        // Convert URL-encoded title to readable format
+        const decodedTitle = decodeURIComponent(titlePart.replace(/-/g, ' '));
+        info.itemName = decodedTitle.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        ).join(' ');
+      }
     }
   }
   
-  // eBay specific URL parsing
+  // ThriftBooks specific URL parsing
+  if (hostname.includes('thriftbooks')) {
+    const patterns = [
+      /\/share\/([^\/\?#]+)/i,
+      /\/([^\/\?#]+)\/[\d\-]+/i,
+      /\/([^\/\?#]+)\//i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        const titlePart = decodeURIComponent(match[1]);
+        const readableTitle = titlePart
+          .replace(/[-_]/g, ' ')
+          .replace(/\+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ')
+          .trim();
+        
+        if (readableTitle.length > 3) {
+          info.itemName = readableTitle;
+          console.log('Extracted ThriftBooks product name from URL:', readableTitle);
+          break;
+        }
+      }
+    }
+  }
+  
+  // eBay specific URL parsing (enhanced)
   if (hostname.includes('ebay')) {
-    const match = url.match(/\/itm\/([^\/]+)/);
-    if (match) {
-      const titlePart = match[1];
-      const decodedTitle = decodeURIComponent(titlePart.replace(/-/g, ' '));
-      info.itemName = decodedTitle.split(' ').slice(0, 8).join(' '); // Limit length
+    const patterns = [
+      /\/itm\/([^\/\?#]+)/,
+      /\/p\/([^\/\?#]+)/,
+      /\/([^\/\?#]+)\/\d+/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        const titlePart = match[1];
+        const decodedTitle = decodeURIComponent(titlePart.replace(/-/g, ' '));
+        info.itemName = decodedTitle.split(' ').slice(0, 10).join(' '); // Limit length
+        console.log('Extracted eBay product name from URL:', info.itemName);
+        break;
+      }
     }
   }
   
-  // Shopify store URL parsing (like sculpd.com)
-  if (url.includes('/products/')) {
-    const match = url.match(/\/products\/([^\/\?]+)/);
+  // Shopify store URL parsing (enhanced)
+  if (url.includes('/products/') || hostname.includes('shopify')) {
+    const match = url.match(/\/products\/([^\/\?#]+)/);
     if (match) {
       const productSlug = decodeURIComponent(match[1]);
       // Convert slug to readable title
       const readableTitle = productSlug
-        .replace(/-/g, ' ')
-        .replace(/_/g, ' ')
+        .replace(/[-_]/g, ' ')
+        .replace(/\+/g, ' ')
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
@@ -265,13 +375,13 @@ const extractFromUrlStructure = (url: string, hostname: string): Partial<Product
     }
   }
   
-  // Etsy specific URL parsing - improved
+  // Etsy specific URL parsing (enhanced)
   if (hostname.includes('etsy')) {
     const match = url.match(/\/listing\/\d+\/([^\/\?#]+)/);
     if (match) {
       const titlePart = decodeURIComponent(match[1]);
       const readableTitle = titlePart
-        .replace(/-/g, ' ')
+        .replace(/[-_]/g, ' ')
         .replace(/\+/g, ' ')
         .replace(/\s+/g, ' ')
         .split(' ')
@@ -283,14 +393,37 @@ const extractFromUrlStructure = (url: string, hostname: string): Partial<Product
     }
   }
   
-  // Generic product URL parsing for other e-commerce sites
+  // Barnes & Noble specific URL parsing
+  if (hostname.includes('barnesandnoble') || hostname.includes('bn.com')) {
+    const match = url.match(/\/w\/([^\/\?#]+)/);
+    if (match) {
+      const titlePart = decodeURIComponent(match[1]);
+      const readableTitle = titlePart
+        .replace(/[-_]/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      info.itemName = readableTitle;
+      console.log('Extracted Barnes & Noble product name from URL:', readableTitle);
+    }
+  }
+  
+  // Generic product URL parsing for other e-commerce sites (enhanced)
   if (!info.itemName) {
-    // Try to extract from common patterns like /product/, /item/, /p/
+    // Extended patterns for various e-commerce sites
     const patterns = [
-      /\/product\/([^\/\?]+)/i,
-      /\/item\/([^\/\?]+)/i,
-      /\/p\/([^\/\?]+)/i,
-      /\/shop\/([^\/\?]+)/i
+      /\/product\/([^\/\?#]+)/i,
+      /\/products\/([^\/\?#]+)/i,
+      /\/item\/([^\/\?#]+)/i,
+      /\/items\/([^\/\?#]+)/i,
+      /\/p\/([^\/\?#]+)/i,
+      /\/shop\/([^\/\?#]+)/i,
+      /\/book\/([^\/\?#]+)/i,
+      /\/books\/([^\/\?#]+)/i,
+      /\/catalog\/([^\/\?#]+)/i,
+      /\/store\/([^\/\?#]+)/i,
+      /\/buy\/([^\/\?#]+)/i,
+      /\/detail\/([^\/\?#]+)/i
     ];
     
     for (const pattern of patterns) {
@@ -299,9 +432,12 @@ const extractFromUrlStructure = (url: string, hostname: string): Partial<Product
         const productSlug = decodeURIComponent(match[1]);
         const readableTitle = productSlug
           .replace(/[-_]/g, ' ')
+          .replace(/\+/g, ' ')
+          .replace(/\s+/g, ' ')
           .split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
           .join(' ')
+          .trim()
           .substring(0, 100); // Limit length
         
         if (readableTitle.length > 3) {
@@ -320,8 +456,9 @@ const extractStoreName = (hostname: string): string => {
   // Remove www. and common TLD extensions
   let storeName = hostname.replace(/^www\./, '');
   
-  // Known store mappings
+  // Enhanced store mappings with book retailers and more sites
   const storeMap: { [key: string]: string } = {
+    // Amazon variants
     'amazon.com': 'Amazon',
     'amazon.co.uk': 'Amazon UK',
     'amazon.ca': 'Amazon Canada',
@@ -331,10 +468,35 @@ const extractStoreName = (hostname: string): string => {
     'amazon.es': 'Amazon Spain',
     'amazon.in': 'Amazon India',
     'amazon.co.jp': 'Amazon Japan',
+    'amazon.com.au': 'Amazon Australia',
+    'amazon.com.br': 'Amazon Brazil',
+    
+    // eBay variants
     'ebay.com': 'eBay',
     'ebay.co.uk': 'eBay UK',
     'ebay.de': 'eBay Germany',
     'ebay.fr': 'eBay France',
+    'ebay.it': 'eBay Italy',
+    'ebay.es': 'eBay Spain',
+    'ebay.ca': 'eBay Canada',
+    'ebay.com.au': 'eBay Australia',
+    
+    // Book retailers
+    'thriftbooks.com': 'ThriftBooks',
+    'barnesandnoble.com': 'Barnes & Noble',
+    'bn.com': 'Barnes & Noble',
+    'bookdepository.com': 'Book Depository',
+    'abebooks.com': 'AbeBooks',
+    'alibris.com': 'Alibris',
+    'powells.com': 'Powell\'s Books',
+    'betterworldbooks.com': 'Better World Books',
+    'booksamillion.com': 'Books-A-Million',
+    'chapters.indigo.ca': 'Chapters Indigo',
+    'waterstones.com': 'Waterstones',
+    'whsmith.co.uk': 'WHSmith',
+    'scholastic.com': 'Scholastic',
+    
+    // Major retailers
     'etsy.com': 'Etsy',
     'target.com': 'Target',
     'walmart.com': 'Walmart',
@@ -347,8 +509,11 @@ const extractStoreName = (hostname: string): string => {
     'homedepot.com': 'Home Depot',
     'lowes.com': "Lowe's",
     'costco.com': 'Costco',
+    'samsclub.com': "Sam's Club",
     'sephora.com': 'Sephora',
     'ulta.com': 'Ulta Beauty',
+    
+    // Fashion & apparel
     'nike.com': 'Nike',
     'adidas.com': 'Adidas',
     'zara.com': 'Zara',
@@ -361,21 +526,51 @@ const extractStoreName = (hostname: string): string => {
     'anthropologie.com': 'Anthropologie',
     'freepeople.com': 'Free People',
     'victoriassecret.com': "Victoria's Secret",
+    
+    // Home & furniture
     'williams-sonoma.com': 'Williams Sonoma',
     'crateandbarrel.com': 'Crate & Barrel',
     'cb2.com': 'CB2',
     'westelm.com': 'West Elm',
     'potterybarn.com': 'Pottery Barn',
     'ikea.com': 'IKEA',
+    'roomandboard.com': 'Room & Board',
+    'restorationhardware.com': 'Restoration Hardware',
+    
+    // E-commerce platforms
     'shopify.com': 'Shopify Store',
     'bigcommerce.com': 'BigCommerce Store',
     'squarespace.com': 'Squarespace Store',
     'wix.com': 'Wix Store',
+    'myshopify.com': 'Shopify Store',
+    
+    // Marketplaces
     'poshmark.com': 'Poshmark',
     'mercari.com': 'Mercari',
     'depop.com': 'Depop',
     'thredup.com': 'ThredUp',
-    'realreal.com': 'The RealReal'
+    'realreal.com': 'The RealReal',
+    'vestiairecollective.com': 'Vestiaire Collective',
+    'rebag.com': 'Rebag',
+    'fashionphile.com': 'Fashionphile',
+    
+    // Electronics & tech
+    'newegg.com': 'Newegg',
+    'bhphotovideo.com': 'B&H Photo',
+    'adorama.com': 'Adorama',
+    'microcenter.com': 'Micro Center',
+    'apple.com': 'Apple',
+    'microsoft.com': 'Microsoft',
+    'dell.com': 'Dell',
+    'hp.com': 'HP',
+    
+    // Specialty stores
+    'chewy.com': 'Chewy',
+    'petco.com': 'Petco',
+    'petsmart.com': 'PetSmart',
+    'rei.com': 'REI',
+    'dickssportinggoods.com': "Dick's Sporting Goods",
+    'academy.com': 'Academy Sports'
   };
   
   for (const [domain, name] of Object.entries(storeMap)) {
@@ -384,29 +579,69 @@ const extractStoreName = (hostname: string): string => {
     }
   }
   
-  // Fallback: capitalize first letter and remove .com
-  storeName = storeName.replace(/\.(com|co\.uk|ca|org|net|de|fr|shop)$/, '');
+  // Enhanced fallback: handle more TLD extensions and special cases
+  storeName = storeName.replace(/\.(com|co\.uk|ca|org|net|de|fr|shop|store|io|ly|me|us|biz|info)$/, '');
+  
+  // Handle special cases like hyphenated names
+  if (storeName.includes('-')) {
+    return storeName.split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  
   return storeName.charAt(0).toUpperCase() + storeName.slice(1);
 };
 
 const extractItemName = (doc: Document): string | undefined => {
-  // Try various selectors for product titles in order of preference
+  // Enhanced selectors for product titles with better store coverage
   const selectors = [
     // Meta tags (highest priority)
     'meta[property="og:title"]',
     'meta[name="twitter:title"]',
     'meta[property="product:title"]',
     'meta[name="title"]',
+    'meta[property="book:title"]', // For book sites
     
-    // Store-specific selectors
+    // Store-specific selectors (enhanced)
     '#productTitle', // Amazon
     '.x-item-title-label', // eBay
+    '.x-item-title', // eBay alternative
     '[data-automation-id="product-title"]', // Target
     '[data-testid="product-title"]',
     'h1[data-test-id="listing-page-title"]', // Etsy
     '[data-testid="listing-page-title"]', // Etsy alternative
     '.listing-page-title h1', // Etsy fallback
     '.shop2-listing-page-title', // Etsy legacy
+    
+    // ThriftBooks specific
+    '.AllEditionsItem-title', // ThriftBooks
+    '.work-title', // ThriftBooks
+    '.book-title', // ThriftBooks
+    'h1.title', // ThriftBooks
+    '.product-title h1', // ThriftBooks product page
+    
+    // Barnes & Noble specific
+    '.pdp-product-name', // B&N
+    '.product-info-title', // B&N
+    'h1[data-ux="ProductName"]', // B&N
+    
+    // Book retailer patterns
+    '.book-title',
+    '.title-main',
+    '.work-title',
+    '.book-name',
+    '.item-title',
+    
+    // Shopify patterns (enhanced)
+    '.product-single__title',
+    '.product__title',
+    '.product-title',
+    '.product_title',
+    '.product-meta__title',
+    '[class*="product-title"]',
+    '[class*="ProductTitle"]',
+    
+    // Generic e-commerce patterns
     '.product-title',
     '#product-title',
     '.pdp-product-name',
@@ -414,17 +649,26 @@ const extractItemName = (doc: Document): string | undefined => {
     '.item-title',
     '.listing-page-title',
     '.product-details-product-title',
-    '[class*="ProductTitle"]',
+    '.product-main-title',
+    '.main-product-title',
     '[class*="product-title"]',
     '[class*="item-title"]',
     '[class*="listing-page-title"]',
+    '[class*="ProductName"]',
+    '[class*="product-name"]',
+    '[data-product-title]',
+    '[data-title]',
     
-    // Generic headings
+    // Generic headings (improved priority)
     'h1[class*="title"]',
     'h1[class*="product"]',
     'h1[class*="name"]',
+    'h1[class*="book"]',
     '.page-title h1',
+    '.content-title h1',
     'main h1',
+    'article h1',
+    '.container h1',
     'h1'
   ];
   
@@ -433,25 +677,34 @@ const extractItemName = (doc: Document): string | undefined => {
     if (element) {
       const content = element.getAttribute('content') || element.textContent;
       if (content && content.trim() && content.length > 3 && content.length < 300) {
-        // Clean up the title
+        // Enhanced title cleaning
         let cleanTitle = content.trim()
           .replace(/\s+/g, ' ') // Normalize whitespace
           .replace(/^\||\|$/g, '') // Remove leading/trailing pipes
+          .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+          .replace(/^:+|:+$/g, '') // Remove leading/trailing colons
           .trim();
         
-        return cleanTitle.substring(0, 150);
+        // Skip if it's too generic
+        const genericWords = ['untitled', 'product', 'item', 'page', 'home', 'shop', 'store'];
+        if (!genericWords.some(word => cleanTitle.toLowerCase() === word)) {
+          return cleanTitle.substring(0, 150);
+        }
       }
     }
   }
   
-  // Try title tag as last resort
+  // Enhanced title tag fallback
   const title = doc.title;
   if (title && title.length > 3) {
-    // Remove common e-commerce suffixes and clean up
+    // Enhanced cleaning for title tag with more store patterns
     const cleanTitle = title
-      .replace(/ - (Amazon\.com|Amazon|eBay|Target|Walmart|Best Buy|Shop|Store|Buy Online).*$/i, '')
-      .replace(/ \| .*$/i, '') // Remove everything after pipe
+      .replace(/ - (Amazon\.com|Amazon|eBay|Target|Walmart|Best Buy|Barnes & Noble|ThriftBooks|Etsy|Shop|Store|Buy Online|Free Shipping).*$/i, '')
+      .replace(/ \| (Amazon|eBay|Target|Walmart|Best Buy|Barnes & Noble|ThriftBooks|Etsy|Shop|Store).*$/i, '')
       .replace(/ :: .*$/i, '') // Remove everything after double colon
+      .replace(/ - Buy .*$/i, '') // Remove "Buy" suffixes
+      .replace(/ - Shop .*$/i, '') // Remove "Shop" suffixes
+      .replace(/ \(.*\)$/i, '') // Remove parenthetical info at end
       .trim();
     
     if (cleanTitle.length > 3) {
