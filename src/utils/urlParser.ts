@@ -1,555 +1,1355 @@
-// UrlData interface for URL parsing results
-export interface UrlData {
-  url: string;
-  title?: string;
-  price?: string;
-  imageUrl?: string;
-  description?: string;
+
+interface ProductInfo {
   itemName?: string;
   storeName?: string;
+  price?: string;
+  imageUrl?: string;
 }
 
-// Enhanced price extraction with multiple strategies and extensive debugging
-const extractPriceFromText = (text: string): string | undefined => {
-  if (!text || typeof text !== 'string') {
-    console.log('💰 No text provided for price extraction');
-    return undefined;
+// Performance-optimized cache with TTL and hit tracking
+const urlCache = new Map<string, { data: ProductInfo; timestamp: number; hits: number }>();
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+const MAX_CACHE_SIZE = 200;
+
+// Fast proxy services ordered by reliability and speed
+const PROXY_SERVICES = [
+  { url: 'https://api.allorigins.win/get?url=', timeout: 3000, priority: 1 },
+  { url: 'https://corsproxy.io/?', timeout: 4000, priority: 2 },
+  { url: 'https://cors-anywhere.herokuapp.com/', timeout: 5000, priority: 3 },
+];
+
+// Cache management
+const cleanExpiredCache = () => {
+  const now = Date.now();
+  for (const [key, value] of urlCache.entries()) {
+    if (now - value.timestamp > CACHE_DURATION) {
+      urlCache.delete(key);
+    }
   }
   
-  console.log('💰 Extracting price from text:', text.substring(0, 200));
+  // If cache is still too large, remove least used items
+  if (urlCache.size > MAX_CACHE_SIZE) {
+    const sortedEntries = Array.from(urlCache.entries())
+      .sort((a, b) => a[1].hits - b[1].hits);
+    const toRemove = sortedEntries.slice(0, urlCache.size - MAX_CACHE_SIZE);
+    toRemove.forEach(([key]) => urlCache.delete(key));
+  }
+};
+
+export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
+  const startTime = performance.now();
   
-  // Clean the text first
-  const cleanText = text.replace(/\s+/g, ' ').trim();
+  try {
+    console.log('🚀 Fast parsing URL:', url);
+    
+    // Clean the URL first
+    let cleanUrl = url.trim();
+    if (!cleanUrl) {
+      throw new Error('Empty URL provided');
+    }
+
+    // Check cache first
+    const cacheKey = cleanUrl;
+    const cached = urlCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+      cached.hits++;
+      console.log('✅ Cache hit! Returning cached result in', performance.now() - startTime, 'ms');
+      return cached.data;
+    }
+
+    // Clean expired cache periodically
+    if (urlCache.size > 0 && Math.random() < 0.1) {
+      cleanExpiredCache();
+    }
+
+    // Fast redirect resolution (parallel with URL parsing)
+    const [resolvedUrl, urlBasedInfo] = await Promise.all([
+      resolveRedirects(cleanUrl),
+      Promise.resolve(extractFromUrlStructure(cleanUrl, new URL(cleanUrl).hostname.toLowerCase()))
+    ]);
+
+    const urlObj = new URL(resolvedUrl);
+    const hostname = urlObj.hostname.toLowerCase();
+    
+    // Extract store name from hostname
+    const storeName = extractStoreName(hostname);
+    
+    // Initial product info with URL-based extraction
+    const productInfo: ProductInfo = { 
+      storeName,
+      ...urlBasedInfo 
+    };
+    
+    // Fast parallel processing approach
+    const extractionPromises = [];
+    
+    // Add API extraction for Shopify stores (parallel)
+    if (hostname.includes('shopify') || resolvedUrl.includes('/products/')) {
+      extractionPromises.push(
+        (async () => {
+          try {
+            const productApiUrl = resolvedUrl.replace(/\?.*$/, '') + '.json';
+            const apiResponse = await fetch(productApiUrl, { 
+              signal: AbortSignal.timeout(3000) 
+            });
+            if (apiResponse.ok) {
+              const productData = await apiResponse.json();
+              if (productData.product) {
+                return {
+                  source: 'shopify-api',
+                  itemName: productData.product.title,
+                  price: productData.product.variants?.[0]?.price ? 
+                    parseFloat(productData.product.variants[0].price).toFixed(2) : undefined,
+                  imageUrl: productData.product.images?.[0]?.src
+                };
+              }
+            }
+          } catch {
+            // API failed, will fallback to scraping
+          }
+          return null;
+        })()
+      );
+    }
+
+    // Add parallel proxy fetching with race condition
+    extractionPromises.push(
+      (async () => {
+        const fetchPromises = PROXY_SERVICES.map(async (service, index) => {
+          try {
+            const proxyUrl = service.url + encodeURIComponent(resolvedUrl);
+            const response = await fetch(proxyUrl, {
+              signal: AbortSignal.timeout(service.timeout),
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              }
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            let htmlContent: string;
+            const contentType = response.headers.get('content-type') || '';
+            
+            if (contentType.includes('application/json')) {
+              const data = await response.json();
+              htmlContent = data.contents || data.response || '';
+            } else {
+              htmlContent = await response.text();
+            }
+
+            if (!htmlContent || !htmlContent.includes('<html')) {
+              throw new Error('Invalid HTML content');
+            }
+
+            return { htmlContent, service: service.url, priority: service.priority };
+          } catch (error) {
+            throw new Error(`Proxy ${index + 1} failed: ${error.message}`);
+          }
+        });
+
+        // Use Promise.any to get the fastest successful response
+        try {
+          // Use Promise.race for faster response (first one wins)
+          const result = await Promise.race(fetchPromises.map(async (promise, index) => {
+            try {
+              return await promise;
+            } catch (error) {
+              // Throw with index to track which proxy failed
+              throw new Error(`Proxy ${index + 1} failed: ${error.message}`);
+            }
+          }));
+          console.log(`✅ Fast fetch success via ${result.service} in`, performance.now() - startTime, 'ms');
+          
+          // Parse HTML and extract all data in parallel
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(result.htmlContent, 'text/html');
+          
+          const [itemName, price, imageUrl] = await Promise.all([
+            Promise.resolve(extractItemName(doc)),
+            Promise.resolve(extractPrice(doc)),
+            Promise.resolve(extractImageUrl(doc, urlObj.origin))
+          ]);
+
+          return {
+            source: 'scraping',
+            itemName,
+            price,
+            imageUrl
+          };
+        } catch (error) {
+          console.log('All proxy services failed:', error);
+          return null;
+        }
+      })()
+    );
+
+    // Wait for any successful extraction method
+    try {
+      const results = await Promise.allSettled(extractionPromises);
+      const successfulResults = results
+        .filter(result => result.status === 'fulfilled' && result.value)
+        .map(result => (result as PromiseFulfilledResult<any>).value);
+
+      // Merge results, prioritizing API data over scraped data
+      for (const result of successfulResults) {
+        if (result.itemName && !productInfo.itemName) {
+          productInfo.itemName = result.itemName;
+        }
+        if (result.price && !productInfo.price) {
+          productInfo.price = result.price;
+        }
+        if (result.imageUrl && !productInfo.imageUrl) {
+          productInfo.imageUrl = result.imageUrl;
+        }
+      }
+
+      console.log(`⚡ Total parsing time: ${performance.now() - startTime}ms`);
+    } catch (error) {
+      console.log('Extraction failed, using URL-based data only:', error);
+    }
+
+    // Cache the result
+    urlCache.set(cacheKey, {
+      data: productInfo,
+      timestamp: Date.now(),
+      hits: 1
+    });
+
+    return productInfo;
+  } catch (error) {
+    console.error('Error parsing URL:', error);
+    return {};
+  }
+};
+
+// Enhanced redirect resolution with multiple fallback services
+const resolveRedirects = async (url: string): Promise<string> => {
+  const shortUrlPatterns = [
+    'amzn.to', 'amazon.com/dp', 'amazon.com/gp',
+    'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'short.link',
+    'rb.gy', 'is.gd', 'v.gd', 'rebrand.ly', 'tiny.cc'
+  ];
+
+  try {
+    const urlObj = new URL(url);
+    const isShortUrl = shortUrlPatterns.some(pattern => 
+      urlObj.hostname.includes(pattern) || url.includes(pattern)
+    );
+
+    if (!isShortUrl) {
+      return url;
+    }
+
+    console.log('Resolving redirect for short URL:', url);
+
+    // Multiple redirect resolution services with timeout
+    const redirectServices = [
+      async () => {
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://httpbin.org/redirect-to?url=${encodeURIComponent(url)}`)}`, {
+          signal: AbortSignal.timeout(5000)
+        });
+        return response.url;
+      },
+      async () => {
+        // Direct HEAD request to the short URL
+        const response = await fetch(url, {
+          method: 'HEAD',
+          redirect: 'follow',
+          signal: AbortSignal.timeout(5000)
+        });
+        return response.url;
+      },
+      async () => {
+        // Use a different redirect resolver
+        const response = await fetch(`https://unshorten.me/json/${encodeURIComponent(url)}`, {
+          signal: AbortSignal.timeout(5000)
+        });
+        const data = await response.json();
+        return data.resolved_url || data.url;
+      }
+    ];
+
+    // Try each service with timeout
+    for (const service of redirectServices) {
+      try {
+        const resolvedUrl = await service();
+        if (resolvedUrl && resolvedUrl !== url && resolvedUrl.length > url.length) {
+          console.log('Successfully resolved redirect:', resolvedUrl);
+          return resolvedUrl;
+        }
+      } catch (serviceError) {
+        console.log('Redirect service failed, trying next:', serviceError.message);
+        continue;
+      }
+    }
+    
+    return url;
+  } catch (error) {
+    console.warn('Could not resolve redirect for:', url, error);
+    return url;
+  }
+};
+
+const extractFromUrlStructure = (url: string, hostname: string): Partial<ProductInfo> => {
+  const info: Partial<ProductInfo> = {};
   
-  // Multiple comprehensive price pattern strategies
-  const pricePatterns = [
-    // Currency symbol before number (USD, EUR, etc.)
-    /(?:[\$£€¥₹₩¢₽₴₪₦₨₡₵₸₻₼₯₰₱₲₳₵₶₷₸₹₺₻₼₽₾₿])\s*(\d{1,4}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)/gi,
-    // Currency symbol after number
-    /(\d{1,4}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)\s*(?:[\$£€¥₹₩¢₽₴₪₦₨₡₵₸₻₼₯₰₱₲₳₵₶₷₸₹₺₻₼₽₾₿])/gi,
-    // European format (comma as decimal separator)
-    /(\d{1,4}(?:\.\d{3})*,\d{2})/g,
-    // Standard decimal format
-    /\b(\d{1,4}[.,]\d{2})\b/g,
-    // Currency codes after numbers
-    /(\d{1,4}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)\s*(?:USD|EUR|GBP|CAD|AUD|JPY|CHF|SEK|NOK|DKK|PLN|CZK|HUF|BGN|RON|HRK|RSD|BAM|MKD|ALL|ISK|RUB|UAH|BYN|MDL|GEL|AMD|AZN|KZT|UZS|KGS|TJS|TMT|AFN|PKR|INR|LKR|NPR|BTN|BDT|MVR|MMK|LAK|KHR|VND|THB|MYR|BND|SGD|IDR|PHP|CNY|HKD|MOP|TWD|KRW|JPY|MNT)/gi,
-    // Currency codes before numbers
-    /(?:USD|EUR|GBP|CAD|AUD|JPY|CHF|SEK|NOK|DKK|PLN|CZK|HUF|BGN|RON|HRK|RSD|BAM|MKD|ALL|ISK|RUB|UAH|BYN|MDL|GEL|AMD|AZN|KZT|UZS|KGS|TJS|TMT|AFN|PKR|INR|LKR|NPR|BTN|BDT|MVR|MMK|LAK|KHR|VND|THB|MYR|BND|SGD|IDR|PHP|CNY|HKD|MOP|TWD|KRW|JPY|MNT)\s*(\d{1,4}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)/gi,
-    // Just numbers that look like prices (more permissive)
-    /\b(\d{1,5}\.\d{2})\b/g,
-    // Even more permissive number patterns
-    /\b(\d{1,4})\.\d{2}\b/g
+  // Amazon specific URL parsing (enhanced for different Amazon URL formats)
+  if (hostname.includes('amazon')) {
+    // Standard Amazon product URLs
+    let match = url.match(/\/([^\/]+)\/dp\/([A-Z0-9]{10})/);
+    if (!match) {
+      // Alternative Amazon URLs like /gp/product/
+      match = url.match(/\/gp\/product\/([A-Z0-9]{10})/);
+      if (match) {
+        // For /gp/product/ URLs, we don't have the title in the URL
+        info.itemName = 'Amazon Product';
+      }
+    }
+    if (!match) {
+      // Amazon short URLs or other formats
+      match = url.match(/\/([A-Z0-9]{10})/);
+    }
+    
+    if (match && match[1] && match[1].length > 5) {
+      if (!info.itemName) {
+        const titlePart = match[1];
+        // Convert URL-encoded title to readable format
+        const decodedTitle = decodeURIComponent(titlePart.replace(/-/g, ' '));
+        info.itemName = decodedTitle.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        ).join(' ');
+      }
+    }
+  }
+  
+  // ThriftBooks specific URL parsing
+  if (hostname.includes('thriftbooks')) {
+    const patterns = [
+      /\/share\/([^\/\?#]+)/i,
+      /\/([^\/\?#]+)\/[\d\-]+/i,
+      /\/([^\/\?#]+)\//i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        const titlePart = decodeURIComponent(match[1]);
+        const readableTitle = titlePart
+          .replace(/[-_]/g, ' ')
+          .replace(/\+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ')
+          .trim();
+        
+        if (readableTitle.length > 3) {
+          info.itemName = readableTitle;
+          console.log('Extracted ThriftBooks product name from URL:', readableTitle);
+          break;
+        }
+      }
+    }
+  }
+  
+  // eBay specific URL parsing (enhanced)
+  if (hostname.includes('ebay')) {
+    const patterns = [
+      /\/itm\/([^\/\?#]+)/,
+      /\/p\/([^\/\?#]+)/,
+      /\/([^\/\?#]+)\/\d+/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        const titlePart = match[1];
+        const decodedTitle = decodeURIComponent(titlePart.replace(/-/g, ' '));
+        info.itemName = decodedTitle.split(' ').slice(0, 10).join(' '); // Limit length
+        console.log('Extracted eBay product name from URL:', info.itemName);
+        break;
+      }
+    }
+  }
+  
+  // Shopify store URL parsing (enhanced)
+  if (url.includes('/products/') || hostname.includes('shopify')) {
+    const match = url.match(/\/products\/([^\/\?#]+)/);
+    if (match) {
+      const productSlug = decodeURIComponent(match[1]);
+      // Convert slug to readable title
+      const readableTitle = productSlug
+        .replace(/[-_]/g, ' ')
+        .replace(/\+/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      info.itemName = readableTitle;
+      console.log('Extracted Shopify product name from URL:', readableTitle);
+    }
+  }
+  
+  // Etsy specific URL parsing (enhanced)
+  if (hostname.includes('etsy')) {
+    const match = url.match(/\/listing\/\d+\/([^\/\?#]+)/);
+    if (match) {
+      const titlePart = decodeURIComponent(match[1]);
+      const readableTitle = titlePart
+        .replace(/[-_]/g, ' ')
+        .replace(/\+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+        .trim();
+      info.itemName = readableTitle;
+      console.log('Extracted Etsy product name from URL:', readableTitle);
+    }
+  }
+  
+  // Barnes & Noble specific URL parsing
+  if (hostname.includes('barnesandnoble') || hostname.includes('bn.com')) {
+    const match = url.match(/\/w\/([^\/\?#]+)/);
+    if (match) {
+      const titlePart = decodeURIComponent(match[1]);
+      const readableTitle = titlePart
+        .replace(/[-_]/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      info.itemName = readableTitle;
+      console.log('Extracted Barnes & Noble product name from URL:', readableTitle);
+    }
+  }
+  
+  // Generic product URL parsing for other e-commerce sites (enhanced)
+  if (!info.itemName) {
+    // Extended patterns for various e-commerce sites
+    const patterns = [
+      /\/product\/([^\/\?#]+)/i,
+      /\/products\/([^\/\?#]+)/i,
+      /\/item\/([^\/\?#]+)/i,
+      /\/items\/([^\/\?#]+)/i,
+      /\/p\/([^\/\?#]+)/i,
+      /\/shop\/([^\/\?#]+)/i,
+      /\/book\/([^\/\?#]+)/i,
+      /\/books\/([^\/\?#]+)/i,
+      /\/catalog\/([^\/\?#]+)/i,
+      /\/store\/([^\/\?#]+)/i,
+      /\/buy\/([^\/\?#]+)/i,
+      /\/detail\/([^\/\?#]+)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        const productSlug = decodeURIComponent(match[1]);
+        const readableTitle = productSlug
+          .replace(/[-_]/g, ' ')
+          .replace(/\+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ')
+          .trim()
+          .substring(0, 100); // Limit length
+        
+        if (readableTitle.length > 3) {
+          info.itemName = readableTitle;
+          console.log('Extracted product name from generic URL pattern:', readableTitle);
+          break;
+        }
+      }
+    }
+  }
+  
+  return info;
+};
+
+const extractStoreName = (hostname: string): string => {
+  // Remove www. and common TLD extensions
+  let storeName = hostname.replace(/^www\./, '');
+  
+  // Enhanced store mappings with book retailers and more sites
+  const storeMap: { [key: string]: string } = {
+    // Amazon variants
+    'amazon.com': 'Amazon',
+    'amazon.co.uk': 'Amazon UK',
+    'amazon.ca': 'Amazon Canada',
+    'amazon.de': 'Amazon Germany',
+    'amazon.fr': 'Amazon France',
+    'amazon.it': 'Amazon Italy',
+    'amazon.es': 'Amazon Spain',
+    'amazon.in': 'Amazon India',
+    'amazon.co.jp': 'Amazon Japan',
+    'amazon.com.au': 'Amazon Australia',
+    'amazon.com.br': 'Amazon Brazil',
+    
+    // eBay variants
+    'ebay.com': 'eBay',
+    'ebay.co.uk': 'eBay UK',
+    'ebay.de': 'eBay Germany',
+    'ebay.fr': 'eBay France',
+    'ebay.it': 'eBay Italy',
+    'ebay.es': 'eBay Spain',
+    'ebay.ca': 'eBay Canada',
+    'ebay.com.au': 'eBay Australia',
+    
+    // Book retailers
+    'thriftbooks.com': 'ThriftBooks',
+    'barnesandnoble.com': 'Barnes & Noble',
+    'bn.com': 'Barnes & Noble',
+    'bookdepository.com': 'Book Depository',
+    'abebooks.com': 'AbeBooks',
+    'alibris.com': 'Alibris',
+    'powells.com': 'Powell\'s Books',
+    'betterworldbooks.com': 'Better World Books',
+    'booksamillion.com': 'Books-A-Million',
+    'chapters.indigo.ca': 'Chapters Indigo',
+    'waterstones.com': 'Waterstones',
+    'whsmith.co.uk': 'WHSmith',
+    'scholastic.com': 'Scholastic',
+    
+    // Major retailers
+    'etsy.com': 'Etsy',
+    'target.com': 'Target',
+    'walmart.com': 'Walmart',
+    'bestbuy.com': 'Best Buy',
+    'macys.com': "Macy's",
+    'nordstrom.com': 'Nordstrom',
+    'zappos.com': 'Zappos',
+    'wayfair.com': 'Wayfair',
+    'overstock.com': 'Overstock',
+    'homedepot.com': 'Home Depot',
+    'lowes.com': "Lowe's",
+    'costco.com': 'Costco',
+    'samsclub.com': "Sam's Club",
+    'sephora.com': 'Sephora',
+    'ulta.com': 'Ulta Beauty',
+    
+    // Fashion & apparel
+    'nike.com': 'Nike',
+    'adidas.com': 'Adidas',
+    'zara.com': 'Zara',
+    'hm.com': 'H&M',
+    'uniqlo.com': 'Uniqlo',
+    'gap.com': 'Gap',
+    'oldnavy.com': 'Old Navy',
+    'forever21.com': 'Forever 21',
+    'urbanoutfitters.com': 'Urban Outfitters',
+    'anthropologie.com': 'Anthropologie',
+    'freepeople.com': 'Free People',
+    'victoriassecret.com': "Victoria's Secret",
+    
+    // Home & furniture
+    'williams-sonoma.com': 'Williams Sonoma',
+    'crateandbarrel.com': 'Crate & Barrel',
+    'cb2.com': 'CB2',
+    'westelm.com': 'West Elm',
+    'potterybarn.com': 'Pottery Barn',
+    'ikea.com': 'IKEA',
+    'roomandboard.com': 'Room & Board',
+    'restorationhardware.com': 'Restoration Hardware',
+    
+    // E-commerce platforms
+    'shopify.com': 'Shopify Store',
+    'bigcommerce.com': 'BigCommerce Store',
+    'squarespace.com': 'Squarespace Store',
+    'wix.com': 'Wix Store',
+    'myshopify.com': 'Shopify Store',
+    
+    // Marketplaces
+    'poshmark.com': 'Poshmark',
+    'mercari.com': 'Mercari',
+    'depop.com': 'Depop',
+    'thredup.com': 'ThredUp',
+    'realreal.com': 'The RealReal',
+    'vestiairecollective.com': 'Vestiaire Collective',
+    'rebag.com': 'Rebag',
+    'fashionphile.com': 'Fashionphile',
+    
+    // Electronics & tech
+    'newegg.com': 'Newegg',
+    'bhphotovideo.com': 'B&H Photo',
+    'adorama.com': 'Adorama',
+    'microcenter.com': 'Micro Center',
+    'apple.com': 'Apple',
+    'microsoft.com': 'Microsoft',
+    'dell.com': 'Dell',
+    'hp.com': 'HP',
+    
+    // Specialty stores
+    'chewy.com': 'Chewy',
+    'petco.com': 'Petco',
+    'petsmart.com': 'PetSmart',
+    'rei.com': 'REI',
+    'dickssportinggoods.com': "Dick's Sporting Goods",
+    'academy.com': 'Academy Sports'
+  };
+  
+  for (const [domain, name] of Object.entries(storeMap)) {
+    if (hostname.includes(domain)) {
+      return name;
+    }
+  }
+  
+  // Enhanced fallback: handle more TLD extensions and special cases
+  storeName = storeName.replace(/\.(com|co\.uk|ca|org|net|de|fr|shop|store|io|ly|me|us|biz|info)$/, '');
+  
+  // Handle special cases like hyphenated names
+  if (storeName.includes('-')) {
+    return storeName.split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  
+  return storeName.charAt(0).toUpperCase() + storeName.slice(1);
+};
+
+const extractItemName = (doc: Document): string | undefined => {
+  // Enhanced selectors for product titles with better store coverage
+  const selectors = [
+    // Meta tags (highest priority)
+    'meta[property="og:title"]',
+    'meta[name="twitter:title"]',
+    'meta[property="product:title"]',
+    'meta[name="title"]',
+    'meta[property="book:title"]', // For book sites
+    
+    // Store-specific selectors (enhanced)
+    '#productTitle', // Amazon
+    '.x-item-title-label', // eBay
+    '.x-item-title', // eBay alternative
+    '[data-automation-id="product-title"]', // Target
+    '[data-testid="product-title"]',
+    'h1[data-test-id="listing-page-title"]', // Etsy
+    '[data-testid="listing-page-title"]', // Etsy alternative
+    '.listing-page-title h1', // Etsy fallback
+    '.shop2-listing-page-title', // Etsy legacy
+    
+    // ThriftBooks specific
+    '.AllEditionsItem-title', // ThriftBooks
+    '.work-title', // ThriftBooks
+    '.book-title', // ThriftBooks
+    'h1.title', // ThriftBooks
+    '.product-title h1', // ThriftBooks product page
+    
+    // Barnes & Noble specific
+    '.pdp-product-name', // B&N
+    '.product-info-title', // B&N
+    'h1[data-ux="ProductName"]', // B&N
+    
+    // Book retailer patterns
+    '.book-title',
+    '.title-main',
+    '.work-title',
+    '.book-name',
+    '.item-title',
+    
+    // Shopify patterns (enhanced)
+    '.product-single__title',
+    '.product__title',
+    '.product-title',
+    '.product_title',
+    '.product-meta__title',
+    '[class*="product-title"]',
+    '[class*="ProductTitle"]',
+    
+    // Generic e-commerce patterns
+    '.product-title',
+    '#product-title',
+    '.pdp-product-name',
+    '.product-name',
+    '.item-title',
+    '.listing-page-title',
+    '.product-details-product-title',
+    '.product-main-title',
+    '.main-product-title',
+    '[class*="product-title"]',
+    '[class*="item-title"]',
+    '[class*="listing-page-title"]',
+    '[class*="ProductName"]',
+    '[class*="product-name"]',
+    '[data-product-title]',
+    '[data-title]',
+    
+    // Generic headings (improved priority)
+    'h1[class*="title"]',
+    'h1[class*="product"]',
+    'h1[class*="name"]',
+    'h1[class*="book"]',
+    '.page-title h1',
+    '.content-title h1',
+    'main h1',
+    'article h1',
+    '.container h1',
+    'h1'
   ];
   
-  for (let i = 0; i < pricePatterns.length; i++) {
-    const pattern = pricePatterns[i];
-    const matches = [...cleanText.matchAll(pattern)];
+  for (const selector of selectors) {
+    const element = doc.querySelector(selector);
+    if (element) {
+      const content = element.getAttribute('content') || element.textContent;
+      if (content && content.trim() && content.length > 3 && content.length < 300) {
+        // Enhanced title cleaning
+        let cleanTitle = content.trim()
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .replace(/^\||\|$/g, '') // Remove leading/trailing pipes
+          .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+          .replace(/^:+|:+$/g, '') // Remove leading/trailing colons
+          .trim();
+        
+        // Skip if it's too generic
+        const genericWords = ['untitled', 'product', 'item', 'page', 'home', 'shop', 'store'];
+        if (!genericWords.some(word => cleanTitle.toLowerCase() === word)) {
+          return cleanTitle.substring(0, 150);
+        }
+      }
+    }
+  }
+  
+  // Enhanced title tag fallback
+  const title = doc.title;
+  if (title && title.length > 3) {
+    // Enhanced cleaning for title tag with more store patterns
+    const cleanTitle = title
+      .replace(/ - (Amazon\.com|Amazon|eBay|Target|Walmart|Best Buy|Barnes & Noble|ThriftBooks|Etsy|Shop|Store|Buy Online|Free Shipping).*$/i, '')
+      .replace(/ \| (Amazon|eBay|Target|Walmart|Best Buy|Barnes & Noble|ThriftBooks|Etsy|Shop|Store).*$/i, '')
+      .replace(/ :: .*$/i, '') // Remove everything after double colon
+      .replace(/ - Buy .*$/i, '') // Remove "Buy" suffixes
+      .replace(/ - Shop .*$/i, '') // Remove "Shop" suffixes
+      .replace(/ \(.*\)$/i, '') // Remove parenthetical info at end
+      .trim();
     
-    console.log(`💰 Pattern ${i + 1}: Found ${matches.length} matches`);
-    
+    if (cleanTitle.length > 3) {
+      return cleanTitle.substring(0, 150);
+    }
+  }
+  
+  return undefined;
+};
+
+// Helper function to extract price from text
+const extractPriceFromText = (text: string): string | undefined => {
+  const pricePatterns = [
+    /[\$£€¥]\s*(\d{1,3}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)/gi,
+    /(\d{1,3}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)\s*[\$£€¥]/gi,
+    /\b(\d{1,4}[.,]\d{2})\b/g,
+    /(\d{1,3}(?:\.\d{3})*,\d{2})/g
+  ];
+  
+  for (const pattern of pricePatterns) {
+    const matches = [...text.matchAll(pattern)];
     for (const match of matches) {
       const rawPrice = match[1] || match[0];
       let price = rawPrice.replace(/\s/g, '');
       
-      console.log('💰 Raw price match:', rawPrice, '→ cleaned:', price);
-      
-      // Handle different number formats
       if (price.includes(',') && price.includes('.')) {
-        const lastComma = price.lastIndexOf(',');
-        const lastDot = price.lastIndexOf('.');
-        if (lastComma > lastDot) {
-          // Comma is decimal separator (European style)
-          price = price.replace(/\./g, '').replace(',', '.');
-        } else {
-          // Dot is decimal separator (US style)
-          price = price.replace(/,/g, '');
-        }
+        price = price.replace(/\./g, '').replace(',', '.');
       } else if (price.includes(',') && !price.includes('.')) {
         const commaIndex = price.lastIndexOf(',');
         const afterComma = price.substring(commaIndex + 1);
         if (afterComma.length === 2) {
-          // Comma as decimal separator
           price = price.replace(',', '.');
-        } else {
-          // Comma as thousands separator
-          price = price.replace(/,/g, '');
         }
       }
       
-      // Remove any remaining non-numeric characters except decimal point
-      price = price.replace(/[^\d.]/g, '');
+      price = price.replace(/,/g, '');
       const numPrice = parseFloat(price);
       
-      console.log('💰 Final numeric value:', numPrice);
-      
-      if (!isNaN(numPrice) && numPrice >= 0.01 && numPrice <= 999999) {
-        const finalPrice = numPrice.toFixed(2);
-        console.log('✅ Valid price found:', finalPrice);
-        return finalPrice;
+      if (!isNaN(numPrice) && numPrice >= 0.01 && numPrice <= 99999) {
+        return numPrice.toFixed(2);
       }
     }
   }
-  
-  console.log('❌ No valid price found in text');
   return undefined;
 };
 
-// Comprehensive price extraction with multiple strategies
 const extractPrice = (doc: Document): string | undefined => {
-  console.log('💰 🚀 Starting COMPREHENSIVE price extraction...');
+  console.log('🔍 Starting price extraction from DOM...');
+  console.log('📄 Page title:', doc.title);
+  console.log('📄 URL:', doc.location?.href || 'unknown');
   
-  const currentUrl = doc.location?.href || window.location.href || '';
-  const hostname = currentUrl ? new URL(currentUrl).hostname.toLowerCase() : '';
+  // First, let's see what price-like content exists on the page
+  const allText = doc.body?.textContent || '';
+  console.log('📄 Full page text length:', allText.length);
   
-  console.log('🔍 URL:', currentUrl);
-  console.log('🏠 Hostname:', hostname);
+  // Look for French/European price patterns specifically
+  const frenchPriceMatches = allText.match(/\d{1,4}[.,]\d{2}\s*€|€\s*\d{1,4}[.,]\d{2}/g);
+  const generalPriceMatches = allText.match(/[\$£€¥]\s*[\d,]+\.?\d{0,2}|\b\d{1,4}[.,]\d{2}\b/g);
+  console.log('💰 Found French/European prices:', frenchPriceMatches?.slice(0, 10));
+  console.log('💰 Found general prices:', generalPriceMatches?.slice(0, 10));
   
-  // Strategy 1: Meta tags (most reliable)
-  console.log('💰 📋 Strategy 1: Meta tags...');
-  const metaSelectors = [
-    'meta[property="product:price:amount"]',
-    'meta[property="og:price:amount"]',
-    'meta[property="product:price"]',
-    'meta[name="price"]',
-    'meta[property="price"]',
-    'meta[itemprop="price"]',
-    'meta[property="product:price:currency"]',
-    'meta[name="twitter:data1"]'
-  ];
-  
-  for (const selector of metaSelectors) {
-    const meta = doc.querySelector(selector);
-    if (meta) {
-      const content = meta.getAttribute('content');
-      console.log(`💰 Meta "${selector}":`, content);
-      if (content) {
-        const price = extractPriceFromText(content);
-        if (price) {
-          console.log('✅ Price from meta tag:', price);
-          return price;
-        }
-      }
+  // Log some HTML structure for debugging
+  const priceElements = doc.querySelectorAll('[class*="price"], [class*="Prix"], [data-testid*="price"]');
+  console.log('💰 Found price-related elements:', priceElements.length);
+  priceElements.forEach((el, i) => {
+    if (i < 5) {
+      console.log(`💰 Price element ${i}:`, el.className, el.textContent?.trim());
     }
-  }
+  });
   
-  // Strategy 2: JSON-LD structured data
-  console.log('💰 📊 Strategy 2: JSON-LD...');
-  const jsonScripts = doc.querySelectorAll('script[type="application/ld+json"]');
-  console.log(`💰 Found ${jsonScripts.length} JSON-LD scripts`);
+  // Check if this is Smallable (any country) and extract directly from their structure
+  const currentUrl = doc.location?.href || '';
+  const isSmallable = /smallable\.(com|fr|co\.uk|de|es|it|be|nl|ch)/i.test(currentUrl);
   
-  for (let i = 0; i < jsonScripts.length; i++) {
-    const script = jsonScripts[i];
-    try {
-      const data = JSON.parse(script.textContent || '');
-      console.log(`💰 JSON-LD ${i + 1}:`, typeof data, Object.keys(data).slice(0, 5));
-      
-      // Recursive price finder
-      const findPrice = (obj: any, path = ''): string | undefined => {
-        if (typeof obj !== 'object' || obj === null) return undefined;
-        
-        // Direct price fields
-        const priceFields = ['price', 'lowPrice', 'highPrice', 'priceRange', 'amount', 'value'];
-        for (const field of priceFields) {
-          if (obj[field] !== undefined) {
-            console.log(`💰 Found ${path}.${field}:`, obj[field]);
-            const priceStr = obj[field].toString();
-            const price = extractPriceFromText(priceStr);
-            if (price) return price;
-          }
-        }
-        
-        // Check offers
-        if (obj.offers) {
-          if (Array.isArray(obj.offers)) {
-            for (let j = 0; j < obj.offers.length; j++) {
-              const price = findPrice(obj.offers[j], `${path}.offers[${j}]`);
-              if (price) return price;
-            }
-          } else {
-            const price = findPrice(obj.offers, `${path}.offers`);
-            if (price) return price;
-          }
-        }
-        
-        // Recursively search other objects
-        for (const key in obj) {
-          if (typeof obj[key] === 'object' && key !== 'offers') {
-            const price = findPrice(obj[key], `${path}.${key}`);
-            if (price) return price;
-          }
-        }
-        
-        return undefined;
-      };
-      
-      const jsonPrice = findPrice(data);
-      if (jsonPrice) {
-        console.log('✅ Price from JSON-LD:', jsonPrice);
-        return jsonPrice;
-      }
-    } catch (e) {
-      console.log(`💰 Failed to parse JSON-LD ${i + 1}:`, e);
-    }
-  }
+  console.log('🔍 URL being parsed:', currentUrl);
+  console.log('🎯 Is Smallable?', isSmallable);
   
-  // Strategy 3: Site-specific optimized extraction
-  console.log('💰 🎯 Strategy 3: Site-specific...');
-  
-  let siteSpecificSelectors: string[] = [];
-  
-  if (hostname.includes('smallable')) {
-    console.log('🎯 Smallable detected!');
-    siteSpecificSelectors = [
-      '.ProductPrice',
-      '.ProductPrice-current',
-      '.product-price',
+  if (isSmallable) {
+    console.log('🎯 Detected Smallable - using specific extraction for', currentUrl);
+    
+    // Log page structure for debugging
+    const allPriceElements = doc.querySelectorAll('[class*="price"], [class*="Price"], [data-testid*="price"], [id*="price"]');
+    console.log('💰 All price-related elements found:', allPriceElements.length);
+    
+    // More comprehensive Smallable price selectors
+    const smallablePriceSelectors = [
+      // Current price selectors
+      '.product-price-value',
       '.product__price',
       '.price-current',
       '.price__current',
       '.current-price',
+      '.ProductPrice-current',
+      '.Price-current',
       '.formatted-price',
-      '.final-price',
-      '.sell-price',
+      '[data-testid="current-price"]',
+      '[data-testid="price"]',
       '.price-value',
       '.current-price-value',
       '.price',
       '.price-amount',
-      '.money',
-      '.amount',
-      '[data-testid*="price"]',
-      '[data-price]',
-      '[class*="price"]:not([class*="was"]):not([class*="original"]):not([class*="old"])'
-    ];
-  } else if (hostname.includes('amazon')) {
-    siteSpecificSelectors = [
-      '.a-price-whole',
-      '.a-price .a-offscreen',
-      '#priceblock_dealprice',
-      '#priceblock_saleprice',
-      '#price_inside_buybox',
-      '.a-price-range'
-    ];
-  } else if (hostname.includes('etsy')) {
-    siteSpecificSelectors = [
-      '[data-testid="price-current"]',
-      '.currency-value',
-      '.shop2-listing-price .currency-value',
-      '.listing-page-price .currency-value',
-      'p.wt-text-title-03'
-    ];
-  } else if (hostname.includes('shopify') || doc.querySelector('meta[name="generator"][content*="Shopify"]')) {
-    siteSpecificSelectors = [
-      '.price--highlight .price-item--regular',
-      '.price--highlight .price-item--sale',
-      '.price .price-item',
-      '.product__price .price',
-      '.product-price-value',
-      '[data-product-price]'
-    ];
-  } else {
-    // Generic comprehensive selectors
-    siteSpecificSelectors = [
-      '[data-testid*="price"]',
-      '[data-testid*="Price"]',
-      '.price-current',
-      '.current-price',
-      '.price',
       '.product-price',
-      '.price-value',
+      '.sell-price',
       '.final-price',
-      '.sale-price',
-      '.regular-price',
-      '.price-now',
-      '.amount',
-      '.money',
-      '.cost'
+      // Meta tags
+      'meta[property="product:price:amount"]',
+      'meta[property="og:price:amount"]',
+      'meta[name="price"]',
+      // Generic patterns
+      '[class*="price"]:not([class*="was"]):not([class*="original"])',
+      '[data-price]'
     ];
-  }
-  
-  console.log(`💰 Using ${siteSpecificSelectors.length} site-specific selectors`);
-  
-  for (const selector of siteSpecificSelectors) {
-    const elements = doc.querySelectorAll(selector);
-    console.log(`💰 "${selector}": ${elements.length} elements`);
     
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
-      let text = '';
+    for (const selector of smallablePriceSelectors) {
+      const elements = doc.querySelectorAll(selector);
+      console.log(`💰 Checking "${selector}": found ${elements.length} elements`);
       
-      if (element.tagName === 'META') {
-        text = element.getAttribute('content') || '';
-      } else if (element.hasAttribute('data-price')) {
-        text = element.getAttribute('data-price') || '';
-      } else {
-        text = element.textContent?.trim() || '';
+      for (const element of elements) {
+        let priceText = '';
+        
+        if (element.tagName === 'META') {
+          priceText = element.getAttribute('content') || '';
+        } else {
+          priceText = element.textContent?.trim() || '';
+        }
+        
+        console.log(`💰 Element text:`, priceText);
+        
+        if (priceText) {
+          const price = extractPriceFromText(priceText);
+          if (price) {
+            console.log('✅ Smallable price extracted successfully:', price);
+            return price;
+          }
+        }
       }
-      
-      console.log(`💰 Element ${i + 1} text:`, text.substring(0, 100));
-      
-      if (text) {
-        const price = extractPriceFromText(text);
+    }
+    
+    // Fallback: search entire page text for European price patterns
+    const pageText = doc.body?.textContent || '';
+    const europeanPrices = pageText.match(/\d{1,4}[.,]\d{2}\s*€|€\s*\d{1,4}[.,]\d{2}|\d{1,4}[.,]\d{2}\s*EUR/g);
+    console.log('💰 European prices found in page text:', europeanPrices?.slice(0, 5));
+    
+    if (europeanPrices && europeanPrices.length > 0) {
+      for (const priceMatch of europeanPrices) {
+        const price = extractPriceFromText(priceMatch);
         if (price) {
-          console.log('✅ Site-specific price found:', price);
+          console.log('✅ Smallable price from page text:', price);
           return price;
         }
       }
     }
   }
-  
-  // Strategy 4: Generic comprehensive DOM search
-  console.log('💰 🔍 Strategy 4: Comprehensive DOM...');
-  
-  // Find all elements that might contain prices
-  const priceElements = doc.querySelectorAll('*');
-  const potentialPriceElements: Element[] = [];
-  
-  for (const element of priceElements) {
-    const className = element.className?.toString().toLowerCase() || '';
-    const id = element.id?.toLowerCase() || '';
-    const dataAttrs = Array.from(element.attributes)
-      .filter(attr => attr.name.startsWith('data-'))
-      .map(attr => attr.name.toLowerCase())
-      .join(' ');
+
+  // Enhanced selectors for price with better store coverage
+  const selectors = [
+    // Meta tags (most reliable)
+    'meta[property="product:price:amount"]',
+    'meta[property="og:price:amount"]',
+    'meta[property="product:price"]',
+    'meta[name="price"]',
     
-    const combinedText = `${className} ${id} ${dataAttrs}`;
+    // ThriftBooks specific selectors (high priority)
+    '.SearchResultListItem-price', // ThriftBooks search results
+    '.AllEditionsItem-price', // ThriftBooks book page
+    '.work-price', // ThriftBooks
+    '.price-value', // ThriftBooks
+    '.item-price', // ThriftBooks
+    '.book-price', // ThriftBooks
+    '.condition-price', // ThriftBooks by condition
+    '.product-price .price', // ThriftBooks product page
+    '[data-testid="price"]', // ThriftBooks modern
+    '.price-current', // ThriftBooks current price
     
-    if (combinedText.includes('price') || 
-        combinedText.includes('cost') || 
-        combinedText.includes('amount') || 
-        combinedText.includes('money') ||
-        combinedText.includes('total') ||
-        combinedText.includes('value')) {
-      potentialPriceElements.push(element);
-    }
-  }
-  
-  console.log(`💰 Found ${potentialPriceElements.length} potential price elements`);
-  
-  for (let i = 0; i < Math.min(potentialPriceElements.length, 50); i++) {
-    const element = potentialPriceElements[i];
-    const text = element.textContent?.trim() || '';
+    // Barnes & Noble specific
+    '.price-display', // B&N
+    '.price-main', // B&N
+    '.current-price-value', // B&N
+    '.pdp-price .price', // B&N
     
-    if (text && text.length < 100) { // Avoid large text blocks
-      const price = extractPriceFromText(text);
-      if (price) {
-        console.log(`✅ Generic DOM price found in element ${i + 1}:`, price);
-        return price;
-      }
-    }
-  }
-  
-  // Strategy 5: Full page text analysis (last resort)
-  console.log('💰 📄 Strategy 5: Full page text...');
-  const pageText = doc.body?.textContent || '';
-  
-  // Look for various currency patterns in the entire page
-  const currencyPatterns = [
-    /\d{1,4}[.,]\d{2}\s*€/g,
-    /€\s*\d{1,4}[.,]\d{2}/g,
-    /\$\s*\d{1,4}[.,]\d{2}/g,
-    /£\s*\d{1,4}[.,]\d{2}/g,
-    /¥\s*\d{1,4}[.,]\d{2}/g,
-    /\d{1,4}[.,]\d{2}\s*USD/gi,
-    /\d{1,4}[.,]\d{2}\s*EUR/gi,
-    /\d{1,4}[.,]\d{2}\s*GBP/gi
+    // Shopify-specific selectors (high priority for Shopify stores)
+    '.price--highlight .price-item--regular',
+    '.price--highlight .price-item--sale',
+    '.price .price-item--regular',
+    '.price .price-item',
+    '.price__regular .price-item',
+    '.price__sale .price-item',
+    '.product-form__cart-submit [data-price]',
+    '[data-product-price]',
+    '.product__price .price',
+    '.product-price-value',
+    
+    // Etsy-specific price selectors
+    '[data-testid="price-current"]', // Etsy current
+    '.currency-value', // Etsy price
+    '.shop2-listing-price .currency-value', // Etsy legacy
+    '.listing-page-page .currency-value', // Etsy alternative
+    'p.wt-text-title-03', // Etsy price text
+    '[class*="listing-page-price"]', // Etsy generic
+    
+    // Amazon selectors
+    '.a-price-whole', // Amazon whole price
+    '.a-price .a-offscreen', // Amazon full price
+    '#priceblock_dealprice', // Amazon deal price
+    '#priceblock_saleprice', // Amazon sale price
+    '#price_inside_buybox', // Amazon buybox price
+    '.a-price-range', // Amazon price range
+    
+    // eBay selectors
+    '.notranslate', // eBay price
+    '.u-flL.condText', // eBay price
+    '.price-current .price', // eBay current
+    
+    // Store-specific selectors
+    '.display-price', // Best Buy
+    '[data-automation-id="product-price"]', // Target
+    '[data-testid="price"]',
+    '.price-current',
+    '.current-price',
+    '.sale-price',
+    '.regular-price',
+    '.price-now',
+    '.final-price',
+    '.product-price',
+    '.price-value',
+    '.price-amount',
+    
+    // Smallable-specific selectors (French retailer)
+    '.ProductPrice-current', // Smallable
+    '.Price-current', // Smallable
+    '.price__current', // Smallable
+    '.formatted-price', // Smallable
+    '.price-item', // Smallable
+    '.actual-price', // Smallable
+    '.product-price .price', // Smallable
+    '.sell-price', // Smallable
+    '.current-price-value', // Smallable
+    '.price-display span', // Smallable
+    '.price-wrapper .price', // Smallable
+    
+    // Generic price selectors
+    '[class*="price"]:not([class*="original"]):not([class*="was"]):not([class*="msrp"]):not([class*="list"])',
+    '[class*="Price"]:not([class*="Original"]):not([class*="Was"]):not([class*="List"])',
+    '[id*="price"]',
+    '[data-price]',
+    '.money',
+    '.cost',
+    '.amount'
   ];
   
-  for (const pattern of currencyPatterns) {
-    const matches = pageText.match(pattern);
-    if (matches && matches.length > 0) {
-      console.log(`💰 Currency pattern matches:`, matches.slice(0, 5));
+  for (const selector of selectors) {
+    const elements = doc.querySelectorAll(selector);
+    console.log(`🔎 Checking selector "${selector}": found ${elements.length} elements`);
+    for (const element of elements) {
+      const content = element.getAttribute('content') || 
+                     element.getAttribute('data-price') || 
+                     element.textContent;
       
-      for (const match of matches.slice(0, 10)) {
-        const price = extractPriceFromText(match);
-        if (price) {
-          console.log('✅ Full page text price found:', price);
-          return price;
+      if (content && content.trim()) {
+        console.log(`Checking price element "${selector}": "${content.trim()}"`);
+        
+        // Comprehensive regex patterns for international price formats
+        const pricePatterns = [
+          // Currency symbol first with various formats
+          /[\$£€¥₹₽¢]\s*(\d{1,3}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)/gi,
+          
+          // Currency symbol after price
+          /(\d{1,3}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)\s*[\$£€¥₹₽¢]/gi,
+          
+          // Decimal prices without currency (any reasonable format)
+          /\b(\d{1,4}[.,]\d{2})\b/g,
+          
+          // Integer prices with currency indicators
+          /[\$£€¥₹₽¢]\s*(\d{1,4})\b/gi,
+          
+          // European format (comma as decimal separator)
+          /(\d{1,3}(?:\.\d{3})*,\d{2})/g,
+          
+          // Just numbers that look like prices (broad fallback)
+          /\b(\d{1,4}(?:[.,]\d{2})?)\b/g
+        ];
+        
+        for (const pattern of pricePatterns) {
+          const matches = [...content.matchAll(pattern)];
+          if (matches.length > 0) {
+            for (const match of matches) {
+              // Get the captured group (the numeric part)
+              const rawPrice = match[1] || match[0];
+              console.log(`🔍 Raw price match: "${rawPrice}" from pattern: ${pattern}`);
+              
+              // Handle different decimal formats
+              let price = rawPrice.replace(/\s/g, ''); // Remove spaces first
+              
+              // Handle European format (1.234,56 -> 1234.56)
+              if (price.includes(',') && price.includes('.')) {
+                // If both comma and dot, assume European format where dot is thousands separator
+                price = price.replace(/\./g, '').replace(',', '.');
+              } else if (price.includes(',') && !price.includes('.')) {
+                // Only comma, could be decimal separator
+                const commaIndex = price.lastIndexOf(',');
+                const afterComma = price.substring(commaIndex + 1);
+                if (afterComma.length === 2) {
+                  // Likely decimal separator
+                  price = price.replace(',', '.');
+                }
+              }
+              
+              // Remove any remaining commas (thousands separators)
+              price = price.replace(/,/g, '');
+              
+              const numPrice = parseFloat(price);
+              console.log(`💰 Parsed price: ${numPrice} from "${rawPrice}"`);
+              
+              // Reasonable price validation with better range
+              if (!isNaN(numPrice) && numPrice >= 0.01 && numPrice <= 99999) {
+                console.log(`✅ Valid price found: $${numPrice.toFixed(2)} from "${content.trim().substring(0, 60)}"`);
+                return numPrice.toFixed(2);
+              } else {
+                console.log(`❌ Invalid price range: ${numPrice} (must be between 0.01 and 99999)`);
+              }
+            }
+          }
+        }
+        
+        // Fallback: look for any reasonable number that might be a price
+        const fallbackMatch = content.match(/\b(\d{1,3}(?:\.\d{2})?)\b/);
+        if (fallbackMatch) {
+          const numPrice = parseFloat(fallbackMatch[1]);
+          if (!isNaN(numPrice) && numPrice >= 1 && numPrice <= 1000) {
+            console.log(`⚠️ Fallback price found: $${numPrice.toFixed(2)}`);
+            return numPrice.toFixed(2);
+          }
         }
       }
     }
   }
   
-  console.log('❌ No price found with any strategy');
+  // Enhanced fallback: look for JSON-LD structured data (common in Shopify)
+  const jsonLdElements = doc.querySelectorAll('script[type="application/ld+json"]');
+  for (const element of jsonLdElements) {
+    try {
+      const jsonData = JSON.parse(element.textContent || '');
+      if (jsonData['@type'] === 'Product' && jsonData.offers) {
+        const offers = Array.isArray(jsonData.offers) ? jsonData.offers[0] : jsonData.offers;
+        if (offers.price) {
+          const price = parseFloat(offers.price);
+          if (!isNaN(price) && price > 0.50) {
+            console.log(`Found price in JSON-LD: ${price}`);
+            return price.toFixed(2);
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore JSON parsing errors
+    }
+  }
+  
+  // Shopify-specific: look for product data in script tags
+  const scriptElements = doc.querySelectorAll('script');
+  for (const script of scriptElements) {
+    const content = script.textContent || '';
+    
+    // Look for Shopify product JSON
+    const shopifyProductMatch = content.match(/window\.ShopifyAnalytics\s*=.*?product['"]:.*?price['"]:.*?(\d+)/);
+    if (shopifyProductMatch) {
+      const price = parseFloat(shopifyProductMatch[1]) / 100; // Shopify prices are in cents
+      if (!isNaN(price) && price > 0.50) {
+        console.log(`Found Shopify product price: ${price}`);
+        return price.toFixed(2);
+      }
+    }
+    
+    // Look for product data variable
+    const productDataMatch = content.match(/(?:product|item).*?['":].*?(\d+\.\d{2})/i);
+    if (productDataMatch) {
+      const price = parseFloat(productDataMatch[1]);
+      if (!isNaN(price) && price > 0.50 && price < 10000) {
+        console.log(`Found product data price: ${price}`);
+        return price.toFixed(2);
+      }
+    }
+  }
+  
+  // Final fallback: look for any number that looks like a price in the visible text
+  const bodyText = doc.body?.textContent || '';
+  const fallbackPatterns = [
+    /[\$£€¥]\s*[\d,]+\.?\d{2}/g, // Currency with decimals
+    /[\$£€¥]\s*[\d,]+/g, // Currency without decimals
+    /\b[\d,]+\.\d{2}\b/g // Decimal numbers (likely prices)
+  ];
+  
+  for (const pattern of fallbackPatterns) {
+    const matches = bodyText.match(pattern);
+    if (matches) {
+      for (const match of matches) {
+        const price = match.replace(/[£€¥\$,\s]/g, '');
+        const numPrice = parseFloat(price);
+        if (!isNaN(numPrice) && numPrice > 5 && numPrice < 10000) {
+          console.log(`Found fallback price: ${numPrice}`);
+          return numPrice.toFixed(2);
+        }
+      }
+    }
+  }
+  
   return undefined;
 };
 
-// Enhanced image extraction with comprehensive strategies
 const extractImageUrl = (doc: Document, origin: string): string | undefined => {
-  console.log('🖼️ 🚀 Starting COMPREHENSIVE image extraction...');
+  console.log('🖼️ Starting image extraction from DOM...');
+  console.log('📄 Page has images:', doc.querySelectorAll('img').length);
   
-  const currentUrl = doc.location?.href || window.location.href || '';
-  const hostname = currentUrl ? new URL(currentUrl).hostname.toLowerCase() : '';
+  // Check if this is Smallable (any country) and extract directly from their structure
+  const currentUrl = doc.location?.href || '';
+  const isSmallable = /smallable\.(com|fr|co\.uk|de|es|it|be|nl|ch)/i.test(currentUrl);
   
-  console.log('🔍 URL:', currentUrl);
-  console.log('🏠 Hostname:', hostname);
-  console.log('📸 Total images on page:', doc.querySelectorAll('img').length);
-  
-  // Strategy 1: Meta tags (most reliable)
-  console.log('🖼️ 📋 Strategy 1: Meta tags...');
-  const metaSelectors = [
-    'meta[property="og:image"]',
-    'meta[property="og:image:url"]',
-    'meta[name="twitter:image"]',
-    'meta[property="product:image"]',
-    'meta[itemprop="image"]',
-    'meta[name="thumbnail"]'
-  ];
-  
-  for (const selector of metaSelectors) {
-    const meta = doc.querySelector(selector);
-    if (meta) {
-      const content = meta.getAttribute('content');
-      console.log(`🖼️ Meta "${selector}":`, content);
-      if (content && content.trim() && !content.includes('data:image') && content.length > 10) {
-        try {
-          const imageUrl = new URL(content, origin).href;
-          console.log('✅ Image from meta tag:', imageUrl);
-          return imageUrl;
-        } catch {
-          if (content.startsWith('http')) {
-            console.log('✅ Direct image URL from meta:', content);
-            return content;
-          }
-        }
-      }
-    }
-  }
-  
-  // Strategy 2: JSON-LD structured data
-  console.log('🖼️ 📊 Strategy 2: JSON-LD...');
-  const jsonScripts = doc.querySelectorAll('script[type="application/ld+json"]');
-  
-  for (let i = 0; i < jsonScripts.length; i++) {
-    try {
-      const data = JSON.parse(jsonScripts[i].textContent || '');
-      
-      const findImage = (obj: any): string | undefined => {
-        if (typeof obj !== 'object' || obj === null) return undefined;
-        
-        // Direct image fields
-        if (obj.image) {
-          const img = Array.isArray(obj.image) ? obj.image[0] : obj.image;
-          const imgUrl = typeof img === 'string' ? img : img?.url;
-          if (imgUrl) {
-            console.log('🖼️ JSON-LD image found:', imgUrl);
-            return imgUrl;
-          }
-        }
-        
-        // Search nested objects
-        for (const key in obj) {
-          if (typeof obj[key] === 'object') {
-            const nestedImg = findImage(obj[key]);
-            if (nestedImg) return nestedImg;
-          }
-        }
-        
-        return undefined;
-      };
-      
-      const jsonImage = findImage(data);
-      if (jsonImage) {
-        console.log('✅ Image from JSON-LD:', jsonImage);
-        return jsonImage;
-      }
-    } catch (e) {
-      console.log(`🖼️ Failed to parse JSON-LD ${i + 1}:`, e);
-    }
-  }
-  
-  // Strategy 3: Site-specific image extraction
-  console.log('🖼️ 🎯 Strategy 3: Site-specific...');
-  
-  let siteSpecificSelectors: string[] = [];
-  
-  if (hostname.includes('smallable')) {
-    console.log('🎯 Smallable image extraction!');
-    siteSpecificSelectors = [
+  if (isSmallable) {
+    console.log('🎯 Detected Smallable - using specific image extraction');
+    
+    // Smallable-specific image extraction
+    const smallableImageSelectors = [
       '.ProductGallery img',
-      '.product-gallery img',
       '.product-image img',
-      '.product__image img',
       '.main-image img',
-      '.hero-image img',
-      '.featured-image img',
       '.ProductImage img',
       '.media-wrapper img',
       '.picture img',
       '.photo img',
       '.image-container img',
-      '.gallery img',
-      '.product-photos img',
-      '.product-media img',
-      '[data-role="product-image"] img',
-      '[data-testid*="image"] img',
-      '[data-testid*="photo"] img',
-      '.carousel img:first-child',
-      '.swiper-slide img:first-child'
-    ];
-  } else if (hostname.includes('amazon')) {
-    siteSpecificSelectors = [
-      '#landingImage',
-      '.a-dynamic-image',
-      '#imgTagWrapperId img',
-      '.imageBlockContainer img'
-    ];
-  } else if (hostname.includes('etsy')) {
-    siteSpecificSelectors = [
-      '[data-testid="listing-page-image"]',
-      '.listing-page-image img',
-      '.shop2-listing-image img'
-    ];
-  } else {
-    // Generic comprehensive selectors
-    siteSpecificSelectors = [
-      '.product-image img',
-      '.product__image img',
-      '.main-image img',
       '.hero-image img',
       '.featured-image img',
-      '.gallery img:first-child',
-      '.product-gallery img:first-child',
-      '.carousel img:first-child',
-      '[data-testid*="image"] img',
-      '[data-testid*="photo"] img'
+      '[data-role="product-image"] img',
+      '.product-photos img:first-child',
+      '.Gallery img:first-child',
+      '.product-media img:first-child'
     ];
-  }
-  
-  console.log(`🖼️ Using ${siteSpecificSelectors.length} site-specific selectors`);
-  
-  for (const selector of siteSpecificSelectors) {
-    const elements = doc.querySelectorAll(selector);
-    console.log(`🖼️ "${selector}": ${elements.length} elements`);
     
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
-      const src = element.getAttribute('src') || 
+    for (const selector of smallableImageSelectors) {
+      const imageElement = doc.querySelector(selector);
+      if (imageElement) {
+        const src = imageElement.getAttribute('src') || 
+                    imageElement.getAttribute('data-src') || 
+                    imageElement.getAttribute('data-lazy-src');
+        
+        console.log(`🖼️ Smallable image found with "${selector}":`, src);
+        
+        if (src && src.trim() && !src.includes('data:image') && src.length > 10) {
+          try {
+            const imageUrl = new URL(src, origin).href;
+            console.log('🖼️ Smallable image extracted successfully:', imageUrl);
+            return imageUrl;
+          } catch {
+            if (src.startsWith('http')) {
+              console.log('🖼️ Smallable image URL (direct):', src);
+              return src;
+            }
+          }
+        }
+      }
+    }
+    
+    // Fallback: search Open Graph meta for Smallable
+    const ogImage = doc.querySelector('meta[property="og:image"]');
+    if (ogImage) {
+      const src = ogImage.getAttribute('content');
+      if (src) {
+        console.log('🖼️ Smallable image from OG meta:', src);
+        return src;
+      }
+    }
+  }
+
+  // Enhanced selectors for product images with better store coverage
+  const selectors = [
+    // Meta tags (most reliable)
+    'meta[property="og:image"]',
+    'meta[name="twitter:image"]',
+    'meta[property="og:image:url"]',
+    'meta[property="product:image"]',
+    
+    // Smallable-specific image selectors (French retailer)
+    '.product-image img', // Smallable main image
+    '.item-image img', // Smallable item
+    '.product-gallery img', // Smallable gallery
+    '.media-wrapper img', // Smallable media
+    '.picture img', // Smallable picture
+    '.photo img', // Smallable photo
+    '.image-container img', // Smallable container
+    '.main-image img', // Smallable main
+    '.hero-image img', // Smallable hero
+    '.featured-image img', // Smallable featured
+    '[data-role="product-image"] img', // Smallable modern
+    '.product-photos img', // Smallable photos
+    
+    // ThriftBooks specific image selectors (high priority)
+    '.SearchResultListItem-image img', // ThriftBooks search results
+    '.AllEditionsItem-image img', // ThriftBooks book page
+    '.work-image img', // ThriftBooks
+    '.book-image img', // ThriftBooks
+    '.product-image img', // ThriftBooks product page
+    '.item-image img', // ThriftBooks
+    '.book-cover img', // ThriftBooks cover
+    '.cover-image img', // ThriftBooks cover
+    '[data-testid="book-cover"] img', // ThriftBooks modern
+    '.main-book-image img', // ThriftBooks main
+    
+    // Barnes & Noble specific
+    '.pdp-product-image img', // B&N
+    '.product-image-main img', // B&N
+    '.book-jacket img', // B&N
+    
+    // Store-specific high-quality image selectors
+    '#landingImage', // Amazon main product image
+    '.a-dynamic-image', // Amazon dynamic image
+    '#imgBlkFront', // eBay main image
+    '.ux-image-carousel-item img', // eBay carousel
+    '[data-automation-id="product-image"] img', // Target
+    '[data-testid="product-image"] img',
+    '.product-hero-image img',
+    '.product-media img',
+    '.pdp-image img',
+    '.main-product-image img',
+    
+    // Etsy specific
+    '[data-testid="listing-page-image"] img', // Etsy
+    '.listing-page-image img', // Etsy
+    '.shop2-listing-page-image img', // Etsy legacy
+    
+    // Shopify specific
+    '.product__main-photos img', // Shopify
+    '.product-single__photo img', // Shopify
+    '.featured-image img', // Shopify
+    
+    // Generic product image selectors
+    '.product-image img',
+    '#product-image img',
+    '.hero-image img',
+    '.main-image img',
+    '.primary-image img',
+    '.featured-image img',
+    '[class*="ProductImage"] img',
+    '[class*="product-image"] img',
+    '[class*="hero"] img',
+    '[class*="main"] img',
+    '[class*="primary"] img',
+    '[class*="book"] img',
+    '[class*="cover"] img',
+    
+    // Alt text based selectors (enhanced for books)
+    'img[alt*="product" i]',
+    'img[alt*="item" i]',
+    'img[alt*="book" i]',
+    'img[alt*="cover" i]',
+    'img[alt*="buy" i]',
+    'img[alt*="shop" i]',
+    
+    // Source-based selectors
+    'img[src*="product"]',
+    'img[src*="item"]',
+    'img[src*="catalog"]',
+    'img[src*="book"]',
+    'img[src*="cover"]',
+    'img[class*="product"]',
+    'img[class*="book"]',
+    
+    // Fallback: any reasonably sized image
+    'img[width]:not([width="1"]):not([width="0"])',
+    'main img',
+    '.content img'
+  ];
+  
+  for (const selector of selectors) {
+    const elements = doc.querySelectorAll(selector);
+    console.log(`🔎 Checking image selector "${selector}": found ${elements.length} elements`);
+    
+    for (const element of elements) {
+      const src = element.getAttribute('content') || 
+                  element.getAttribute('src') || 
                   element.getAttribute('data-src') || 
-                  element.getAttribute('data-lazy-src') ||
-                  element.getAttribute('data-original') ||
-                  element.getAttribute('data-srcset')?.split(' ')[0];
+                  element.getAttribute('data-lazy-src');
       
-      console.log(`🖼️ Element ${i + 1} src:`, src);
+      console.log(`🖼️ Image element candidate:`, {
+        selector,
+        tagName: element.tagName,
+        className: element.className,
+        src,
+        alt: element.getAttribute('alt'),
+        width: element.getAttribute('width'),
+        height: element.getAttribute('height')
+      });
       
       if (src && src.trim() && !src.includes('data:image') && src.length > 10) {
         // Skip obvious non-product images
-        const srcLower = src.toLowerCase();
-        if (srcLower.includes('logo') || 
-            srcLower.includes('icon') || 
-            srcLower.includes('banner') ||
-            srcLower.includes('avatar') ||
-            srcLower.includes('placeholder')) {
-          console.log('🖼️ Skipping non-product image:', src);
+        const skipPatterns = [
+          'placeholder', 'icon', 'logo', 'spinner', 'loading', 'pixel',
+          'blank', 'spacer', 'arrow', 'button', 'social', 'banner',
+          'nav', 'menu', 'footer', 'header', 'ad', 'promo'
+        ];
+        
+        if (skipPatterns.some(pattern => src.toLowerCase().includes(pattern))) {
           continue;
         }
         
+        // Check image dimensions if available
+        if (element.tagName === 'IMG') {
+          const imgElement = element as HTMLImageElement;
+          const width = imgElement.naturalWidth || parseInt(element.getAttribute('width') || '0');
+          const height = imgElement.naturalHeight || parseInt(element.getAttribute('height') || '0');
+          
+          // Skip very small images (likely icons) or very thin images (likely decorative)
+          if ((width > 0 && width < 100) || (height > 0 && height < 100)) continue;
+          if ((width > 0 && height > 0) && (width / height > 10 || height / width > 10)) continue;
+        }
+        
+        // Convert relative URLs to absolute
         try {
           const imageUrl = new URL(src, origin).href;
-          console.log('✅ Site-specific image found:', imageUrl);
-          return imageUrl;
+          
+          // Validate that it's likely a product image
+          const validImageExtensions = /\.(jpg|jpeg|png|webp|gif|avif)($|\?)/i;
+          const hasImagePath = /\/(images?|media|photos?|pics?|assets|cdn|static)/i.test(imageUrl);
+          const hasProductPath = /\/(product|item|catalog|listing)/i.test(imageUrl);
+          
+          if (validImageExtensions.test(imageUrl) || hasImagePath || hasProductPath) {
+            console.log('Found product image candidate:', imageUrl);
+            return imageUrl;
+          }
         } catch {
-          if (src.startsWith('http')) {
-            console.log('✅ Direct site-specific image URL:', src);
+          // If URL construction fails, try returning the src as-is if it looks like a URL
+          if (src.startsWith('http') && src.includes('.')) {
+            console.log('Using fallback image URL:', src);
             return src;
           }
         }
@@ -557,279 +1357,5 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
     }
   }
   
-  // Strategy 4: Generic comprehensive image search
-  console.log('🖼️ 🔍 Strategy 4: Comprehensive image search...');
-  
-  const allImages = doc.querySelectorAll('img');
-  console.log(`🖼️ Analyzing ${allImages.length} images`);
-  
-  // Score images based on various factors
-  const scoredImages: Array<{element: HTMLImageElement, score: number, src: string}> = [];
-  
-  for (const img of allImages) {
-    const src = img.getAttribute('src') || 
-                img.getAttribute('data-src') || 
-                img.getAttribute('data-lazy-src') ||
-                img.getAttribute('data-original');
-    
-    if (!src || src.includes('data:image') || src.length < 10) continue;
-    
-    let score = 0;
-    const className = img.className?.toLowerCase() || '';
-    const id = img.id?.toLowerCase() || '';
-    const alt = img.getAttribute('alt')?.toLowerCase() || '';
-    const srcLower = src.toLowerCase();
-    
-    // Positive scoring
-    if (className.includes('product') || id.includes('product')) score += 10;
-    if (className.includes('main') || id.includes('main')) score += 8;
-    if (className.includes('hero') || id.includes('hero')) score += 8;
-    if (className.includes('featured') || id.includes('featured')) score += 7;
-    if (className.includes('image') || id.includes('image')) score += 5;
-    if (alt.includes('product')) score += 5;
-    
-    // Size-based scoring
-    const width = parseInt(img.getAttribute('width') || '0');
-    const height = parseInt(img.getAttribute('height') || '0');
-    if (width > 200 && height > 200) score += 5;
-    if (width > 400 && height > 400) score += 3;
-    
-    // Negative scoring
-    if (srcLower.includes('logo') || className.includes('logo')) score -= 10;
-    if (srcLower.includes('icon') || className.includes('icon')) score -= 8;
-    if (srcLower.includes('banner') || className.includes('banner')) score -= 8;
-    if (srcLower.includes('avatar') || className.includes('avatar')) score -= 5;
-    if (srcLower.includes('placeholder')) score -= 5;
-    if (width < 100 || height < 100) score -= 3;
-    
-    scoredImages.push({element: img, score, src});
-  }
-  
-  // Sort by score and try the best candidates
-  scoredImages.sort((a, b) => b.score - a.score);
-  
-  console.log(`🖼️ Top 5 scored images:`, scoredImages.slice(0, 5).map(img => ({
-    src: img.src.substring(0, 100),
-    score: img.score
-  })));
-  
-  for (let i = 0; i < Math.min(scoredImages.length, 10); i++) {
-    const {src} = scoredImages[i];
-    
-    try {
-      const imageUrl = new URL(src, origin).href;
-      console.log(`✅ Scored image ${i + 1} selected:`, imageUrl);
-      return imageUrl;
-    } catch {
-      if (src.startsWith('http')) {
-        console.log(`✅ Direct scored image ${i + 1} URL:`, src);
-        return src;
-      }
-    }
-  }
-  
-  console.log('❌ No suitable image found');
   return undefined;
 };
-
-// Enhanced metadata extraction
-const extractMetadata = (doc: Document): { title?: string; description?: string } => {
-  console.log('📄 Extracting metadata...');
-  
-  // Title extraction with multiple strategies
-  let title = doc.querySelector('meta[property="og:title"]')?.getAttribute('content') ||
-              doc.querySelector('meta[name="twitter:title"]')?.getAttribute('content') ||
-              doc.querySelector('title')?.textContent ||
-              doc.querySelector('h1')?.textContent ||
-              '';
-  
-  // Description extraction
-  let description = doc.querySelector('meta[property="og:description"]')?.getAttribute('content') ||
-                    doc.querySelector('meta[name="description"]')?.getAttribute('content') ||
-                    doc.querySelector('meta[name="twitter:description"]')?.getAttribute('content') ||
-                    '';
-  
-  // Clean up title and description
-  title = title.trim().substring(0, 200);
-  description = description.trim().substring(0, 500);
-  
-  console.log('📄 Extracted title:', title);
-  console.log('📄 Extracted description:', description.substring(0, 100));
-  
-  return { title: title || undefined, description: description || undefined };
-};
-
-// Main URL parsing function with enhanced error handling and retry logic
-export const parseUrl = async (url: string): Promise<UrlData | null> => {
-  console.log('🚀 Starting enhanced URL parsing for:', url);
-  
-  if (!url || typeof url !== 'string') {
-    console.log('❌ Invalid URL provided');
-    return null;
-  }
-  
-  let finalUrl = url.trim();
-  
-  // Ensure URL has protocol
-  if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
-    finalUrl = 'https://' + finalUrl;
-  }
-  
-  console.log('🔗 Final URL to parse:', finalUrl);
-  
-  // Array of proxy services for robust fetching
-  const proxyServices = [
-    'https://api.allorigins.win/get?url=',
-    'https://cors-anywhere.herokuapp.com/',
-    'https://proxy.cors.sh/'
-  ];
-  
-  let lastError: Error | null = null;
-  
-  // Try multiple proxy services
-  for (let i = 0; i < proxyServices.length; i++) {
-    const proxyUrl = proxyServices[i] + encodeURIComponent(finalUrl);
-    
-    try {
-      console.log(`🌐 Attempt ${i + 1}: Fetching via ${proxyServices[i]}`);
-      
-      const response = await fetch(proxyUrl, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      let html: string;
-      
-      if (proxyServices[i].includes('allorigins')) {
-        const data = await response.json();
-        html = data.contents;
-      } else {
-        html = await response.text();
-      }
-      
-      if (!html || html.trim().length < 100) {
-        throw new Error('Empty or invalid HTML response');
-      }
-      
-      console.log(`✅ Successfully fetched HTML (${html.length} chars)`);
-      
-      // Parse HTML
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      
-      if (!doc || !doc.body) {
-        throw new Error('Failed to parse HTML document');
-      }
-      
-      console.log('📄 HTML parsed successfully');
-      
-      // Extract data with comprehensive strategies
-      const urlOrigin = new URL(finalUrl).origin;
-      
-      const price = extractPrice(doc);
-      const imageUrl = extractImageUrl(doc, urlOrigin);
-      const metadata = extractMetadata(doc);
-      
-      const result: UrlData = {
-        url: finalUrl,
-        title: metadata.title,
-        price,
-        imageUrl,
-        description: metadata.description,
-        itemName: metadata.title, // Use title as itemName for compatibility
-        storeName: extractDomainName(finalUrl) // Use domain as storeName
-      };
-      
-      console.log('🎉 Final extraction result:', {
-        url: result.url,
-        title: result.title,
-        price: result.price,
-        imageUrl: result.imageUrl ? result.imageUrl.substring(0, 100) + '...' : undefined,
-        description: result.description ? result.description.substring(0, 100) + '...' : undefined
-      });
-      
-      return result;
-      
-    } catch (error) {
-      lastError = error as Error;
-      console.log(`❌ Attempt ${i + 1} failed:`, error);
-      
-      // If this isn't the last attempt, continue to next proxy
-      if (i < proxyServices.length - 1) {
-        console.log(`🔄 Trying next proxy service...`);
-        continue;
-      }
-    }
-  }
-  
-  // If all proxy attempts failed, try direct fetch as last resort
-  try {
-    console.log('🎯 Final attempt: Direct fetch...');
-    
-    const response = await fetch(finalUrl, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
-    
-    if (response.ok) {
-      const html = await response.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      
-      const urlOrigin = new URL(finalUrl).origin;
-      const price = extractPrice(doc);
-      const imageUrl = extractImageUrl(doc, urlOrigin);
-      const metadata = extractMetadata(doc);
-      
-      const result: UrlData = {
-        url: finalUrl,
-        title: metadata.title,
-        price,
-        imageUrl,
-        description: metadata.description,
-        itemName: metadata.title,
-        storeName: extractDomainName(finalUrl)
-      };
-      
-      console.log('🎉 Direct fetch success:', result);
-      return result;
-    }
-  } catch (error) {
-    console.log('❌ Direct fetch also failed:', error);
-  }
-  
-  // Return partial data even if extraction failed
-  console.log('⚠️ All attempts failed, returning minimal data');
-  
-  return {
-    url: finalUrl,
-    title: extractDomainName(finalUrl),
-    price: undefined,
-    imageUrl: undefined,
-    description: undefined,
-    itemName: extractDomainName(finalUrl),
-    storeName: extractDomainName(finalUrl)
-  };
-};
-
-// Helper function to extract domain name for fallback title
-const extractDomainName = (url: string): string => {
-  try {
-    const domain = new URL(url).hostname;
-    return domain.replace('www.', '').split('.')[0];
-  } catch {
-    return 'Unknown Site';
-  }
-};
-
-// Backward compatibility export
-export const parseProductUrl = parseUrl;
