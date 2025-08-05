@@ -731,7 +731,13 @@ const extractItemName = (doc: Document): string | undefined => {
 
 const extractPrice = (doc: Document): string | undefined => {
   console.log('🔍 Starting price extraction from DOM...');
-  console.log('📄 HTML content contains price keywords:', !!doc.documentElement.innerHTML.toLowerCase().match(/(\$|€|£|price|cost|\d+[.,]\d{2})/));
+  console.log('📄 Page title:', doc.title);
+  console.log('📄 URL:', doc.location?.href || 'unknown');
+  
+  // First, let's see what price-like content exists on the page
+  const allText = doc.body?.textContent || '';
+  const priceMatches = allText.match(/[\$£€¥]\s*[\d,]+\.?\d{0,2}|\b\d{1,4}[.,]\d{2}\b/g);
+  console.log('💰 Found potential prices in page text:', priceMatches?.slice(0, 10));
   
   // Enhanced selectors for price with better store coverage
   const selectors = [
@@ -985,6 +991,9 @@ const extractPrice = (doc: Document): string | undefined => {
 };
 
 const extractImageUrl = (doc: Document, origin: string): string | undefined => {
+  console.log('🖼️ Starting image extraction from DOM...');
+  console.log('📄 Page has images:', doc.querySelectorAll('img').length);
+  
   // Enhanced selectors for product images with better store coverage
   const selectors = [
     // Meta tags (most reliable)
@@ -992,6 +1001,20 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
     'meta[name="twitter:image"]',
     'meta[property="og:image:url"]',
     'meta[property="product:image"]',
+    
+    // Smallable-specific image selectors (French retailer)
+    '.product-image img', // Smallable main image
+    '.item-image img', // Smallable item
+    '.product-gallery img', // Smallable gallery
+    '.media-wrapper img', // Smallable media
+    '.picture img', // Smallable picture
+    '.photo img', // Smallable photo
+    '.image-container img', // Smallable container
+    '.main-image img', // Smallable main
+    '.hero-image img', // Smallable hero
+    '.featured-image img', // Smallable featured
+    '[data-role="product-image"] img', // Smallable modern
+    '.product-photos img', // Smallable photos
     
     // ThriftBooks specific image selectors (high priority)
     '.SearchResultListItem-image img', // ThriftBooks search results
