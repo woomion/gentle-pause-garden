@@ -789,54 +789,86 @@ const extractPrice = (doc: Document): string | undefined => {
     }
   });
   
-  // Check if this is Smallable and extract directly from their structure
+  // Check if this is Smallable (any country) and extract directly from their structure
   const currentUrl = doc.location?.href || '';
-  const isSmallable = currentUrl.includes('smallable.com');
+  const isSmallable = /smallable\.(com|fr|co\.uk|de|es|it|be|nl|ch)/i.test(currentUrl);
+  
+  console.log('🔍 URL being parsed:', currentUrl);
+  console.log('🎯 Is Smallable?', isSmallable);
   
   if (isSmallable) {
-    console.log('🎯 Detected Smallable - using specific extraction');
+    console.log('🎯 Detected Smallable - using specific extraction for', currentUrl);
     
-    // Smallable-specific price extraction
+    // Log page structure for debugging
+    const allPriceElements = doc.querySelectorAll('[class*="price"], [class*="Price"], [data-testid*="price"], [id*="price"]');
+    console.log('💰 All price-related elements found:', allPriceElements.length);
+    
+    // More comprehensive Smallable price selectors
     const smallablePriceSelectors = [
+      // Current price selectors
+      '.product-price-value',
+      '.product__price',
+      '.price-current',
+      '.price__current',
+      '.current-price',
       '.ProductPrice-current',
       '.Price-current',
-      '.price__current',
-      '.price-current',
-      '.product-price .price',
-      '.ProductPrice .price',
       '.formatted-price',
       '[data-testid="current-price"]',
+      '[data-testid="price"]',
       '.price-value',
-      '.current-price-value'
+      '.current-price-value',
+      '.price',
+      '.price-amount',
+      '.product-price',
+      '.sell-price',
+      '.final-price',
+      // Meta tags
+      'meta[property="product:price:amount"]',
+      'meta[property="og:price:amount"]',
+      'meta[name="price"]',
+      // Generic patterns
+      '[class*="price"]:not([class*="was"]):not([class*="original"])',
+      '[data-price]'
     ];
     
     for (const selector of smallablePriceSelectors) {
-      const priceElement = doc.querySelector(selector);
-      if (priceElement) {
-        const priceText = priceElement.textContent?.trim();
-        console.log(`💰 Smallable price found with "${selector}":`, priceText);
+      const elements = doc.querySelectorAll(selector);
+      console.log(`💰 Checking "${selector}": found ${elements.length} elements`);
+      
+      for (const element of elements) {
+        let priceText = '';
+        
+        if (element.tagName === 'META') {
+          priceText = element.getAttribute('content') || '';
+        } else {
+          priceText = element.textContent?.trim() || '';
+        }
+        
+        console.log(`💰 Element text:`, priceText);
+        
         if (priceText) {
           const price = extractPriceFromText(priceText);
           if (price) {
-            console.log('💰 Smallable price extracted successfully:', price);
+            console.log('✅ Smallable price extracted successfully:', price);
             return price;
           }
         }
       }
     }
     
-    // Fallback: search in JSON-LD data for Smallable
-    const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
-    for (const script of scripts) {
-      try {
-        const data = JSON.parse(script.textContent || '');
-        if (data.offers?.price || data.price) {
-          const price = data.offers?.price || data.price;
-          console.log('💰 Smallable price from JSON-LD:', price);
+    // Fallback: search entire page text for European price patterns
+    const pageText = doc.body?.textContent || '';
+    const europeanPrices = pageText.match(/\d{1,4}[.,]\d{2}\s*€|€\s*\d{1,4}[.,]\d{2}|\d{1,4}[.,]\d{2}\s*EUR/g);
+    console.log('💰 European prices found in page text:', europeanPrices?.slice(0, 5));
+    
+    if (europeanPrices && europeanPrices.length > 0) {
+      for (const priceMatch of europeanPrices) {
+        const price = extractPriceFromText(priceMatch);
+        if (price) {
+          console.log('✅ Smallable price from page text:', price);
           return price;
         }
-      } catch (e) {
-        // Continue searching
       }
     }
   }
@@ -1099,9 +1131,9 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
   console.log('🖼️ Starting image extraction from DOM...');
   console.log('📄 Page has images:', doc.querySelectorAll('img').length);
   
-  // Check if this is Smallable and extract directly from their structure
+  // Check if this is Smallable (any country) and extract directly from their structure
   const currentUrl = doc.location?.href || '';
-  const isSmallable = currentUrl.includes('smallable.com');
+  const isSmallable = /smallable\.(com|fr|co\.uk|de|es|it|be|nl|ch)/i.test(currentUrl);
   
   if (isSmallable) {
     console.log('🎯 Detected Smallable - using specific image extraction');
