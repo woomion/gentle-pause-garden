@@ -823,32 +823,50 @@ const extractPrice = (doc: Document): string | undefined => {
       if (content && content.trim()) {
         console.log(`Checking price element "${selector}": "${content.trim()}"`);
         
-        // Multiple regex patterns to catch different price formats
+        // Enhanced regex patterns for better price detection
         const pricePatterns = [
-          /[\$£€¥₹₽¢]\s*[\d,]+\.?\d*/g, // Currency symbol first
-          /[\d,]+\.?\d*\s*[\$£€¥₹₽¢]/g, // Currency symbol last
-          /[\d,]+\.\d{2}/g, // Decimal prices without currency
-          /\b[\d,]{2,}\b/g // Numbers (likely prices) - more flexible
+          // Exact currency formats with proper decimal handling
+          /\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g, // $X.XX or $X,XXX.XX
+          /£\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g, // £X.XX
+          /€\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g, // €X.XX
+          /(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s*[\$£€]/g, // X.XX$ format
+          
+          // Decimal prices without currency (common in ThriftBooks)
+          /\b(\d{1,4}\.\d{2})\b/g, // X.XX format
+          
+          // Integer prices 
+          /\$\s*(\d{1,4})\b/g, // $X format
+          /\b(\d{2,4})\s*[\$£€]/g // X$ format
         ];
         
         for (const pattern of pricePatterns) {
-          const matches = content.match(pattern);
-          if (matches) {
+          const matches = [...content.matchAll(pattern)];
+          if (matches.length > 0) {
             for (const match of matches) {
-              // Clean up the price string
-              let price = match
-                .replace(/[£€¥₹₽¢\$,\s]/g, '') // Remove currency symbols and formatting
-                .replace(/[^\d.]/g, '') // Keep only digits and decimal points
-                .trim();
+              // Get the captured group (the numeric part)
+              const priceStr = match[1] || match[0];
+              let price = priceStr.replace(/[,\s]/g, ''); // Remove commas and spaces
               
-              // Ensure it's a valid number and reasonable price range
               const numPrice = parseFloat(price);
-              if (!isNaN(numPrice) && numPrice > 0.50 && numPrice < 100000) {
-                console.log(`Found valid price: ${numPrice}`);
-                // Return the cleaned numeric price
+              
+              // More reasonable price validation
+              if (!isNaN(numPrice) && numPrice >= 0.01 && numPrice <= 50000) {
+                console.log(`✅ Found valid price: $${numPrice.toFixed(2)} from "${content.trim().substring(0, 50)}"`);
                 return numPrice.toFixed(2);
+              } else {
+                console.log(`❌ Invalid price range: ${numPrice} from "${priceStr}"`);
               }
             }
+          }
+        }
+        
+        // Fallback: look for any reasonable number that might be a price
+        const fallbackMatch = content.match(/\b(\d{1,3}(?:\.\d{2})?)\b/);
+        if (fallbackMatch) {
+          const numPrice = parseFloat(fallbackMatch[1]);
+          if (!isNaN(numPrice) && numPrice >= 1 && numPrice <= 1000) {
+            console.log(`⚠️ Fallback price found: $${numPrice.toFixed(2)}`);
+            return numPrice.toFixed(2);
           }
         }
       }
