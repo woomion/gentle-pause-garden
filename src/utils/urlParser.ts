@@ -730,6 +730,9 @@ const extractItemName = (doc: Document): string | undefined => {
 };
 
 const extractPrice = (doc: Document): string | undefined => {
+  console.log('🔍 Starting price extraction from DOM...');
+  console.log('📄 HTML content contains price keywords:', !!doc.documentElement.innerHTML.toLowerCase().match(/(\$|€|£|price|cost|\d+[.,]\d{2})/));
+  
   // Enhanced selectors for price with better store coverage
   const selectors = [
     // Meta tags (most reliable)
@@ -803,6 +806,16 @@ const extractPrice = (doc: Document): string | undefined => {
     '.price-value',
     '.price-amount',
     
+    // Smallable-specific selectors (French retailer)
+    '.price-item', // Smallable
+    '.price-amount', // Smallable
+    '.actual-price', // Smallable
+    '.product-price .price', // Smallable
+    '.sell-price', // Smallable
+    '.current-price-value', // Smallable
+    '.price-display span', // Smallable
+    '.price-wrapper .price', // Smallable
+    
     // Generic price selectors
     '[class*="price"]:not([class*="original"]):not([class*="was"]):not([class*="msrp"]):not([class*="list"])',
     '[class*="Price"]:not([class*="Original"]):not([class*="Was"]):not([class*="List"])',
@@ -815,6 +828,7 @@ const extractPrice = (doc: Document): string | undefined => {
   
   for (const selector of selectors) {
     const elements = doc.querySelectorAll(selector);
+    console.log(`🔎 Checking selector "${selector}": found ${elements.length} elements`);
     for (const element of elements) {
       const content = element.getAttribute('content') || 
                      element.getAttribute('data-price') || 
