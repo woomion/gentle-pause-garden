@@ -6,9 +6,41 @@ interface ProductInfo {
   imageUrl?: string;
 }
 
+// Performance-optimized cache with TTL and hit tracking
+const urlCache = new Map<string, { data: ProductInfo; timestamp: number; hits: number }>();
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+const MAX_CACHE_SIZE = 200;
+
+// Fast proxy services ordered by reliability and speed
+const PROXY_SERVICES = [
+  { url: 'https://api.allorigins.win/get?url=', timeout: 3000, priority: 1 },
+  { url: 'https://corsproxy.io/?', timeout: 4000, priority: 2 },
+  { url: 'https://cors-anywhere.herokuapp.com/', timeout: 5000, priority: 3 },
+];
+
+// Cache management
+const cleanExpiredCache = () => {
+  const now = Date.now();
+  for (const [key, value] of urlCache.entries()) {
+    if (now - value.timestamp > CACHE_DURATION) {
+      urlCache.delete(key);
+    }
+  }
+  
+  // If cache is still too large, remove least used items
+  if (urlCache.size > MAX_CACHE_SIZE) {
+    const sortedEntries = Array.from(urlCache.entries())
+      .sort((a, b) => a[1].hits - b[1].hits);
+    const toRemove = sortedEntries.slice(0, urlCache.size - MAX_CACHE_SIZE);
+    toRemove.forEach(([key]) => urlCache.delete(key));
+  }
+};
+
 export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
+  const startTime = performance.now();
+  
   try {
-    console.log('Parsing URL:', url);
+    console.log('🚀 Fast parsing URL:', url);
     
     // Clean the URL first
     let cleanUrl = url.trim();
@@ -16,191 +48,173 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       throw new Error('Empty URL provided');
     }
 
-    // Resolve redirects for short URLs
-    cleanUrl = await resolveRedirects(cleanUrl);
-    console.log('Resolved URL:', cleanUrl);
+    // Check cache first
+    const cacheKey = cleanUrl;
+    const cached = urlCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+      cached.hits++;
+      console.log('✅ Cache hit! Returning cached result in', performance.now() - startTime, 'ms');
+      return cached.data;
+    }
 
-    const urlObj = new URL(cleanUrl);
+    // Clean expired cache periodically
+    if (urlCache.size > 0 && Math.random() < 0.1) {
+      cleanExpiredCache();
+    }
+
+    // Fast redirect resolution (parallel with URL parsing)
+    const [resolvedUrl, urlBasedInfo] = await Promise.all([
+      resolveRedirects(cleanUrl),
+      Promise.resolve(extractFromUrlStructure(cleanUrl, new URL(cleanUrl).hostname.toLowerCase()))
+    ]);
+
+    const urlObj = new URL(resolvedUrl);
     const hostname = urlObj.hostname.toLowerCase();
     
     // Extract store name from hostname
     const storeName = extractStoreName(hostname);
     
-    // Try to extract info from URL structure first (for Amazon, etc.)
-    const urlBasedInfo = extractFromUrlStructure(url, hostname);
-    
-    // Try to fetch the page content
+    // Initial product info with URL-based extraction
     const productInfo: ProductInfo = { 
       storeName,
       ...urlBasedInfo 
     };
     
-    try {
-      // Try multiple approaches for better reliability
-      let htmlContent = null;
-      
-      // First, try Shopify product API if it's a Shopify store
-      if (hostname.includes('shopify') || url.includes('/products/')) {
-        try {
-          // Try Shopify's product JSON API
-          const productApiUrl = url.replace(/\?.*$/, '') + '.json';
-          console.log('Trying Shopify product API:', productApiUrl);
-          
-          const apiResponse = await fetch(productApiUrl);
-          if (apiResponse.ok) {
-            const productData = await apiResponse.json();
-            if (productData.product) {
-              console.log('Got Shopify product data:', productData.product.title);
-              
-              // Extract product info from API response
-              if (productData.product.title && !productInfo.itemName) {
-                productInfo.itemName = productData.product.title;
-                console.log('Extracted item name from API:', productData.product.title);
-              }
-              
-              // Get price from variants
-              if (productData.product.variants && productData.product.variants.length > 0) {
-                const variant = productData.product.variants[0];
-                if (variant.price) {
-                  productInfo.price = parseFloat(variant.price).toFixed(2);
-                  console.log('Extracted price from API:', productInfo.price);
-                }
-              }
-              
-              // Get image from API
-              if (productData.product.images && productData.product.images.length > 0) {
-                productInfo.imageUrl = productData.product.images[0].src;
-                console.log('Extracted image from API:', productInfo.imageUrl);
-              }
-              
-              return productInfo; // Return early if API worked
-            }
-          }
-        } catch (apiError) {
-          console.log('Shopify API failed, trying proxy services:', apiError.message);
-        }
-      }
-      
-      // Enhanced proxy services with better reliability and timeout handling
-      const proxyServices = [
-        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://cors-anywhere.herokuapp.com/${url}`,
-        `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`,
-        // Direct fetch as backup (may work for some CORS-enabled sites)
-        url
-      ];
-      
-      // Try each proxy service with enhanced timeout and error handling
-      for (let i = 0; i < proxyServices.length; i++) {
-        const proxyUrl = proxyServices[i];
-        try {
-          console.log('Trying fetch method:', i === proxyServices.length - 1 ? 'direct' : `proxy ${i + 1}`);
-          
-          let response;
-          const fetchOptions = {
-            signal: AbortSignal.timeout(8000), // 8 second timeout
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-              'Accept-Language': 'en-US,en;q=0.5',
-              'Accept-Encoding': 'gzip, deflate, br',
-              'DNT': '1',
-              'Connection': 'keep-alive',
-              'Upgrade-Insecure-Requests': '1'
-            }
-          };
-          
-          if (i === proxyServices.length - 1) {
-            // Last attempt: direct fetch (may work for some CORS-enabled sites)
-            response = await fetch(proxyUrl, {
-              ...fetchOptions,
-              mode: 'cors'
-            });
-            
-            if (response.ok) {
-              htmlContent = await response.text();
-              console.log('Successfully fetched content via direct request');
-              break;
-            }
-          } else {
-            // Proxy attempt
-            response = await fetch(proxyUrl, fetchOptions);
-            
-            if (response.ok) {
-              let data;
-              const contentType = response.headers.get('content-type');
-              
-              if (contentType && contentType.includes('application/json')) {
-                data = await response.json();
-                if (data.contents) {
-                  htmlContent = data.contents;
-                  console.log('Successfully fetched content via proxy (JSON response)');
-                  break;
-                } else if (data.response) {
-                  htmlContent = data.response;
-                  console.log('Successfully fetched content via proxy (response field)');
-                  break;
-                }
-              } else {
-                // Direct HTML response from proxy
-                htmlContent = await response.text();
-                if (htmlContent && htmlContent.includes('<html')) {
-                  console.log('Successfully fetched content via proxy (direct HTML)');
-                  break;
-                }
-              }
-            }
-          }
-        } catch (proxyError) {
-          console.log(`Fetch method ${i + 1} failed, trying next:`, proxyError.message);
-          continue;
-        }
-      }
-      
-      if (htmlContent) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlContent, 'text/html');
-        
-        // Extract item name from various meta tags and title
-        const scrapedName = extractItemName(doc);
-        if (scrapedName && !productInfo.itemName) {
-          productInfo.itemName = scrapedName;
-          console.log('Extracted item name:', scrapedName);
-        }
-        
-        // Extract price from various sources
-        const scrapedPrice = extractPrice(doc);
-        if (scrapedPrice && !productInfo.price) {
-          productInfo.price = scrapedPrice;
-          console.log('Extracted price:', scrapedPrice);
-        } else {
-          console.log('Price extraction failed - no price found');
-          // Debug: log some elements to see what we're working with
-          const priceElements = doc.querySelectorAll('[class*="price"], [class*="Price"], .money, [data-price]');
-          console.log(`Found ${priceElements.length} potential price elements:`, 
-            Array.from(priceElements).slice(0, 5).map(el => ({
-              tagName: el.tagName,
-              className: el.className,
-              textContent: el.textContent?.trim().substring(0, 50),
-              innerHTML: el.innerHTML?.substring(0, 100)
-            }))
-          );
-        }
-        
-        // Extract image URL with improved selectors
-        const scrapedImage = extractImageUrl(doc, urlObj.origin);
-        if (scrapedImage && !productInfo.imageUrl) {
-          productInfo.imageUrl = scrapedImage;
-          console.log('Extracted image URL:', scrapedImage);
-        }
-      } else {
-        console.log('All proxy services failed, using URL-based extraction only');
-      }
-    } catch (fetchError) {
-      console.log('Could not fetch page content, using URL-based extraction only:', fetchError.message);
-    }
+    // Fast parallel processing approach
+    const extractionPromises = [];
     
+    // Add API extraction for Shopify stores (parallel)
+    if (hostname.includes('shopify') || resolvedUrl.includes('/products/')) {
+      extractionPromises.push(
+        (async () => {
+          try {
+            const productApiUrl = resolvedUrl.replace(/\?.*$/, '') + '.json';
+            const apiResponse = await fetch(productApiUrl, { 
+              signal: AbortSignal.timeout(3000) 
+            });
+            if (apiResponse.ok) {
+              const productData = await apiResponse.json();
+              if (productData.product) {
+                return {
+                  source: 'shopify-api',
+                  itemName: productData.product.title,
+                  price: productData.product.variants?.[0]?.price ? 
+                    parseFloat(productData.product.variants[0].price).toFixed(2) : undefined,
+                  imageUrl: productData.product.images?.[0]?.src
+                };
+              }
+            }
+          } catch {
+            // API failed, will fallback to scraping
+          }
+          return null;
+        })()
+      );
+    }
+
+    // Add parallel proxy fetching with race condition
+    extractionPromises.push(
+      (async () => {
+        const fetchPromises = PROXY_SERVICES.map(async (service, index) => {
+          try {
+            const proxyUrl = service.url + encodeURIComponent(resolvedUrl);
+            const response = await fetch(proxyUrl, {
+              signal: AbortSignal.timeout(service.timeout),
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              }
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            let htmlContent: string;
+            const contentType = response.headers.get('content-type') || '';
+            
+            if (contentType.includes('application/json')) {
+              const data = await response.json();
+              htmlContent = data.contents || data.response || '';
+            } else {
+              htmlContent = await response.text();
+            }
+
+            if (!htmlContent || !htmlContent.includes('<html')) {
+              throw new Error('Invalid HTML content');
+            }
+
+            return { htmlContent, service: service.url, priority: service.priority };
+          } catch (error) {
+            throw new Error(`Proxy ${index + 1} failed: ${error.message}`);
+          }
+        });
+
+        // Use Promise.any to get the fastest successful response
+        try {
+          // Use Promise.race for faster response (first one wins)
+          const result = await Promise.race(fetchPromises.map(async (promise, index) => {
+            try {
+              return await promise;
+            } catch (error) {
+              // Throw with index to track which proxy failed
+              throw new Error(`Proxy ${index + 1} failed: ${error.message}`);
+            }
+          }));
+          console.log(`✅ Fast fetch success via ${result.service} in`, performance.now() - startTime, 'ms');
+          
+          // Parse HTML and extract all data in parallel
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(result.htmlContent, 'text/html');
+          
+          const [itemName, price, imageUrl] = await Promise.all([
+            Promise.resolve(extractItemName(doc)),
+            Promise.resolve(extractPrice(doc)),
+            Promise.resolve(extractImageUrl(doc, urlObj.origin))
+          ]);
+
+          return {
+            source: 'scraping',
+            itemName,
+            price,
+            imageUrl
+          };
+        } catch (error) {
+          console.log('All proxy services failed:', error);
+          return null;
+        }
+      })()
+    );
+
+    // Wait for any successful extraction method
+    try {
+      const results = await Promise.allSettled(extractionPromises);
+      const successfulResults = results
+        .filter(result => result.status === 'fulfilled' && result.value)
+        .map(result => (result as PromiseFulfilledResult<any>).value);
+
+      // Merge results, prioritizing API data over scraped data
+      for (const result of successfulResults) {
+        if (result.itemName && !productInfo.itemName) {
+          productInfo.itemName = result.itemName;
+        }
+        if (result.price && !productInfo.price) {
+          productInfo.price = result.price;
+        }
+        if (result.imageUrl && !productInfo.imageUrl) {
+          productInfo.imageUrl = result.imageUrl;
+        }
+      }
+
+      console.log(`⚡ Total parsing time: ${performance.now() - startTime}ms`);
+    } catch (error) {
+      console.log('Extraction failed, using URL-based data only:', error);
+    }
+
+    // Cache the result
+    urlCache.set(cacheKey, {
+      data: productInfo,
+      timestamp: Date.now(),
+      hits: 1
+    });
+
     return productInfo;
   } catch (error) {
     console.error('Error parsing URL:', error);
