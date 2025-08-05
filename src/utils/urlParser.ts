@@ -823,20 +823,25 @@ const extractPrice = (doc: Document): string | undefined => {
       if (content && content.trim()) {
         console.log(`Checking price element "${selector}": "${content.trim()}"`);
         
-        // Enhanced regex patterns for better price detection
+        // Comprehensive regex patterns for international price formats
         const pricePatterns = [
-          // Exact currency formats with proper decimal handling
-          /\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g, // $X.XX or $X,XXX.XX
-          /£\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g, // £X.XX
-          /€\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g, // €X.XX
-          /(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s*[\$£€]/g, // X.XX$ format
+          // Currency symbol first with various formats
+          /[\$£€¥₹₽¢]\s*(\d{1,3}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)/gi,
           
-          // Decimal prices without currency (common in ThriftBooks)
-          /\b(\d{1,4}\.\d{2})\b/g, // X.XX format
+          // Currency symbol after price
+          /(\d{1,3}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)\s*[\$£€¥₹₽¢]/gi,
           
-          // Integer prices 
-          /\$\s*(\d{1,4})\b/g, // $X format
-          /\b(\d{2,4})\s*[\$£€]/g // X$ format
+          // Decimal prices without currency (any reasonable format)
+          /\b(\d{1,4}[.,]\d{2})\b/g,
+          
+          // Integer prices with currency indicators
+          /[\$£€¥₹₽¢]\s*(\d{1,4})\b/gi,
+          
+          // European format (comma as decimal separator)
+          /(\d{1,3}(?:\.\d{3})*,\d{2})/g,
+          
+          // Just numbers that look like prices (broad fallback)
+          /\b(\d{1,4}(?:[.,]\d{2})?)\b/g
         ];
         
         for (const pattern of pricePatterns) {
@@ -844,17 +849,38 @@ const extractPrice = (doc: Document): string | undefined => {
           if (matches.length > 0) {
             for (const match of matches) {
               // Get the captured group (the numeric part)
-              const priceStr = match[1] || match[0];
-              let price = priceStr.replace(/[,\s]/g, ''); // Remove commas and spaces
+              const rawPrice = match[1] || match[0];
+              console.log(`🔍 Raw price match: "${rawPrice}" from pattern: ${pattern}`);
+              
+              // Handle different decimal formats
+              let price = rawPrice.replace(/\s/g, ''); // Remove spaces first
+              
+              // Handle European format (1.234,56 -> 1234.56)
+              if (price.includes(',') && price.includes('.')) {
+                // If both comma and dot, assume European format where dot is thousands separator
+                price = price.replace(/\./g, '').replace(',', '.');
+              } else if (price.includes(',') && !price.includes('.')) {
+                // Only comma, could be decimal separator
+                const commaIndex = price.lastIndexOf(',');
+                const afterComma = price.substring(commaIndex + 1);
+                if (afterComma.length === 2) {
+                  // Likely decimal separator
+                  price = price.replace(',', '.');
+                }
+              }
+              
+              // Remove any remaining commas (thousands separators)
+              price = price.replace(/,/g, '');
               
               const numPrice = parseFloat(price);
+              console.log(`💰 Parsed price: ${numPrice} from "${rawPrice}"`);
               
-              // More reasonable price validation
-              if (!isNaN(numPrice) && numPrice >= 0.01 && numPrice <= 50000) {
-                console.log(`✅ Found valid price: $${numPrice.toFixed(2)} from "${content.trim().substring(0, 50)}"`);
+              // Reasonable price validation with better range
+              if (!isNaN(numPrice) && numPrice >= 0.01 && numPrice <= 99999) {
+                console.log(`✅ Valid price found: $${numPrice.toFixed(2)} from "${content.trim().substring(0, 60)}"`);
                 return numPrice.toFixed(2);
               } else {
-                console.log(`❌ Invalid price range: ${numPrice} from "${priceStr}"`);
+                console.log(`❌ Invalid price range: ${numPrice} (must be between 0.01 and 99999)`);
               }
             }
           }
