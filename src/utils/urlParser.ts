@@ -729,6 +729,42 @@ const extractItemName = (doc: Document): string | undefined => {
   return undefined;
 };
 
+// Helper function to extract price from text
+const extractPriceFromText = (text: string): string | undefined => {
+  const pricePatterns = [
+    /[\$£€¥]\s*(\d{1,3}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)/gi,
+    /(\d{1,3}(?:[,.\s]\d{3})*(?:[.,]\d{2})?)\s*[\$£€¥]/gi,
+    /\b(\d{1,4}[.,]\d{2})\b/g,
+    /(\d{1,3}(?:\.\d{3})*,\d{2})/g
+  ];
+  
+  for (const pattern of pricePatterns) {
+    const matches = [...text.matchAll(pattern)];
+    for (const match of matches) {
+      const rawPrice = match[1] || match[0];
+      let price = rawPrice.replace(/\s/g, '');
+      
+      if (price.includes(',') && price.includes('.')) {
+        price = price.replace(/\./g, '').replace(',', '.');
+      } else if (price.includes(',') && !price.includes('.')) {
+        const commaIndex = price.lastIndexOf(',');
+        const afterComma = price.substring(commaIndex + 1);
+        if (afterComma.length === 2) {
+          price = price.replace(',', '.');
+        }
+      }
+      
+      price = price.replace(/,/g, '');
+      const numPrice = parseFloat(price);
+      
+      if (!isNaN(numPrice) && numPrice >= 0.01 && numPrice <= 99999) {
+        return numPrice.toFixed(2);
+      }
+    }
+  }
+  return undefined;
+};
+
 const extractPrice = (doc: Document): string | undefined => {
   console.log('🔍 Starting price extraction from DOM...');
   console.log('📄 Page title:', doc.title);
@@ -753,6 +789,58 @@ const extractPrice = (doc: Document): string | undefined => {
     }
   });
   
+  // Check if this is Smallable and extract directly from their structure
+  const currentUrl = doc.location?.href || '';
+  const isSmallable = currentUrl.includes('smallable.com');
+  
+  if (isSmallable) {
+    console.log('🎯 Detected Smallable - using specific extraction');
+    
+    // Smallable-specific price extraction
+    const smallablePriceSelectors = [
+      '.ProductPrice-current',
+      '.Price-current',
+      '.price__current',
+      '.price-current',
+      '.product-price .price',
+      '.ProductPrice .price',
+      '.formatted-price',
+      '[data-testid="current-price"]',
+      '.price-value',
+      '.current-price-value'
+    ];
+    
+    for (const selector of smallablePriceSelectors) {
+      const priceElement = doc.querySelector(selector);
+      if (priceElement) {
+        const priceText = priceElement.textContent?.trim();
+        console.log(`💰 Smallable price found with "${selector}":`, priceText);
+        if (priceText) {
+          const price = extractPriceFromText(priceText);
+          if (price) {
+            console.log('💰 Smallable price extracted successfully:', price);
+            return price;
+          }
+        }
+      }
+    }
+    
+    // Fallback: search in JSON-LD data for Smallable
+    const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+    for (const script of scripts) {
+      try {
+        const data = JSON.parse(script.textContent || '');
+        if (data.offers?.price || data.price) {
+          const price = data.offers?.price || data.price;
+          console.log('💰 Smallable price from JSON-LD:', price);
+          return price;
+        }
+      } catch (e) {
+        // Continue searching
+      }
+    }
+  }
+
   // Enhanced selectors for price with better store coverage
   const selectors = [
     // Meta tags (most reliable)
@@ -795,7 +883,7 @@ const extractPrice = (doc: Document): string | undefined => {
     '[data-testid="price-current"]', // Etsy current
     '.currency-value', // Etsy price
     '.shop2-listing-price .currency-value', // Etsy legacy
-    '.listing-page-price .currency-value', // Etsy alternative
+    '.listing-page-page .currency-value', // Etsy alternative
     'p.wt-text-title-03', // Etsy price text
     '[class*="listing-page-price"]', // Etsy generic
     
@@ -827,8 +915,11 @@ const extractPrice = (doc: Document): string | undefined => {
     '.price-amount',
     
     // Smallable-specific selectors (French retailer)
+    '.ProductPrice-current', // Smallable
+    '.Price-current', // Smallable
+    '.price__current', // Smallable
+    '.formatted-price', // Smallable
     '.price-item', // Smallable
-    '.price-amount', // Smallable
     '.actual-price', // Smallable
     '.product-price .price', // Smallable
     '.sell-price', // Smallable
@@ -1008,6 +1099,66 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
   console.log('🖼️ Starting image extraction from DOM...');
   console.log('📄 Page has images:', doc.querySelectorAll('img').length);
   
+  // Check if this is Smallable and extract directly from their structure
+  const currentUrl = doc.location?.href || '';
+  const isSmallable = currentUrl.includes('smallable.com');
+  
+  if (isSmallable) {
+    console.log('🎯 Detected Smallable - using specific image extraction');
+    
+    // Smallable-specific image extraction
+    const smallableImageSelectors = [
+      '.ProductGallery img',
+      '.product-image img',
+      '.main-image img',
+      '.ProductImage img',
+      '.media-wrapper img',
+      '.picture img',
+      '.photo img',
+      '.image-container img',
+      '.hero-image img',
+      '.featured-image img',
+      '[data-role="product-image"] img',
+      '.product-photos img:first-child',
+      '.Gallery img:first-child',
+      '.product-media img:first-child'
+    ];
+    
+    for (const selector of smallableImageSelectors) {
+      const imageElement = doc.querySelector(selector);
+      if (imageElement) {
+        const src = imageElement.getAttribute('src') || 
+                    imageElement.getAttribute('data-src') || 
+                    imageElement.getAttribute('data-lazy-src');
+        
+        console.log(`🖼️ Smallable image found with "${selector}":`, src);
+        
+        if (src && src.trim() && !src.includes('data:image') && src.length > 10) {
+          try {
+            const imageUrl = new URL(src, origin).href;
+            console.log('🖼️ Smallable image extracted successfully:', imageUrl);
+            return imageUrl;
+          } catch {
+            if (src.startsWith('http')) {
+              console.log('🖼️ Smallable image URL (direct):', src);
+              return src;
+            }
+          }
+        }
+      }
+    }
+    
+    // Fallback: search Open Graph meta for Smallable
+    const ogImage = doc.querySelector('meta[property="og:image"]');
+    if (ogImage) {
+      const src = ogImage.getAttribute('content');
+      if (src) {
+        console.log('🖼️ Smallable image from OG meta:', src);
+        return src;
+      }
+    }
+  }
+
   // Enhanced selectors for product images with better store coverage
   const selectors = [
     // Meta tags (most reliable)
