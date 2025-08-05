@@ -736,8 +736,22 @@ const extractPrice = (doc: Document): string | undefined => {
   
   // First, let's see what price-like content exists on the page
   const allText = doc.body?.textContent || '';
-  const priceMatches = allText.match(/[\$£€¥]\s*[\d,]+\.?\d{0,2}|\b\d{1,4}[.,]\d{2}\b/g);
-  console.log('💰 Found potential prices in page text:', priceMatches?.slice(0, 10));
+  console.log('📄 Full page text length:', allText.length);
+  
+  // Look for French/European price patterns specifically
+  const frenchPriceMatches = allText.match(/\d{1,4}[.,]\d{2}\s*€|€\s*\d{1,4}[.,]\d{2}/g);
+  const generalPriceMatches = allText.match(/[\$£€¥]\s*[\d,]+\.?\d{0,2}|\b\d{1,4}[.,]\d{2}\b/g);
+  console.log('💰 Found French/European prices:', frenchPriceMatches?.slice(0, 10));
+  console.log('💰 Found general prices:', generalPriceMatches?.slice(0, 10));
+  
+  // Log some HTML structure for debugging
+  const priceElements = doc.querySelectorAll('[class*="price"], [class*="Prix"], [data-testid*="price"]');
+  console.log('💰 Found price-related elements:', priceElements.length);
+  priceElements.forEach((el, i) => {
+    if (i < 5) {
+      console.log(`💰 Price element ${i}:`, el.className, el.textContent?.trim());
+    }
+  });
   
   // Enhanced selectors for price with better store coverage
   const selectors = [
@@ -1095,12 +1109,23 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
   
   for (const selector of selectors) {
     const elements = doc.querySelectorAll(selector);
+    console.log(`🔎 Checking image selector "${selector}": found ${elements.length} elements`);
     
     for (const element of elements) {
       const src = element.getAttribute('content') || 
                   element.getAttribute('src') || 
                   element.getAttribute('data-src') || 
                   element.getAttribute('data-lazy-src');
+      
+      console.log(`🖼️ Image element candidate:`, {
+        selector,
+        tagName: element.tagName,
+        className: element.className,
+        src,
+        alt: element.getAttribute('alt'),
+        width: element.getAttribute('width'),
+        height: element.getAttribute('height')
+      });
       
       if (src && src.trim() && !src.includes('data:image') && src.length > 10) {
         // Skip obvious non-product images
