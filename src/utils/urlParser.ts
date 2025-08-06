@@ -1128,234 +1128,308 @@ const extractPrice = (doc: Document): string | undefined => {
 };
 
 const extractImageUrl = (doc: Document, origin: string): string | undefined => {
-  console.log('🖼️ Starting image extraction from DOM...');
-  console.log('📄 Page has images:', doc.querySelectorAll('img').length);
+  console.log('🖼️ Starting advanced image extraction from DOM...');
+  console.log('📄 Document has images:', doc.querySelectorAll('img').length);
   
-  // Check if this is Smallable (any country) and extract directly from their structure
-  const currentUrl = doc.location?.href || '';
-  const isSmallable = /smallable\.(com|fr|co\.uk|de|es|it|be|nl|ch)/i.test(currentUrl);
-  
-  if (isSmallable) {
-    console.log('🎯 Detected Smallable - using specific image extraction');
-    
-    // Smallable-specific image extraction
-    const smallableImageSelectors = [
-      '.ProductGallery img',
-      '.product-image img',
-      '.main-image img',
-      '.ProductImage img',
-      '.media-wrapper img',
-      '.picture img',
-      '.photo img',
-      '.image-container img',
-      '.hero-image img',
-      '.featured-image img',
-      '[data-role="product-image"] img',
-      '.product-photos img:first-child',
-      '.Gallery img:first-child',
-      '.product-media img:first-child'
-    ];
-    
-    for (const selector of smallableImageSelectors) {
-      const imageElement = doc.querySelector(selector);
-      if (imageElement) {
-        const src = imageElement.getAttribute('src') || 
-                    imageElement.getAttribute('data-src') || 
-                    imageElement.getAttribute('data-lazy-src');
-        
-        console.log(`🖼️ Smallable image found with "${selector}":`, src);
-        
-        if (src && src.trim() && !src.includes('data:image') && src.length > 10) {
-          try {
-            const imageUrl = new URL(src, origin).href;
-            console.log('🖼️ Smallable image extracted successfully:', imageUrl);
-            return imageUrl;
-          } catch {
-            if (src.startsWith('http')) {
-              console.log('🖼️ Smallable image URL (direct):', src);
-              return src;
+  // Strategy 1: JSON-LD structured data extraction (highest priority)
+  const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  for (const script of jsonLdScripts) {
+    try {
+      const data = JSON.parse(script.textContent || '');
+      const products = Array.isArray(data) ? data : [data];
+      
+      for (const item of products) {
+        if (item['@type'] === 'Product' || item.type === 'Product') {
+          const image = item.image || item.images;
+          if (image) {
+            const imageUrl = Array.isArray(image) ? image[0] : image;
+            const finalUrl = typeof imageUrl === 'object' ? imageUrl.url : imageUrl;
+            if (finalUrl && typeof finalUrl === 'string') {
+              console.log('🖼️ Found image from JSON-LD:', finalUrl);
+              return finalUrl.startsWith('http') ? finalUrl : new URL(finalUrl, origin).href;
             }
           }
         }
       }
+    } catch (e) {
+      console.log('Failed to parse JSON-LD:', e);
     }
-    
-    // Fallback: search Open Graph meta for Smallable
-    const ogImage = doc.querySelector('meta[property="og:image"]');
-    if (ogImage) {
-      const src = ogImage.getAttribute('content');
-      if (src) {
-        console.log('🖼️ Smallable image from OG meta:', src);
-        return src;
+  }
+  
+  // Strategy 2: Meta tags extraction (most reliable for social sharing)
+  const metaSelectors = [
+    'meta[property="og:image"]',
+    'meta[property="og:image:url"]', 
+    'meta[property="og:image:secure_url"]',
+    'meta[name="twitter:image"]',
+    'meta[name="twitter:image:src"]',
+    'meta[property="product:image"]',
+    'meta[name="pinterest:media"]',
+    'meta[name="description" i][content*="image"]',
+    'meta[property="image"]',
+    'meta[name="image"]'
+  ];
+  
+  for (const selector of metaSelectors) {
+    const meta = doc.querySelector(selector);
+    if (meta) {
+      const content = meta.getAttribute('content');
+      if (content && content.trim() && content.length > 10 && !content.includes('data:image')) {
+        console.log(`🖼️ Found image from meta tag "${selector}":`, content);
+        try {
+          return content.startsWith('http') ? content : new URL(content, origin).href;
+        } catch {
+          if (content.startsWith('http')) return content;
+        }
       }
     }
   }
-
-  // Enhanced selectors for product images with better store coverage
-  const selectors = [
-    // Meta tags (most reliable)
-    'meta[property="og:image"]',
-    'meta[name="twitter:image"]',
-    'meta[property="og:image:url"]',
-    'meta[property="product:image"]',
+  
+  // Strategy 3: Site-specific intelligent extraction
+  const currentUrl = doc.location?.href || origin;
+  const hostname = new URL(origin).hostname.toLowerCase();
+  
+  // Smallable (French children's clothing retailer) - comprehensive extraction
+  if (hostname.includes('smallable') || /smallable\.(com|fr|co\.uk|de|es|it|be|nl|ch)/i.test(currentUrl)) {
+    console.log('🎯 Detected Smallable - using comprehensive extraction');
     
-    // Smallable-specific image selectors (French retailer)
-    '.product-image img', // Smallable main image
-    '.item-image img', // Smallable item
-    '.product-gallery img', // Smallable gallery
-    '.media-wrapper img', // Smallable media
-    '.picture img', // Smallable picture
-    '.photo img', // Smallable photo
-    '.image-container img', // Smallable container
-    '.main-image img', // Smallable main
-    '.hero-image img', // Smallable hero
-    '.featured-image img', // Smallable featured
-    '[data-role="product-image"] img', // Smallable modern
-    '.product-photos img', // Smallable photos
+    const smallableSelectors = [
+      // Modern Smallable selectors
+      '.ProductGallery img[src*="product"]',
+      '.ProductImage img[src*="product"]', 
+      '.product-gallery img[src*="product"]',
+      '.media-wrapper img[src*="product"]',
+      '.picture img[src*="product"]',
+      '.hero-image img[src*="product"]',
+      '[data-role="product-image"] img',
+      '.product-photos img:first-of-type',
+      '.Gallery img:first-of-type',
+      '.product-media img:first-of-type',
+      
+      // Legacy Smallable selectors
+      '.product-image img',
+      '.main-image img',
+      '.featured-image img',
+      '.item-image img',
+      '.photo img',
+      '.image-container img',
+      
+      // Fallback for any product images
+      'img[src*="smallable"]',
+      'img[alt*="product" i]',
+      'img[class*="product" i]'
+    ];
     
-    // ThriftBooks specific image selectors (high priority)
-    '.SearchResultListItem-image img', // ThriftBooks search results
-    '.AllEditionsItem-image img', // ThriftBooks book page
-    '.work-image img', // ThriftBooks
-    '.book-image img', // ThriftBooks
-    '.product-image img', // ThriftBooks product page
-    '.item-image img', // ThriftBooks
-    '.book-cover img', // ThriftBooks cover
-    '.cover-image img', // ThriftBooks cover
-    '[data-testid="book-cover"] img', // ThriftBooks modern
-    '.main-book-image img', // ThriftBooks main
+    for (const selector of smallableSelectors) {
+      const img = doc.querySelector(selector);
+      if (img) {
+        const src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy-src');
+        if (src && src.length > 10 && !src.includes('data:image')) {
+          console.log(`🖼️ Smallable image found with "${selector}":`, src);
+          try {
+            return src.startsWith('http') ? src : new URL(src, origin).href;
+          } catch {
+            if (src.startsWith('http')) return src;
+          }
+        }
+      }
+    }
+  }
+  
+  // Strategy 4: Advanced DOM extraction with intelligent scoring
+  const imageSelectors = [
+    // High priority - main product images
+    { selector: '#landingImage', score: 100 }, // Amazon
+    { selector: '.a-dynamic-image', score: 95 }, // Amazon
+    { selector: '#imgBlkFront', score: 90 }, // eBay
+    { selector: '.ux-image-carousel-item img', score: 85 }, // eBay
+    { selector: '[data-testid="listing-page-image"] img', score: 80 }, // Etsy
+    { selector: '.product__main-photos img', score: 75 }, // Shopify
     
-    // Barnes & Noble specific
-    '.pdp-product-image img', // B&N
-    '.product-image-main img', // B&N
-    '.book-jacket img', // B&N
+    // Store-specific selectors
+    { selector: '.SearchResultListItem-image img', score: 70 }, // ThriftBooks
+    { selector: '.AllEditionsItem-image img', score: 70 }, // ThriftBooks
+    { selector: '.pdp-product-image img', score: 65 }, // Barnes & Noble
+    { selector: '.book-cover img', score: 65 }, // Book retailers
+    { selector: '[data-automation-id="product-image"] img', score: 60 }, // Target
     
-    // Store-specific high-quality image selectors
-    '#landingImage', // Amazon main product image
-    '.a-dynamic-image', // Amazon dynamic image
-    '#imgBlkFront', // eBay main image
-    '.ux-image-carousel-item img', // eBay carousel
-    '[data-automation-id="product-image"] img', // Target
-    '[data-testid="product-image"] img',
-    '.product-hero-image img',
-    '.product-media img',
-    '.pdp-image img',
-    '.main-product-image img',
+    // Generic high-quality selectors
+    { selector: '.product-hero-image img', score: 55 },
+    { selector: '.main-product-image img', score: 55 },
+    { selector: '.primary-image img', score: 50 },
+    { selector: '.featured-image img', score: 45 },
+    { selector: '.product-image img', score: 40 },
+    { selector: '.hero-image img', score: 35 },
+    { selector: '.main-image img', score: 30 },
     
-    // Etsy specific
-    '[data-testid="listing-page-image"] img', // Etsy
-    '.listing-page-image img', // Etsy
-    '.shop2-listing-page-image img', // Etsy legacy
+    // Modern attribute-based selectors
+    { selector: '[data-testid*="product"] img', score: 25 },
+    { selector: '[data-testid*="image"] img', score: 20 },
+    { selector: '[class*="ProductImage"] img', score: 15 },
+    { selector: '[class*="product-image"] img', score: 15 },
     
-    // Shopify specific
-    '.product__main-photos img', // Shopify
-    '.product-single__photo img', // Shopify
-    '.featured-image img', // Shopify
+    // Alt text and semantic selectors
+    { selector: 'img[alt*="product" i]', score: 10 },
+    { selector: 'img[alt*="item" i]', score: 10 },
+    { selector: 'img[alt*="book" i]', score: 10 },
+    { selector: 'img[alt*="cover" i]', score: 10 },
     
-    // Generic product image selectors
-    '.product-image img',
-    '#product-image img',
-    '.hero-image img',
-    '.main-image img',
-    '.primary-image img',
-    '.featured-image img',
-    '[class*="ProductImage"] img',
-    '[class*="product-image"] img',
-    '[class*="hero"] img',
-    '[class*="main"] img',
-    '[class*="primary"] img',
-    '[class*="book"] img',
-    '[class*="cover"] img',
-    
-    // Alt text based selectors (enhanced for books)
-    'img[alt*="product" i]',
-    'img[alt*="item" i]',
-    'img[alt*="book" i]',
-    'img[alt*="cover" i]',
-    'img[alt*="buy" i]',
-    'img[alt*="shop" i]',
-    
-    // Source-based selectors
-    'img[src*="product"]',
-    'img[src*="item"]',
-    'img[src*="catalog"]',
-    'img[src*="book"]',
-    'img[src*="cover"]',
-    'img[class*="product"]',
-    'img[class*="book"]',
-    
-    // Fallback: any reasonably sized image
-    'img[width]:not([width="1"]):not([width="0"])',
-    'main img',
-    '.content img'
+    // Source-based patterns
+    { selector: 'img[src*="product"]', score: 8 },
+    { selector: 'img[src*="item"]', score: 8 },
+    { selector: 'img[src*="catalog"]', score: 8 },
+    { selector: 'img[src*="book"]', score: 8 },
+    { selector: 'img[src*="cover"]', score: 8 }
   ];
   
-  for (const selector of selectors) {
+  // Collect and score all potential images
+  const candidates: Array<{element: Element, score: number, src: string}> = [];
+  
+  for (const {selector, score} of imageSelectors) {
     const elements = doc.querySelectorAll(selector);
-    console.log(`🔎 Checking image selector "${selector}": found ${elements.length} elements`);
     
     for (const element of elements) {
       const src = element.getAttribute('content') || 
                   element.getAttribute('src') || 
                   element.getAttribute('data-src') || 
-                  element.getAttribute('data-lazy-src');
+                  element.getAttribute('data-lazy-src') ||
+                  element.getAttribute('data-original') ||
+                  element.getAttribute('data-zoom-image');
       
-      console.log(`🖼️ Image element candidate:`, {
-        selector,
-        tagName: element.tagName,
-        className: element.className,
-        src,
-        alt: element.getAttribute('alt'),
-        width: element.getAttribute('width'),
-        height: element.getAttribute('height')
-      });
-      
-      if (src && src.trim() && !src.includes('data:image') && src.length > 10) {
+      if (src && src.trim() && src.length > 10 && !src.includes('data:image')) {
         // Skip obvious non-product images
         const skipPatterns = [
-          'placeholder', 'icon', 'logo', 'spinner', 'loading', 'pixel',
-          'blank', 'spacer', 'arrow', 'button', 'social', 'banner',
-          'nav', 'menu', 'footer', 'header', 'ad', 'promo'
+          'placeholder', 'icon', 'logo', 'spinner', 'loading', 'pixel', 'blank', 'spacer',
+          'arrow', 'button', 'social', 'banner', 'nav', 'menu', 'footer', 'header', 
+          'ad', 'promo', 'cart', 'search', 'close', 'chevron', 'star', 'heart'
         ];
         
         if (skipPatterns.some(pattern => src.toLowerCase().includes(pattern))) {
           continue;
         }
         
-        // Check image dimensions if available
+        // Bonus scoring for quality indicators
+        let finalScore = score;
+        
+        // Boost score for larger images
         if (element.tagName === 'IMG') {
-          const imgElement = element as HTMLImageElement;
-          const width = imgElement.naturalWidth || parseInt(element.getAttribute('width') || '0');
-          const height = imgElement.naturalHeight || parseInt(element.getAttribute('height') || '0');
+          const width = parseInt(element.getAttribute('width') || '0');
+          const height = parseInt(element.getAttribute('height') || '0');
+          if (width > 300 || height > 300) finalScore += 10;
+          if (width > 500 || height > 500) finalScore += 20;
           
-          // Skip very small images (likely icons) or very thin images (likely decorative)
-          if ((width > 0 && width < 100) || (height > 0 && height < 100)) continue;
-          if ((width > 0 && height > 0) && (width / height > 10 || height / width > 10)) continue;
+          // Skip very small images
+          if ((width > 0 && width < 50) || (height > 0 && height < 50)) continue;
+          
+          // Skip very thin images (likely decorative)
+          if ((width > 0 && height > 0) && (width / height > 15 || height / width > 15)) continue;
         }
         
-        // Convert relative URLs to absolute
-        try {
-          const imageUrl = new URL(src, origin).href;
-          
-          // Validate that it's likely a product image
-          const validImageExtensions = /\.(jpg|jpeg|png|webp|gif|avif)($|\?)/i;
-          const hasImagePath = /\/(images?|media|photos?|pics?|assets|cdn|static)/i.test(imageUrl);
-          const hasProductPath = /\/(product|item|catalog|listing)/i.test(imageUrl);
-          
-          if (validImageExtensions.test(imageUrl) || hasImagePath || hasProductPath) {
-            console.log('Found product image candidate:', imageUrl);
-            return imageUrl;
-          }
-        } catch {
-          // If URL construction fails, try returning the src as-is if it looks like a URL
-          if (src.startsWith('http') && src.includes('.')) {
-            console.log('Using fallback image URL:', src);
-            return src;
-          }
+        // Boost score for high-res indicators
+        if (src.includes('large') || src.includes('big') || src.includes('full') || 
+            src.includes('zoom') || src.includes('detail') || src.includes('high')) {
+          finalScore += 15;
         }
+        
+        // Boost score for product-related paths
+        if (/\/(product|item|catalog|listing|shop|buy)/i.test(src)) {
+          finalScore += 10;
+        }
+        
+        // Boost score for good file extensions
+        if (/\.(jpg|jpeg|png|webp)$/i.test(src)) {
+          finalScore += 5;
+        }
+        
+        candidates.push({ element, score: finalScore, src });
       }
     }
   }
   
+  // Sort by score and return the best candidate
+  candidates.sort((a, b) => b.score - a.score);
+  
+  console.log(`🖼️ Found ${candidates.length} image candidates, top 5:`, 
+    candidates.slice(0, 5).map(c => ({ src: c.src, score: c.score })));
+  
+  for (const candidate of candidates) {
+    try {
+      const imageUrl = candidate.src.startsWith('http') ? 
+        candidate.src : 
+        new URL(candidate.src, origin).href;
+      
+      // Final validation
+      const validExtensions = /\.(jpg|jpeg|png|webp|gif|avif)($|\?)/i;
+      const hasImagePath = /\/(images?|media|photos?|pics?|assets|cdn|static|upload)/i.test(imageUrl);
+      const hasProductPath = /\/(product|item|catalog|listing)/i.test(imageUrl);
+      
+      if (validExtensions.test(imageUrl) || hasImagePath || hasProductPath || candidate.score > 50) {
+        console.log(`🖼️ Selected best image (score: ${candidate.score}):`, imageUrl);
+        return imageUrl;
+      }
+    } catch (e) {
+      console.log('URL construction failed for candidate:', candidate.src);
+      // Try returning as-is if it looks like a URL
+      if (candidate.src.startsWith('http') && candidate.src.includes('.')) {
+        console.log('🖼️ Using fallback URL:', candidate.src);
+        return candidate.src;
+      }
+    }
+  }
+  
+  // Strategy 5: Fallback - scan all images with intelligent filtering
+  console.log('🖼️ Running fallback image scan...');
+  const allImages = doc.querySelectorAll('img');
+  const fallbackCandidates: Array<{src: string, score: number}> = [];
+  
+  for (const img of allImages) {
+    const src = img.getAttribute('src') || img.getAttribute('data-src');
+    if (!src || src.length < 10 || src.includes('data:image')) continue;
+    
+    let score = 0;
+    
+    // Score based on size
+    const width = img.naturalWidth || parseInt(img.getAttribute('width') || '0');
+    const height = img.naturalHeight || parseInt(img.getAttribute('height') || '0');
+    if (width > 200 && height > 200) score += 30;
+    if (width > 400 && height > 400) score += 50;
+    
+    // Score based on position in DOM
+    const rect = img.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.left < window.innerWidth) score += 20; // Visible
+    
+    // Score based on semantic clues
+    const alt = img.getAttribute('alt') || '';
+    const className = img.className || '';
+    const parentClass = img.parentElement?.className || '';
+    
+    if (/product|item|catalog|main|hero|primary|featured/i.test(alt + className + parentClass)) {
+      score += 25;
+    }
+    
+    // Penalize likely non-product images
+    if (/icon|logo|button|nav|menu|ad|banner/i.test(alt + className + parentClass)) {
+      score -= 50;
+    }
+    
+    if (score > 0) {
+      fallbackCandidates.push({ src, score });
+    }
+  }
+  
+  // Sort and return best fallback candidate
+  fallbackCandidates.sort((a, b) => b.score - a.score);
+  
+  if (fallbackCandidates.length > 0) {
+    const best = fallbackCandidates[0];
+    console.log(`🖼️ Using fallback image (score: ${best.score}):`, best.src);
+    try {
+      return best.src.startsWith('http') ? best.src : new URL(best.src, origin).href;
+    } catch {
+      if (best.src.startsWith('http')) return best.src;
+    }
+  }
+  
+  console.log('🖼️ No suitable image found');
   return undefined;
 };
