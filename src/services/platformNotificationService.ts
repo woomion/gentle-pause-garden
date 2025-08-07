@@ -18,7 +18,11 @@ export class PlatformNotificationService {
   isNativePlatform(): boolean {
     const platform = Capacitor.getPlatform();
     const isNative = platform === 'ios' || platform === 'android';
-    console.log('🔔 Platform check: platform =', platform, 'isNative =', isNative);
+    console.log('🔔 Platform detection details:');
+    console.log('  - Capacitor.getPlatform():', platform);
+    console.log('  - Capacitor.isNativePlatform():', Capacitor.isNativePlatform());
+    console.log('  - User Agent:', navigator.userAgent);
+    console.log('  - Is Native:', isNative);
     return isNative;
   }
 
