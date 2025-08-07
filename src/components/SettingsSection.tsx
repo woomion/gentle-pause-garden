@@ -13,6 +13,7 @@ import { useUserSettings } from '@/hooks/useUserSettings';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { platformNotificationService } from '@/services/platformNotificationService';
 
 const SettingsSection = () => {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
@@ -33,12 +34,21 @@ const SettingsSection = () => {
 
   const handleNotificationToggle = async (enabled: boolean) => {
     if (enabled) {
-      // Request browser permission first
+      // Request permission using platform service
       const permissionGranted = await enableNotifications();
       if (!permissionGranted) {
+        const isNative = platformNotificationService.isNativePlatform();
+        const platformName = platformNotificationService.getPlatformName();
+        
+        const errorMessage = isNative 
+          ? `Please enable notifications for Pocket Pause in your ${platformName} device settings. Go to Settings → Notifications → Pocket Pause and make sure notifications are allowed.`
+          : platformNotificationService.isMobileWeb()
+            ? 'Tap "Allow" when your browser asks for notification permission. If you don\'t see a prompt, look for a notification icon in your browser\'s address bar.'
+            : 'Please allow notifications in your browser settings to enable this feature. Click the notification icon in your browser\'s address bar or check your browser settings.';
+            
         toast({
           title: "Permission denied",
-          description: "Please allow notifications in your browser to enable this feature.",
+          description: errorMessage,
           variant: "destructive"
         });
         return false;
