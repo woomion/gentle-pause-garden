@@ -10,30 +10,19 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
     console.log('🎬 LoadingScreen: Starting...');
     
     try {
-      // Check if user has seen the loading screen before
-      const hasSeenLoading = localStorage.getItem('pocket-pause-seen-loading');
-      console.log('🎬 LoadingScreen: Has seen before:', !!hasSeenLoading);
-      
-      const duration = hasSeenLoading ? 2000 : 5000; // 2s for returning users, 5s for new users
-      console.log('🎬 LoadingScreen: Duration set to:', duration + 'ms');
-      
       const timer = setTimeout(() => {
         try {
-          console.log('🎬 LoadingScreen: Timer completed, marking as seen and calling onComplete');
+          console.log('🎬 LoadingScreen: Timer completed, marking session as loaded');
           
-          // Mark that user has seen the loading screen
-          if (!hasSeenLoading) {
-            localStorage.setItem('pocket-pause-seen-loading', 'true');
-            console.log('🎬 LoadingScreen: Marked as seen in localStorage');
-          }
+          // Mark that loading screen was shown this session
+          sessionStorage.setItem('pocket-pause-session-loaded', 'true');
           
           onComplete();
         } catch (error) {
           console.error('❌ LoadingScreen: Error in timer completion:', error);
-          // Still call onComplete to avoid getting stuck
           onComplete();
         }
-      }, duration);
+      }, 3000); // 3 second loading animation
 
       return () => {
         console.log('🎬 LoadingScreen: Cleanup - clearing timer');
@@ -41,7 +30,6 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
       };
     } catch (error) {
       console.error('❌ LoadingScreen: Error in useEffect:', error);
-      // If anything fails, just complete immediately
       setTimeout(onComplete, 100);
     }
   }, [onComplete]);

@@ -51,7 +51,10 @@ const ScrollToTop = () => {
 };
 
 const App = () => {
-  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(() => {
+    // Only show loading screen if not shown in this session
+    return !sessionStorage.getItem('pocket-pause-session-loaded');
+  });
   const [appError, setAppError] = useState<string | null>(null);
 
   // Add mobile debugging immediately
