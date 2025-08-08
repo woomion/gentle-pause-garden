@@ -11,11 +11,13 @@ const urlCache = new Map<string, { data: ProductInfo; timestamp: number; hits: n
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 const MAX_CACHE_SIZE = 200;
 
-// Fast proxy services ordered by reliability and speed
+// Enhanced proxy services with fallbacks and retry logic
 const PROXY_SERVICES = [
-  { url: 'https://api.allorigins.win/get?url=', timeout: 3000, priority: 1 },
-  { url: 'https://corsproxy.io/?', timeout: 4000, priority: 2 },
-  { url: 'https://cors-anywhere.herokuapp.com/', timeout: 5000, priority: 3 },
+  { url: 'https://api.allorigins.win/get?url=', timeout: 2500, priority: 1, retries: 2 },
+  { url: 'https://corsproxy.io/?', timeout: 3000, priority: 2, retries: 2 },
+  { url: 'https://cors-anywhere.herokuapp.com/', timeout: 4000, priority: 3, retries: 1 },
+  { url: 'https://thingproxy.freeboard.io/fetch/', timeout: 3500, priority: 4, retries: 1 },
+  { url: 'https://proxy.cors.sh/', timeout: 3000, priority: 5, retries: 1 },
 ];
 
 // Cache management
@@ -40,13 +42,21 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   const startTime = performance.now();
   
   try {
-    console.log('🚀 Fast parsing URL:', url);
+    console.log('🚀 Enhanced parsing URL:', url);
     
-    // Clean the URL first
+    // Robust URL validation and cleaning
     let cleanUrl = url.trim();
     if (!cleanUrl) {
       throw new Error('Empty URL provided');
     }
+
+    // Enhanced URL validation
+    if (!isValidUrl(cleanUrl)) {
+      throw new Error('Invalid URL format');
+    }
+
+    // Normalize URL
+    cleanUrl = normalizeUrl(cleanUrl);
 
     // Check cache first
     const cacheKey = cleanUrl;
@@ -112,53 +122,94 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       );
     }
 
-    // Add parallel proxy fetching with race condition
+    // Enhanced parallel proxy fetching with retry logic and circuit breaker
     extractionPromises.push(
       (async () => {
         const fetchPromises = PROXY_SERVICES.map(async (service, index) => {
-          try {
-            const proxyUrl = service.url + encodeURIComponent(resolvedUrl);
-            const response = await fetch(proxyUrl, {
-              signal: AbortSignal.timeout(service.timeout),
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          let lastError: Error | null = null;
+          
+          // Retry logic for each service
+          for (let attempt = 0; attempt <= service.retries; attempt++) {
+            try {
+              const proxyUrl = service.url + encodeURIComponent(resolvedUrl);
+              
+              // Enhanced headers for better success rate
+              const headers = {
+                'User-Agent': getRandomUserAgent(),
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+              };
+
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), service.timeout);
+              
+              const response = await fetch(proxyUrl, {
+                signal: controller.signal,
+                headers,
+                redirect: 'follow'
+              });
+
+              clearTimeout(timeoutId);
+
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
               }
-            });
 
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              let htmlContent: string;
+              const contentType = response.headers.get('content-type') || '';
+              
+              // Enhanced content type handling
+              if (contentType.includes('application/json')) {
+                const data = await response.json();
+                htmlContent = data.contents || data.response || data.data || '';
+              } else {
+                htmlContent = await response.text();
+              }
 
-            let htmlContent: string;
-            const contentType = response.headers.get('content-type') || '';
-            
-            if (contentType.includes('application/json')) {
-              const data = await response.json();
-              htmlContent = data.contents || data.response || '';
-            } else {
-              htmlContent = await response.text();
+              // Enhanced HTML validation
+              if (!htmlContent || htmlContent.length < 100) {
+                throw new Error('Empty or invalid content');
+              }
+
+              if (!htmlContent.includes('<html') && !htmlContent.includes('<HTML')) {
+                throw new Error('Content does not appear to be HTML');
+              }
+
+              // Check for error pages
+              if (isErrorPage(htmlContent)) {
+                throw new Error('Received error page content');
+              }
+
+              console.log(`✅ Proxy ${index + 1} success on attempt ${attempt + 1}`);
+              return { htmlContent, service: service.url, priority: service.priority, attempt };
+              
+            } catch (error) {
+              lastError = error as Error;
+              console.log(`⚠️ Proxy ${index + 1} attempt ${attempt + 1} failed:`, error.message);
+              
+              // Wait before retry (exponential backoff)
+              if (attempt < service.retries) {
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+              }
             }
-
-            if (!htmlContent || !htmlContent.includes('<html')) {
-              throw new Error('Invalid HTML content');
-            }
-
-            return { htmlContent, service: service.url, priority: service.priority };
-          } catch (error) {
-            throw new Error(`Proxy ${index + 1} failed: ${error.message}`);
           }
+          
+          throw new Error(`Proxy ${index + 1} exhausted all retries: ${lastError?.message}`);
         });
 
-        // Use Promise.any to get the fastest successful response
+        // Enhanced response handling with timeout race
         try {
-          // Use Promise.race for faster response (first one wins)
-          const result = await Promise.race(fetchPromises.map(async (promise, index) => {
-            try {
-              return await promise;
-            } catch (error) {
-              // Throw with index to track which proxy failed
-              throw new Error(`Proxy ${index + 1} failed: ${error.message}`);
-            }
-          }));
-          console.log(`✅ Fast fetch success via ${result.service} in`, performance.now() - startTime, 'ms');
+          // Race between proxies with overall timeout
+          const racePromise = Promise.race(fetchPromises);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('All proxies timed out')), 10000)
+          );
+          
+          const result = await Promise.race([racePromise, timeoutPromise]) as any;
+          console.log(`✅ Enhanced fetch success via ${result.service} in ${performance.now() - startTime}ms (attempt ${result.attempt + 1})`);
           
           // Parse HTML and extract all data in parallel
           const parser = new DOMParser();
@@ -217,17 +268,71 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
 
     return productInfo;
   } catch (error) {
-    console.error('Error parsing URL:', error);
-    return {};
+    console.error('Enhanced parser error:', error);
+    
+    // Return partial data on error with store name at minimum
+    try {
+      const urlObj = new URL(url);
+      return { 
+        storeName: extractStoreName(urlObj.hostname.toLowerCase()),
+        itemName: extractFromUrlStructure(url, urlObj.hostname.toLowerCase()).itemName
+      };
+    } catch {
+      return {};
+    }
   }
 };
 
-// Enhanced redirect resolution with multiple fallback services
+// Helper functions for robust URL parsing
+const isValidUrl = (url: string): boolean => {
+  try {
+    const urlObj = new URL(url);
+    return ['http:', 'https:'].includes(urlObj.protocol);
+  } catch {
+    return false;
+  }
+};
+
+const normalizeUrl = (url: string): string => {
+  try {
+    const urlObj = new URL(url);
+    // Remove tracking parameters
+    const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 
+                           'ref', 'referrer', 'source', 'campaign', 'gclid', 'fbclid'];
+    trackingParams.forEach(param => urlObj.searchParams.delete(param));
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
+};
+
+const getRandomUserAgent = (): string => {
+  const userAgents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15'
+  ];
+  return userAgents[Math.floor(Math.random() * userAgents.length)];
+};
+
+const isErrorPage = (htmlContent: string): boolean => {
+  const errorIndicators = [
+    'access denied', 'forbidden', 'not found', '404', '403', '500',
+    'cloudflare', 'rate limit', 'blocked', 'captcha', 'robot'
+  ];
+  const lowerContent = htmlContent.toLowerCase();
+  return errorIndicators.some(indicator => lowerContent.includes(indicator));
+};
+
+// Enhanced redirect resolution with multiple fallback services and aggressive timeout
 const resolveRedirects = async (url: string): Promise<string> => {
   const shortUrlPatterns = [
-    'amzn.to', 'amazon.com/dp', 'amazon.com/gp',
+    'amzn.to', 'amazon.com/dp', 'amazon.com/gp', 'a.co',
     'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'short.link',
-    'rb.gy', 'is.gd', 'v.gd', 'rebrand.ly', 'tiny.cc'
+    'rb.gy', 'is.gd', 'v.gd', 'rebrand.ly', 'tiny.cc', 'cutt.ly',
+    'shorturl.at', 'sl.uy', 'clck.ru', 'buff.ly', 'ift.tt',
+    'lnkd.in', 'youtu.be', 'fb.me', 'ig.me', 'tr.im'
   ];
 
   try {
@@ -242,45 +347,98 @@ const resolveRedirects = async (url: string): Promise<string> => {
 
     console.log('Resolving redirect for short URL:', url);
 
-    // Multiple redirect resolution services with timeout
+    // Enhanced redirect resolution services with improved timeout handling
     const redirectServices = [
+      // Direct HEAD request (fastest, most reliable)
       async () => {
-        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://httpbin.org/redirect-to?url=${encodeURIComponent(url)}`)}`, {
-          signal: AbortSignal.timeout(5000)
-        });
-        return response.url;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        try {
+          const response = await fetch(url, {
+            method: 'HEAD',
+            redirect: 'follow',
+            signal: controller.signal,
+            headers: { 'User-Agent': getRandomUserAgent() }
+          });
+          clearTimeout(timeoutId);
+          return response.url;
+        } finally {
+          clearTimeout(timeoutId);
+        }
       },
+      
+      // Unshorten.me service
       async () => {
-        // Direct HEAD request to the short URL
-        const response = await fetch(url, {
-          method: 'HEAD',
-          redirect: 'follow',
-          signal: AbortSignal.timeout(5000)
-        });
-        return response.url;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        
+        try {
+          const response = await fetch(`https://unshorten.me/json/${encodeURIComponent(url)}`, {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          const data = await response.json();
+          return data.resolved_url || data.url;
+        } finally {
+          clearTimeout(timeoutId);
+        }
       },
+      
+      // Manual redirect following
       async () => {
-        // Use a different redirect resolver
-        const response = await fetch(`https://unshorten.me/json/${encodeURIComponent(url)}`, {
-          signal: AbortSignal.timeout(5000)
-        });
-        const data = await response.json();
-        return data.resolved_url || data.url;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            redirect: 'manual',
+            signal: controller.signal,
+            headers: { 'User-Agent': getRandomUserAgent() }
+          });
+          clearTimeout(timeoutId);
+          
+          if (response.status >= 300 && response.status < 400) {
+            const location = response.headers.get('location');
+            if (location) {
+              return location.startsWith('http') ? location : new URL(location, url).href;
+            }
+          }
+          return response.url;
+        } finally {
+          clearTimeout(timeoutId);
+        }
       }
     ];
 
-    // Try each service with timeout
-    for (const service of redirectServices) {
-      try {
-        const resolvedUrl = await service();
-        if (resolvedUrl && resolvedUrl !== url && resolvedUrl.length > url.length) {
-          console.log('Successfully resolved redirect:', resolvedUrl);
-          return resolvedUrl;
-        }
-      } catch (serviceError) {
-        console.log('Redirect service failed, trying next:', serviceError.message);
-        continue;
+    // Enhanced service trying with race condition
+    try {
+      const racePromise = Promise.race(
+        redirectServices.map(async (service, index) => {
+          try {
+            const result = await service();
+            console.log(`Redirect service ${index + 1} succeeded:`, result);
+            return result;
+          } catch (error) {
+            console.log(`Redirect service ${index + 1} failed:`, error.message);
+            throw error;
+          }
+        })
+      );
+      
+      const timeoutPromise = new Promise<string>((_, reject) => 
+        setTimeout(() => reject(new Error('All redirect services timed out')), 8000)
+      );
+      
+      const resolvedUrl = await Promise.race([racePromise, timeoutPromise]);
+      
+      if (resolvedUrl && resolvedUrl !== url && resolvedUrl.length >= url.length) {
+        console.log('Successfully resolved redirect:', resolvedUrl);
+        return resolvedUrl;
       }
+    } catch (error) {
+      console.log('All redirect services failed:', error.message);
     }
     
     return url;
@@ -577,6 +735,9 @@ const extractStoreName = (hostname: string): string => {
     'microsoft.com': 'Microsoft',
     'dell.com': 'Dell',
     'hp.com': 'HP',
+    'lenovo.com': 'Lenovo',
+    'asus.com': 'ASUS',
+    'samsung.com': 'Samsung',
     
     // Specialty stores
     'chewy.com': 'Chewy',
@@ -584,7 +745,39 @@ const extractStoreName = (hostname: string): string => {
     'petsmart.com': 'PetSmart',
     'rei.com': 'REI',
     'dickssportinggoods.com': "Dick's Sporting Goods",
-    'academy.com': 'Academy Sports'
+    'academy.com': 'Academy Sports',
+    'backcountry.com': 'Backcountry',
+    'moosejaw.com': 'Moosejaw',
+    'patagonia.com': 'Patagonia',
+    
+    // International retailers
+    'smallable.com': 'Smallable',
+    'smallable.fr': 'Smallable France',
+    'smallable.co.uk': 'Smallable UK',
+    'zalando.com': 'Zalando',
+    'zalando.de': 'Zalando Germany',
+    'zalando.fr': 'Zalando France',
+    'fnac.com': 'Fnac',
+    'cdiscount.com': 'Cdiscount',
+    'rakuten.com': 'Rakuten',
+    'alibaba.com': 'Alibaba',
+    'aliexpress.com': 'AliExpress',
+    'jd.com': 'JD.com',
+    'tmall.com': 'Tmall',
+    
+    // Luxury & designer
+    'net-a-porter.com': 'Net-A-Porter',
+    'mr-porter.com': 'Mr Porter',
+    'ssense.com': 'SSENSE',
+    'farfetch.com': 'Farfetch',
+    'yoox.com': 'YOOX',
+    'theoutnet.com': 'THE OUTNET',
+    
+    // Health & beauty
+    'dermstore.com': 'Dermstore',
+    'lookfantastic.com': 'LookFantastic',
+    'spacenk.com': 'Space NK',
+    'cultbeauty.com': 'Cult Beauty'
   };
   
   for (const [domain, name] of Object.entries(storeMap)) {
@@ -593,8 +786,8 @@ const extractStoreName = (hostname: string): string => {
     }
   }
   
-  // Enhanced fallback: handle more TLD extensions and special cases
-  storeName = storeName.replace(/\.(com|co\.uk|ca|org|net|de|fr|shop|store|io|ly|me|us|biz|info)$/, '');
+  // Enhanced fallback: handle comprehensive TLD extensions
+  storeName = storeName.replace(/\.(com|co\.uk|ca|org|net|de|fr|shop|store|io|ly|me|us|biz|info|it|es|be|nl|ch|au|jp|br|mx|in|ru|cn|kr|pl|se|no|dk|fi|at|pt|gr|cz|hu|ro|bg|hr|sk|si|lv|lt|ee|mt|cy|lu|ie|is)$/, '');
   
   // Handle special cases like hyphenated names
   if (storeName.includes('-')) {
