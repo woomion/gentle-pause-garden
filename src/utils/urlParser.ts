@@ -11,14 +11,28 @@ const urlCache = new Map<string, { data: ProductInfo; timestamp: number; hits: n
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 const MAX_CACHE_SIZE = 200;
 
-// Enhanced proxy services with fallbacks and retry logic
+// Ultra-enhanced proxy services with health monitoring and adaptive routing
 const PROXY_SERVICES = [
-  { url: 'https://api.allorigins.win/get?url=', timeout: 2500, priority: 1, retries: 2 },
-  { url: 'https://corsproxy.io/?', timeout: 3000, priority: 2, retries: 2 },
-  { url: 'https://cors-anywhere.herokuapp.com/', timeout: 4000, priority: 3, retries: 1 },
-  { url: 'https://thingproxy.freeboard.io/fetch/', timeout: 3500, priority: 4, retries: 1 },
-  { url: 'https://proxy.cors.sh/', timeout: 3000, priority: 5, retries: 1 },
+  { url: 'https://api.allorigins.win/get?url=', timeout: 2000, priority: 1, retries: 3, health: 100 },
+  { url: 'https://corsproxy.io/?', timeout: 2500, priority: 2, retries: 3, health: 100 },
+  { url: 'https://cors-anywhere.herokuapp.com/', timeout: 3000, priority: 3, retries: 2, health: 100 },
+  { url: 'https://thingproxy.freeboard.io/fetch/', timeout: 3000, priority: 4, retries: 2, health: 100 },
+  { url: 'https://proxy.cors.sh/', timeout: 2500, priority: 5, retries: 2, health: 100 },
+  { url: 'https://crossorigin.me/', timeout: 2500, priority: 6, retries: 2, health: 100 },
+  { url: 'https://api.codetabs.com/v1/proxy/?quest=', timeout: 3000, priority: 7, retries: 1, health: 100 },
 ];
+
+// Health monitoring for proxy services
+const updateProxyHealth = (serviceUrl: string, success: boolean) => {
+  const service = PROXY_SERVICES.find(s => s.url === serviceUrl);
+  if (service) {
+    if (success) {
+      service.health = Math.min(100, service.health + 5);
+    } else {
+      service.health = Math.max(0, service.health - 10);
+    }
+  }
+};
 
 // Cache management
 const cleanExpiredCache = () => {
@@ -122,13 +136,18 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       );
     }
 
-    // Enhanced parallel proxy fetching with retry logic and circuit breaker
+    // Ultra-enhanced parallel proxy fetching with health-aware routing and intelligent fallbacks
     extractionPromises.push(
       (async () => {
-        const fetchPromises = PROXY_SERVICES.map(async (service, index) => {
+        // Sort proxies by health score and priority
+        const healthyProxies = PROXY_SERVICES
+          .filter(service => service.health > 20)
+          .sort((a, b) => (b.health * 100 / b.priority) - (a.health * 100 / a.priority));
+        
+        const fetchPromises = healthyProxies.map(async (service, index) => {
           let lastError: Error | null = null;
           
-          // Retry logic for each service
+          // Enhanced retry logic with exponential backoff and jitter
           for (let attempt = 0; attempt <= service.retries; attempt++) {
             try {
               const proxyUrl = service.url + encodeURIComponent(resolvedUrl);
@@ -184,28 +203,42 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
               }
 
               console.log(`✅ Proxy ${index + 1} success on attempt ${attempt + 1}`);
-              return { htmlContent, service: service.url, priority: service.priority, attempt };
+              updateProxyHealth(service.url, true);
+              return { 
+                htmlContent, 
+                service: service.url, 
+                priority: service.priority, 
+                attempt,
+                responseTime: performance.now() - startTime
+              };
               
             } catch (error) {
               lastError = error as Error;
               console.log(`⚠️ Proxy ${index + 1} attempt ${attempt + 1} failed:`, error.message);
               
-              // Wait before retry (exponential backoff)
+              // Enhanced wait before retry (exponential backoff with jitter)
               if (attempt < service.retries) {
-                await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 500));
+                const baseDelay = Math.pow(2, attempt) * 300;
+                const jitter = Math.random() * 200; // Add randomness to prevent thundering herd
+                await new Promise(resolve => setTimeout(resolve, baseDelay + jitter));
               }
             }
           }
           
+          updateProxyHealth(service.url, false);
           throw new Error(`Proxy ${index + 1} exhausted all retries: ${lastError?.message}`);
         });
 
-        // Enhanced response handling with timeout race
+        // Ultra-enhanced response handling with intelligent timeout and fallback cascade
         try {
-          // Race between proxies with overall timeout
+          // Adaptive timeout based on proxy health
+          const avgHealth = healthyProxies.reduce((sum, p) => sum + p.health, 0) / healthyProxies.length;
+          const adaptiveTimeout = avgHealth > 70 ? 8000 : 12000;
+          
+          // Race between proxies with adaptive timeout
           const racePromise = Promise.race(fetchPromises);
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('All proxies timed out')), 10000)
+            setTimeout(() => reject(new Error('All proxies timed out')), adaptiveTimeout)
           );
           
           const result = await Promise.race([racePromise, timeoutPromise]) as any;
@@ -308,18 +341,24 @@ const normalizeUrl = (url: string): string => {
 
 const getRandomUserAgent = (): string => {
   const userAgents = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15'
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/121.0.0.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0'
   ];
   return userAgents[Math.floor(Math.random() * userAgents.length)];
 };
 
 const isErrorPage = (htmlContent: string): boolean => {
   const errorIndicators = [
-    'access denied', 'forbidden', 'not found', '404', '403', '500',
-    'cloudflare', 'rate limit', 'blocked', 'captcha', 'robot'
+    'access denied', 'forbidden', 'not found', '404', '403', '500', '502', '503',
+    'cloudflare', 'rate limit', 'blocked', 'captcha', 'robot', 'challenge',
+    'temporarily unavailable', 'maintenance', 'error', 'problem', 'issue',
+    'security check', 'verification required', 'please try again',
+    'suspicious activity', 'too many requests', 'quota exceeded'
   ];
   const lowerContent = htmlContent.toLowerCase();
   return errorIndicators.some(indicator => lowerContent.includes(indicator));
@@ -328,11 +367,14 @@ const isErrorPage = (htmlContent: string): boolean => {
 // Enhanced redirect resolution with multiple fallback services and aggressive timeout
 const resolveRedirects = async (url: string): Promise<string> => {
   const shortUrlPatterns = [
-    'amzn.to', 'amazon.com/dp', 'amazon.com/gp', 'a.co',
+    'amzn.to', 'amazon.com/dp', 'amazon.com/gp', 'a.co', 'amzn.com',
     'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'short.link',
     'rb.gy', 'is.gd', 'v.gd', 'rebrand.ly', 'tiny.cc', 'cutt.ly',
     'shorturl.at', 'sl.uy', 'clck.ru', 'buff.ly', 'ift.tt',
-    'lnkd.in', 'youtu.be', 'fb.me', 'ig.me', 'tr.im'
+    'lnkd.in', 'youtu.be', 'fb.me', 'ig.me', 'tr.im', 'dlvr.it',
+    'su.pr', 'shar.es', 'politi.co', 'bzfd.it', 'nyti.ms',
+    'wapo.st', 'wsjsoc.com', 'reut.rs', 'cnn.it', 'bbc.in',
+    'trib.al', 'huff.to', 'bloom.bg', 'on.mktw.net', 'yhoo.it'
   ];
 
   try {
