@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 import { useToast } from "@/hooks/use-toast";
-import { ExternalLink, Smartphone } from "lucide-react";
+import { ExternalLink, Smartphone, PauseCircle, Wallet, Bell, BarChart3, ShieldCheck, Cloud } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const GetApp = () => {
@@ -22,11 +22,11 @@ const GetApp = () => {
   }, []);
 
   useEffect(() => {
-    // SEO: title, meta description, canonical
-    const title = "Get Pocket Pause — Install the Pocket Pause App";
+    // SEO: title, meta description, canonical, structured data
+    const title = "Install Pocket Pause — Conscious spending app";
     document.title = title;
 
-    const descContent = "Install the Pocket Pause app on iOS, Android, or desktop. Add to Home Screen or use the Install button.";
+    const descContent = "Install the Pocket Pause app on iOS, Android, or desktop. Learn how it works and start pausing impulse buys.";
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement("meta");
@@ -42,6 +42,46 @@ const GetApp = () => {
       document.head.appendChild(canonical);
     }
     canonical.href = `${window.location.origin}${window.location.pathname}`;
+
+    // FAQ structured data
+    const faqLd = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "How do I install Pocket Pause?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "On iOS, open in Safari and use Add to Home Screen. On Android/Desktop, use your browser's Install option."
+          }
+        },
+        {
+          "@type": "Question",
+          name: "Is there anything to download?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Pocket Pause is a Progressive Web App (PWA). Your browser installs it without a traditional download."
+          }
+        },
+        {
+          "@type": "Question",
+          name: "Does it work offline?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes, the app caches key features so you can add pauses and review them even with spotty connection."
+          }
+        }
+      ]
+    };
+    let ld = document.querySelector('script[data-faq-ld="getapp"]') as HTMLScriptElement | null;
+    if (!ld) {
+      ld = document.createElement("script");
+      ld.type = "application/ld+json";
+      ld.setAttribute("data-faq-ld", "getapp");
+      document.head.appendChild(ld);
+    }
+    ld.textContent = JSON.stringify(faqLd);
   }, []);
 
   const copyLink = async () => {
@@ -54,16 +94,116 @@ const GetApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream dark:bg-[#200E3B] transition-colors duration-300">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       <header className="border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold text-foreground">Get Pocket Pause</h1>
-          <p className="text-muted-foreground mt-1">Install the app for faster access and offline support</p>
+        <div className="max-w-5xl mx-auto px-4 py-12 text-center">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">PWA • No download required</p>
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground mt-2">Install Pocket Pause</h1>
+          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+            Shop with intention. Pause impulse buys, capture wants, and review them later with a clear mind.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            {platform.isIOS ? (
+              <Button asChild>
+                <a href="#install" className="focus:outline-none">How to install on iOS</a>
+              </Button>
+            ) : isInstallable ? (
+              <Button onClick={promptInstall}>Install Pocket Pause</Button>
+            ) : (
+              <Button asChild>
+                <a href="#install" className="focus:outline-none">How to install</a>
+              </Button>
+            )}
+            <Button variant="outline" onClick={copyLink}>Copy app link</Button>
+            <Button asChild variant="link">
+              <Link to={appPath} className="inline-flex items-center gap-1">
+                Open app <ExternalLink className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <section className="grid gap-6 md:grid-cols-2">
+      <main className="max-w-5xl mx-auto px-4 py-10 space-y-12">
+        {/* Features */}
+        <section aria-labelledby="features">
+          <h2 id="features" className="sr-only">Features</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-2 text-foreground mb-1">
+                <PauseCircle className="h-5 w-5" />
+                <h3 className="font-semibold">Pause before you purchase</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">Save links and notes when the impulse hits. Put it on pause instead of in the cart.</p>
+            </div>
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-2 text-foreground mb-1">
+                <Wallet className="h-5 w-5" />
+                <h3 className="font-semibold">Spend with your values</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">Reflect on alignment, joy, and timing—then buy with confidence or let it go.</p>
+            </div>
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-2 text-foreground mb-1">
+                <Bell className="h-5 w-5" />
+                <h3 className="font-semibold">Gentle nudges</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">Optional reminders to review paused items when it’s actually a good moment.</p>
+            </div>
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-2 text-foreground mb-1">
+                <BarChart3 className="h-5 w-5" />
+                <h3 className="font-semibold">See your progress</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">Track decisions and savings over time to build better habits.</p>
+            </div>
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-2 text-foreground mb-1">
+                <ShieldCheck className="h-5 w-5" />
+                <h3 className="font-semibold">Private by design</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">Your data stays yours. We use secure, privacy‑first infrastructure.</p>
+            </div>
+            <div className="rounded-lg border border-border p-4">
+              <div className="flex items-center gap-2 text-foreground mb-1">
+                <Cloud className="h-5 w-5" />
+                <h3 className="font-semibold">Works anywhere</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">Install on iOS, Android, or desktop as a PWA—offline support included.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Screenshots */}
+        <section aria-labelledby="screenshots">
+          <div className="flex items-center justify-between">
+            <h2 id="screenshots" className="text-xl font-semibold text-foreground">A quick look</h2>
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <img
+              src="/lovable-uploads/e80ad720-84cd-484f-9a75-4b83ade80b53.png"
+              alt="Pocket Pause app screenshot showing the pause input"
+              className="w-full rounded-md border border-border object-cover"
+              loading="lazy"
+            />
+            <img
+              src="/lovable-uploads/1367d743-1b24-47dd-adba-c17931d597c6.png"
+              alt="Pocket Pause review screen with thoughtful prompts"
+              className="w-full rounded-md border border-border object-cover"
+              loading="lazy"
+            />
+            <img
+              src="/lovable-uploads/760792e5-34ff-4bc0-925c-bca522d834ed.png"
+              alt="Pocket Pause stats tracking progress and savings"
+              className="w-full rounded-md border border-border object-cover"
+              loading="lazy"
+            />
+          </div>
+        </section>
+
+        {/* Install section */}
+        <section id="install" aria-labelledby="install-heading" className="grid gap-6 md:grid-cols-2">
+          <h2 id="install-heading" className="sr-only">Install Pocket Pause</h2>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -123,6 +263,25 @@ const GetApp = () => {
               </Button>
             </CardContent>
           </Card>
+        </section>
+
+        {/* FAQ */}
+        <section aria-labelledby="faq" className="max-w-3xl">
+          <h2 id="faq" className="text-xl font-semibold text-foreground">Frequently asked questions</h2>
+          <div className="mt-4 space-y-3">
+            <details className="rounded-md border border-border p-4">
+              <summary className="cursor-pointer font-medium">How do I install Pocket Pause?</summary>
+              <p className="mt-2 text-sm text-muted-foreground">On iOS, open in Safari and use Add to Home Screen. On Android/Desktop, use your browser’s Install option.</p>
+            </details>
+            <details className="rounded-md border border-border p-4">
+              <summary className="cursor-pointer font-medium">Is there anything to download?</summary>
+              <p className="mt-2 text-sm text-muted-foreground">No separate download—this is a Progressive Web App (PWA). Your browser installs it directly.</p>
+            </details>
+            <details className="rounded-md border border-border p-4">
+              <summary className="cursor-pointer font-medium">Does it work offline?</summary>
+              <p className="mt-2 text-sm text-muted-foreground">Yes. Key features are cached so you can add pauses and review them without a perfect connection.</p>
+            </details>
+          </div>
         </section>
       </main>
     </div>
