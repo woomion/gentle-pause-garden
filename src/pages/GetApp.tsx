@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button";
 import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 import { useToast } from "@/hooks/use-toast";
 import { ExternalLink, Smartphone } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const GetApp = () => {
   const { isInstallable, promptInstall } = usePWAInstallPrompt();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const appPath = user ? "/" : "/auth";
+  const appUrl = `${window.location.origin}${appPath}`;
 
   const platform = useMemo(() => {
     const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
@@ -42,7 +46,7 @@ const GetApp = () => {
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.origin);
+      await navigator.clipboard.writeText(appUrl);
       toast({ title: "Link copied", description: "App link copied to clipboard" });
     } catch {
       toast({ title: "Copy failed", description: "Please copy the URL manually", variant: "destructive" });
@@ -93,9 +97,9 @@ const GetApp = () => {
                       <div className="flex gap-2">
                         <Button variant="outline" onClick={copyLink}>Copy app link</Button>
                         <Button asChild variant="link">
-                          <a href={window.location.origin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1">
+                          <Link to={appPath} className="inline-flex items-center gap-1">
                             Open app <ExternalLink className="h-4 w-4" />
-                          </a>
+                          </Link>
                         </Button>
                       </div>
                     </>
