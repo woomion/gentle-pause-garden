@@ -6,6 +6,10 @@ import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 import { useToast } from "@/hooks/use-toast";
 import { ExternalLink, Smartphone, PauseCircle, Wallet, Bell, BarChart3, ShieldCheck, Cloud } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import HowItWorks from "@/components/landing/HowItWorks";
+import Testimonials from "@/components/landing/Testimonials";
+import PrivacySection from "@/components/landing/PrivacySection";
+import StickyInstallBar from "@/components/landing/StickyInstallBar";
 
 const GetApp = () => {
   const { isInstallable, promptInstall } = usePWAInstallPrompt();
@@ -191,6 +195,8 @@ const GetApp = () => {
           </ul>
         </section>
 
+        <HowItWorks />
+
         {/* Screenshots */}
         <section aria-labelledby="screenshots">
           <div className="flex items-center justify-between">
@@ -217,6 +223,8 @@ const GetApp = () => {
             />
           </div>
         </section>
+
+        <Testimonials />
 
         {/* Install section */}
         <section id="install" aria-labelledby="install-heading" className="grid gap-6 md:grid-cols-2">
@@ -282,6 +290,8 @@ const GetApp = () => {
           </Card>
         </section>
 
+        <PrivacySection />
+
         {/* FAQ */}
         <section aria-labelledby="faq" className="max-w-3xl">
           <h2 id="faq" className="text-xl font-semibold text-foreground">Frequently asked questions</h2>
@@ -301,6 +311,8 @@ const GetApp = () => {
           </div>
         </section>
       </main>
+
+      <StickyInstallBar />
     </div>
   );
 };
