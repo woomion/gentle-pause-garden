@@ -35,9 +35,9 @@ const PauseHeader = () => {
 
   const handleCourseClick = () => {
     if (location.pathname === '/courses') {
-      navigate('/');
+      navigate({ pathname: '/', search: location.search });
     } else {
-      navigate('/courses');
+      navigate({ pathname: '/courses', search: location.search });
     }
   };
 
