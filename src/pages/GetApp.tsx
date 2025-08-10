@@ -128,73 +128,67 @@ const GetApp = () => {
           <div className="flex items-center justify-between">
             <h2 id="features" className="text-xl font-semibold text-foreground">Why Pocket Pause</h2>
           </div>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="group relative overflow-hidden rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 transition-all hover-scale">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/20 blur-2xl" />
-              <div className="flex items-center gap-3 mb-2">
-                <div className="rounded-full bg-primary/10 p-2">
-                  <PauseCircle className="h-5 w-5 text-primary" />
-                </div>
+          <ul className="mt-6 grid gap-6 sm:grid-cols-2">
+            <li className="flex items-start gap-4 animate-fade-in">
+              <span className="rounded-full bg-primary/10 p-2">
+                <PauseCircle className="h-5 w-5 text-primary" />
+              </span>
+              <div>
                 <h3 className="font-semibold text-foreground">Pause before you purchase</h3>
+                <p className="text-sm text-muted-foreground">Save links and notes when the impulse hits. Put it on pause instead of in the cart.</p>
               </div>
-              <p className="text-sm text-muted-foreground">Save links and notes when the impulse hits. Put it on pause instead of in the cart.</p>
-            </div>
+            </li>
 
-            <div className="group relative overflow-hidden rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 transition-all hover-scale">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/20 blur-2xl" />
-              <div className="flex items-center gap-3 mb-2">
-                <div className="rounded-full bg-primary/10 p-2">
-                  <Wallet className="h-5 w-5 text-primary" />
-                </div>
+            <li className="flex items-start gap-4 animate-fade-in">
+              <span className="rounded-full bg-primary/10 p-2">
+                <Wallet className="h-5 w-5 text-primary" />
+              </span>
+              <div>
                 <h3 className="font-semibold text-foreground">Spend with your values</h3>
+                <p className="text-sm text-muted-foreground">Reflect on alignment, joy, and timing—then buy with confidence or let it go.</p>
               </div>
-              <p className="text-sm text-muted-foreground">Reflect on alignment, joy, and timing—then buy with confidence or let it go.</p>
-            </div>
+            </li>
 
-            <div className="group relative overflow-hidden rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 transition-all hover-scale">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/20 blur-2xl" />
-              <div className="flex items-center gap-3 mb-2">
-                <div className="rounded-full bg-primary/10 p-2">
-                  <Bell className="h-5 w-5 text-primary" />
-                </div>
+            <li className="flex items-start gap-4 animate-fade-in">
+              <span className="rounded-full bg-primary/10 p-2">
+                <Bell className="h-5 w-5 text-primary" />
+              </span>
+              <div>
                 <h3 className="font-semibold text-foreground">Gentle nudges</h3>
+                <p className="text-sm text-muted-foreground">Optional reminders to review paused items when it’s actually a good moment.</p>
               </div>
-              <p className="text-sm text-muted-foreground">Optional reminders to review paused items when it’s actually a good moment.</p>
-            </div>
+            </li>
 
-            <div className="group relative overflow-hidden rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 transition-all hover-scale">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/20 blur-2xl" />
-              <div className="flex items-center gap-3 mb-2">
-                <div className="rounded-full bg-primary/10 p-2">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                </div>
+            <li className="flex items-start gap-4 animate-fade-in">
+              <span className="rounded-full bg-primary/10 p-2">
+                <BarChart3 className="h-5 w-5 text-primary" />
+              </span>
+              <div>
                 <h3 className="font-semibold text-foreground">See your progress</h3>
+                <p className="text-sm text-muted-foreground">Track decisions and savings over time to build better habits.</p>
               </div>
-              <p className="text-sm text-muted-foreground">Track decisions and savings over time to build better habits.</p>
-            </div>
+            </li>
 
-            <div className="group relative overflow-hidden rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 transition-all hover-scale">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/20 blur-2xl" />
-              <div className="flex items-center gap-3 mb-2">
-                <div className="rounded-full bg-primary/10 p-2">
-                  <ShieldCheck className="h-5 w-5 text-primary" />
-                </div>
+            <li className="flex items-start gap-4 animate-fade-in">
+              <span className="rounded-full bg-primary/10 p-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </span>
+              <div>
                 <h3 className="font-semibold text-foreground">Private by design</h3>
+                <p className="text-sm text-muted-foreground">Your data stays yours. We use secure, privacy‑first infrastructure.</p>
               </div>
-              <p className="text-sm text-muted-foreground">Your data stays yours. We use secure, privacy‑first infrastructure.</p>
-            </div>
+            </li>
 
-            <div className="group relative overflow-hidden rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 transition-all hover-scale">
-              <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary/20 blur-2xl" />
-              <div className="flex items-center gap-3 mb-2">
-                <div className="rounded-full bg-primary/10 p-2">
-                  <Cloud className="h-5 w-5 text-primary" />
-                </div>
+            <li className="flex items-start gap-4 animate-fade-in">
+              <span className="rounded-full bg-primary/10 p-2">
+                <Cloud className="h-5 w-5 text-primary" />
+              </span>
+              <div>
                 <h3 className="font-semibold text-foreground">Works anywhere</h3>
+                <p className="text-sm text-muted-foreground">Install on iOS, Android, or desktop as a PWA—offline support included.</p>
               </div>
-              <p className="text-sm text-muted-foreground">Install on iOS, Android, or desktop as a PWA—offline support included.</p>
-            </div>
-          </div>
+            </li>
+          </ul>
         </section>
 
         {/* Screenshots */}
