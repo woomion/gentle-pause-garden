@@ -102,7 +102,7 @@ const GetApp = () => {
       <header className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-hero-miro" />
         <div className="absolute inset-0 -z-10 hero-blob-contrast" />
-        <div className="max-w-5xl mx-auto px-4 py-20 text-center">
+        <div className="max-w-5xl mx-auto px-4 py-28 sm:py-32 text-center">
           <p className="inline-flex items-center rounded-full border border-foreground/20 bg-foreground/5 px-3 py-1 text-xs text-foreground/90 backdrop-blur">
             Mindful spending, minus the guilt
           </p>
@@ -130,9 +130,9 @@ const GetApp = () => {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-10 space-y-12">
+      <main className="max-w-5xl mx-auto px-4 py-16 sm:py-20 divide-y divide-border/60">
         {/* Benefits */}
-        <section aria-labelledby="features">
+        <section aria-labelledby="features" className="py-12 sm:py-16">
           <div className="flex items-center justify-between">
             <h2 id="features" className="text-xl font-semibold text-foreground">Why Pocket Pause</h2>
           </div>
@@ -202,7 +202,7 @@ const GetApp = () => {
         <HowItWorks />
 
         {/* Screenshots */}
-        <section aria-labelledby="screenshots">
+        <section aria-labelledby="screenshots" className="py-12 sm:py-16">
           <div className="flex items-center justify-between">
             <h2 id="screenshots" className="text-xl font-semibold text-foreground">A quick look</h2>
           </div>
@@ -231,7 +231,7 @@ const GetApp = () => {
         <Testimonials />
 
         {/* Install section */}
-        <section id="install" aria-labelledby="install-heading" className="grid gap-6 md:grid-cols-2">
+        <section id="install" aria-labelledby="install-heading" className="py-12 sm:py-16 grid gap-6 md:grid-cols-2">
           <h2 id="install-heading" className="sr-only">Install Pocket Pause</h2>
           <Card className="bg-brand-yellow text-brand-yellow-foreground border-none">
             <CardHeader>
@@ -297,7 +297,7 @@ const GetApp = () => {
         <PrivacySection />
 
         {/* FAQ */}
-        <section aria-labelledby="faq" className="max-w-3xl">
+        <section aria-labelledby="faq" className="py-12 sm:py-16 max-w-3xl">
           <h2 id="faq" className="text-xl font-semibold text-foreground">Frequently asked questions</h2>
           <div className="mt-4 space-y-3">
             <details className="rounded-md border border-border p-4">

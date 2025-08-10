@@ -3,7 +3,7 @@ import { PauseCircle, ListChecks, CheckCircle2 } from "lucide-react";
 
 const HowItWorks: React.FC = () => {
   return (
-    <section aria-labelledby="how-it-works" className="max-w-5xl mx-auto">
+    <section aria-labelledby="how-it-works" className="max-w-5xl mx-auto py-12 sm:py-16">
       <div className="flex items-center justify-between">
         <h2 id="how-it-works" className="text-xl font-semibold text-foreground">How it works</h2>
       </div>

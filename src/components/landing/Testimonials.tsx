@@ -2,7 +2,7 @@ import React from "react";
 
 const Testimonials: React.FC = () => {
   return (
-    <section aria-labelledby="testimonials" className="max-w-5xl mx-auto">
+    <section aria-labelledby="testimonials" className="max-w-5xl mx-auto py-12 sm:py-16">
       <div className="flex items-center justify-between">
         <h2 id="testimonials" className="text-xl font-semibold text-foreground">What people say</h2>
       </div>

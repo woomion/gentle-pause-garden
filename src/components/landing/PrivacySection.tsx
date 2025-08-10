@@ -3,7 +3,7 @@ import { ShieldCheck } from "lucide-react";
 
 const PrivacySection: React.FC = () => {
   return (
-    <section aria-labelledby="privacy" className="max-w-5xl mx-auto">
+    <section aria-labelledby="privacy" className="max-w-5xl mx-auto py-12 sm:py-16">
       <div className="flex items-center justify-between">
         <h2 id="privacy" className="text-xl font-semibold text-foreground">Your privacy, protected</h2>
       </div>
