@@ -100,14 +100,14 @@ const GetApp = () => {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       <header className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-brand" />
-        <div className="absolute inset-0 -z-10 hero-blob" />
+        <div className="absolute inset-0 -z-10 bg-hero-miro" />
+        <div className="absolute inset-0 -z-10 hero-blob-contrast" />
         <div className="max-w-5xl mx-auto px-4 py-20 text-center">
-          <p className="inline-flex items-center rounded-full border border-background/30 bg-background/20 px-3 py-1 text-xs text-primary-foreground/90 backdrop-blur">
+          <p className="inline-flex items-center rounded-full border border-foreground/20 bg-foreground/5 px-3 py-1 text-xs text-foreground/90 backdrop-blur">
             Mindful spending, minus the guilt
           </p>
-          <h1 className="mt-4 text-5xl sm:text-6xl font-bold tracking-tight text-primary-foreground text-balance">Pause before you purchase</h1>
-          <p className="mt-4 text-primary-foreground/90 max-w-2xl mx-auto">Capture wants, reflect with prompts, and buy with clarity.</p>
+          <h1 className="mt-4 text-5xl sm:text-6xl font-bold tracking-tight text-foreground text-balance">Pause before you purchase</h1>
+          <p className="mt-4 text-foreground/80 max-w-2xl mx-auto">Capture wants, reflect with prompts, and buy with clarity.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             {platform.isIOS ? (
               <Button asChild size="xl" shape="pill">
@@ -121,7 +121,7 @@ const GetApp = () => {
               </Button>
             )}
             <Button variant="outline" size="xl" shape="pill" onClick={copyLink}>Copy app link</Button>
-            <Button asChild variant="link" className="text-primary-foreground">
+            <Button asChild variant="link" className="text-foreground">
               <Link to={appPath} className="inline-flex items-center gap-1">
                 Open app <ExternalLink className="h-4 w-4" />
               </Link>
@@ -233,7 +233,7 @@ const GetApp = () => {
         {/* Install section */}
         <section id="install" aria-labelledby="install-heading" className="grid gap-6 md:grid-cols-2">
           <h2 id="install-heading" className="sr-only">Install Pocket Pause</h2>
-          <Card>
+          <Card className="bg-brand-yellow text-brand-yellow-foreground border-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Smartphone className="h-5 w-5" />

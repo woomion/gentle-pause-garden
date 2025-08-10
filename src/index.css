@@ -70,6 +70,10 @@
     --section-header: 270 35% 88%;
     --section-header-foreground: 220 13% 18%;
     --whisper-lavender: 260 47% 25%;
+
+    /* Miro-style accent */
+    --brand-yellow: 48 100% 60%;
+    --brand-yellow-foreground: 220 13% 18%;
   }
 
   .dark {
@@ -133,6 +137,10 @@
     --decide-now-foreground: 260 47% 15%;
     --section-header: 270 40% 60%;
     --section-header-foreground: 44 69% 97%;
+
+    /* Miro-style accent (dark) */
+    --brand-yellow: 48 95% 55%;
+    --brand-yellow-foreground: 260 47% 15%;
   }
 
 }
@@ -229,5 +237,20 @@
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Miro-inspired utilities */
+  .bg-brand-yellow {
+    background-color: hsl(var(--brand-yellow));
+  }
+  .text-brand-yellow-foreground {
+    color: hsl(var(--brand-yellow-foreground));
+  }
+  .bg-hero-miro {
+    background-image: linear-gradient(180deg, hsl(var(--brand-yellow)), hsl(var(--brand-yellow) / 0.92));
+  }
+  .hero-blob-contrast {
+    background: radial-gradient(600px 300px at 70% -50px, hsl(var(--foreground) / 0.12), transparent 70%);
+    filter: blur(10px);
   }
 }
