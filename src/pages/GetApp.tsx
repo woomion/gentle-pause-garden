@@ -108,7 +108,7 @@ const GetApp = () => {
             <Link to="/" className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors">
               Pocket Pause
             </Link>
-            <Link to="/?guest=1" className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4">
+            <Link to="/?guest=1&pill=1" className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4">
               Open app (Guest preview)
             </Link>
           </div>

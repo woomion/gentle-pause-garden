@@ -45,7 +45,7 @@ const PauseHeader = () => {
     <>
       <header className="relative mb-8 sm:mb-12">
         <div className="text-center pt-2 sm:pt-4">
-          <Link to="/" className="text-foreground font-medium text-lg tracking-wide mb-6 sm:mb-8 hover:text-muted-foreground transition-colors inline-block">
+          <Link to={{ pathname: "/", search: location.search }} className="text-foreground font-medium text-lg tracking-wide mb-6 sm:mb-8 hover:text-muted-foreground transition-colors inline-block">
             POCKET || PAUSE
           </Link>
         </div>
