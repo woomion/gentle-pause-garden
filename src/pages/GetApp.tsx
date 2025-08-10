@@ -37,7 +37,7 @@ const GetApp = () => {
       canonical.rel = "canonical";
       document.head.appendChild(canonical);
     }
-    canonical.href = `${window.location.origin}/get`;
+    canonical.href = `${window.location.origin}${window.location.pathname}`;
   }, []);
 
   const copyLink = async () => {

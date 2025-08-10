@@ -17,6 +17,7 @@ import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useSharedContent } from '../hooks/useSharedContent';
+import GetApp from './GetApp';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -86,7 +87,11 @@ const Index = () => {
     );
   }
 
-  console.log('Rendering main Index content');
+// Show landing page for signed-out users
+if (!user) {
+  return <GetApp />;
+}
+console.log('Rendering main Index content');
 
   return (
     <>
