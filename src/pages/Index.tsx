@@ -20,6 +20,10 @@ import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useSharedContent } from '../hooks/useSharedContent';
 import GetApp from './GetApp';
 import GuestModeIndicator from '../components/GuestModeIndicator';
+import { usePausedItems } from '../hooks/usePausedItems';
+import PausedItemDetail from '../components/PausedItemDetail';
+import PillQuickPauseBar from '../components/pill/PillQuickPauseBar';
+import PillItem from '../components/pill/PillItem';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
@@ -28,10 +32,28 @@ const Index = () => {
   const { sharedContent, clearSharedContent } = useSharedContent();
   const [searchParams] = useSearchParams();
   const isGuest = searchParams.get('guest') === '1';
+  const pillMode = searchParams.get('pill') === '1';
   
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
   const itemReview = useItemReview();
+
+  // Pill mode state (sorting and items)
+  const { items, loading: itemsLoading, getItemsForReview, removeItem } = usePausedItems();
+  const [sortMode, setSortMode] = useState<'soonest' | 'newest'>(
+    (localStorage.getItem('pill_sort') as 'soonest' | 'newest') || 'soonest'
+  );
+  useEffect(() => {
+    localStorage.setItem('pill_sort', sortMode);
+  }, [sortMode]);
+  const sortedItems = (items || []).slice().sort((a, b) =>
+    sortMode === 'soonest'
+      ? a.checkInDate.getTime() - b.checkInDate.getTime()
+      : b.pausedAt.getTime() - a.pausedAt.getTime()
+  );
+  const readyCount = (getItemsForReview && getItemsForReview())?.length || 0;
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [showItemDetail, setShowItemDetail] = useState(false);
   
   // Handle redirects for invitations
   useIndexRedirects();
@@ -139,18 +161,70 @@ console.log('Rendering main Index content');
             </div>
           </div>
           */}
-          <ReviewBanner 
-            itemsCount={itemReview.itemsForReview.length}
-            onStartReview={handleStartReview}
-          />
-          <MainTabs onSectionToggle={setSectionsExpanded} />
+          {pillMode ? (
+            <>
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <button
+                  onClick={handleStartReview}
+                  className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-foreground hover:bg-primary/15"
+                >
+                  Ready to review ({readyCount})
+                </button>
+                <div className="flex items-center gap-1 text-xs">
+                  <button
+                    className={`px-2 py-1 rounded-full border ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
+                    onClick={() => setSortMode('soonest')}
+                  >
+                    Soonest
+                  </button>
+                  <button
+                    className={`px-2 py-1 rounded-full border ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
+                    onClick={() => setSortMode('newest')}
+                  >
+                    Newest
+                  </button>
+                </div>
+              </div>
+
+              {/* Pill list */}
+              <div className="space-y-2">
+                {itemsLoading ? (
+                  <div className="text-sm text-muted-foreground">Loading…</div>
+                ) : (
+                  sortedItems.map((it) => (
+                    <PillItem
+                      key={it.id}
+                      item={it}
+                      onClick={() => {
+                        setSelectedItem(it);
+                        setShowItemDetail(true);
+                      }}
+                    />
+                  ))
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <ReviewBanner 
+                itemsCount={itemReview.itemsForReview.length}
+                onStartReview={handleStartReview}
+              />
+              <MainTabs onSectionToggle={setSectionsExpanded} />
+            </>
+          )}
+
         </div>
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-40">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
-          <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
+          {pillMode ? (
+            <PillQuickPauseBar />
+          ) : (
+            <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
+          )}
           <FooterLinks />
         </div>
       </div>
@@ -177,6 +251,21 @@ console.log('Rendering main Index content');
           onClose={handleCloseReview}
           onItemDecided={itemReview.handleItemDecided}
           onNext={itemReview.handleNextReview}
+        />
+      )}
+
+      {pillMode && selectedItem && (
+        <PausedItemDetail
+          item={selectedItem}
+          items={sortedItems}
+          currentIndex={sortedItems.findIndex((i) => i.id === selectedItem.id)}
+          isOpen={showItemDetail}
+          onClose={() => setShowItemDetail(false)}
+          onDelete={(id: string) => {
+            removeItem(id);
+            setShowItemDetail(false);
+          }}
+          currentUserId={user?.id}
         />
       )}
     </>
