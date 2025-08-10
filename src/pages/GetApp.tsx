@@ -104,9 +104,12 @@ const GetApp = () => {
         <div className="absolute inset-0 -z-10 bg-hero-miro" />
         <div className="absolute inset-0 -z-10 hero-blob-contrast" />
         <div className="max-w-5xl mx-auto px-4 pt-6">
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center gap-1">
             <Link to="/" className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors">
               Pocket Pause
+            </Link>
+            <Link to="/?guest=1" className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4">
+              Open app (Guest preview)
             </Link>
           </div>
         </div>

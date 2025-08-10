@@ -12,19 +12,22 @@ import ItemReviewModal from '../components/ItemReviewModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../contexts/AuthContext';
+import { useSearchParams } from 'react-router-dom';
 
 import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useSharedContent } from '../hooks/useSharedContent';
 import GetApp from './GetApp';
-
+import GuestModeIndicator from '../components/GuestModeIndicator';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
   const [sectionsExpanded, setSectionsExpanded] = useState(false);
   const addPauseButtonRef = useRef<AddPauseButtonRef>(null);
   const { sharedContent, clearSharedContent } = useSharedContent();
+  const [searchParams] = useSearchParams();
+  const isGuest = searchParams.get('guest') === '1';
   
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
@@ -87,8 +90,8 @@ const Index = () => {
     );
   }
 
-// Show landing page for signed-out users
-if (!user) {
+// Show landing page for signed-out users unless guest preview is enabled
+if (!user && !isGuest) {
   return <GetApp />;
 }
 console.log('Rendering main Index content');
@@ -100,6 +103,7 @@ console.log('Rendering main Index content');
       }`}>
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-12 sm:pt-16">
           <PauseHeader />
+          <GuestModeIndicator show={!user} />
           <WelcomeMessage firstName={user?.user_metadata?.first_name} />
           
           {/* Wisdom Orb Remnant - Hidden for now */}
