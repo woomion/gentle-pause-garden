@@ -15,6 +15,7 @@ import GreaterJoyFund from "./pages/GreaterJoyFund";
 import NotFound from "./pages/NotFound";
 import DonationSuccess from "./pages/DonationSuccess";
 import Bookmarklet from "./pages/Bookmarklet";
+import GetApp from "./pages/GetApp";
 import OfflineIndicator from "./components/OfflineIndicator";
 import LoadingScreen from "./components/LoadingScreen";
 import PWAInstallBanner from "./components/PWAInstallBanner";
@@ -170,6 +171,7 @@ const App = () => {
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/get" element={<GetApp />} />
                   <Route path="/" element={
                     <AuthGuard>
                       <Index />

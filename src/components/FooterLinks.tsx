@@ -6,20 +6,26 @@ const FooterLinks = () => {
     <div className="pt-6 pb-2 sm:pt-4 sm:pb-0">
       <div className="text-center text-[10px] text-muted-foreground">
         <p className="mb-3 sm:mb-2">Pocket Pause—your conscious spending companion</p>
-        <div className="flex justify-center gap-4">
-          <Link 
-            to="/about" 
-            className="hover:text-muted-foreground transition-colors underline"
-          >
-            About
-          </Link>
-          <Link 
-            to="/privacy-policy" 
-            className="hover:text-muted-foreground transition-colors underline"
-          >
-            Privacy
-          </Link>
-        </div>
+          <div className="flex justify-center gap-4">
+            <Link 
+              to="/get" 
+              className="hover:text-muted-foreground transition-colors underline"
+            >
+              Get the app
+            </Link>
+            <Link 
+              to="/about" 
+              className="hover:text-muted-foreground transition-colors underline"
+            >
+              About
+            </Link>
+            <Link 
+              to="/privacy-policy" 
+              className="hover:text-muted-foreground transition-colors underline"
+            >
+              Privacy
+            </Link>
+          </div>
       </div>
     </div>
   );
