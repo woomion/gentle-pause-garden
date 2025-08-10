@@ -10,6 +10,7 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import Testimonials from "@/components/landing/Testimonials";
 import PrivacySection from "@/components/landing/PrivacySection";
 import StickyInstallBar from "@/components/landing/StickyInstallBar";
+import AppMockPreviews from "@/components/landing/AppMockPreviews";
 
 const GetApp = () => {
   const { isInstallable, promptInstall } = usePWAInstallPrompt();
@@ -206,26 +207,7 @@ const GetApp = () => {
           <div className="flex items-center justify-between">
             <h2 id="screenshots" className="text-xl font-semibold text-foreground">A quick look</h2>
           </div>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <img
-              src="/lovable-uploads/e80ad720-84cd-484f-9a75-4b83ade80b53.png"
-              alt="Pocket Pause app screenshot showing the pause input"
-              className="w-full rounded-md border border-border object-cover"
-              loading="lazy"
-            />
-            <img
-              src="/lovable-uploads/1367d743-1b24-47dd-adba-c17931d597c6.png"
-              alt="Pocket Pause review screen with thoughtful prompts"
-              className="w-full rounded-md border border-border object-cover"
-              loading="lazy"
-            />
-            <img
-              src="/lovable-uploads/760792e5-34ff-4bc0-925c-bca522d834ed.png"
-              alt="Pocket Pause stats tracking progress and savings"
-              className="w-full rounded-md border border-border object-cover"
-              loading="lazy"
-            />
-          </div>
+          <AppMockPreviews />
         </section>
 
         <Testimonials />
