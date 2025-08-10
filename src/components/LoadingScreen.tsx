@@ -42,7 +42,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
         {/* Logo - visible immediately */}
         <div>
           <h1 className="text-foreground font-medium text-2xl sm:text-3xl tracking-wide mb-4">
-            POCKET || PAUSE
+            Pocket Pause
           </h1>
         </div>
         
