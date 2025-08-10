@@ -103,6 +103,13 @@ const GetApp = () => {
       <header className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-hero-miro" />
         <div className="absolute inset-0 -z-10 hero-blob-contrast" />
+        <div className="max-w-5xl mx-auto px-4 pt-6">
+          <div className="text-center">
+            <Link to="/" className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors">
+              Pocket Pause
+            </Link>
+          </div>
+        </div>
         <div className="max-w-5xl mx-auto px-4 py-28 sm:py-32 text-center">
           <p className="inline-flex items-center rounded-full border border-foreground/20 bg-foreground/5 px-3 py-1 text-xs text-foreground/90 backdrop-blur">
             Mindful spending, minus the guilt

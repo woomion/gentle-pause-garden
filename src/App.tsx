@@ -17,7 +17,7 @@ import DonationSuccess from "./pages/DonationSuccess";
 import Bookmarklet from "./pages/Bookmarklet";
 import GetApp from "./pages/GetApp";
 import OfflineIndicator from "./components/OfflineIndicator";
-import LoadingScreen from "./components/LoadingScreen";
+
 import PWAInstallBanner from "./components/PWAInstallBanner";
 
 import { AuthProvider } from "./contexts/AuthContext";
@@ -53,10 +53,6 @@ const ScrollToTop = () => {
 };
 
 const App = () => {
-  const [showLoadingScreen, setShowLoadingScreen] = useState(() => {
-    // Only show loading screen if not shown in this session
-    return !sessionStorage.getItem('pocket-pause-session-loaded');
-  });
   const [appError, setAppError] = useState<string | null>(null);
 
   // Add mobile debugging immediately
@@ -117,10 +113,6 @@ const App = () => {
     }
   }, []);
 
-  const handleLoadingComplete = () => {
-    console.log('✅ Loading screen completed');
-    setShowLoadingScreen(false);
-  };
 
   // If there's an app-level error, show it
   if (appError) {
@@ -143,14 +135,6 @@ const App = () => {
     );
   }
 
-  // Show loading screen
-  if (showLoadingScreen) {
-    return (
-      <ErrorBoundary>
-        <LoadingScreen onComplete={handleLoadingComplete} />
-      </ErrorBoundary>
-    );
-  }
   
   console.log('🎯 Rendering main app...');
   
