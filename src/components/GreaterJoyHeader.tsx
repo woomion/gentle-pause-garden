@@ -17,7 +17,7 @@ const GreaterJoyHeader = () => {
           to="/"
           className="text-foreground font-medium text-lg tracking-wide mb-2 hover:text-muted-foreground transition-colors"
         >
-          Pocket Pause
+          POCKET || PAUSE
         </Link>
       </div>
     </header>

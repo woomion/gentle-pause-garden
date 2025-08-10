@@ -470,7 +470,7 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
               onClick={handleClose}
               className="text-foreground font-medium text-lg tracking-wide mb-6 sm:mb-8 hover:text-muted-foreground transition-colors inline-block"
             >
-              Pocket Pause
+              POCKET || PAUSE
             </button>
           </div>
         </header>
