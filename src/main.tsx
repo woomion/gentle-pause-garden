@@ -1,10 +1,20 @@
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { registerSW } from 'virtual:pwa-register'
 import App from './App.tsx'
 import './index.css'
 
 console.log('Main.tsx: Starting app');
+const updateSW = registerSW({
+  immediate: true,
+  onOfflineReady() {
+    console.log('🔋 App ready to work offline');
+  },
+  onNeedRefresh() {
+    console.log('⬆️ New content available; will update automatically');
+  }
+});
 
 // Comprehensive scroll restoration
 const scrollToTop = () => {

@@ -17,6 +17,7 @@ import DonationSuccess from "./pages/DonationSuccess";
 import Bookmarklet from "./pages/Bookmarklet";
 import OfflineIndicator from "./components/OfflineIndicator";
 import LoadingScreen from "./components/LoadingScreen";
+import PWAInstallBanner from "./components/PWAInstallBanner";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -160,9 +161,10 @@ const App = () => {
             <TooltipProvider>
               <MobileDebugger />
               <OfflineIndicator />
+              <PWAInstallBanner />
               <Toaster />
               <Sonner />
-              
+
               <BrowserRouter>
                 <ScrollToTop />
                 <Routes>
