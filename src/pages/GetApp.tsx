@@ -97,11 +97,9 @@ const GetApp = () => {
     <div className="min-h-screen bg-background transition-colors duration-300">
       <header className="border-b border-border">
         <div className="max-w-5xl mx-auto px-4 py-12 text-center">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">PWA • No download required</p>
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground mt-2">Install Pocket Pause</h1>
-          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Shop with intention. Pause impulse buys, capture wants, and review them later with a clear mind.
-          </p>
+          
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground mt-2">Pocket Pause</h1>
+          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">Purchase with clarity. Pause impulses, capture wants, and decide with confidence.</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             {platform.isIOS ? (
               <Button asChild>
