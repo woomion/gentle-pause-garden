@@ -85,14 +85,15 @@ const PillQuickPauseBar = () => {
           }}
         />
       </div>
-      <div className="mt-2 flex items-center gap-1">
+      <div className="mt-3 grid grid-cols-4 gap-2">
         {DURATION_PRESETS.map((d) => (
           <button
             key={d.key}
             type="button"
             onClick={() => setDuration(d.key)}
+            aria-pressed={duration === d.key}
             className={
-              `px-2 py-1 text-xs rounded-full border transition-colors ` +
+              `flex-1 h-10 rounded-full border text-sm transition-colors ` +
               (duration === d.key
                 ? 'bg-primary/15 text-primary border-primary/30'
                 : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted')
@@ -101,8 +102,8 @@ const PillQuickPauseBar = () => {
             {d.label}
           </button>
         ))}
-        <div className="ml-auto text-xs text-muted-foreground">{duration}</div>
       </div>
+      <div className="mt-2 text-xs text-muted-foreground text-right">{duration}</div>
       <div className="mt-3">
         <Button onClick={handleSubmit} disabled={!value.trim() || submitting} size="xl" shape="pill" className="w-full">
           {submitting ? 'Pausing…' : 'Pause'}
