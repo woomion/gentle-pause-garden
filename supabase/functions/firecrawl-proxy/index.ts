@@ -6,20 +6,30 @@ interface FirecrawlCrawlResponse {
   error?: string;
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req: Request) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
   try {
     const { url } = await req.json().catch(() => ({}));
     if (!url || typeof url !== 'string') {
-      return new Response(JSON.stringify({ error: 'Missing url' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'Missing url' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'FIRECRAWL_API_KEY not set' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'FIRECRAWL_API_KEY not set' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const payload = {
@@ -39,7 +49,7 @@ serve(async (req: Request) => {
 
     const data: FirecrawlCrawlResponse = await fcRes.json();
     if (!fcRes.ok || !data.success) {
-      return new Response(JSON.stringify({ error: data.error || 'Firecrawl request failed' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: data.error || 'Firecrawl request failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // Extract a reasonable html/markdown payload
@@ -51,9 +61,9 @@ serve(async (req: Request) => {
 
     return new Response(JSON.stringify({ html, markdown }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'Unknown error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'Unknown error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

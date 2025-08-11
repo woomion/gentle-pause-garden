@@ -1,1 +1,4 @@
 project_id = "cnjznmbgxprsrovmdywe"
+
+[functions.firecrawl-proxy]
+verify_jwt = false
