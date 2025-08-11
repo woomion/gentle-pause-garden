@@ -954,8 +954,8 @@ const extractItemName = (doc: Document): string | undefined => {
   if (title && title.length > 3) {
     // Enhanced cleaning for title tag with more store patterns
     const cleanTitle = title
-      .replace(/ - (Amazon\.com|Amazon|eBay|Target|Walmart|Best Buy|Barnes & Noble|ThriftBooks|Etsy|Shop|Store|Buy Online|Free Shipping).*$/i, '')
-      .replace(/ \| (Amazon|eBay|Target|Walmart|Best Buy|Barnes & Noble|ThriftBooks|Etsy|Shop|Store).*$/i, '')
+      .replace(/ - (Amazon\.com|Amazon|eBay|Target|Walmart|Best Buy|Barnes & Noble|ThriftBooks|Etsy|Shopbop|Shop|Store|SHOPBOP).*$/i, '')
+      .replace(/ \| (Amazon|eBay|Target|Walmart|Best Buy|Barnes & Noble|ThriftBooks|Etsy|Shopbop|Shop|Store|SHOPBOP).*$/i, '')
       .replace(/ :: .*$/i, '') // Remove everything after double colon
       .replace(/ - Buy .*$/i, '') // Remove "Buy" suffixes
       .replace(/ - Shop .*$/i, '') // Remove "Shop" suffixes

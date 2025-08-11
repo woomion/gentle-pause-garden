@@ -77,13 +77,16 @@ const Index = () => {
   useEffect(() => {
     if (!sharedContent) return;
     const incoming = sharedContent.url || sharedContent.text || '';
-    if (!incoming) return;
+    if (!incoming && !sharedContent.title) return;
 
     if (pillMode) {
-      setSharedPrefill(incoming);
+      setSharedPrefill(incoming || sharedContent.title);
       setCompactQuickBar(false); // ensure Pause button is visible
     } else if (addPauseButtonRef.current) {
-      modalStates.handleAddPause({ url: sharedContent.url, text: sharedContent.text });
+      modalStates.handleAddPause({
+        link: sharedContent.url,
+        itemName: sharedContent.title || sharedContent.text,
+      });
     }
     clearSharedContent();
   }, [sharedContent, pillMode]);

@@ -24,7 +24,8 @@
     "method": "GET",
     "params": {
       "url": "shared_url",
-      "text": "shared_text"
+      "text": "shared_text",
+      "title": "shared_title"
     }
   },
   "categories": ["shopping", "lifestyle", "productivity"]

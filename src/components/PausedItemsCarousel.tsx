@@ -57,10 +57,10 @@ const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId }: PausedI
     <div className="relative">
       {/* Mobile: single column carousel */}
       <div className="block md:hidden">
-        <Carousel className="w-full" setApi={setApi}>
+        <Carousel className="w-full touch-pan-y select-none" setApi={setApi} opts={{ dragFree: true, containScroll: 'trimSnaps' }}>
           <CarouselContent>
             {items.map((item) => (
-              <CarouselItem key={item.id}>
+              <CarouselItem key={item.id} className="select-none">
                 <PausedItemCard 
                   item={item} 
                   onClick={() => onItemClick(item)} 
@@ -74,10 +74,10 @@ const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId }: PausedI
 
       {/* Desktop: two column carousel */}
       <div className="hidden md:block">
-        <Carousel className="w-full" setApi={setApi}>
+        <Carousel className="w-full touch-pan-y select-none" setApi={setApi} opts={{ dragFree: true, containScroll: 'trimSnaps' }}>
           <CarouselContent>
             {groupedItems.map((group, groupIndex) => (
-              <CarouselItem key={groupIndex}>
+              <CarouselItem key={groupIndex} className="select-none">
                 <div className="grid grid-cols-2 gap-4">
                   {group.map((item) => (
                     <PausedItemCard 
