@@ -4,12 +4,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import PauseLog from "./pages/PauseLog";
 import About from "./pages/About";
-import Courses from "./pages/Courses";
+// import Courses from "./pages/Courses";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import GreaterJoyFund from "./pages/GreaterJoyFund";
 import NotFound from "./pages/NotFound";
@@ -171,11 +171,7 @@ const App = () => {
                       <About />
                     </AuthGuard>
                   } />
-                  <Route path="/courses" element={
-                    <AuthGuard>
-                      <Courses />
-                    </AuthGuard>
-                  } />
+                  <Route path="/courses" element={<Navigate to="/" replace />} />
                   <Route path="/greater-joy-fund" element={
                     <AuthGuard>
                       <GreaterJoyFund />

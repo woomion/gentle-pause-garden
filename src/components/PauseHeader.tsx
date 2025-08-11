@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
-import QuickPauseButton from './QuickPauseButton';
+import { useInstalledApp } from '@/hooks/useInstalledApp';
 
 const PauseHeader = () => {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -14,6 +14,8 @@ const PauseHeader = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const installed = useInstalledApp();
+  const showCourses = false; // Temporarily hide Pocket Wisdom
 
   const firstName = user?.user_metadata?.first_name || '';
   const email = user?.email || '';
@@ -27,12 +29,6 @@ const PauseHeader = () => {
     }
   };
 
-  const handleQuickPause = () => {
-    // This would trigger the same pause form as the main button
-    // For now, just log to console - you can integrate with your existing pause logic
-    console.log('Quick pause in-store triggered');
-  };
-
   const handleCourseClick = () => {
     if (location.pathname === '/courses') {
       navigate({ pathname: '/', search: location.search });
@@ -44,23 +40,27 @@ const PauseHeader = () => {
   return (
     <>
       <header className="relative mb-8 sm:mb-12">
-        <div className="text-center pt-2 sm:pt-4">
-          <Link to={{ pathname: "/", search: location.search }} className="text-foreground font-medium text-lg tracking-wide mb-6 sm:mb-8 hover:text-muted-foreground transition-colors inline-block">
+        <div className={`text-center ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
+          <Link
+            to={{ pathname: '/', search: location.search }}
+            className={`text-foreground font-medium text-lg tracking-wide ${installed ? 'mb-4 sm:mb-6' : 'mb-6 sm:mb-8'} hover:text-muted-foreground transition-colors inline-block`}
+          >
             POCKET || PAUSE
           </Link>
         </div>
-        
-        
-        <div className="absolute top-12 sm:top-16 right-0 flex items-center gap-3">
-          <button 
-            className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
-            onClick={handleCourseClick}
-            title="Course section"
-          >
-            <BookOpen size={24} />
-          </button>
-          
-          <button 
+
+        <div className={`absolute ${installed ? 'top-6 sm:top-8' : 'top-12 sm:top-16'} right-0 flex items-center gap-3`}>
+          {showCourses && (
+            <button
+              className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
+              onClick={handleCourseClick}
+              title="Course section"
+            >
+              <BookOpen size={24} />
+            </button>
+          )}
+
+          <button
             className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
             onClick={handleAccountClick}
           >
@@ -76,7 +76,7 @@ const PauseHeader = () => {
           </button>
         </div>
       </header>
-      
+
       <UserProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
       <SignupModal isOpen={signupOpen} onClose={() => setSignupOpen(false)} />
     </>
