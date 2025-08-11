@@ -16,7 +16,7 @@ const DURATION_PRESETS: { key: string; label: string }[] = [
 
 const isProbablyUrl = (text: string) => /^(https?:\/\/|www\.)/i.test(text.trim());
 
-const PillQuickPauseBar = ({ compact = false, prefillValue }: { compact?: boolean; prefillValue?: string }) => {
+const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: { compact?: boolean; prefillValue?: string; onExpandRequest?: () => void }) => {
   const { addItem } = usePausedItems();
   const { toast } = useToast();
   const [value, setValue] = useState('');
@@ -93,7 +93,13 @@ const PillQuickPauseBar = ({ compact = false, prefillValue }: { compact?: boolea
         <Input
           ref={inputRef}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setValue(v);
+            if (compact && onExpandRequest && isProbablyUrl(v)) {
+              onExpandRequest();
+            }
+          }}
           placeholder="Paste a link or type a thought..."
           className="flex-1 h-12 rounded-full text-base"
           onKeyDown={(e) => {

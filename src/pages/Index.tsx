@@ -250,7 +250,11 @@ console.log('Rendering main Index content');
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-40">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           {pillMode ? (
-            <PillQuickPauseBar compact={compactQuickBar && !sharedPrefill} prefillValue={sharedPrefill} />
+            <PillQuickPauseBar
+              compact={compactQuickBar && !sharedPrefill}
+              prefillValue={sharedPrefill}
+              onExpandRequest={() => setCompactQuickBar(false)}
+            />
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
           )}
