@@ -79,12 +79,18 @@ const PillQuickPauseBar = () => {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Paste a link or type a thought..."
-          className="flex-1"
+          className="flex-1 h-12 rounded-full text-base"
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSubmit();
           }}
         />
-        <Button onClick={handleSubmit} disabled={!value.trim() || submitting} className="shrink-0">
+        <Button
+          onClick={handleSubmit}
+          disabled={!value.trim() || submitting}
+          size="xl"
+          shape="pill"
+          className="shrink-0 px-6 md:px-8"
+        >
           {submitting ? 'Pausing…' : 'Pause'}
         </Button>
       </div>
