@@ -136,6 +136,41 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       );
     }
 
+    // Native/direct fetch attempt (faster on installed apps) before proxies
+    extractionPromises.push(
+      (async () => {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+          const response = await fetch(resolvedUrl, {
+            signal: controller.signal,
+            redirect: 'follow'
+          });
+          clearTimeout(timeoutId);
+
+          if (!response.ok) throw new Error(`Direct fetch HTTP ${response.status}`);
+          const html = await response.text();
+          if (!html || html.length < 100 || (!html.includes('<html') && !html.includes('<HTML'))) {
+            throw new Error('Direct fetch returned non-HTML or too small content');
+          }
+
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const [itemName, price, imageUrl] = await Promise.all([
+            Promise.resolve(extractItemName(doc)),
+            Promise.resolve(extractPrice(doc)),
+            Promise.resolve(extractImageUrl(doc, resolvedUrl))
+          ]);
+
+          console.log('✅ Direct fetch parse success');
+          return { source: 'direct', itemName, price, imageUrl };
+        } catch (e) {
+          // Likely CORS in web; installed apps typically succeed
+          return null;
+        }
+      })()
+    );
+
     // Ultra-enhanced parallel proxy fetching with health-aware routing and intelligent fallbacks
     extractionPromises.push(
       (async () => {
