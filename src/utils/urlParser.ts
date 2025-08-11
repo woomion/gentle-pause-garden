@@ -921,7 +921,13 @@ const extractItemName = (doc: Document): string | undefined => {
     'h1'
   ];
   
-  for (const selector of selectors) {
+  // Shopbop-specific title selectors
+  const shopbopSelectors = [
+    'h1.pdp-product-title',
+    'h1[itemprop="name"]',
+  ];
+  
+  for (const selector of [...shopbopSelectors, ...selectors]) {
     const element = doc.querySelector(selector);
     if (element) {
       const content = element.getAttribute('content') || element.textContent;
@@ -1107,6 +1113,61 @@ const extractPrice = (doc: Document): string | undefined => {
       }
     }
   }
+
+  // Shopbop-specific extraction
+  try {
+    const siteName = (doc.querySelector('meta[property="og:site_name"]') as HTMLMetaElement)?.content?.toLowerCase();
+    const canonical = (doc.querySelector('link[rel="canonical"]') as HTMLLinkElement)?.href || '';
+    const ogUrl = (doc.querySelector('meta[property="og:url"]') as HTMLMetaElement)?.content || '';
+    const isShopbop = (siteName && siteName.includes('shopbop')) || canonical.includes('shopbop.com') || ogUrl.includes('shopbop.com');
+
+    if (isShopbop) {
+      // Try JSON-LD Product first
+      const jsonLdElements = doc.querySelectorAll('script[type="application/ld+json"]');
+      for (const element of jsonLdElements) {
+        try {
+          const data = JSON.parse(element.textContent || '');
+          const items = Array.isArray(data) ? data : [data];
+          for (const item of items) {
+            if (item['@type'] === 'Product' && item.offers) {
+              const offers = Array.isArray(item.offers) ? item.offers[0] : item.offers;
+              const priceVal = parseFloat(offers.price || offers.priceSpecification?.price);
+              if (!isNaN(priceVal) && priceVal > 0) {
+                return priceVal.toFixed(2);
+              }
+            }
+          }
+        } catch {}
+      }
+
+      // Fallback: explicit price nodes commonly used
+      const sbSelectors = [
+        '.pdp-pricing .price',
+        '.pdp-price .amount',
+        '.price .amount',
+        '.product-pricing .price',
+        '[data-test="product-price"]',
+        '[data-testid="price"]'
+      ];
+      for (const selector of sbSelectors) {
+        const el = doc.querySelector(selector);
+        const txt = el?.textContent?.trim() || '';
+        const val = extractPriceFromText(txt);
+        if (val) return val;
+      }
+
+      // Fallback: Search scripts for price JSON
+      const scripts = Array.from(doc.querySelectorAll('script'));
+      for (const s of scripts) {
+        const content = s.textContent || '';
+        const match = content.match(/"price"\s*:\s*"?(\d+(?:\.\d{2})?)"?/i);
+        if (match) {
+          const num = parseFloat(match[1]);
+          if (!isNaN(num) && num > 0) return num.toFixed(2);
+        }
+      }
+    }
+  } catch {}
 
   // Enhanced selectors for price with better store coverage
   const selectors = [
@@ -1415,6 +1476,11 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
   
   // Strategy 3: Store-specific selectors
   const imageSelectors = [
+    // Shopbop first to ensure high specificity
+    'meta[property="og:image"]',
+    '.pdp-image img',
+    '.pdp-main-image img',
+
     // Amazon
     '#landingImage',
     '.a-dynamic-image',

@@ -25,6 +25,7 @@ import PausedItemDetail from '../components/PausedItemDetail';
 import PillQuickPauseBar from '../components/pill/PillQuickPauseBar';
 import PillItem from '../components/pill/PillItem';
 import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
+import { useInstalledApp } from '../hooks/useInstalledApp';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
@@ -60,6 +61,7 @@ const Index = () => {
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [compactQuickBar, setCompactQuickBar] = useState(false);
   const [sharedPrefill, setSharedPrefill] = useState<string | undefined>(undefined);
+  const installed = useInstalledApp();
   
   // Handle redirects for invitations
   useIndexRedirects();
@@ -147,7 +149,7 @@ console.log('Rendering main Index content');
         sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
       }`}>
 
-        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-12 sm:pt-16">
+        <div className={`max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
           <PauseHeader />
           <GuestModeIndicator show={!user} />
           <WelcomeMessage firstName={user?.user_metadata?.first_name} />
