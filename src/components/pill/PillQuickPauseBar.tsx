@@ -32,6 +32,8 @@ const PillQuickPauseBar = () => {
       let itemName = raw;
       let storeName = 'Unknown Store';
       let link: string | undefined;
+      let price: string | undefined;
+      let imageUrl: string | undefined;
 
       if (isProbablyUrl(raw)) {
         const url = raw.startsWith('http') ? raw : `https://${raw}`;
@@ -39,8 +41,9 @@ const PillQuickPauseBar = () => {
         try {
           const parsed = await parseProductUrl(url);
           if (parsed?.itemName) itemName = parsed.itemName;
-          if (parsed?.storeName) storeName = parsed.storeName;
-          else storeName = extractStoreName(url);
+          if (parsed?.storeName) storeName = parsed.storeName; else storeName = extractStoreName(url);
+          if (parsed?.price) price = parsed.price;
+          if (parsed?.imageUrl) imageUrl = parsed.imageUrl;
         } catch {
           storeName = extractStoreName(url);
         }
@@ -49,13 +52,13 @@ const PillQuickPauseBar = () => {
       await addItem({
         itemName: itemName || 'Unnamed Item',
         storeName,
-        price: '',
+        price: price ?? '',
         emotion: 'something else',
         notes: undefined,
         duration,
         link,
         photo: null,
-        imageUrl: undefined,
+        imageUrl,
         tags: [],
         isCart: false,
         itemType: 'item',
