@@ -14,7 +14,33 @@ const DURATION_PRESETS: { key: string; label: string }[] = [
   { key: '1 month', label: '1 month' },
 ];
 
-const isProbablyUrl = (text: string) => /^(https?:\/\/|www\.)/i.test(text.trim());
+const isProbablyUrl = (text: string) => {
+  const t = text.trim();
+  if (/^(https?:\/\/|www\.)/i.test(t)) return true;
+  // Domain-like detection without protocol (e.g., amazon.com/xyz, a.co/abc)
+  if (!/^\S+$/.test(t)) return false; // must be single token
+  try {
+    const u = new URL(t.startsWith('http') ? t : `https://${t}`);
+    return !!u.hostname && u.hostname.includes('.');
+  } catch {
+    return false;
+  }
+};
+
+const getFallbackTitleFromUrl = (rawUrl: string): string | undefined => {
+  try {
+    const u = new URL(rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`);
+    let seg = u.pathname.split('/').filter(Boolean).pop() || '';
+    seg = decodeURIComponent(seg)
+      .replace(/\.(html|htm|php|aspx)$/i, '')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b(dp|gp|product|products|item|sku|p)\b/gi, ' ')
+      .trim();
+    return seg || undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: { compact?: boolean; prefillValue?: string; onExpandRequest?: () => void }) => {
   const { addItem } = usePausedItems();
@@ -52,12 +78,19 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
         link = url;
         try {
           const parsed = await parseProductUrl(url);
-          if (parsed?.itemName) itemName = parsed.itemName;
+          if (parsed?.itemName) {
+            itemName = parsed.itemName;
+          } else {
+            const ft = getFallbackTitleFromUrl(url);
+            if (ft) itemName = ft;
+          }
           if (parsed?.storeName) storeName = parsed.storeName; else storeName = extractStoreName(url);
           if (parsed?.price) price = parsed.price;
           if (parsed?.imageUrl) imageUrl = parsed.imageUrl;
         } catch {
           storeName = extractStoreName(url);
+          const ft = getFallbackTitleFromUrl(url);
+          if (ft) itemName = ft;
         }
       }
 
