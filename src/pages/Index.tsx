@@ -171,18 +171,23 @@ console.log('Rendering main Index content');
                 >
                   Ready to review ({readyCount})
                 </button>
-                <div className="flex items-center gap-1 text-xs">
+                <div className="flex items-center gap-2 text-xs" aria-label="Sort items">
+                  <span className="text-muted-foreground">Sort:</span>
                   <button
                     className={`px-2 py-1 rounded-full border ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
                     onClick={() => setSortMode('soonest')}
+                    aria-label="Sort by ending soon"
+                    title="Sort by ending soon"
                   >
-                    Soonest
+                    Ending soon
                   </button>
                   <button
                     className={`px-2 py-1 rounded-full border ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
                     onClick={() => setSortMode('newest')}
+                    aria-label="Sort by recently paused"
+                    title="Sort by recently paused"
                   >
-                    Newest
+                    Recently paused
                   </button>
                 </div>
               </div>
