@@ -79,7 +79,7 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
             </div>
 
             {/* Store name (optional) */}
-            {item.storeName && item.storeName.trim() && (
+            {item.storeName && item.storeName.trim() && item.storeName !== 'Unknown Store' && (
               <div>
                 <p className="text-sm text-muted-foreground">{item.storeName}</p>
               </div>

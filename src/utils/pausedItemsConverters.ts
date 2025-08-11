@@ -22,10 +22,13 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     rawItem: dbItem
   });
   
-  // Extract store name from notes or URL
+  // Extract store name from notes or URL, but never default to placeholder
   let storeName = extractStoreNameFromNotes(dbItem.notes);
   if (storeName === 'Unknown Store' && dbItem.url) {
     storeName = extractStoreName(dbItem.url);
+  }
+  if (storeName === 'Unknown Store') {
+    storeName = '';
   }
   
   // Extract actual notes (cleaned of metadata)
