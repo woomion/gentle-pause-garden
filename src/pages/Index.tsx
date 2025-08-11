@@ -24,6 +24,7 @@ import { usePausedItems } from '../hooks/usePausedItems';
 import PausedItemDetail from '../components/PausedItemDetail';
 import PillQuickPauseBar from '../components/pill/PillQuickPauseBar';
 import PillItem from '../components/pill/PillItem';
+import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
@@ -186,13 +187,12 @@ console.log('Rendering main Index content');
           */}
           {pillMode ? (
             <>
-              <div className="mb-4 flex items-center justify-between gap-2">
-                <button
-                  onClick={handleStartReview}
-                  className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-foreground hover:bg-primary/15"
-                >
-                  Ready to review ({readyCount})
-                </button>
+              {readyCount > 0 && (
+                <div className="mb-3">
+                  <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
+                </div>
+              )}
+              <div className="mb-4 flex items-center justify-end gap-2">
                 <div className="flex items-center gap-2 text-xs" aria-label="Sort items">
                   <span className="text-muted-foreground">Sort:</span>
                   <button

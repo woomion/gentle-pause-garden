@@ -26,7 +26,7 @@ const PillItem = ({ item, onClick }: PillItemProps) => {
   return (
     <button
       onClick={onClick}
-      className="relative w-full rounded-full border border-primary/30 bg-primary/10 px-4 py-3 text-left transition-colors hover:bg-primary/15"
+      className="relative w-full rounded-full overflow-hidden border border-primary/30 bg-primary/10 px-4 py-3 text-left transition-colors hover:bg-primary/15"
     >
       {/* progress */}
       <div
