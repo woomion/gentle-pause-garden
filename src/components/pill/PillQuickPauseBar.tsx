@@ -42,7 +42,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
 
     try {
       let itemName = raw;
-      let storeName = 'Unknown Store';
+      let storeName = '';
       let link: string | undefined;
       let price: string | undefined;
       let imageUrl: string | undefined;
@@ -62,7 +62,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
       }
 
       await addItem({
-        itemName: itemName || 'Unnamed Item',
+        itemName: itemName,
         storeName,
         price: price ?? '',
         emotion: 'something else',

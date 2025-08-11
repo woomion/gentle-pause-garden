@@ -197,46 +197,48 @@ console.log('Rendering main Index content');
                   <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
                 </div>
               )}
-              <div className="mb-4 flex items-center justify-end gap-2">
-                <div className="flex items-center gap-2 text-xs" aria-label="Sort items">
-                  <span className="text-muted-foreground">Sort:</span>
-                  <button
-                    className={`px-2 py-1 rounded-full border ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
-                    onClick={() => setSortMode('soonest')}
-                    aria-label="Sort by ending soon"
-                    title="Sort by ending soon"
-                  >
-                    Ending soon
-                  </button>
-                  <button
-                    className={`px-2 py-1 rounded-full border ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
-                    onClick={() => setSortMode('newest')}
-                    aria-label="Sort by recently paused"
-                    title="Sort by recently paused"
-                  >
-                    Recently paused
-                  </button>
+              <section className="-mx-4 sm:-mx-6 bg-card border-t border-b border-border py-3">
+                <div className="mb-4 flex items-center justify-end gap-2 px-4 sm:px-6">
+                  <div className="flex items-center gap-2 text-xs" aria-label="Sort items">
+                    <span className="text-muted-foreground">Sort:</span>
+                    <button
+                      className={`px-2 py-1 rounded-full border ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
+                      onClick={() => setSortMode('soonest')}
+                      aria-label="Sort by ending soon"
+                      title="Sort by ending soon"
+                    >
+                      Ending soon
+                    </button>
+                    <button
+                      className={`px-2 py-1 rounded-full border ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
+                      onClick={() => setSortMode('newest')}
+                      aria-label="Sort by recently paused"
+                      title="Sort by recently paused"
+                    >
+                      Recently paused
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Pill list */}
-              <div className="space-y-2">
-                {itemsLoading ? (
-                  <div className="text-sm text-muted-foreground">Loading…</div>
-                ) : (
-                  currentPausedItems.map((it) => (
-                    <PillItem
-                      key={it.id}
-                      item={it}
-                      onClick={() => {
-                        setSelectedItem(it);
-                        setShowItemDetail(true);
-                      }}
-                    />
-                  ))
-                )}
-              </div>
-              <div aria-hidden className="h-16" />
+                {/* Pill list */}
+                <div className="space-y-2 px-4 sm:px-6">
+                  {itemsLoading ? (
+                    <div className="text-sm text-muted-foreground">Loading…</div>
+                  ) : (
+                    currentPausedItems.map((it) => (
+                      <PillItem
+                        key={it.id}
+                        item={it}
+                        onClick={() => {
+                          setSelectedItem(it);
+                          setShowItemDetail(true);
+                        }}
+                      />
+                    ))
+                  )}
+                </div>
+                <div aria-hidden className="h-4" />
+              </section>
             </>
           ) : (
             <>

@@ -374,9 +374,9 @@ const PauseForm = ({ onClose, onShowSignup, signupModalDismissed = false, initia
     
     // Commit the pause immediately when entering details step
     const itemData = {
-      itemName: formData.itemName || 'Unnamed Item',
-      storeName: formData.storeName || 'Unknown Store', 
-      price: formData.price || '0',
+      itemName: formData.itemName,
+      storeName: formData.storeName, 
+      price: formData.price,
       emotion: formData.emotion,
       notes: formData.notes,
       duration: formData.duration,

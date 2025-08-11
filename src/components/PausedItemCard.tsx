@@ -78,10 +78,12 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
               )}
             </div>
 
-            {/* Store name */}
-            <div>
-              <p className="text-sm text-muted-foreground">{item.storeName}</p>
-            </div>
+            {/* Store name (optional) */}
+            {item.storeName && item.storeName.trim() && (
+              <div>
+                <p className="text-sm text-muted-foreground">{item.storeName}</p>
+              </div>
+            )}
           </div>
 
           {/* View item button aligned to bottom of image */}
