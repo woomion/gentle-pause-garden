@@ -76,7 +76,7 @@ const PillQuickPauseBar = ({ compact = false }: { compact?: boolean }) => {
   };
 
   return (
-    <div className="w-full rounded-xl border border-border bg-card/70 backdrop-blur px-3 py-3">
+    <div className={`w-full rounded-xl border border-border bg-card/70 backdrop-blur px-3 ${compact ? 'py-2' : 'py-3'}`}>
       <div className="flex items-center gap-2">
         <Input
           value={value}

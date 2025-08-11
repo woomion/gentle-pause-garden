@@ -76,6 +76,13 @@ const Index = () => {
     }
   }, [sharedContent]);
 
+  // Fallback: also react to window scrolling (if body scrolls instead of the container)
+  useEffect(() => {
+    const onWinScroll = () => setCompactQuickBar(window.scrollY > 8);
+    window.addEventListener('scroll', onWinScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onWinScroll);
+  }, []);
+
   const handleStartReview = () => {
     itemReview.resetReviewIndex();
     modalStates.handleStartReview('solo');
@@ -215,6 +222,7 @@ console.log('Rendering main Index content');
                   ))
                 )}
               </div>
+              <div aria-hidden className="h-16" />
             </>
           ) : (
             <>
