@@ -18,8 +18,10 @@ const PillItem = ({ item, onClick }: PillItemProps) => {
   }, [item.checkInDate, item.pausedAt]);
 
   const label = useMemo(() => {
-    return item.itemName || item.link || 'Paused item';
-  }, [item.itemName, item.link]);
+    const base = item.itemName || item.link || 'Paused item';
+    const hasStore = 'storeName' in item && (item as any).storeName && (item as any).storeName.trim().length > 0;
+    return hasStore ? `${(item as any).storeName}_${base}` : base;
+  }, [item.itemName, item.link, (item as any)?.storeName]);
 
   return (
     <button

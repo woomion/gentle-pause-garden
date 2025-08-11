@@ -16,7 +16,7 @@
     --popover: 44 69% 97%;
     --popover-foreground: 220 13% 18%;
 
-    --primary: 270 47% 25%;
+    --primary: 262 83% 58%;
     --primary-foreground: 44 69% 97%;
 
     --secondary: 270 35% 88%;
@@ -33,7 +33,7 @@
 
     --border: 270 20% 88%;
     --input: 270 20% 88%;
-    --ring: 270 47% 25%;
+    --ring: 262 83% 58%;
 
     /* App-specific colors */
     --cream: 44 69% 97%;
@@ -86,8 +86,8 @@
     --popover: 260 47% 20%;
     --popover-foreground: 44 69% 97%;
 
-    --primary: 44 69% 97%;
-    --primary-foreground: 260 47% 15%;
+    --primary: 262 83% 62%;
+    --primary-foreground: 44 69% 97%;
 
     --secondary: 260 30% 25%;
     --secondary-foreground: 44 69% 97%;
@@ -103,7 +103,7 @@
 
     --border: 260 20% 35%;
     --input: 260 20% 35%;
-    --ring: 44 69% 97%;
+    --ring: 262 83% 62%;
 
     /* App-specific dark colors */
     --cream: 260 47% 20%;

@@ -51,6 +51,7 @@ const Index = () => {
       ? a.checkInDate.getTime() - b.checkInDate.getTime()
       : b.pausedAt.getTime() - a.pausedAt.getTime()
   );
+  const currentPausedItems = sortedItems.filter((i) => i.checkInDate.getTime() > Date.now());
   const readyCount = (getItemsForReview && getItemsForReview())?.length || 0;
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
@@ -191,7 +192,7 @@ console.log('Rendering main Index content');
                 {itemsLoading ? (
                   <div className="text-sm text-muted-foreground">Loading…</div>
                 ) : (
-                  sortedItems.map((it) => (
+                  currentPausedItems.map((it) => (
                     <PillItem
                       key={it.id}
                       item={it}
