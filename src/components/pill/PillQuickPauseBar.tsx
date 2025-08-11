@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
@@ -16,12 +16,24 @@ const DURATION_PRESETS: { key: string; label: string }[] = [
 
 const isProbablyUrl = (text: string) => /^(https?:\/\/|www\.)/i.test(text.trim());
 
-const PillQuickPauseBar = ({ compact = false }: { compact?: boolean }) => {
+const PillQuickPauseBar = ({ compact = false, prefillValue }: { compact?: boolean; prefillValue?: string }) => {
   const { addItem } = usePausedItems();
   const { toast } = useToast();
   const [value, setValue] = useState('');
   const [duration, setDuration] = useState<string>('1 week');
   const [submitting, setSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [lastAppliedPrefill, setLastAppliedPrefill] = useState<string | undefined>(undefined);
+
+  // When a prefill value comes from share target, populate and focus the input once per unique value
+  useEffect(() => {
+    if (prefillValue && prefillValue !== lastAppliedPrefill) {
+      setValue(prefillValue);
+      setLastAppliedPrefill(prefillValue);
+      // Focus after value set
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [prefillValue, lastAppliedPrefill]);
 
   const handleSubmit = async () => {
     const raw = value.trim();
@@ -79,6 +91,7 @@ const PillQuickPauseBar = ({ compact = false }: { compact?: boolean }) => {
     <div className={`w-full rounded-xl border border-border bg-card/70 backdrop-blur px-3 ${compact ? 'py-2' : 'py-3'}`}>
       <div className="flex items-center gap-2">
         <Input
+          ref={inputRef}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Paste a link or type a thought..."

@@ -57,6 +57,7 @@ const Index = () => {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [compactQuickBar, setCompactQuickBar] = useState(false);
+  const [sharedPrefill, setSharedPrefill] = useState<string | undefined>(undefined);
   
   // Handle redirects for invitations
   useIndexRedirects();
@@ -68,13 +69,20 @@ const Index = () => {
   // Initialize notifications
   useNotifications(notificationsEnabled);
 
-  // Handle shared content from other apps
+  // Handle shared content from other apps or PWA share target
   useEffect(() => {
-    if (sharedContent?.url && addPauseButtonRef.current) {
-      modalStates.handleAddPause({ url: sharedContent.url });
-      clearSharedContent();
+    if (!sharedContent) return;
+    const incoming = sharedContent.url || sharedContent.text || '';
+    if (!incoming) return;
+
+    if (pillMode) {
+      setSharedPrefill(incoming);
+      setCompactQuickBar(false); // ensure Pause button is visible
+    } else if (addPauseButtonRef.current) {
+      modalStates.handleAddPause({ url: sharedContent.url, text: sharedContent.text });
     }
-  }, [sharedContent]);
+    clearSharedContent();
+  }, [sharedContent, pillMode]);
 
   // Fallback: also react to window scrolling (if body scrolls instead of the container)
   useEffect(() => {
@@ -241,7 +249,7 @@ console.log('Rendering main Index content');
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-40">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           {pillMode ? (
-            <PillQuickPauseBar compact={compactQuickBar} />
+            <PillQuickPauseBar compact={compactQuickBar && !sharedPrefill} prefillValue={sharedPrefill} />
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
           )}
