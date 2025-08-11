@@ -29,6 +29,7 @@ const Index = () => {
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
   const [sectionsExpanded, setSectionsExpanded] = useState(false);
   const addPauseButtonRef = useRef<AddPauseButtonRef>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { sharedContent, clearSharedContent } = useSharedContent();
   const [searchParams] = useSearchParams();
   const isGuest = searchParams.get('guest') === '1';
@@ -55,6 +56,7 @@ const Index = () => {
   const readyCount = (getItemsForReview && getItemsForReview())?.length || 0;
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
+  const [compactQuickBar, setCompactQuickBar] = useState(false);
   
   // Handle redirects for invitations
   useIndexRedirects();
@@ -121,9 +123,13 @@ console.log('Rendering main Index content');
 
   return (
     <>
-      <div className={`min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 overflow-y-auto ${
+      <div
+        ref={scrollContainerRef}
+        onScroll={(e) => setCompactQuickBar((e.currentTarget as HTMLDivElement).scrollTop > 8)}
+        className={`min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 overflow-y-auto ${
         sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
       }`}>
+
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-12 sm:pt-16">
           <PauseHeader />
           <GuestModeIndicator show={!user} />
@@ -227,7 +233,7 @@ console.log('Rendering main Index content');
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-40">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           {pillMode ? (
-            <PillQuickPauseBar />
+            <PillQuickPauseBar compact={compactQuickBar} />
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
           )}

@@ -16,7 +16,7 @@ const DURATION_PRESETS: { key: string; label: string }[] = [
 
 const isProbablyUrl = (text: string) => /^(https?:\/\/|www\.)/i.test(text.trim());
 
-const PillQuickPauseBar = () => {
+const PillQuickPauseBar = ({ compact = false }: { compact?: boolean }) => {
   const { addItem } = usePausedItems();
   const { toast } = useToast();
   const [value, setValue] = useState('');
@@ -88,30 +88,33 @@ const PillQuickPauseBar = () => {
           }}
         />
       </div>
-      <div className="mt-3 grid grid-cols-4 gap-2">
-        {DURATION_PRESETS.map((d) => (
-          <button
-            key={d.key}
-            type="button"
-            onClick={() => setDuration(d.key)}
-            aria-pressed={duration === d.key}
-            className={
-              `flex-1 h-10 rounded-full border text-sm transition-colors ` +
-              (duration === d.key
-                ? 'bg-primary/15 text-primary border-primary/30'
-                : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted')
-            }
-          >
-            {d.label}
-          </button>
-        ))}
-      </div>
-      
-      <div className="mt-3">
-        <Button onClick={handleSubmit} disabled={!value.trim() || submitting} size="xl" shape="pill" className="w-full">
-          {submitting ? 'Pausing…' : 'Pause'}
-        </Button>
-      </div>
+      {!compact && (
+        <>
+          <div className="mt-3 grid grid-cols-4 gap-2">
+            {DURATION_PRESETS.map((d) => (
+              <button
+                key={d.key}
+                type="button"
+                onClick={() => setDuration(d.key)}
+                aria-pressed={duration === d.key}
+                className={
+                  `flex-1 h-10 rounded-full border text-sm transition-colors ` +
+                  (duration === d.key
+                    ? 'bg-primary/15 text-primary border-primary/30'
+                    : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted')
+                }
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-3">
+            <Button onClick={handleSubmit} disabled={!value.trim() || submitting} size="xl" shape="pill" className="w-full">
+              {submitting ? 'Pausing…' : 'Pause'}
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
