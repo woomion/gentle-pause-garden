@@ -8,10 +8,10 @@ import { extractStoreName } from '@/utils/pausedItemsUtils';
 
 // Quick add bar for Pill Mode only. Keeps UI minimal and fast.
 const DURATION_PRESETS: { key: string; label: string }[] = [
-  { key: '24 hours', label: '1d' },
-  { key: '3 days', label: '3d' },
-  { key: '1 week', label: '7d' },
-  { key: '1 month', label: '30d' },
+  { key: '24 hours', label: '1 day' },
+  { key: '3 days', label: '3 days' },
+  { key: '1 week', label: '1 week' },
+  { key: '1 month', label: '1 month' },
 ];
 
 const isProbablyUrl = (text: string) => /^(https?:\/\/|www\.)/i.test(text.trim());
@@ -106,7 +106,7 @@ const PillQuickPauseBar = () => {
           </button>
         ))}
       </div>
-      <div className="mt-2 text-xs text-muted-foreground text-right">{duration}</div>
+      
       <div className="mt-3">
         <Button onClick={handleSubmit} disabled={!value.trim() || submitting} size="xl" shape="pill" className="w-full">
           {submitting ? 'Pausing…' : 'Pause'}
