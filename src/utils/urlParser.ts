@@ -1,3 +1,4 @@
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProductInfo {
   itemName?: string;
@@ -297,6 +298,33 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
           };
         } catch (error) {
           console.log('All proxy services failed:', error);
+          return null;
+        }
+      })()
+    );
+    // Firecrawl-backed server scrape via Supabase Edge Function (best effort for hard sites like Shopbop)
+    extractionPromises.push(
+      (async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('firecrawl-proxy', {
+            body: { url: resolvedUrl }
+          });
+          if (error || !data) return null;
+          const html = data.html || data.data?.[0]?.html || data.data?.[0]?.content || data.markdown || data.md;
+          if (!html || typeof html !== 'string' || html.length < 100) return null;
+
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const [itemName, price, imageUrl] = await Promise.all([
+            Promise.resolve(extractItemName(doc)),
+            Promise.resolve(extractPrice(doc)),
+            Promise.resolve(extractImageUrl(doc, resolvedUrl))
+          ]);
+
+          console.log('✅ Firecrawl proxy parse success');
+          return { source: 'firecrawl', itemName, price, imageUrl };
+        } catch (e) {
+          console.log('Firecrawl proxy failed', e);
           return null;
         }
       })()
