@@ -33,7 +33,8 @@ const Index = () => {
   const { sharedContent, clearSharedContent } = useSharedContent();
   const [searchParams] = useSearchParams();
   const isGuest = searchParams.get('guest') === '1';
-  const pillMode = searchParams.get('pill') === '1' || isGuest;
+  const pillParam = searchParams.get('pill');
+  const pillMode = pillParam ? pillParam === '1' : true;
   
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
