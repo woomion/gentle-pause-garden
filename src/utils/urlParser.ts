@@ -141,7 +141,7 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       (async () => {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3500);
+          const timeoutId = setTimeout(() => controller.abort(), 6000);
           const response = await fetch(resolvedUrl, {
             signal: controller.signal,
             redirect: 'follow'
@@ -366,7 +366,7 @@ const normalizeUrl = (url: string): string => {
     const urlObj = new URL(url);
     // Remove tracking parameters
     const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 
-                           'ref', 'referrer', 'source', 'campaign', 'gclid', 'fbclid'];
+                           'ref', 'referrer', 'source', 'campaign', 'gclid', 'fbclid', 'extid', 'currencyCode'];
     trackingParams.forEach(param => urlObj.searchParams.delete(param));
     return urlObj.toString();
   } catch {
@@ -774,6 +774,7 @@ const extractStoreName = (hostname: string): string => {
     'urbanoutfitters.com': 'Urban Outfitters',
     'anthropologie.com': 'Anthropologie',
     'freepeople.com': 'Free People',
+    'shopbop.com': 'Shopbop',
     'victoriassecret.com': "Victoria's Secret",
     
     // Home & furniture
@@ -961,6 +962,26 @@ const extractItemName = (doc: Document): string | undefined => {
     'h1.pdp-product-title',
     'h1[itemprop="name"]',
   ];
+  
+  // Try JSON-LD Product name first (handles arrays and @graph)
+  try {
+    const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+    for (const script of jsonLdScripts) {
+      try {
+        const data = JSON.parse(script.textContent || '');
+        const nodes = Array.isArray(data) ? data : (data['@graph'] || [data]);
+        for (const node of nodes) {
+          const types = Array.isArray(node['@type']) ? node['@type'] : [node['@type']];
+          if (types && types.includes('Product')) {
+            const name = typeof node.name === 'string' ? node.name : (Array.isArray(node.name) ? node.name[0] : undefined);
+            if (name && name.trim().length > 3) {
+              return name.trim().substring(0, 150);
+            }
+          }
+        }
+      } catch {}
+    }
+  } catch {}
   
   for (const selector of [...shopbopSelectors, ...selectors]) {
     const element = doc.querySelector(selector);
@@ -1162,9 +1183,10 @@ const extractPrice = (doc: Document): string | undefined => {
       for (const element of jsonLdElements) {
         try {
           const data = JSON.parse(element.textContent || '');
-          const items = Array.isArray(data) ? data : [data];
-          for (const item of items) {
-            if (item['@type'] === 'Product' && item.offers) {
+          const nodes = Array.isArray(data) ? data : (data['@graph'] || [data]);
+          for (const item of nodes) {
+            const types = Array.isArray(item['@type']) ? item['@type'] : [item['@type']];
+            if (types && types.includes('Product') && item.offers) {
               const offers = Array.isArray(item.offers) ? item.offers[0] : item.offers;
               const priceVal = parseFloat(offers.price || offers.priceSpecification?.price);
               if (!isNaN(priceVal) && priceVal > 0) {
@@ -1465,6 +1487,7 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
   const metaSelectors = [
     'meta[property="og:image"]',
     'meta[property="og:image:url"]',
+    'meta[property="og:image:secure_url"]',
     'meta[name="twitter:image"]',
     'meta[property="product:image"]'
   ];
