@@ -84,15 +84,6 @@ const PillQuickPauseBar = () => {
             if (e.key === 'Enter') handleSubmit();
           }}
         />
-        <Button
-          onClick={handleSubmit}
-          disabled={!value.trim() || submitting}
-          size="xl"
-          shape="pill"
-          className="shrink-0 px-6 md:px-8"
-        >
-          {submitting ? 'Pausing…' : 'Pause'}
-        </Button>
       </div>
       <div className="mt-2 flex items-center gap-1">
         {DURATION_PRESETS.map((d) => (
@@ -111,6 +102,11 @@ const PillQuickPauseBar = () => {
           </button>
         ))}
         <div className="ml-auto text-xs text-muted-foreground">{duration}</div>
+      </div>
+      <div className="mt-3">
+        <Button onClick={handleSubmit} disabled={!value.trim() || submitting} size="xl" shape="pill" className="w-full">
+          {submitting ? 'Pausing…' : 'Pause'}
+        </Button>
       </div>
     </div>
   );
