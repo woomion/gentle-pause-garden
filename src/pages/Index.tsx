@@ -197,48 +197,46 @@ console.log('Rendering main Index content');
                   <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
                 </div>
               )}
-              <section className="-mx-4 sm:-mx-6 bg-card border-t border-b border-border py-3">
-                <div className="mb-4 flex items-center justify-end gap-2 px-4 sm:px-6">
-                  <div className="flex items-center gap-2 text-xs" aria-label="Sort items">
-                    <span className="text-muted-foreground">Sort:</span>
-                    <button
-                      className={`px-2 py-1 rounded-full border ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
-                      onClick={() => setSortMode('soonest')}
-                      aria-label="Sort by ending soon"
-                      title="Sort by ending soon"
-                    >
-                      Ending soon
-                    </button>
-                    <button
-                      className={`px-2 py-1 rounded-full border ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
-                      onClick={() => setSortMode('newest')}
-                      aria-label="Sort by recently paused"
-                      title="Sort by recently paused"
-                    >
-                      Recently paused
-                    </button>
-                  </div>
+              <div className="mb-4 flex items-center justify-end gap-2">
+                <div className="flex items-center gap-2 text-xs" aria-label="Sort items">
+                  <span className="text-muted-foreground">Sort:</span>
+                  <button
+                    className={`px-2 py-1 rounded-full border ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
+                    onClick={() => setSortMode('soonest')}
+                    aria-label="Sort by ending soon"
+                    title="Sort by ending soon"
+                  >
+                    Ending soon
+                  </button>
+                  <button
+                    className={`px-2 py-1 rounded-full border ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
+                    onClick={() => setSortMode('newest')}
+                    aria-label="Sort by recently paused"
+                    title="Sort by recently paused"
+                  >
+                    Recently paused
+                  </button>
                 </div>
+              </div>
 
-                {/* Pill list */}
-                <div className="space-y-2 px-4 sm:px-6">
-                  {itemsLoading ? (
-                    <div className="text-sm text-muted-foreground">Loading…</div>
-                  ) : (
-                    currentPausedItems.map((it) => (
-                      <PillItem
-                        key={it.id}
-                        item={it}
-                        onClick={() => {
-                          setSelectedItem(it);
-                          setShowItemDetail(true);
-                        }}
-                      />
-                    ))
-                  )}
-                </div>
-                <div aria-hidden className="h-4" />
-              </section>
+              {/* Pill list */}
+              <div className="space-y-2">
+                {itemsLoading ? (
+                  <div className="text-sm text-muted-foreground">Loading…</div>
+                ) : (
+                  currentPausedItems.map((it) => (
+                    <PillItem
+                      key={it.id}
+                      item={it}
+                      onClick={() => {
+                        setSelectedItem(it);
+                        setShowItemDetail(true);
+                      }}
+                    />
+                  ))
+                )}
+              </div>
+              <div aria-hidden className="h-16" />
             </>
           ) : (
             <>
@@ -254,7 +252,7 @@ console.log('Rendering main Index content');
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-40">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           {pillMode ? (
             <PillQuickPauseBar
