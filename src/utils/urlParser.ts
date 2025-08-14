@@ -185,6 +185,7 @@ const extractPrice = (doc: Document): string | undefined => {
 
   for (const selector of selectors) {
     const element = doc.querySelector(selector);
+    console.log(`🔍 Price selector ${selector}:`, element ? `Found element with text: "${element.textContent?.trim()}"` : 'No element found');
     if (element) {
       const text = element.textContent?.trim();
       if (text) {
@@ -196,6 +197,8 @@ const extractPrice = (doc: Document): string | undefined => {
           price = price.replace(/,/g, '');
           console.log(`💰 Found price: ${price} from selector: ${selector}`);
           return price;
+        } else {
+          console.log(`💰 Text "${text}" didn't match price pattern`);
         }
       }
     }
@@ -229,6 +232,7 @@ const extractImageUrl = (doc: Document, baseUrl: string): string | undefined => 
 
   for (const selector of selectors) {
     const img = doc.querySelector(selector) as HTMLImageElement;
+    console.log(`🔍 Image selector ${selector}:`, img ? `Found img with src: "${img.src || img.getAttribute('data-src') || 'no src'}"` : 'No img found');
     if (img) {
       // Try multiple src attributes
       let imgSrc = img.src || img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('srcset')?.split(' ')[0];
@@ -237,10 +241,13 @@ const extractImageUrl = (doc: Document, baseUrl: string): string | undefined => 
         try {
           const url = new URL(imgSrc, baseUrl);
           if (isValidImageUrl(url.toString())) {
-            console.log(`🖼️ Found image: ${url.toString()} from selector: ${selector}`);
+            console.log(`🖼️ Found valid image: ${url.toString()} from selector: ${selector}`);
             return url.toString();
+          } else {
+            console.log(`🖼️ Image ${url.toString()} failed validation`);
           }
-        } catch {
+        } catch (e) {
+          console.log(`🖼️ Failed to create URL from ${imgSrc}:`, e);
           continue;
         }
       }
@@ -334,31 +341,38 @@ export const parseProductUrl = async (url: string, options: RobustParsingOptions
         }
         
         if (html && typeof html === 'string' && html.length > 100) {
-          console.log('✅ Valid HTML content received from Firecrawl, length:', html.length);
+          console.log('🔥 Firecrawl returned HTML, parsing with DOMParser...');
+          console.log('📄 HTML length:', html.length);
+          console.log('📄 HTML preview:', html.substring(0, 500));
           
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
           
-          // Extract product information
-          console.log('🔍 Starting DOM extraction...');
-          const [itemName, price, imageUrl] = await Promise.all([
-            Promise.resolve(extractItemName(doc)),
-            Promise.resolve(extractPrice(doc)),
-            Promise.resolve(extractImageUrl(doc, resolvedUrl))
-          ]);
-
-          console.log('🔍 DOM extraction results:', { itemName, price, imageUrl });
-
-          // Update product info with parsed data
-          if (itemName) productInfo.itemName = itemName;
-          if (price) productInfo.price = price;
-          if (imageUrl) productInfo.imageUrl = imageUrl;
+          console.log('🔍 Before Firecrawl parsing:', productInfo);
+          
+          if (!productInfo.itemName) {
+            const extractedName = extractItemName(doc);
+            console.log('📝 Extracted item name:', extractedName);
+            productInfo.itemName = extractedName;
+          }
+          if (!productInfo.price) {
+            const extractedPrice = extractPrice(doc);
+            console.log('💰 Extracted price:', extractedPrice);
+            productInfo.price = extractedPrice;
+          }
+          if (!productInfo.imageUrl) {
+            const extractedImage = extractImageUrl(doc, resolvedUrl);
+            console.log('🖼️ Extracted image:', extractedImage);
+            productInfo.imageUrl = extractedImage;
+          }
+          
+          console.log('🔍 After Firecrawl parsing:', productInfo);
           
           console.log('✅ Firecrawl parsing successful:', {
-            itemName: !!itemName,
-            price: !!price, 
-            imageUrl: !!imageUrl,
-            storeName: !!storeName
+            itemName: !!productInfo.itemName,
+            price: !!productInfo.price, 
+            imageUrl: !!productInfo.imageUrl,
+            storeName: !!productInfo.storeName
           });
         } else {
           console.log('⚠️ Firecrawl returned insufficient content');
