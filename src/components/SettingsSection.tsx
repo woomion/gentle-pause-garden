@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Bell, Tag, Users, User, Moon, Sun, Palette, ChevronDown, ChevronRight, Heart } from 'lucide-react';
+import { Settings, Bell, User, Moon, Sun, Palette, ChevronDown, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTheme } from '@/components/ThemeProvider';
 import NotificationSettingsModal from './NotificationSettingsModal';
-import TagManagement from './TagManagement';
 import { ValuesSetupModal } from './ValuesSetupModal';
 import { ValuesDisplay } from './ValuesDisplay';
 
@@ -20,13 +19,11 @@ import { useUserValues } from '@/hooks/useUserValues';
 
 const SettingsSection = () => {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
-  const [showTagManagement, setShowTagManagement] = useState(false);
   const [showValuesModal, setShowValuesModal] = useState(false);
   
   // Collapsible state for each section
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [organizationOpen, setOrganizationOpen] = useState(false);
   
   
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
@@ -280,45 +277,6 @@ const SettingsSection = () => {
         existingValues={userValues.values_selected}
       />
 
-      {/* Organization */}
-      <Collapsible open={organizationOpen} onOpenChange={setOrganizationOpen}>
-        <CollapsibleTrigger className="w-full">
-          <Card className="bg-card border-border cursor-pointer hover:bg-card/80 transition-colors">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Tag className="h-4 w-4" />
-                  Organization
-                </div>
-                {organizationOpen ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                )}
-              </CardTitle>
-              <CardDescription className="text-sm text-left">
-                Manage tags and categories for your paused items
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <Card className="bg-card border-border border-t-0 rounded-t-none">
-            <CardContent className="pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowTagManagement(true)}
-                className="w-full text-xs h-8"
-              >
-                Manage Tags
-              </Button>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
-
-
       {/* Modals */}
       <NotificationSettingsModal
         isOpen={showNotificationSettings}
@@ -327,29 +285,6 @@ const SettingsSection = () => {
         onNotificationsToggle={handleNotificationToggle}
         onTestNotification={() => {}}
       />
-
-      {showTagManagement && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-card rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Tag Management
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowTagManagement(false)}
-                  className="h-8 w-8 p-0"
-                >
-                  ×
-                </Button>
-              </div>
-              <TagManagement onClose={() => setShowTagManagement(false)} />
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

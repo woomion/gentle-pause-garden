@@ -124,7 +124,7 @@ const ItemReviewContent = ({
       <ItemReviewDetails item={item} onViewItem={handleViewItem} />
       
       {userValues.length > 0 && (
-        <div className="mt-6 p-4 bg-muted/30 rounded-lg border">
+        <div className="mt-6 p-4 rounded-lg border bg-background">
           <ValuesDisplay values={userValues} />
           <p className="text-sm text-muted-foreground mt-2">
             Does this purchase align with your values?
