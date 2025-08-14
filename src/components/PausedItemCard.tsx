@@ -38,6 +38,12 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
 
   // Show comments section for shared items
   const showComments = false;
+  
+  // Check if item is ready for review
+  const isReadyForReview = useMemo(() => {
+    const now = new Date();
+    return new Date(item.checkInDate) <= now;
+  }, [item.checkInDate]);
 
   return (
     <div 
@@ -104,7 +110,11 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
       
       {/* Pause Duration Banner - stretches across bottom of card */}
       <div className="absolute bottom-0 left-0 right-0">
-        <PauseDurationBanner checkInTime={item.checkInTime} />
+            <PauseDurationBanner 
+              checkInTime={item.checkInTime} 
+              pausedAt={typeof item.pausedAt === 'string' ? item.pausedAt : item.pausedAt.toISOString()}
+              isReadyForReview={isReadyForReview}
+            />
       </div>
     </div>
   );

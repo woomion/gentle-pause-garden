@@ -53,34 +53,17 @@ const ItemReviewContent = ({
     ('userId' in item && item.userId === user.id)
   );
 
-  const handleDecision = async (decision: 'purchase' | 'let-go') => {
-    setSelectedDecision(decision);
-    setShowFeedback(true);
-  };
-
-  const handleSubmitDecision = async () => {
-    if (!selectedDecision) return;
-
-    console.log('🔍 ItemReviewContent: Submitting decision with reflection notes:', {
-      selectedDecision,
-      reflectionNotes: notes,
-      itemName: item.itemName
-    });
-
+  const handleDecisionDirect = async (decision: 'purchase' | 'let-go') => {
     try {
-      if (selectedDecision === 'purchase') {
-        await handleBought(item, onItemDecided, () => {}, notes);
+      if (decision === 'purchase') {
+        await handleBought(item, onItemDecided, () => {});
       } else {
-        await handleLetGo(item, onItemDecided, () => {}, notes);
+        await handleLetGo(item, onItemDecided, () => {});
       }
 
-      // Don't call onItemDecided again - it's already called by handleBought/handleLetGo
       if (isLastItem) {
         onClose();
       } else {
-        setSelectedDecision(null);
-        setShowFeedback(false);
-        setNotes('');
         onNavigateNext();
       }
     } catch (error) {
@@ -129,30 +112,16 @@ const ItemReviewContent = ({
 
   return (
     <div className="p-6">
-      {!showFeedback ? (
-        <>
-          <ItemReviewDetails item={item} onViewItem={handleViewItem} />
-          
-          
-          {/* Decision buttons - only show when allowed */}
-          {showDecisionButtons && (
-            <div className="mt-8">
-              <ItemReviewDecisionButtons 
-                onDecision={handleDecision} 
-                onExtendPause={() => setShowExtendModal(true)}
-              />
-            </div>
-          )}
-        </>
-      ) : (
-        <ItemReviewFeedbackForm
-          selectedDecision={externalSelectedDecision || selectedDecision!}
-          notes={notes}
-          setNotes={setNotes}
-          onSubmit={handleSubmitDecision}
-          onBack={() => setShowFeedback(false)}
-          isLastItem={isLastItem}
-        />
+      <ItemReviewDetails item={item} onViewItem={handleViewItem} />
+      
+      {/* Decision buttons - only show when allowed */}
+      {showDecisionButtons && (
+        <div className="mt-8">
+          <ItemReviewDecisionButtons 
+            onDecision={handleDecisionDirect} 
+            onExtendPause={() => setShowExtendModal(true)}
+          />
+        </div>
       )}
 
       <ExtendPauseModal

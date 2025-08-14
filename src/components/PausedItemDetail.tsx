@@ -36,6 +36,12 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchEndRef = useRef<{ x: number; y: number } | null>(null);
 
+  // Check if item is ready for review
+  const isReadyForReview = useMemo(() => {
+    const now = new Date();
+    return new Date(item.checkInDate) <= now;
+  }, [item.checkInDate]);
+
   // Mark comments as read when opening the detail view
   useEffect(() => {
     if (isOpen && currentUserId) {
@@ -163,7 +169,11 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           <div className="relative">
             <ItemImage item={item} />
             {/* Pause Duration Banner - touching bottom of image */}
-            <PauseDurationBanner checkInTime={item.checkInTime} />
+        <PauseDurationBanner 
+          checkInTime={item.checkInTime} 
+          pausedAt={typeof item.pausedAt === 'string' ? item.pausedAt : item.pausedAt.toISOString()}
+          isReadyForReview={isReadyForReview}
+        />
           </div>
 
           {/* Item details */}
