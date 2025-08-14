@@ -160,7 +160,14 @@ const extractItemName = (doc: Document): string | undefined => {
 
 const extractPrice = (doc: Document): string | undefined => {
   const selectors = [
+    // Shopbop specific
+    '.prices .price-sale',
+    '.prices .price',
     '[data-automation-id="product-price"]',
+    '.product-prices .price',
+    '.price-box .price',
+    '.pricing .price',
+    // Generic selectors
     '.price-current',
     '.price-now',
     '.product-price',
@@ -168,7 +175,12 @@ const extractPrice = (doc: Document): string | undefined => {
     '[data-testid="price"]',
     '.price',
     '[class*="price"]',
-    '[id*="price"]'
+    '[id*="price"]',
+    '.money',
+    '.cost',
+    '.amount',
+    'span[class*="price"]',
+    'div[class*="price"]'
   ];
 
   for (const selector of selectors) {
@@ -176,9 +188,14 @@ const extractPrice = (doc: Document): string | undefined => {
     if (element) {
       const text = element.textContent?.trim();
       if (text) {
-        const priceMatch = text.match(/\$?[\d,]+\.?\d*/);
+        // More robust price matching
+        const priceMatch = text.match(/\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
         if (priceMatch) {
-          return priceMatch[0].replace(/^\$/, '');
+          let price = priceMatch[1];
+          // Remove commas for consistency
+          price = price.replace(/,/g, '');
+          console.log(`💰 Found price: ${price} from selector: ${selector}`);
+          return price;
         }
       }
     }
@@ -189,27 +206,43 @@ const extractPrice = (doc: Document): string | undefined => {
 
 const extractImageUrl = (doc: Document, baseUrl: string): string | undefined => {
   const selectors = [
-    'img[data-automation-id="product-image"]',
+    // Shopbop specific
     '.product-image img',
+    '.product-images img',
+    '.image-container img',
+    '.main-image img',
+    // Generic selectors
+    'img[data-automation-id="product-image"]',
     '.pdp-image img',
     '[data-testid="product-image"] img',
-    '.main-image img',
     '.hero-image img',
     'img[alt*="product"]',
     'img[src*="product"]',
-    'img[class*="product"]'
+    'img[class*="product"]',
+    'img[class*="main"]',
+    'img[class*="primary"]',
+    '.gallery img:first-child',
+    '.images img:first-child',
+    'img[data-src]',
+    'img[srcset]'
   ];
 
   for (const selector of selectors) {
     const img = doc.querySelector(selector) as HTMLImageElement;
-    if (img && img.src) {
-      try {
-        const url = new URL(img.src, baseUrl);
-        if (isValidImageUrl(url.toString())) {
-          return url.toString();
+    if (img) {
+      // Try multiple src attributes
+      let imgSrc = img.src || img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('srcset')?.split(' ')[0];
+      
+      if (imgSrc) {
+        try {
+          const url = new URL(imgSrc, baseUrl);
+          if (isValidImageUrl(url.toString())) {
+            console.log(`🖼️ Found image: ${url.toString()} from selector: ${selector}`);
+            return url.toString();
+          }
+        } catch {
+          continue;
         }
-      } catch {
-        continue;
       }
     }
   }
