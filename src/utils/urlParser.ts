@@ -298,9 +298,12 @@ export const parseProductUrl = async (url: string, options: RobustParsingOptions
     // Primary method: Use Firecrawl via Supabase Edge Function
     console.log('🧪 Using Firecrawl for advanced parsing');
     try {
+      console.log('🔗 Calling firecrawl-proxy with URL:', resolvedUrl);
       const { data, error } = await supabase.functions.invoke('firecrawl-proxy', {
         body: { url: resolvedUrl }
       });
+      
+      console.log('📡 Firecrawl proxy response:', { hasData: !!data, hasError: !!error, error });
       
       if (error) {
         console.log('❌ Firecrawl error:', error);
@@ -308,14 +311,22 @@ export const parseProductUrl = async (url: string, options: RobustParsingOptions
       }
       
       if (data && data.success !== false) {
-        console.log('✅ Firecrawl response received');
+        console.log('✅ Firecrawl response received:', data);
         
         // Extract content from various possible response formats
         let html = data.html || data.content || (data.data && data.data[0] && data.data[0].html) || (data.data && data.data[0] && data.data[0].content);
         
+        console.log('🔍 HTML extraction attempt:', { 
+          hasDirectHtml: !!data.html, 
+          hasContent: !!data.content,
+          hasDataArray: !!data.data,
+          htmlLength: html ? html.length : 0
+        });
+        
         // Also try markdown content if HTML not available
         if (!html) {
           const markdown = data.markdown || data.md || (data.data && data.data[0] && data.data[0].markdown);
+          console.log('🔍 Markdown fallback:', { hasMarkdown: !!markdown, markdownLength: markdown ? markdown.length : 0 });
           if (markdown) {
             // Convert markdown to a basic HTML structure for parsing
             html = `<html><body><div>${markdown}</div></body></html>`;
@@ -329,11 +340,14 @@ export const parseProductUrl = async (url: string, options: RobustParsingOptions
           const doc = parser.parseFromString(html, 'text/html');
           
           // Extract product information
+          console.log('🔍 Starting DOM extraction...');
           const [itemName, price, imageUrl] = await Promise.all([
             Promise.resolve(extractItemName(doc)),
             Promise.resolve(extractPrice(doc)),
             Promise.resolve(extractImageUrl(doc, resolvedUrl))
           ]);
+
+          console.log('🔍 DOM extraction results:', { itemName, price, imageUrl });
 
           // Update product info with parsed data
           if (itemName) productInfo.itemName = itemName;
