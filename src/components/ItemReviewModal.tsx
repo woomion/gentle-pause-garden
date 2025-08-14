@@ -74,6 +74,7 @@ const ItemReviewModal = ({
   };
 
   const handleDecision = (decision: 'purchase' | 'let-go') => {
+    console.log('🎯 ItemReviewModal: handleDecision called with:', decision);
     setSelectedDecision(decision);
     setShowFeedback(true);
   };
