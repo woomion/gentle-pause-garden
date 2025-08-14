@@ -7,35 +7,68 @@ interface ProductInfo {
   imageUrl?: string;
 }
 
+interface RobustParsingOptions {
+  maxRetries?: number;
+  timeout?: number;
+  enableFallbacks?: boolean;
+  validateContent?: boolean;
+}
+
 // Performance-optimized cache with TTL and hit tracking
-const urlCache = new Map<string, { data: ProductInfo; timestamp: number; hits: number }>();
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
-const MAX_CACHE_SIZE = 200;
+const urlCache = new Map<string, { data: ProductInfo; timestamp: number; hits: number; quality: number }>();
+const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes for better UX
+const MAX_CACHE_SIZE = 500; // Increased cache size
+
+// Rate limiting to prevent overwhelming services
+const rateLimiter = new Map<string, number>();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS_PER_MINUTE = 10;
 
 // Ultra-enhanced proxy services with health monitoring and adaptive routing
 const PROXY_SERVICES = [
-  { url: 'https://api.allorigins.win/get?url=', timeout: 2000, priority: 1, retries: 3, health: 100 },
-  { url: 'https://corsproxy.io/?', timeout: 2500, priority: 2, retries: 3, health: 100 },
-  { url: 'https://cors-anywhere.herokuapp.com/', timeout: 3000, priority: 3, retries: 2, health: 100 },
-  { url: 'https://thingproxy.freeboard.io/fetch/', timeout: 3000, priority: 4, retries: 2, health: 100 },
-  { url: 'https://proxy.cors.sh/', timeout: 2500, priority: 5, retries: 2, health: 100 },
-  { url: 'https://crossorigin.me/', timeout: 2500, priority: 6, retries: 2, health: 100 },
-  { url: 'https://api.codetabs.com/v1/proxy/?quest=', timeout: 3000, priority: 7, retries: 1, health: 100 },
+  { url: 'https://api.allorigins.win/get?url=', timeout: 3000, priority: 1, retries: 3, health: 100, reliability: 90 },
+  { url: 'https://corsproxy.io/?', timeout: 3500, priority: 2, retries: 3, health: 100, reliability: 85 },
+  { url: 'https://cors-anywhere.herokuapp.com/', timeout: 4000, priority: 3, retries: 2, health: 100, reliability: 70 },
+  { url: 'https://thingproxy.freeboard.io/fetch/', timeout: 4000, priority: 4, retries: 2, health: 100, reliability: 75 },
+  { url: 'https://proxy.cors.sh/', timeout: 3500, priority: 5, retries: 2, health: 100, reliability: 80 },
+  { url: 'https://crossorigin.me/', timeout: 3500, priority: 6, retries: 2, health: 100, reliability: 65 },
+  { url: 'https://api.codetabs.com/v1/proxy/?quest=', timeout: 4000, priority: 7, retries: 1, health: 100, reliability: 60 },
+  { url: 'https://api.scrapeowl.com/v1/scrape?api_key=demo&url=', timeout: 5000, priority: 8, retries: 1, health: 100, reliability: 85 },
+  { url: 'https://scrapesite.vercel.app/api/scrape?url=', timeout: 4500, priority: 9, retries: 1, health: 100, reliability: 70 },
 ];
 
-// Health monitoring for proxy services
-const updateProxyHealth = (serviceUrl: string, success: boolean) => {
+// Enhanced health monitoring for proxy services
+const updateProxyHealth = (serviceUrl: string, success: boolean, responseTime?: number) => {
   const service = PROXY_SERVICES.find(s => s.url === serviceUrl);
   if (service) {
     if (success) {
-      service.health = Math.min(100, service.health + 5);
+      service.health = Math.min(100, service.health + 8);
+      // Boost reliability based on response time
+      if (responseTime && responseTime < 2000) {
+        service.reliability = Math.min(100, service.reliability + 2);
+      }
     } else {
-      service.health = Math.max(0, service.health - 10);
+      service.health = Math.max(0, service.health - 15);
+      service.reliability = Math.max(0, service.reliability - 5);
     }
   }
 };
 
-// Cache management
+// Rate limiting check
+const checkRateLimit = (hostname: string): boolean => {
+  const now = Date.now();
+  const key = hostname;
+  const lastRequest = rateLimiter.get(key) || 0;
+  
+  if (now - lastRequest < RATE_LIMIT_WINDOW / MAX_REQUESTS_PER_MINUTE) {
+    return false; // Rate limited
+  }
+  
+  rateLimiter.set(key, now);
+  return true;
+};
+
+// Enhanced cache management with quality scoring
 const cleanExpiredCache = () => {
   const now = Date.now();
   for (const [key, value] of urlCache.entries()) {
@@ -44,20 +77,46 @@ const cleanExpiredCache = () => {
     }
   }
   
-  // If cache is still too large, remove least used items
+  // If cache is still too large, remove items with lowest quality and hits
   if (urlCache.size > MAX_CACHE_SIZE) {
     const sortedEntries = Array.from(urlCache.entries())
-      .sort((a, b) => a[1].hits - b[1].hits);
+      .sort((a, b) => (a[1].hits * a[1].quality) - (b[1].hits * b[1].quality));
     const toRemove = sortedEntries.slice(0, urlCache.size - MAX_CACHE_SIZE);
     toRemove.forEach(([key]) => urlCache.delete(key));
   }
 };
 
-export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
+// Calculate data quality score
+const calculateQuality = (productInfo: ProductInfo): number => {
+  let quality = 0;
+  if (productInfo.itemName && productInfo.itemName.length > 5) quality += 40;
+  if (productInfo.price && productInfo.price.match(/[\d.,]+/)) quality += 30;
+  if (productInfo.imageUrl && isValidImageUrl(productInfo.imageUrl)) quality += 20;
+  if (productInfo.storeName) quality += 10;
+  return quality;
+};
+
+const isValidImageUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return /\.(jpg|jpeg|png|webp|gif|svg|avif)($|\?)/i.test(url) || 
+           url.includes('images') || url.includes('cdn') || url.includes('static');
+  } catch {
+    return false;
+  }
+};
+
+export const parseProductUrl = async (url: string, options: RobustParsingOptions = {}): Promise<ProductInfo> => {
   const startTime = performance.now();
+  const { 
+    maxRetries = 3, 
+    timeout = 8000, 
+    enableFallbacks = true, 
+    validateContent = true 
+  } = options;
   
   try {
-    console.log('🚀 Enhanced parsing URL:', url);
+    console.log('🚀 Robust parsing URL:', url);
     
     // Robust URL validation and cleaning
     let cleanUrl = url.trim();
@@ -65,21 +124,35 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       throw new Error('Empty URL provided');
     }
 
-    // Enhanced URL validation
+    // Enhanced URL validation with better error messages
     if (!isValidUrl(cleanUrl)) {
-      throw new Error('Invalid URL format');
+      throw new Error(`Invalid URL format: ${cleanUrl}`);
     }
 
-    // Normalize URL
+    // Normalize URL and remove tracking
     cleanUrl = normalizeUrl(cleanUrl);
+    console.log('🔗 Normalized URL:', cleanUrl);
 
-    // Check cache first
+    // Rate limiting check
+    const initialUrlObj = new URL(cleanUrl);
+    const initialHostname = initialUrlObj.hostname;
+    if (!checkRateLimit(initialHostname)) {
+      console.log('⏱️ Rate limited, using cache or basic extraction');
+      return extractFromUrlStructure(cleanUrl, initialHostname);
+    }
+
+    // Enhanced cache check with quality consideration
     const cacheKey = cleanUrl;
     const cached = urlCache.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
       cached.hits++;
-      console.log('✅ Cache hit! Returning cached result in', performance.now() - startTime, 'ms');
-      return cached.data;
+      // Return cached data immediately if high quality, otherwise continue parsing
+      if (cached.quality >= 70) {
+        console.log('✅ High-quality cache hit! Returning cached result in', performance.now() - startTime, 'ms');
+        return cached.data;
+      } else {
+        console.log('📊 Low-quality cache found, attempting fresh parse...');
+      }
     }
 
     // Clean expired cache periodically
@@ -90,14 +163,14 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     // Fast redirect resolution (parallel with URL parsing)
     const [resolvedUrl, urlBasedInfo] = await Promise.all([
       resolveRedirects(cleanUrl),
-      Promise.resolve(extractFromUrlStructure(cleanUrl, new URL(cleanUrl).hostname.toLowerCase()))
+      Promise.resolve(extractFromUrlStructure(cleanUrl, initialHostname.toLowerCase()))
     ]);
 
     const urlObj = new URL(resolvedUrl);
-    const hostname = urlObj.hostname.toLowerCase();
+    const resolvedHostname = urlObj.hostname.toLowerCase();
     
     // Extract store name from hostname
-    const storeName = extractStoreName(hostname);
+    const storeName = extractStoreName(resolvedHostname);
     
     // Initial product info with URL-based extraction
     const productInfo: ProductInfo = { 
@@ -109,7 +182,7 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     const extractionPromises = [];
     
     // Add API extraction for Shopify stores (parallel)
-    if (hostname.includes('shopify') || resolvedUrl.includes('/products/')) {
+    if (resolvedHostname.includes('shopify') || resolvedUrl.includes('/products/')) {
       extractionPromises.push(
         (async () => {
           try {
@@ -175,10 +248,14 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     // Ultra-enhanced parallel proxy fetching with health-aware routing and intelligent fallbacks
     extractionPromises.push(
       (async () => {
-        // Sort proxies by health score and priority
+        // Enhanced proxy selection with reliability scoring
         const healthyProxies = PROXY_SERVICES
-          .filter(service => service.health > 20)
-          .sort((a, b) => (b.health * 100 / b.priority) - (a.health * 100 / a.priority));
+          .filter(service => service.health > 15 && service.reliability > 30)
+          .sort((a, b) => {
+            const scoreA = (b.health * b.reliability) / (b.priority * 100);
+            const scoreB = (a.health * a.reliability) / (a.priority * 100);
+            return scoreA - scoreB;
+          });
         
         const fetchPromises = healthyProxies.map(async (service, index) => {
           let lastError: Error | null = null;
@@ -238,14 +315,16 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
                 throw new Error('Received error page content');
               }
 
-              console.log(`✅ Proxy ${index + 1} success on attempt ${attempt + 1}`);
-              updateProxyHealth(service.url, true);
+              const responseTime = performance.now() - startTime;
+              console.log(`✅ Proxy ${index + 1} success on attempt ${attempt + 1} (${responseTime.toFixed(0)}ms)`);
+              updateProxyHealth(service.url, true, responseTime);
               return { 
                 htmlContent, 
                 service: service.url, 
                 priority: service.priority, 
                 attempt,
-                responseTime: performance.now() - startTime
+                responseTime,
+                contentLength: htmlContent.length
               };
               
             } catch (error) {
@@ -361,26 +440,49 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       console.log('Extraction failed, using URL-based data only:', error);
     }
 
-    // Cache the result
-    urlCache.set(cacheKey, {
-      data: productInfo,
-      timestamp: Date.now(),
-      hits: 1
-    });
+    // Enhanced caching with quality assessment
+    const quality = calculateQuality(productInfo);
+    const shouldCache = quality >= 30 || (productInfo.storeName && productInfo.itemName);
+    
+    if (shouldCache) {
+      urlCache.set(cacheKey, {
+        data: productInfo,
+        timestamp: Date.now(),
+        hits: 1,
+        quality
+      });
+      console.log(`💾 Cached result with quality score: ${quality}`);
+    } else {
+      console.log(`🚫 Skipped caching due to low quality: ${quality}`);
+    }
 
     return productInfo;
   } catch (error) {
-    console.error('Enhanced parser error:', error);
+    console.error('🚨 Robust parser error:', error);
     
-    // Return partial data on error with store name at minimum
+    // Enhanced fallback with multiple recovery strategies
     try {
       const urlObj = new URL(url);
+      const hostname = urlObj.hostname.toLowerCase();
+      
+      // Try cache with lower quality threshold on error
+      const cached = urlCache.get(url);
+      if (cached && cached.quality >= 20) {
+        console.log('🔄 Using cached fallback data');
+        return cached.data;
+      }
+      
+      // Enhanced URL-based extraction as fallback
+      const fallbackData = extractFromUrlStructure(url, hostname);
+      const storeName = extractStoreName(hostname);
+      
       return { 
-        storeName: extractStoreName(urlObj.hostname.toLowerCase()),
-        itemName: extractFromUrlStructure(url, urlObj.hostname.toLowerCase()).itemName
+        storeName,
+        ...fallbackData
       };
-    } catch {
-      return {};
+    } catch (fallbackError) {
+      console.error('🚨 Fallback extraction failed:', fallbackError);
+      return { storeName: 'Unknown Store' };
     }
   }
 };
@@ -423,14 +525,32 @@ const getRandomUserAgent = (): string => {
 
 const isErrorPage = (htmlContent: string): boolean => {
   const errorIndicators = [
-    'access denied', 'forbidden', 'not found', '404', '403', '500', '502', '503',
+    'access denied', 'forbidden', 'not found', '404', '403', '500', '502', '503', '429',
     'cloudflare', 'rate limit', 'blocked', 'captcha', 'robot', 'challenge',
     'temporarily unavailable', 'maintenance', 'error', 'problem', 'issue',
     'security check', 'verification required', 'please try again',
-    'suspicious activity', 'too many requests', 'quota exceeded'
+    'suspicious activity', 'too many requests', 'quota exceeded',
+    'service unavailable', 'gateway timeout', 'bad gateway', 'internal server error',
+    'request blocked', 'access restricted', 'permission denied', 'unauthorized'
   ];
   const lowerContent = htmlContent.toLowerCase();
-  return errorIndicators.some(indicator => lowerContent.includes(indicator));
+  
+  // Check for error indicators
+  if (errorIndicators.some(indicator => lowerContent.includes(indicator))) {
+    return true;
+  }
+  
+  // Check for minimal content (likely error pages)
+  const textContent = htmlContent.replace(/<[^>]*>/g, '').trim();
+  if (textContent.length < 200 && (
+    textContent.includes('error') || 
+    textContent.includes('not found') ||
+    textContent.includes('access')
+  )) {
+    return true;
+  }
+  
+  return false;
 };
 
 // Enhanced redirect resolution with multiple fallback services and aggressive timeout
