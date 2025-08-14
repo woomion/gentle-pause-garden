@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import PauseHeader from '../components/PauseHeader';
-import WelcomeMessage from '../components/WelcomeMessage';
+import { WelcomeWithValues } from '../components/WelcomeWithValues';
 import ReviewBanner from '../components/ReviewBanner';
 import AddPauseButton, { AddPauseButtonRef } from '../components/AddPauseButton';
 import MainTabs from '../components/MainTabs';
@@ -153,7 +153,7 @@ console.log('Rendering main Index content');
         <div className={`max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
           <PauseHeader />
           <GuestModeIndicator show={!user} />
-          <WelcomeMessage firstName={user?.user_metadata?.first_name} />
+          <WelcomeWithValues />
           
           {/* Wisdom Orb Remnant - Hidden for now */}
           {/* 

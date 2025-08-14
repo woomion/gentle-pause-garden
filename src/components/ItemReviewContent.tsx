@@ -11,6 +11,7 @@ import ItemReviewFeedbackForm from './ItemReviewFeedbackForm';
 import ExtendPauseModal from './ExtendPauseModal';
 import { ItemCommentsThread } from './ItemCommentsThread';
 import { useAuth } from '@/contexts/AuthContext';
+import { ValuesDisplay } from './ValuesDisplay';
 
 import { toast } from '@/hooks/use-toast';
 
@@ -24,6 +25,7 @@ interface ItemReviewContentProps {
   setShowFeedback: (show: boolean) => void;
   showDecisionButtons?: boolean;
   externalSelectedDecision?: 'purchase' | 'let-go' | null;
+  userValues?: string[];
 }
 
 const ItemReviewContent = ({
@@ -35,7 +37,8 @@ const ItemReviewContent = ({
   showFeedback,
   setShowFeedback,
   showDecisionButtons = true,
-  externalSelectedDecision
+  externalSelectedDecision,
+  userValues = []
 }: ItemReviewContentProps) => {
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
   const [notes, setNotes] = useState('');
@@ -113,6 +116,15 @@ const ItemReviewContent = ({
   return (
     <div className="p-6">
       <ItemReviewDetails item={item} onViewItem={handleViewItem} />
+      
+      {userValues.length > 0 && (
+        <div className="mt-6 p-4 bg-muted/30 rounded-lg border">
+          <ValuesDisplay values={userValues} />
+          <p className="text-sm text-muted-foreground mt-2">
+            Does this purchase align with your values?
+          </p>
+        </div>
+      )}
       
       {/* Decision buttons - only show when allowed */}
       {showDecisionButtons && (

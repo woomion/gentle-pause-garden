@@ -10,6 +10,7 @@ import ExtendPauseModal from './ExtendPauseModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { toast } from '@/hooks/use-toast';
+import { useUserValues } from '@/hooks/useUserValues';
 import {
   Carousel,
   CarouselContent,
@@ -44,6 +45,7 @@ const ItemReviewModal = ({
     items.length
   );
   const { user } = useAuth();
+  const { userValues } = useUserValues();
   
   // Lock background scroll when modal is open
   useScrollLock(isOpen);
@@ -158,6 +160,7 @@ const ItemReviewModal = ({
                       showFeedback={false}
                       setShowFeedback={setShowFeedback}
                       showDecisionButtons={false}
+                      userValues={userValues.values_selected}
                     />
                   </CarouselItem>
                 ))}
@@ -195,6 +198,7 @@ const ItemReviewModal = ({
                   setShowFeedback={setShowFeedback}
                   showDecisionButtons={false}
                   externalSelectedDecision={selectedDecision}
+                  userValues={userValues.values_selected}
                 />
               </div>
             )}
@@ -208,6 +212,7 @@ const ItemReviewModal = ({
             isLastItem={isLastItem}
             showFeedback={showFeedback}
             setShowFeedback={setShowFeedback}
+            userValues={userValues.values_selected}
           />
         )}
         
