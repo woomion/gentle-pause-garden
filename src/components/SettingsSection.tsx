@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Bell, Tag, Users, User, Moon, Sun, Palette, ChevronDown, ChevronRight } from 'lucide-react';
+import { Settings, Bell, Tag, Users, User, Moon, Sun, Palette, ChevronDown, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -8,17 +8,20 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useTheme } from '@/components/ThemeProvider';
 import NotificationSettingsModal from './NotificationSettingsModal';
 import TagManagement from './TagManagement';
+import { ValuesSetupModal } from './ValuesSetupModal';
+import { ValuesDisplay } from './ValuesDisplay';
 
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { platformNotificationService } from '@/services/platformNotificationService';
+import { useUserValues } from '@/hooks/useUserValues';
 
 const SettingsSection = () => {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showTagManagement, setShowTagManagement] = useState(false);
-  
+  const [showValuesModal, setShowValuesModal] = useState(false);
   
   // Collapsible state for each section
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -29,6 +32,7 @@ const SettingsSection = () => {
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
   const { user } = useAuth();
+  const { userValues, refetch: refetchValues } = useUserValues();
   const { toast } = useToast();
   const { theme, setTheme, actualTheme } = useTheme();
 
@@ -217,13 +221,64 @@ const SettingsSection = () => {
                   size="sm"
                   className="w-full text-xs h-8"
                 >
-                  Delete Account
+                   Delete Account
                 </Button>
               </div>
             </CardContent>
           </Card>
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Values Section */}
+      {user && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Heart className="h-5 w-5 text-primary" />
+              <CardTitle>Your Values</CardTitle>
+            </div>
+            <CardDescription>
+              The values that guide your purchasing decisions
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {userValues.values_selected.length > 0 ? (
+              <div className="space-y-3">
+                <ValuesDisplay values={userValues.values_selected} />
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowValuesModal(true)}
+                  className="w-full"
+                >
+                  Update Values
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  You haven't selected your values yet. Choose the principles that should guide your purchasing decisions.
+                </p>
+                <Button 
+                  onClick={() => setShowValuesModal(true)}
+                  className="w-full"
+                >
+                  Choose Your Values
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <ValuesSetupModal
+        isOpen={showValuesModal}
+        onClose={() => setShowValuesModal(false)}
+        onComplete={() => {
+          refetchValues();
+          setShowValuesModal(false);
+        }}
+        existingValues={userValues.values_selected}
+      />
 
       {/* Organization */}
       <Collapsible open={organizationOpen} onOpenChange={setOrganizationOpen}>
