@@ -57,20 +57,26 @@ const ItemReviewContent = ({
   );
 
   const handleDecisionDirect = async (decision: 'purchase' | 'let-go') => {
+    console.log('🎯 ItemReviewContent: handleDecisionDirect called with:', decision, 'for item:', item.id);
     try {
       if (decision === 'purchase') {
+        console.log('🎯 ItemReviewContent: Calling handleBought');
         await handleBought(item, onItemDecided, () => {});
       } else {
+        console.log('🎯 ItemReviewContent: Calling handleLetGo');
         await handleLetGo(item, onItemDecided, () => {});
       }
 
+      console.log('🎯 ItemReviewContent: Decision processing complete, isLastItem:', isLastItem);
       if (isLastItem) {
+        console.log('🎯 ItemReviewContent: Closing modal (last item)');
         onClose();
       } else {
+        console.log('🎯 ItemReviewContent: Navigating to next item');
         onNavigateNext();
       }
     } catch (error) {
-      console.error('Error submitting decision:', error);
+      console.error('❌ ItemReviewContent: Error submitting decision:', error);
     }
   };
 

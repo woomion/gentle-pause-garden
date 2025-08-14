@@ -68,16 +68,21 @@ export const useItemReview = () => {
 
   const handleItemDecided = async (id: string) => {
     console.log('🔍 useItemReview: handleItemDecided called for item:', id);
-    console.log('🔍 useItemReview: current items count:', itemsForReview.length);
+    console.log('🔍 useItemReview: current items count before removal:', itemsForReview.length);
+    console.log('🔍 useItemReview: current items:', itemsForReview.map(i => ({ id: i.id, name: 'itemName' in i ? i.itemName : (i as any).title || 'Unknown' })));
     
     // Store the current length before removal (for confetti logic)
     const currentLength = itemsForReview.length;
     
     // Remove from store - the store listeners will handle updating itemsForReview automatically
     if (user) {
+      console.log('🔍 useItemReview: Removing from supabase store:', id);
       await supabasePausedItemsStore.removeItem(id);
+      console.log('🔍 useItemReview: Supabase removal complete');
     } else {
+      console.log('🔍 useItemReview: Removing from local store:', id);
       pausedItemsStore.removeItem(id);
+      console.log('🔍 useItemReview: Local removal complete');
     }
     
     // If this was the last item, trigger confetti
