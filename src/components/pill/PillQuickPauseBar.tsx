@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { usePausedItems } from '@/hooks/usePausedItems';
+import { useUsageLimit } from '@/hooks/useUsageLimit';
 import { parseProductUrl } from '@/utils/urlParser';
 import { extractStoreName } from '@/utils/pausedItemsUtils';
 
@@ -46,6 +47,7 @@ const getFallbackTitleFromUrl = (rawUrl: string): string | undefined => {
 const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: { compact?: boolean; prefillValue?: string; onExpandRequest?: () => void }) => {
   const { addItem } = usePausedItems();
   const { toast } = useToast();
+  const usageLimit = useUsageLimit();
   const [value, setValue] = useState('');
   const [duration, setDuration] = useState<string>('1 week');
   const [submitting, setSubmitting] = useState(false);
@@ -65,6 +67,12 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
   const handleSubmit = async () => {
     const raw = value.trim();
     if (!raw || submitting) return;
+    
+    // Check usage limit before proceeding
+    if (!usageLimit.checkUsageLimit()) {
+      return;
+    }
+    
     setSubmitting(true);
 
     try {
@@ -112,6 +120,9 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
         itemType: 'item',
         usePlaceholder: false,
       });
+
+      // Increment usage count for non-authenticated users
+      usageLimit.incrementUsage();
 
       toast({ title: 'Paused', description: 'Added to your pause list', duration: 2000 });
       setValue('');

@@ -9,16 +9,17 @@ import FooterLinks from '../components/FooterLinks';
 import PauseForm from '../components/PauseForm';
 import SignupModal from '../components/SignupModal';
 import ItemReviewModal from '../components/ItemReviewModal';
+import UsageLimitModal from '../components/UsageLimitModal';
 import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useSearchParams } from 'react-router-dom';
+import { useUsageLimit } from '../hooks/useUsageLimit';
 
 import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useSharedContent } from '../hooks/useSharedContent';
-import GetApp from './GetApp';
 import GuestModeIndicator from '../components/GuestModeIndicator';
 import { usePausedItems } from '../hooks/usePausedItems';
 import PausedItemDetail from '../components/PausedItemDetail';
@@ -34,9 +35,9 @@ const Index = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { sharedContent, clearSharedContent } = useSharedContent();
   const [searchParams] = useSearchParams();
-  const isGuest = searchParams.get('guest') === '1';
   const pillParam = searchParams.get('pill');
   const pillMode = pillParam ? pillParam === '1' : true;
+  const usageLimit = useUsageLimit();
   
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
@@ -137,10 +138,7 @@ const Index = () => {
     );
   }
 
-// Show landing page for signed-out users unless guest preview is enabled
-if (!user && !isGuest) {
-  return <GetApp />;
-}
+// Show main app to everyone - no more landing page redirect
 console.log('Rendering main Index content');
 
   return (
@@ -306,6 +304,14 @@ console.log('Rendering main Index content');
           currentUserId={user?.id}
         />
       )}
+
+      <UsageLimitModal
+        isOpen={usageLimit.showUsageLimitModal}
+        onClose={usageLimit.closeUsageLimitModal}
+        onSignUp={modalStates.handleShowSignup}
+        freeItemsUsed={usageLimit.freeItemsUsed}
+        maxFreeItems={usageLimit.maxFreeItems}
+      />
     </>
   );
 };
