@@ -152,7 +152,7 @@ const ItemReviewModal = ({
           <>
             <Carousel className="w-full" setApi={setApi} opts={{ startIndex: activeIndex }}>
               {/* Carousel Navigation at top */}
-              <div className="flex items-center justify-center gap-4 px-6 py-3 border-b border-border">
+              <div className="flex items-center justify-center gap-4 px-6 py-3">
                 <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
                 <span className="text-xs text-muted-foreground px-2">
                   Swipe or use arrows
@@ -174,20 +174,20 @@ const ItemReviewModal = ({
                       showDecisionButtons={false}
                       userValues={userValues.values_selected}
                     />
+                    
+                    {/* Decision buttons right after values section for current item */}
+                    {index === activeIndex && !showFeedback && (
+                      <div className="px-6 pb-6">
+                        <ItemReviewDecisionButtons 
+                          onDecision={handleDecision} 
+                          onExtendPause={() => setShowExtendModal(true)}
+                        />
+                      </div>
+                    )}
                   </CarouselItem>
                 ))}
               </CarouselContent>
             </Carousel>
-            
-            {/* Static Decision Buttons for Current Item */}
-            {!showFeedback && (
-              <div className="p-6 pt-4">
-                <ItemReviewDecisionButtons 
-                  onDecision={handleDecision} 
-                  onExtendPause={() => setShowExtendModal(true)}
-                />
-              </div>
-            )}
             
             {/* Simple decision processing */}
             {showFeedback && selectedDecision && (
