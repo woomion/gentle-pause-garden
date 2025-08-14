@@ -11,6 +11,7 @@ const DURATION_PRESETS: { key: string; label: string }[] = [
   { key: '24 hours', label: '1 day' },
   { key: '3 days', label: '3 days' },
   { key: '1 week', label: '1 week' },
+  { key: '2 weeks', label: '2 weeks' },
   { key: '1 month', label: '1 month' },
 ];
 
@@ -77,7 +78,9 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
         const url = raw.startsWith('http') ? raw : `https://${raw}`;
         link = url;
         try {
+          console.log('🔍 Parsing URL:', url);
           const parsed = await parseProductUrl(url);
+          console.log('🔍 Parsed result:', parsed);
           if (parsed?.itemName) {
             itemName = parsed.itemName;
           } else {
@@ -142,7 +145,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
       </div>
       {!compact && (
         <>
-          <div className="mt-3 grid grid-cols-4 gap-2">
+          <div className="mt-3 grid grid-cols-5 gap-2">
             {DURATION_PRESETS.map((d) => (
               <button
                 key={d.key}

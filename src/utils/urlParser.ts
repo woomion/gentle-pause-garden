@@ -1052,6 +1052,13 @@ const extractItemName = (doc: Document): string | undefined => {
     '.listing-page-title h1', // Etsy fallback
     '.shop2-listing-page-title', // Etsy legacy
     
+    // Shopbop specific (high priority)
+    '.pdp-product-name h1', // Shopbop main title
+    '.pdp-product-title', // Shopbop alternative
+    '[data-testid="pdp-product-title"]', // Shopbop modern
+    '.product-details__title', // Shopbop variant
+    '.pdp-details-title h1', // Shopbop specific
+    
     // ThriftBooks specific
     '.AllEditionsItem-title', // ThriftBooks
     '.work-title', // ThriftBooks
@@ -1688,10 +1695,12 @@ const extractImageUrl = (doc: Document, origin: string): string | undefined => {
   
   // Strategy 3: Store-specific selectors
   const imageSelectors = [
-    // Shopbop first to ensure high specificity
-    'meta[property="og:image"]',
-    '.pdp-image img',
-    '.pdp-main-image img',
+    // Shopbop specific (high priority for better extraction)
+    '.pdp-main-image img', // Shopbop main product image
+    '.pdp-image img', // Shopbop image container
+    '.product-carousel img', // Shopbop carousel
+    '[data-testid="pdp-main-image"] img', // Shopbop modern
+    '.pdp-gallery img', // Shopbop gallery
 
     // Amazon
     '#landingImage',
