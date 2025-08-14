@@ -133,10 +133,15 @@ export const parseProductUrl = async (url: string, options: RobustParsingOptions
     cleanUrl = normalizeUrl(cleanUrl);
     console.log('🔗 Normalized URL:', cleanUrl);
 
-    // Rate limiting check
+    // Rate limiting check - skip for priority sites like Shopbop
     const initialUrlObj = new URL(cleanUrl);
     const initialHostname = initialUrlObj.hostname;
-    if (!checkRateLimit(initialHostname)) {
+    const isPrioritySite = initialHostname.includes('shopbop') || 
+                          initialHostname.includes('amazon') || 
+                          initialHostname.includes('nordstrom') ||
+                          initialHostname.includes('saks');
+    
+    if (!isPrioritySite && !checkRateLimit(initialHostname)) {
       console.log('⏱️ Rate limited, using cache or basic extraction');
       return extractFromUrlStructure(cleanUrl, initialHostname);
     }
