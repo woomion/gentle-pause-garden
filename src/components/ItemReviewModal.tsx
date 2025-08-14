@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem, pausedItemsStore } from '../stores/pausedItemsStore';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
+import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
+import { pauseLogStore } from '../stores/pauseLogStore';
 import { useItemReviewCarousel } from '../hooks/useItemReviewCarousel';
 import { ItemReviewContent } from './ItemReviewContent';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
@@ -149,6 +151,15 @@ const ItemReviewModal = ({
         {items.length > 1 ? (
           <>
             <Carousel className="w-full" setApi={setApi} opts={{ startIndex: activeIndex }}>
+              {/* Carousel Navigation at top */}
+              <div className="flex items-center justify-center gap-4 px-6 py-3 border-b border-border">
+                <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
+                <span className="text-xs text-muted-foreground px-2">
+                  Swipe or use arrows
+                </span>
+                <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
+              </div>
+              
               <CarouselContent>
                 {items.map((item, index) => (
                   <CarouselItem key={item.id}>
@@ -166,14 +177,6 @@ const ItemReviewModal = ({
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              {/* Carousel Navigation */}
-              <div className="flex items-center justify-center gap-4">
-                <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-                <span className="text-xs text-muted-foreground px-2">
-                  Swipe or use arrows
-                </span>
-                <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
-              </div>
             </Carousel>
             
             {/* Static Decision Buttons for Current Item */}
@@ -186,21 +189,57 @@ const ItemReviewModal = ({
               </div>
             )}
             
-            {/* Feedback Form for Current Item */}
+            {/* Simple decision processing */}
             {showFeedback && selectedDecision && (
               <div className="p-6 pt-4">
-                <ItemReviewContent
-                  item={currentItem}
-                  onItemDecided={onItemDecided}
-                  onNavigateNext={handleNavigateNext}
-                  onClose={onClose}
-                  isLastItem={isLastItem}
-                  showFeedback={true}
-                  setShowFeedback={setShowFeedback}
-                  showDecisionButtons={false}
-                  externalSelectedDecision={selectedDecision}
-                  userValues={userValues.values_selected}
-                />
+                <div className="text-center">
+                  <p className="text-lg font-medium mb-4">
+                    {selectedDecision === 'purchase' ? 'Great choice!' : 'Well done letting it go!'}
+                  </p>
+                  <button
+                    onClick={async () => {
+                      console.log('🎯 ItemReviewModal: Processing decision:', selectedDecision);
+                      try {
+                        // Add to pause log
+                        if (user) {
+                          await supabasePauseLogStore.addItem({
+                            itemName: currentItem.itemName,
+                            emotion: currentItem.emotion,
+                            storeName: currentItem.storeName,
+                            status: selectedDecision === 'purchase' ? 'purchased' : 'let-go',
+                            notes: '',
+                            tags: currentItem.tags
+                          });
+                        } else {
+                          pauseLogStore.addItem({
+                            itemName: currentItem.itemName,
+                            emotion: currentItem.emotion,
+                            storeName: currentItem.storeName,
+                            status: selectedDecision === 'purchase' ? 'purchased' : 'let-go',
+                            notes: '',
+                            tags: currentItem.tags
+                          });
+                        }
+                        
+                        console.log('🎯 ItemReviewModal: Calling onItemDecided to remove item');
+                        onItemDecided(currentItem.id);
+                        
+                        if (isLastItem) {
+                          console.log('🎯 ItemReviewModal: Closing modal (last item)');
+                          onClose();
+                        } else {
+                          console.log('🎯 ItemReviewModal: Navigating to next item');
+                          handleNavigateNext();
+                        }
+                      } catch (error) {
+                        console.error('❌ ItemReviewModal: Error processing decision:', error);
+                      }
+                    }}
+                    className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
+                  >
+                    {isLastItem ? 'Finish' : 'Continue'}
+                  </button>
+                </div>
               </div>
             )}
           </>
