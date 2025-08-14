@@ -70,21 +70,17 @@ export const useItemReview = () => {
     console.log('🔍 useItemReview: handleItemDecided called for item:', id);
     console.log('🔍 useItemReview: current items count:', itemsForReview.length);
     
-    // Store the current length before removal
+    // Store the current length before removal (for confetti logic)
     const currentLength = itemsForReview.length;
     
+    // Remove from store - the store listeners will handle updating itemsForReview automatically
     if (user) {
       await supabasePausedItemsStore.removeItem(id);
     } else {
       pausedItemsStore.removeItem(id);
     }
     
-    // Update the items list
-    const updatedItems = itemsForReview.filter(item => item.id !== id);
-    console.log('🔍 useItemReview: updated items count:', updatedItems.length);
-    setItemsForReview(updatedItems);
-    
-    // If this was the last item (currentLength was 1), trigger confetti
+    // If this was the last item, trigger confetti
     if (currentLength === 1) {
       // Gentle confetti effect with gold stars
       confetti({
