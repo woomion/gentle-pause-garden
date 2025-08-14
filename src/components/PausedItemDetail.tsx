@@ -187,8 +187,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             
             <p className="text-muted-foreground text-base">{item.storeName}</p>
             
-            <EmotionBadge emotion={item.emotion} />
-
             {/* Only show notes if they exist and aren't empty after cleaning */}
             {cleanNotes && cleanNotes.trim() && (
               <div className="pt-2">
