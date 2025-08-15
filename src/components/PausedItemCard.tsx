@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { formatPrice } from '../utils/priceFormatter';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemActions } from '../hooks/useItemActions';
 import ItemImage from './ItemImage';
-import PauseDurationBanner from './PauseDurationBanner';
+import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 
 import { extractActualNotes } from '../utils/notesMetadataUtils';
 import { useItemComments } from '../hooks/useItemComments';
@@ -19,8 +19,9 @@ interface PausedItemCardProps {
 }
 
 const PausedItemCard = ({ item, onClick, currentUserId, onDecideNow }: PausedItemCardProps) => {
-  const { handleViewItem } = useItemActions();
+  const { handleViewItem, handleBought, handleLetGo } = useItemActions();
   const { getCommentCount, getUnreadCount, hasNewComments } = useItemComments(currentUserId);
+  const [showDecisionButtons, setShowDecisionButtons] = useState(false);
 
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
   const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
@@ -32,10 +33,22 @@ const PausedItemCard = ({ item, onClick, currentUserId, onDecideNow }: PausedIte
     }
   };
 
-  const handleDecideNow = (e: React.MouseEvent) => {
+  const handleDecideClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onDecideNow) {
-      onDecideNow(item);
+    setShowDecisionButtons(true);
+  };
+
+  const handleDecision = async (e: React.MouseEvent, decision: 'purchase' | 'let-go') => {
+    e.stopPropagation();
+    try {
+      if (decision === 'purchase') {
+        await handleBought(item, () => {}, () => {});
+      } else {
+        await handleLetGo(item, () => {}, () => {});
+      }
+      setShowDecisionButtons(false);
+    } catch (error) {
+      console.error('Error handling decision:', error);
     }
   };
 
@@ -116,15 +129,41 @@ const PausedItemCard = ({ item, onClick, currentUserId, onDecideNow }: PausedIte
         </div>
       </div>
       
-      {/* Pause Duration Banner - stretches across bottom of card */}
+      {/* Decision area at bottom of card */}
       <div className="absolute bottom-0 left-0 right-0">
-            <PauseDurationBanner 
-              checkInTime={item.checkInTime} 
-              pausedAt={typeof item.pausedAt === 'string' ? item.pausedAt : item.pausedAt.toISOString()}
-              isReadyForReview={isReadyForReview}
-              onDecideNow={handleDecideNow}
-              showDecideButton={isReadyForReview}
-            />
+        {isReadyForReview ? (
+          <div className="p-3 bg-indigo-50 dark:bg-indigo-950/50 border-t border-indigo-200 dark:border-indigo-800">
+            {!showDecisionButtons ? (
+              <button
+                onClick={handleDecideClick}
+                className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+              >
+                {item.link ? 'Decide now' : 'Make a decision'}
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <button
+                  onClick={(e) => handleDecision(e, 'purchase')}
+                  className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  {item.link ? "I'm going to buy this" : "I'm interested in this"}
+                </button>
+                <button
+                  onClick={(e) => handleDecision(e, 'let-go')}
+                  className="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  {item.link ? "I'm ready to let this go" : "I'm done thinking about this"}
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-3 bg-purple-50 dark:bg-purple-950/50 border-t border-purple-200 dark:border-purple-800">
+            <p className="text-sm text-purple-700 dark:text-purple-300 text-center">
+              {item.checkInTime}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
