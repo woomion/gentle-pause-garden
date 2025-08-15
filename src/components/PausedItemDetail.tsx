@@ -217,7 +217,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                     onClick={handleDecisionClick}
                     className="w-full py-3 px-4 bg-decide-now hover:bg-decide-now/90 text-decide-now-foreground font-medium rounded-xl transition-colors"
                   >
-                    Decide now
+                    {(item.link || (item as any).url) ? 'Decide now' : 'Make a decision'}
                   </button>
                 </div>
               ) : showDecisionButtons && !showFeedback ? (
@@ -226,13 +226,13 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                     onClick={() => handleDecision('purchase')}
                     className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
                   >
-                    I'm going to buy this
+                    {(item.link || (item as any).url) ? "I'm going to buy this" : "I'm interested in this"}
                   </button>
                   <button
                     onClick={() => handleDecision('let-go')}
                     className="w-full py-3 px-4 bg-decision-let-go hover:bg-decision-let-go/90 text-decision-let-go-foreground font-medium rounded-xl transition-colors"
                   >
-                    I'm ready to let this go
+                    {(item.link || (item as any).url) ? "I'm ready to let this go" : "I'm done thinking about this"}
                   </button>
                 </div>
               ) : showFeedback && selectedDecision ? (
