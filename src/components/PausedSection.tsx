@@ -7,14 +7,19 @@ import GuestModeIndicator from './GuestModeIndicator';
 import PausedItemsCarousel from './PausedItemsCarousel';
 import PausedSectionEmpty from './PausedSectionEmpty';
 import PausedSectionLoading from './PausedSectionLoading';
+import ItemReviewModal from './ItemReviewModal';
+import { useItemReview } from '../hooks/useItemReview';
 
 const PausedSection = () => {
   const [pausedItems, setPausedItems] = useState<(PausedItem | LocalPausedItem)[]>([]);
   const [selectedItem, setSelectedItem] = useState<PausedItem | LocalPausedItem | null>(null);
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewItem, setReviewItem] = useState<PausedItem | LocalPausedItem | null>(null);
 
   const { user } = useAuth();
+  const itemReview = useItemReview();
 
   const sortItemsByDate = useCallback((items: (PausedItem | LocalPausedItem)[]) => {
     return items
@@ -110,10 +115,11 @@ const PausedSection = () => {
   }, [user]);
 
   const handleDecideNow = useCallback((item: PausedItem | LocalPausedItem) => {
-    setSelectedItem(item);
-    const index = pausedItems.findIndex(i => i.id === item.id);
-    setSelectedItemIndex(index);
-  }, [pausedItems]);
+    console.log('🎯 PausedSection: handleDecideNow called for item:', item.id);
+    // Open the review modal with just this specific item
+    setReviewItem(item);
+    setShowReviewModal(true);
+  }, []);
 
   // Loading state
   if (isLoading) {
@@ -172,6 +178,35 @@ const PausedSection = () => {
           onNavigateNext={handleNavigateNext}
           onNavigatePrevious={handleNavigatePrevious}
           currentUserId={user?.id}
+        />
+      )}
+
+      {/* Review Modal for individual "Decide now" actions */}
+      {showReviewModal && reviewItem && (
+        <ItemReviewModal
+          items={[reviewItem]}
+          currentIndex={0}
+          isOpen={showReviewModal}
+          onClose={() => {
+            setShowReviewModal(false);
+            setReviewItem(null);
+          }}
+          onItemDecided={(id: string) => {
+            console.log('🎯 PausedSection: Item decided:', id);
+            // Remove from the paused items list
+            if (user) {
+              supabasePausedItemsStore.removeItem(id);
+            } else {
+              pausedItemsStore.removeItem(id);
+            }
+            setShowReviewModal(false);
+            setReviewItem(null);
+          }}
+          onNext={() => {
+            // Since it's just one item, close the modal
+            setShowReviewModal(false);
+            setReviewItem(null);
+          }}
         />
       )}
     </div>
