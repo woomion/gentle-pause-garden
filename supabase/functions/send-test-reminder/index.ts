@@ -30,10 +30,12 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log(`Sending test reminder to ${email} for user ${userId || 'current user'}`);
     
-    // If no userId provided, try to get from auth header
+    // For test purposes, let's use demo data if no user found
+    let reviewItems: any[] = [];
     let targetUserId = userId;
+    
     if (!targetUserId) {
-      // Get user from JWT token
+      // Try to get user from JWT token
       const authHeader = req.headers.get('authorization');
       if (authHeader) {
         const token = authHeader.replace('Bearer ', '');
@@ -44,35 +46,28 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    if (!targetUserId) {
-      return new Response(JSON.stringify({ error: 'No user ID provided or found' }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+    if (targetUserId) {
+      // Get items ready for review for this user
+      const { data: items, error: itemsError } = await supabase
+        .from('paused_items')
+        .select('id, title, store_name, review_at')
+        .eq('user_id', targetUserId)
+        .eq('status', 'paused')
+        .lte('review_at', new Date().toISOString());
+
+      if (!itemsError && items) {
+        reviewItems = items;
+      }
     }
 
-    // Get items ready for review for this user
-    const { data: reviewItems, error: itemsError } = await supabase
-      .from('paused_items')
-      .select('id, title, store_name, review_at')
-      .eq('user_id', targetUserId)
-      .eq('status', 'paused')
-      .lte('review_at', new Date().toISOString());
-
-    if (itemsError) {
-      console.log(`Error fetching items for user ${targetUserId}:`, itemsError);
-      return new Response(JSON.stringify({ error: 'Failed to fetch items' }), {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    if (!reviewItems || reviewItems.length === 0) {
-      console.log(`No items ready for review for user ${targetUserId}`);
-      return new Response(JSON.stringify({ message: 'No items ready for review found' }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+    // If no items found from database, use demo data for test
+    if (reviewItems.length === 0) {
+      console.log('No items found in database, using demo data for test');
+      reviewItems = [
+        { title: 'Mindful Focus Hourglass 5', store_name: 'Demo Store' },
+        { title: 'Hikerkind X Keen Targhee', store_name: 'Outdoor Gear Co' },
+        { title: 'Double Date Night Bundle', store_name: 'Experience Shop' }
+      ];
     }
 
     console.log(`Found ${reviewItems.length} items ready for review`);
