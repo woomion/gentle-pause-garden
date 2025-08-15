@@ -8,10 +8,10 @@ import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import ItemReviewDetails from './ItemReviewDetails';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 import ItemReviewFeedbackForm from './ItemReviewFeedbackForm';
-import ExtendPauseModal from './ExtendPauseModal';
+
 import { ItemCommentsThread } from './ItemCommentsThread';
 import { useAuth } from '@/contexts/AuthContext';
-import { ValuesDisplay } from './ValuesDisplay';
+
 
 import { toast } from '@/hooks/use-toast';
 
@@ -42,7 +42,7 @@ const ItemReviewContent = ({
 }: ItemReviewContentProps) => {
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
   const [notes, setNotes] = useState('');
-  const [showExtendModal, setShowExtendModal] = useState(false);
+  
 
   const { user } = useAuth();
   
@@ -86,69 +86,21 @@ const ItemReviewContent = ({
     setNotes('');
   };
 
-  const handleExtendPause = async (duration: string) => {
-    try {
-      if (user) {
-        await supabasePausedItemsStore.extendPause(item.id, duration);
-      } else {
-        // For guest users, use local store
-        pausedItemsStore.extendPause(item.id, duration);
-      }
-      
-      toast({
-        title: "Pause extended",
-        description: "Your item will be ready for review later.",
-      });
-      
-      // Don't call onItemDecided for extended items - they should remain in the store
-      // and appear in "my pauses". The extendPause method updates the review date,
-      // so the item will naturally not appear in the review queue anymore.
-      
-      if (isLastItem) {
-        onClose();
-      } else {
-        onNavigateNext();
-      }
-    } catch (error) {
-      console.error('Error extending pause:', error);
-      toast({
-        title: "Error",
-        description: "Failed to extend pause. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="p-6">
       <ItemReviewDetails item={item} onViewItem={handleViewItem} />
-      
-      {userValues.length > 0 && (
-        <div className="mt-6 p-4 rounded-lg border bg-background">
-          <ValuesDisplay values={userValues} />
-          <p className="text-sm text-muted-foreground mt-2">
-            Does this purchase align with your values?
-          </p>
-        </div>
-      )}
       
       {/* Decision buttons - only show when allowed */}
       {showDecisionButtons && (
         <div className="mt-8">
           <ItemReviewDecisionButtons 
             onDecision={handleDecisionDirect} 
-            onExtendPause={() => setShowExtendModal(true)}
             hasUrl={!!(item.link || (item as any).url)}
           />
         </div>
       )}
 
-      <ExtendPauseModal
-        isOpen={showExtendModal}
-        onClose={() => setShowExtendModal(false)}
-        onExtend={handleExtendPause}
-        itemName={'itemName' in item ? item.itemName : (item as any).title || 'item'}
-      />
     </div>
   );
 };

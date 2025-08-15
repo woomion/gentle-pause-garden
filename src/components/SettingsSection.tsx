@@ -7,19 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTheme } from '@/components/ThemeProvider';
 import NotificationSettingsModal from './NotificationSettingsModal';
-import { ValuesSetupModal } from './ValuesSetupModal';
-import { ValuesDisplay } from './ValuesDisplay';
 
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { platformNotificationService } from '@/services/platformNotificationService';
-import { useUserValues } from '@/hooks/useUserValues';
+
 
 const SettingsSection = () => {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
-  const [showValuesModal, setShowValuesModal] = useState(false);
+  
   
   // Collapsible state for each section
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -29,7 +27,7 @@ const SettingsSection = () => {
   const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
   const { user } = useAuth();
-  const { userValues, refetch: refetchValues } = useUserValues();
+  
   const { toast } = useToast();
   const { theme, setTheme, actualTheme } = useTheme();
 
@@ -226,56 +224,6 @@ const SettingsSection = () => {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Values Section */}
-      {user && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-primary" />
-              <CardTitle>Your Values</CardTitle>
-            </div>
-            <CardDescription>
-              The values that guide your purchasing decisions
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {userValues.values_selected.length > 0 ? (
-              <div className="space-y-3">
-                <ValuesDisplay values={userValues.values_selected} />
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowValuesModal(true)}
-                  className="w-full"
-                >
-                  Update Values
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  You haven't selected your values yet. Choose the principles that should guide your purchasing decisions.
-                </p>
-                <Button 
-                  onClick={() => setShowValuesModal(true)}
-                  className="w-full"
-                >
-                  Choose Your Values
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      <ValuesSetupModal
-        isOpen={showValuesModal}
-        onClose={() => setShowValuesModal(false)}
-        onComplete={() => {
-          refetchValues();
-          setShowValuesModal(false);
-        }}
-        existingValues={userValues.values_selected}
-      />
 
       {/* Modals */}
       <NotificationSettingsModal

@@ -2,7 +2,7 @@
 import { ExternalLink } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
-import { getEmotionColor } from '../utils/emotionColors';
+
 interface PauseLogItemCardProps {
   item: PauseLogItem;
   onDelete: (id: string) => void;

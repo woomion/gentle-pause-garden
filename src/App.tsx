@@ -11,9 +11,7 @@ import PauseLog from "./pages/PauseLog";
 import About from "./pages/About";
 // import Courses from "./pages/Courses";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
-import GreaterJoyFund from "./pages/GreaterJoyFund";
 import NotFound from "./pages/NotFound";
-import DonationSuccess from "./pages/DonationSuccess";
 import Bookmarklet from "./pages/Bookmarklet";
 import GetApp from "./pages/GetApp";
 import OfflineIndicator from "./components/OfflineIndicator";
@@ -172,16 +170,6 @@ const App = () => {
                     </AuthGuard>
                   } />
                   <Route path="/courses" element={<Navigate to="/" replace />} />
-                  <Route path="/greater-joy-fund" element={
-                    <AuthGuard>
-                      <GreaterJoyFund />
-                    </AuthGuard>
-                  } />
-                  <Route path="/donation-success" element={
-                    <AuthGuard>
-                      <DonationSuccess />
-                    </AuthGuard>
-                  } />
                   <Route path="/bookmarklet" element={
                     <AuthGuard>
                       <Bookmarklet />

@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import PausedSection from './PausedSection';
 import PauseLogSection from './PauseLogSection';
 
-import StatsTab from './StatsTab';
+
 import { useSubscription } from '@/hooks/useSubscription';
 import { useItemComments } from '@/hooks/useItemComments';
 import { useAuth } from '@/contexts/AuthContext';

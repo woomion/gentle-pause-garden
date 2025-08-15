@@ -6,7 +6,7 @@ import ReviewBanner from '../components/ReviewBanner';
 import AddPauseButton, { AddPauseButtonRef } from '../components/AddPauseButton';
 import MainTabs from '../components/MainTabs';
 import FooterLinks from '../components/FooterLinks';
-import PauseForm from '../components/PauseForm';
+
 import SignupModal from '../components/SignupModal';
 import ItemReviewModal from '../components/ItemReviewModal';
 import UsageLimitModal from '../components/UsageLimitModal';
@@ -265,14 +265,6 @@ console.log('Rendering main Index content');
         </div>
       </div>
       
-      {modalStates.showForm && (
-        <PauseForm 
-          onClose={handleFormClose} 
-          onShowSignup={handleShowSignupInternal}
-          signupModalDismissed={modalStates.signupModalDismissed}
-          initialData={modalStates.formInitialData}
-        />
-      )}
       
       <SignupModal 
         isOpen={modalStates.showSignupModal} 

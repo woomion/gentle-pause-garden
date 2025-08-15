@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import FeedbackModal from './FeedbackModal';
-import DonationModal from './DonationModal';
+
 import SettingsModal from './SettingsModal';
 
 interface UserProfileModalProps {
@@ -18,7 +18,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const { user, signOut } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [donationOpen, setDonationOpen] = useState(false);
+  
   const [settingsOpen, setSettingsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -48,9 +48,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
     onClose();
   };
 
-  const handleSupportClick = () => {
-    setDonationOpen(true);
-  };
 
   if (!isOpen || !user) return null;
 
@@ -145,21 +142,11 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
               </Button>
             </div>
 
-            {/* Support Section - moved to bottom */}
-            <div className="pt-6 text-center">
-              <button
-                onClick={handleSupportClick}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2 decoration-1"
-              >
-                Support the Pause
-              </button>
-            </div>
           </div>
         </div>
       </div>
       
       <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
-      <DonationModal open={donationOpen} onOpenChange={setDonationOpen} />
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );

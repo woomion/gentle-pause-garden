@@ -2,7 +2,7 @@ import { ExternalLink, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
-import EmotionBadge from './EmotionBadge';
+
 import { formatPrice } from '../utils/priceFormatter';
 import { useMemo } from 'react';
 
@@ -55,9 +55,6 @@ const PauseLogItemDetail = ({ item, isOpen, onClose, onViewLink, onDelete }: Pau
             
             <p className="text-gray-600 dark:text-gray-300 text-base">{item.storeName}</p>
             
-            <div className="pt-1">
-              <EmotionBadge emotion={item.emotion} />
-            </div>
 
             {/* Notes section */}
             {item.notes && item.notes.trim() && (

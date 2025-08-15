@@ -9,7 +9,7 @@ import { formatPrice } from '../utils/priceFormatter';
 import { useItemActions } from '../hooks/useItemActions';
 import ItemImage from './ItemImage';
 import PauseDurationBanner from './PauseDurationBanner';
-import EmotionBadge from './EmotionBadge';
+
 import { extractActualNotes } from '../utils/notesMetadataUtils';
 import { ItemCommentsThread } from './ItemCommentsThread';
 import { useItemComments } from '../hooks/useItemComments';

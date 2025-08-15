@@ -3,14 +3,14 @@ import { ShoppingCart } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
-import { getEmotionColor } from '../utils/emotionColors';
+
 interface ItemReviewDetailsProps {
   item: PausedItem | LocalPausedItem;
   onViewItem: (item: PausedItem | LocalPausedItem) => void;
 }
 
 const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
-  const emotionColor = getEmotionColor(item.emotion);
+  
 
   const imageUrl = (() => {
     // Handle cart placeholder case
@@ -98,18 +98,6 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
           {item.storeName}
         </p>
         
-        <div className="text-black dark:text-[#F9F5EB] text-sm mb-3">
-          <span>Paused while feeling </span>
-          <span 
-            className="inline-block px-2 py-1 rounded text-xs font-medium"
-            style={{ 
-              backgroundColor: emotionColor,
-              color: '#000'
-            }}
-          >
-            {item.emotion}
-          </span>
-        </div>
 
         {item.notes && item.notes.trim() && (
           <div className="pt-2 border-t border-gray-200 dark:border-gray-600">

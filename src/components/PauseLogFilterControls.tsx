@@ -4,36 +4,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { getEmotionColor } from '../utils/emotionColors';
+
 interface PauseLogFilterControlsProps {
-  emotionFilters: string[];
   statusFilters: string[];
   tagFilters: string[];
-  uniqueEmotions: string[];
   uniqueTags: string[];
-  onEmotionFiltersChange: (filters: string[]) => void;
   onStatusFiltersChange: (filters: string[]) => void;
   onTagFiltersChange: (filters: string[]) => void;
 }
 
 const PauseLogFilterControls = ({
-  emotionFilters,
   statusFilters,
   tagFilters,
-  uniqueEmotions,
   uniqueTags,
-  onEmotionFiltersChange,
   onStatusFiltersChange,
   onTagFiltersChange
 }: PauseLogFilterControlsProps) => {
-  
-  const handleEmotionToggle = (emotion: string) => {
-    if (emotionFilters.includes(emotion)) {
-      onEmotionFiltersChange(emotionFilters.filter(e => e !== emotion));
-    } else {
-      onEmotionFiltersChange([...emotionFilters, emotion]);
-    }
-  };
 
   const handleStatusToggle = (status: string) => {
     if (statusFilters.includes(status)) {
@@ -58,40 +44,6 @@ const PauseLogFilterControls = ({
       </div>
 
       <div className="flex flex-wrap gap-4 items-center">
-        {/* Emotions Multi-Select */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-40 justify-between text-black dark:text-[#F9F5EB] border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20">
-              {emotionFilters.length === 0 
-                ? "All emotions" 
-                : `${emotionFilters.length} emotion${emotionFilters.length > 1 ? 's' : ''}`
-              }
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-60 bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 z-50">
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {uniqueEmotions.map(emotion => (
-                <div key={emotion} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`emotion-${emotion}`}
-                    checked={emotionFilters.includes(emotion)}
-                    onCheckedChange={() => handleEmotionToggle(emotion)}
-                  />
-                  <label
-                    htmlFor={`emotion-${emotion}`}
-                    className="flex items-center gap-2 text-sm cursor-pointer flex-1 text-black"
-                  >
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: getEmotionColor(emotion) }}
-                    />
-                    <span className="capitalize">{emotion}</span>
-                  </label>
-                </div>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
 
         {/* Status Multi-Select */}
         <Popover>

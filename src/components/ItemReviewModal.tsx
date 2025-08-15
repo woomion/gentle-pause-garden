@@ -8,11 +8,11 @@ import { pauseLogStore } from '../stores/pauseLogStore';
 import { useItemReviewCarousel } from '../hooks/useItemReviewCarousel';
 import { ItemReviewContent } from './ItemReviewContent';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
-import ExtendPauseModal from './ExtendPauseModal';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { toast } from '@/hooks/use-toast';
-import { useUserValues } from '@/hooks/useUserValues';
+
 import {
   Carousel,
   CarouselContent,
@@ -40,14 +40,14 @@ const ItemReviewModal = ({
 }: ItemReviewModalProps) => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
-  const [showExtendModal, setShowExtendModal] = useState(false);
+  
   const { activeIndex, api, setApi, navigateToNext } = useItemReviewCarousel(
     currentIndex,
     isOpen,
     items.length
   );
   const { user } = useAuth();
-  const { userValues } = useUserValues();
+  
   
   // Lock background scroll when modal is open
   useScrollLock(isOpen);
@@ -88,7 +88,7 @@ const ItemReviewModal = ({
         if (user) {
           await supabasePauseLogStore.addItem({
             itemName: currentItem.itemName,
-            emotion: currentItem.emotion,
+            emotion: 'something else',
             storeName: currentItem.storeName,
             status: decision === 'purchase' ? 'purchased' : 'let-go',
             notes: '',
@@ -97,7 +97,7 @@ const ItemReviewModal = ({
         } else {
           pauseLogStore.addItem({
             itemName: currentItem.itemName,
-            emotion: currentItem.emotion,
+            emotion: 'something else',
             storeName: currentItem.storeName,
             status: decision === 'purchase' ? 'purchased' : 'let-go',
             notes: '',
@@ -136,35 +136,6 @@ const ItemReviewModal = ({
     }
   };
 
-  const handleExtendPause = async (duration: string) => {
-    try {
-      if (user) {
-        await supabasePausedItemsStore.extendPause(currentItem.id, duration);
-      } else {
-        pausedItemsStore.extendPause(currentItem.id, duration);
-      }
-      
-      toast({
-        title: "Pause extended",
-        description: "Your item will be ready for review later.",
-      });
-      
-      setShowExtendModal(false);
-      
-      if (isLastItem) {
-        onClose();
-      } else {
-        handleNavigateNext();
-      }
-    } catch (error) {
-      console.error('Error extending pause:', error);
-      toast({
-        title: "Error",
-        description: "Failed to extend pause. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -207,7 +178,7 @@ const ItemReviewModal = ({
                       showFeedback={false}
                       setShowFeedback={setShowFeedback}
                       showDecisionButtons={false}
-                      userValues={userValues.values_selected}
+                      userValues={[]}
                     />
                     
                     {/* Decision buttons right after values section for current item */}
@@ -215,7 +186,6 @@ const ItemReviewModal = ({
                       <div className="px-6 pb-6">
                         <ItemReviewDecisionButtons 
                           onDecision={handleDecision} 
-                          onExtendPause={() => setShowExtendModal(true)}
                           hasUrl={!!(currentItem.link || (currentItem as any).url)}
                         />
                       </div>
@@ -251,7 +221,7 @@ const ItemReviewModal = ({
                         if (user) {
                           await supabasePauseLogStore.addItem({
                             itemName: currentItem.itemName,
-                            emotion: currentItem.emotion,
+                            emotion: 'something else',
                             storeName: currentItem.storeName,
                             status: selectedDecision === 'purchase' ? 'purchased' : 'let-go',
                             notes: '',
@@ -260,7 +230,7 @@ const ItemReviewModal = ({
                         } else {
                           pauseLogStore.addItem({
                             itemName: currentItem.itemName,
-                            emotion: currentItem.emotion,
+                            emotion: 'something else',
                             storeName: currentItem.storeName,
                             status: selectedDecision === 'purchase' ? 'purchased' : 'let-go',
                             notes: '',
@@ -299,16 +269,9 @@ const ItemReviewModal = ({
             isLastItem={isLastItem}
             showFeedback={showFeedback}
             setShowFeedback={setShowFeedback}
-            userValues={userValues.values_selected}
+            userValues={[]}
           />
         )}
-        
-        <ExtendPauseModal
-          isOpen={showExtendModal}
-          onClose={() => setShowExtendModal(false)}
-          onExtend={handleExtendPause}
-          itemName={'itemName' in currentItem ? currentItem.itemName : (currentItem as any).title || 'item'}
-        />
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ import PauseLogItemCard from '../components/PauseLogItemCard';
 import PauseLogItemDetail from '../components/PauseLogItemDetail';
 import PauseLogEmptyState from '../components/PauseLogEmptyState';
 import FooterLinks from '../components/FooterLinks';
-import { getEmotionColor } from '../utils/emotionColors';
+
 import { createHierarchicalStructure, HierarchicalData, YearGroup, MonthGroup } from '../utils/dateGrouping';
 
 const PauseLog = () => {
@@ -27,7 +27,7 @@ const PauseLog = () => {
   
   const { items, deleteItem, loadItems } = user ? supabasePauseLog : localPauseLog;
   
-  const [emotionFilters, setEmotionFilters] = useState<string[]>([]);
+  
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<PauseLogItem | null>(null);
@@ -48,11 +48,6 @@ const PauseLog = () => {
     }
   }, [user, loadItems]);
 
-  // Get unique emotions and tags from items
-  const uniqueEmotions = useMemo(() => {
-    const emotions = items.map(item => item.emotion).filter(Boolean);
-    return [...new Set(emotions)];
-  }, [items]);
 
   const uniqueTags = useMemo(() => {
     const allTags = items.flatMap(item => item.tags || []);
@@ -62,11 +57,10 @@ const PauseLog = () => {
   // Filter and sort items based on selected filters and sort order
   const filteredItems = useMemo(() => {
     let filtered = items.filter(item => {
-      const emotionMatch = emotionFilters.length === 0 || emotionFilters.includes(item.emotion);
       const statusMatch = statusFilters.length === 0 || statusFilters.includes(item.status);
       const tagMatch = tagFilters.length === 0 || (item.tags && item.tags.some(tag => tagFilters.includes(tag)));
       
-      return emotionMatch && statusMatch && tagMatch;
+      return statusMatch && tagMatch;
     });
 
     // Sort by date decided (letGoDate) - newest first
@@ -77,7 +71,7 @@ const PauseLog = () => {
     });
 
     return filtered;
-  }, [items, emotionFilters, statusFilters, tagFilters]);
+  }, [items, statusFilters, tagFilters]);
 
   // Create hierarchical structure from filtered items
   const hierarchicalData = useMemo(() => {
@@ -87,16 +81,6 @@ const PauseLog = () => {
   // Get active filters for display
   const activeFilters = useMemo(() => {
     const filters = [];
-    
-    // Add emotion filters with colors
-    emotionFilters.forEach(emotion => {
-      filters.push({ 
-        type: 'emotion', 
-        value: emotion, 
-        label: emotion,
-        isEmotion: true
-      });
-    });
     
     // Add status filters
     statusFilters.forEach(status => {
@@ -117,21 +101,15 @@ const PauseLog = () => {
     });
     
     return filters;
-  }, [emotionFilters, statusFilters, tagFilters]);
+  }, [statusFilters, tagFilters]);
 
   const clearAllFilters = () => {
-    setEmotionFilters([]);
     setStatusFilters([]);
     setTagFilters([]);
   };
 
   const removeFilter = (filterType: string, value?: string) => {
     switch (filterType) {
-      case 'emotion':
-        if (value) {
-          setEmotionFilters(prev => prev.filter(e => e !== value));
-        }
-        break;
       case 'status':
         if (value) {
           setStatusFilters(prev => prev.filter(s => s !== value));
@@ -268,12 +246,9 @@ const PauseLog = () => {
         
         <div className="mb-6">
           <PauseLogFilterControls
-            emotionFilters={emotionFilters}
             statusFilters={statusFilters}
             tagFilters={tagFilters}
-            uniqueEmotions={uniqueEmotions}
             uniqueTags={uniqueTags}
-            onEmotionFiltersChange={setEmotionFilters}
             onStatusFiltersChange={setStatusFilters}
             onTagFiltersChange={setTagFilters}
           />
@@ -285,24 +260,14 @@ const PauseLog = () => {
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <span className="text-sm font-medium text-black">Active filters:</span>
               {activeFilters.map((filter) => (
-                <div
+                 <div
                   key={`${filter.type}-${filter.value}`}
-                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border ${
-                    filter.isEmotion 
-                      ? 'text-black' 
-                      : 'bg-lavender/20 text-dark-gray border-lavender/30'
-                  }`}
-                  style={filter.isEmotion ? {
-                    backgroundColor: getEmotionColor(filter.value),
-                    borderColor: getEmotionColor(filter.value)
-                  } : undefined}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border bg-lavender/20 text-dark-gray border-lavender/30"
                 >
                   <span>{filter.label}</span>
-                  <button
+                   <button
                     onClick={() => removeFilter(filter.type, filter.value)}
-                    className={`ml-1 hover:text-red-600 text-xs font-bold ${
-                      filter.isEmotion ? 'text-black' : 'text-dark-gray'
-                    }`}
+                    className="ml-1 hover:text-red-600 text-xs font-bold text-dark-gray"
                     aria-label={`Remove ${filter.label} filter`}
                   >
                     ×

@@ -1,14 +1,13 @@
 
 import { Check, X } from 'lucide-react';
-import ExtendPauseCTA from './ExtendPauseCTA';
+
 
 interface ItemReviewDecisionButtonsProps {
   onDecision: (decision: 'purchase' | 'let-go') => void;
-  onExtendPause?: () => void;
   hasUrl?: boolean;
 }
 
-const ItemReviewDecisionButtons = ({ onDecision, onExtendPause, hasUrl = true }: ItemReviewDecisionButtonsProps) => {
+const ItemReviewDecisionButtons = ({ onDecision, hasUrl = true }: ItemReviewDecisionButtonsProps) => {
   
   const handlePurchaseClick = () => {
     console.log('🔵 Purchase button clicked');
@@ -54,10 +53,6 @@ const ItemReviewDecisionButtons = ({ onDecision, onExtendPause, hasUrl = true }:
             I'm done thinking about this
           </button>
         </>
-      )}
-      
-      {onExtendPause && (
-        <ExtendPauseCTA onExtend={onExtendPause} />
       )}
     </div>
   );
