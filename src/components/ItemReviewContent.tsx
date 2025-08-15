@@ -1,19 +1,12 @@
 
-import { useState, useEffect } from 'react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
-import { PausedItem as LocalPausedItem, pausedItemsStore } from '../stores/pausedItemsStore';
+import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemNavigation } from '../hooks/useItemNavigation';
 import { useItemActions } from '../hooks/useItemActions';
-import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import ItemReviewDetails from './ItemReviewDetails';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
-import ItemReviewFeedbackForm from './ItemReviewFeedbackForm';
 
-import { ItemCommentsThread } from './ItemCommentsThread';
 import { useAuth } from '@/contexts/AuthContext';
-
-
-import { toast } from '@/hooks/use-toast';
 
 interface ItemReviewContentProps {
   item: PausedItem | LocalPausedItem;
@@ -21,8 +14,6 @@ interface ItemReviewContentProps {
   onNavigateNext: () => void;
   onClose: () => void;
   isLastItem: boolean;
-  showFeedback: boolean;
-  setShowFeedback: (show: boolean) => void;
   showDecisionButtons?: boolean;
   externalSelectedDecision?: 'purchase' | 'let-go' | null;
   userValues?: string[];
@@ -34,14 +25,11 @@ const ItemReviewContent = ({
   onNavigateNext,
   onClose,
   isLastItem,
-  showFeedback,
-  setShowFeedback,
   showDecisionButtons = true,
   externalSelectedDecision,
   userValues = []
 }: ItemReviewContentProps) => {
-  const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
-  const [notes, setNotes] = useState('');
+  // Remove feedback-related state since reflection space is removed
   
 
   const { user } = useAuth();
@@ -80,11 +68,7 @@ const ItemReviewContent = ({
     }
   };
 
-  const resetState = () => {
-    setSelectedDecision(null);
-    setShowFeedback(false);
-    setNotes('');
-  };
+  // Remove resetState function since no feedback state to reset
 
 
   return (

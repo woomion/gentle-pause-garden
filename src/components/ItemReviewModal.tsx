@@ -38,8 +38,7 @@ const ItemReviewModal = ({
   onItemDecided,
   onNext
 }: ItemReviewModalProps) => {
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
+  // Remove reflection/feedback state - no longer needed
   
   const { activeIndex, api, setApi, navigateToNext } = useItemReviewCarousel(
     currentIndex,
@@ -55,20 +54,15 @@ const ItemReviewModal = ({
   const currentItem = items[activeIndex];
   const isLastItem = activeIndex >= items.length - 1;
 
-  // Reset feedback state when modal opens or active item changes
+  // Reset state when modal opens or active item changes (simplified)
   useEffect(() => {
-    if (isOpen) {
-      setShowFeedback(false);
-      setSelectedDecision(null);
-    }
+    // No feedback state to reset anymore
   }, [isOpen, activeIndex]);
 
   if (!isOpen || !currentItem) return null;
 
   const handleNavigateNext = () => {
-    // Reset feedback state when navigating
-    setShowFeedback(false);
-    setSelectedDecision(null);
+    // Simplified navigation without feedback state
     const nextIndex = navigateToNext();
     if (nextIndex === null) {
       onClose();
@@ -78,62 +72,48 @@ const ItemReviewModal = ({
   const handleDecision = async (decision: 'purchase' | 'let-go') => {
     console.log('🎯 ItemReviewModal: handleDecision called with:', decision);
     
-    const hasUrl = !!(currentItem.link || (currentItem as any).url);
-    
-    if (!hasUrl) {
-      // For items without URLs, process decision immediately
-      console.log('🎯 ItemReviewModal: Processing decision immediately (no URL)');
-      try {
-        // Add to pause log
-        if (user) {
-          await supabasePauseLogStore.addItem({
-            itemName: currentItem.itemName,
-            emotion: 'something else',
-            storeName: currentItem.storeName,
-            status: decision === 'purchase' ? 'purchased' : 'let-go',
-            notes: '',
-            tags: currentItem.tags
-          });
-        } else {
-          pauseLogStore.addItem({
-            itemName: currentItem.itemName,
-            emotion: 'something else',
-            storeName: currentItem.storeName,
-            status: decision === 'purchase' ? 'purchased' : 'let-go',
-            notes: '',
-            tags: currentItem.tags
-          });
-        }
-        
-        console.log('🎯 ItemReviewModal: Calling onItemDecided to remove item');
-        onItemDecided(currentItem.id);
-        
-        if (isLastItem) {
-          console.log('🎯 ItemReviewModal: Closing modal (last item)');
-          onClose();
-        } else {
-          console.log('🎯 ItemReviewModal: Navigating to next item');
-          handleNavigateNext();
-        }
-      } catch (error) {
-        console.error('❌ ItemReviewModal: Error processing decision:', error);
+    // Process decision immediately for all items (no reflection/feedback step)
+    console.log('🎯 ItemReviewModal: Processing decision immediately');
+    try {
+      // Add to pause log
+      if (user) {
+        await supabasePauseLogStore.addItem({
+          itemName: currentItem.itemName,
+          emotion: 'something else',
+          storeName: currentItem.storeName,
+          status: decision === 'purchase' ? 'purchased' : 'let-go',
+          notes: '',
+          tags: currentItem.tags
+        });
+      } else {
+        pauseLogStore.addItem({
+          itemName: currentItem.itemName,
+          emotion: 'something else',
+          storeName: currentItem.storeName,
+          status: decision === 'purchase' ? 'purchased' : 'let-go',
+          notes: '',
+          tags: currentItem.tags
+        });
       }
-    } else {
-      // For items with URLs, show feedback step first
-      setSelectedDecision(decision);
-      setShowFeedback(true);
+      
+      console.log('🎯 ItemReviewModal: Calling onItemDecided to remove item');
+      onItemDecided(currentItem.id);
+      
+      if (isLastItem) {
+        console.log('🎯 ItemReviewModal: Closing modal (last item)');
+        onClose();
+      } else {
+        console.log('🎯 ItemReviewModal: Navigating to next item');
+        handleNavigateNext();
+      }
+    } catch (error) {
+      console.error('❌ ItemReviewModal: Error processing decision:', error);
     }
   };
 
   const handleClose = () => {
-    if (showFeedback) {
-      // If in feedback mode, go back to decision buttons
-      setShowFeedback(false);
-      setSelectedDecision(null);
-    } else {
-      // If not in feedback mode, close the modal
-      onClose();
-    }
+    // Simplified close handler without feedback mode
+    onClose();
   };
 
 
@@ -175,14 +155,12 @@ const ItemReviewModal = ({
                       onNavigateNext={handleNavigateNext}
                       onClose={onClose}
                       isLastItem={index >= items.length - 1}
-                      showFeedback={false}
-                      setShowFeedback={setShowFeedback}
                       showDecisionButtons={false}
                       userValues={[]}
                     />
                     
                     {/* Decision buttons right after values section for current item */}
-                    {index === activeIndex && !showFeedback && (
+                    {index === activeIndex && (
                       <div className="px-6 pb-6">
                         <ItemReviewDecisionButtons 
                           onDecision={handleDecision} 
@@ -205,60 +183,6 @@ const ItemReviewModal = ({
                 ))}
               </CarouselContent>
             </Carousel>
-            
-            {/* Simple decision processing */}
-            {showFeedback && selectedDecision && (
-              <div className="p-6 pt-4">
-                <div className="text-center">
-                  <p className="text-lg font-medium mb-4">
-                    {selectedDecision === 'purchase' ? 'Great choice!' : 'Well done letting it go!'}
-                  </p>
-                  <button
-                    onClick={async () => {
-                      console.log('🎯 ItemReviewModal: Processing decision:', selectedDecision);
-                      try {
-                        // Add to pause log
-                        if (user) {
-                          await supabasePauseLogStore.addItem({
-                            itemName: currentItem.itemName,
-                            emotion: 'something else',
-                            storeName: currentItem.storeName,
-                            status: selectedDecision === 'purchase' ? 'purchased' : 'let-go',
-                            notes: '',
-                            tags: currentItem.tags
-                          });
-                        } else {
-                          pauseLogStore.addItem({
-                            itemName: currentItem.itemName,
-                            emotion: 'something else',
-                            storeName: currentItem.storeName,
-                            status: selectedDecision === 'purchase' ? 'purchased' : 'let-go',
-                            notes: '',
-                            tags: currentItem.tags
-                          });
-                        }
-                        
-                        console.log('🎯 ItemReviewModal: Calling onItemDecided to remove item');
-                        onItemDecided(currentItem.id);
-                        
-                        if (isLastItem) {
-                          console.log('🎯 ItemReviewModal: Closing modal (last item)');
-                          onClose();
-                        } else {
-                          console.log('🎯 ItemReviewModal: Navigating to next item');
-                          handleNavigateNext();
-                        }
-                      } catch (error) {
-                        console.error('❌ ItemReviewModal: Error processing decision:', error);
-                      }
-                    }}
-                    className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
-                  >
-                    {isLastItem ? 'Finish' : 'Continue'}
-                  </button>
-                </div>
-              </div>
-            )}
           </>
         ) : (
           <ItemReviewContent
@@ -267,8 +191,6 @@ const ItemReviewModal = ({
             onNavigateNext={handleNavigateNext}
             onClose={onClose}
             isLastItem={isLastItem}
-            showFeedback={showFeedback}
-            setShowFeedback={setShowFeedback}
             userValues={[]}
           />
         )}
