@@ -644,7 +644,10 @@ const applyDomainShims = (result: ProductInfo, url: string, html: string): Produ
 export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   console.log('🔥 Enhanced URL parser called with:', url);
   
-  if (!url?.trim()) return {};
+  if (!url?.trim()) {
+    console.log('❌ Empty URL provided');
+    return {};
+  }
   
   const normalizedUrl = normalizeUrl(url);
   
@@ -663,16 +666,16 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     const attempts: ParseAttempt[] = [];
     let canonicalUrl = normalizedUrl;
 
-    // Enhanced approach order with schema-guided extraction
+    // Prioritize proven approaches - put working methods first
     const approaches = [
-      { 
-        name: 'firecrawl-extract', 
-        fn: () => fetchViaFirecrawlExtract(normalizedUrl),
-        isStructured: true 
-      },
       { 
         name: 'firecrawl', 
         fn: () => fetchViaFirecrawl(normalizedUrl),
+        isStructured: false 
+      },
+      { 
+        name: 'direct', 
+        fn: () => fetchDirect(normalizedUrl),
         isStructured: false 
       },
       { 
@@ -681,9 +684,9 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
         isStructured: false 
       },
       { 
-        name: 'direct', 
-        fn: () => fetchDirect(normalizedUrl),
-        isStructured: false 
+        name: 'firecrawl-extract', 
+        fn: () => fetchViaFirecrawlExtract(normalizedUrl),
+        isStructured: true 
       }
     ];
 
@@ -692,9 +695,16 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
         console.log(`🔄 Trying ${approach.name} for:`, normalizedUrl);
         
         const data = await approach.fn();
+        console.log(`📊 ${approach.name} returned:`, { 
+          dataType: typeof data, 
+          isString: typeof data === 'string',
+          hasContent: data ? (typeof data === 'string' ? data.length : 'object') : 'null',
+          preview: typeof data === 'string' ? data.substring(0, 100) + '...' : data
+        });
         
         if (approach.isStructured && data) {
           // Handle structured response from Firecrawl extract
+          console.log(`🎯 Processing structured data from ${approach.name}:`, data);
           const structuredData = data as ProductInfo;
           Object.assign(result, structuredData);
           
@@ -704,6 +714,7 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
             data: structuredData
           });
           
+          console.log(`🎯 Structured result after assignment:`, result);
           if (structuredData.itemName || structuredData.price || structuredData.imageUrl) {
             console.log('✅ Successfully parsed with structured', approach.name, ':', result);
             cache.set(normalizedUrl, { 
@@ -713,9 +724,12 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
               canonical: canonicalUrl
             });
             return result;
+          } else {
+            console.log(`⚠️ ${approach.name} returned data but no useful product info`);
           }
         } else if (!approach.isStructured && data && typeof data === 'string' && data.length > 500) {
           // Handle HTML response
+          console.log(`🎯 Processing HTML data from ${approach.name}, length:`, data.length);
           const html = data as string;
           
           // Extract canonical URL on first successful fetch
@@ -733,18 +747,24 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
           }
           
           // Extract structured data first
+          console.log(`🎯 Extracting structured data from HTML...`);
           const structured = extractStructuredData(html);
+          console.log(`🎯 Structured data found:`, structured);
           const structuredResult = extractFromStructuredData(structured, canonicalUrl);
+          console.log(`🎯 Structured result:`, structuredResult);
           Object.assign(result, structuredResult);
           
           // Fallback to DOM parsing if structured data insufficient
           if (!result.itemName || !result.price || !result.imageUrl) {
+            console.log(`🎯 Falling back to DOM parsing. Current result:`, result);
             const domResult = extractFromDOM(html, canonicalUrl);
+            console.log(`🎯 DOM parsing result:`, domResult);
             Object.assign(result, domResult);
           }
           
           // Apply domain-specific fixes
           applyDomainShims(result, canonicalUrl, html);
+          console.log(`🎯 Result after domain shims:`, result);
           
           // Infer currency if missing
           if (result.price && !result.priceCurrency) {
@@ -753,6 +773,13 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
           }
           
           const hasUsefulData = result.itemName || result.price || result.imageUrl;
+          console.log(`🎯 Final useful data check:`, { 
+            hasUsefulData, 
+            itemName: !!result.itemName, 
+            price: !!result.price, 
+            imageUrl: !!result.imageUrl,
+            fullResult: result
+          });
           
           attempts.push({
             method: approach.name,
@@ -771,6 +798,11 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
             return result;
           }
         } else {
+          console.log(`⚠️ ${approach.name} returned insufficient data:`, { 
+            isStructured: approach.isStructured,
+            dataType: typeof data,
+            dataLength: typeof data === 'string' ? data.length : 'N/A'
+          });
           attempts.push({
             method: approach.name,
             success: false,
@@ -779,7 +811,7 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        console.log(`⚠️ ${approach.name} failed:`, errorMsg);
+        console.log(`⚠️ ${approach.name} failed with error:`, errorMsg);
         
         attempts.push({
           method: approach.name,
