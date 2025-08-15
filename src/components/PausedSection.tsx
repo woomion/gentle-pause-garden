@@ -109,6 +109,12 @@ const PausedSection = () => {
     setSelectedItem(null);
   }, [user]);
 
+  const handleDecideNow = useCallback((item: PausedItem | LocalPausedItem) => {
+    setSelectedItem(item);
+    const index = pausedItems.findIndex(i => i.id === item.id);
+    setSelectedItemIndex(index);
+  }, [pausedItems]);
+
   // Loading state
   if (isLoading) {
     return <PausedSectionLoading />;
@@ -152,6 +158,7 @@ const PausedSection = () => {
       <PausedItemsCarousel 
         items={pausedItems}
         onItemClick={handleItemClick}
+        onDecideNow={handleDecideNow}
       />
 
       {selectedItem && (

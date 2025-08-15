@@ -6,9 +6,11 @@ interface PauseDurationBannerProps {
   checkInTime: string;
   pausedAt?: string;
   isReadyForReview?: boolean;
+  onDecideNow?: (e?: React.MouseEvent) => void;
+  showDecideButton?: boolean;
 }
 
-const PauseDurationBanner = ({ checkInTime, pausedAt, isReadyForReview }: PauseDurationBannerProps) => {
+const PauseDurationBanner = ({ checkInTime, pausedAt, isReadyForReview, onDecideNow, showDecideButton = false }: PauseDurationBannerProps) => {
   // Calculate elapsed time since pausing
   const getElapsedTime = () => {
     if (!pausedAt) return null;
@@ -52,17 +54,26 @@ const PauseDurationBanner = ({ checkInTime, pausedAt, isReadyForReview }: PauseD
 
   return (
     <div 
-      className="py-2 px-4 rounded-b-lg text-center text-xs font-medium flex items-center justify-center gap-2"
+      className={`py-2 px-4 rounded-b-lg text-center text-xs font-medium flex items-center justify-center gap-2 ${
+        isReadyForReview && showDecideButton ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+      }`}
       style={{ 
-        backgroundColor: '#eeeaf8',
-        color: '#000'
+        backgroundColor: isReadyForReview && showDecideButton ? '#6366f1' : '#eeeaf8',
+        color: isReadyForReview && showDecideButton ? '#fff' : '#000'
       }}
+      onClick={isReadyForReview && showDecideButton && onDecideNow ? onDecideNow : undefined}
     >
-      <Timer size={14} />
-      {isReadyForReview && elapsedTime ? (
-        `Paused ${elapsedTime}`
+      {isReadyForReview && showDecideButton ? (
+        <span className="font-medium">Decide now</span>
       ) : (
-        `${checkInTime} (${extractAndFormatDate(checkInTime)})`
+        <>
+          <Timer size={14} />
+          {isReadyForReview && elapsedTime ? (
+            `Paused ${elapsedTime}`
+          ) : (
+            `${checkInTime} (${extractAndFormatDate(checkInTime)})`
+          )}
+        </>
       )}
     </div>
   );

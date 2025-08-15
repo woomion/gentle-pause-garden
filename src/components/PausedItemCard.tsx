@@ -15,9 +15,10 @@ interface PausedItemCardProps {
   item: PausedItem | LocalPausedItem;
   onClick: (item: PausedItem | LocalPausedItem) => void;
   currentUserId?: string;
+  onDecideNow?: (item: PausedItem | LocalPausedItem) => void;
 }
 
-const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) => {
+const PausedItemCard = ({ item, onClick, currentUserId, onDecideNow }: PausedItemCardProps) => {
   const { handleViewItem } = useItemActions();
   const { getCommentCount, getUnreadCount, hasNewComments } = useItemComments(currentUserId);
 
@@ -28,6 +29,13 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
     e.stopPropagation();
     if (item.link) {
       handleViewItem(item);
+    }
+  };
+
+  const handleDecideNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDecideNow) {
+      onDecideNow(item);
     }
   };
 
@@ -114,6 +122,8 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
               checkInTime={item.checkInTime} 
               pausedAt={typeof item.pausedAt === 'string' ? item.pausedAt : item.pausedAt.toISOString()}
               isReadyForReview={isReadyForReview}
+              onDecideNow={handleDecideNow}
+              showDecideButton={isReadyForReview}
             />
       </div>
     </div>
