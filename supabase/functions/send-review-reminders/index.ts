@@ -72,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         const emailHtml = `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #333; font-size: 24px; margin-bottom: 24px;">Time to Review Your Paused Items 🛍️</h1>
+            <h1 style="color: #333; font-size: 24px; margin-bottom: 24px;">Time to Review Your Paused Items</h1>
             
             <p style="color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
               You have <strong>${reviewItems.length} item${reviewItems.length > 1 ? 's' : ''}</strong> ready for review:
