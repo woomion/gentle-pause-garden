@@ -383,6 +383,7 @@ export const parseProductUrl = async (url: string, options: RobustParsingOptions
       });
       
       console.log('📡 Firecrawl proxy response:', { hasData: !!data, hasError: !!error, error });
+      console.log('🔍 FULL FIRECRAWL RESPONSE:', JSON.stringify(data, null, 2));
       
       if (error) {
         console.log('❌ Firecrawl error:', error);
@@ -390,7 +391,9 @@ export const parseProductUrl = async (url: string, options: RobustParsingOptions
       }
       
       if (data && data.success !== false) {
-        console.log('✅ Firecrawl response received:', data);
+        console.log('✅ Firecrawl response received, checking content...');
+        console.log('🔍 Data.html exists:', !!data.html);
+        console.log('🔍 Data.markdown exists:', !!data.markdown);
         
         // Extract content from various possible response formats
         let html = data.html || data.content || (data.data && data.data[0] && data.data[0].html) || (data.data && data.data[0] && data.data[0].content);
