@@ -67,11 +67,39 @@ export const useItemNavigation = () => {
       }
 
       if (installed) {
-        console.log('📦 Installed PWA detected, opening in external browser/window');
+        console.log('📦 Installed PWA detected, forcing external browser');
         toast({ title: 'Opening in your browser...' });
-        const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-        if (!newWindow) {
+        
+        // Force external browser for PWAs - more aggressive approach
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        
+        if (isMobile) {
+          // On mobile PWAs, force system browser by direct navigation
+          console.log('📱 Mobile PWA - forcing system browser via location.href');
           window.location.href = url;
+          return;
+        }
+        
+        // Desktop PWA - try multiple methods to ensure external opening
+        console.log('💻 Desktop PWA - trying external opening methods');
+        try {
+          // Try creating a temporary link element and clicking it
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          console.log('💻 Used temporary link method');
+        } catch (linkError) {
+          console.log('💻 Link method failed, trying window.open');
+          const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+          if (!newWindow) {
+            console.log('💻 Window.open failed, using location.href');
+            window.location.href = url;
+          }
         }
         return;
       }
