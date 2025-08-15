@@ -74,6 +74,8 @@ export const useUserSettings = () => {
         .insert({
           user_id: user.id,
           notifications_enabled: false,
+          notification_schedule_type: 'custom_time',
+          notification_time_preference: '19:00:00', // 7pm default
           theme: 'light'
         });
 
@@ -81,6 +83,14 @@ export const useUserSettings = () => {
         console.error('Error creating default settings:', error);
       } else {
         setNotificationsEnabled(false);
+        setScheduleSettings({
+          notification_schedule_type: 'custom_time',
+          notification_time_preference: '19:00',
+          notification_batch_window: 30,
+          quiet_hours_start: '22:00',
+          quiet_hours_end: '08:00',
+          notification_profile: 'default'
+        });
       }
     } catch (error) {
       console.error('Error in createDefaultSettings:', error);
