@@ -172,7 +172,14 @@ const ItemReviewModal = ({
                         <ItemReviewDecisionButtons 
                           onDecision={handleDecision} 
                           onExtendPause={() => setShowExtendModal(true)}
-                          hasUrl={!!(currentItem.link || (currentItem as any).url)}
+                          hasUrl={(() => {
+                            console.log('🔍 ItemReviewModal - Current item:', currentItem);
+                            console.log('🔍 ItemReviewModal - link:', currentItem.link);
+                            console.log('🔍 ItemReviewModal - url:', (currentItem as any).url);
+                            const hasUrl = !!(currentItem.link || (currentItem as any).url);
+                            console.log('🔍 ItemReviewModal - hasUrl result:', hasUrl);
+                            return hasUrl;
+                          })()}
                         />
                       </div>
                     )}
