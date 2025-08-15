@@ -30,9 +30,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
   const { markAsRead } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
-  const [selectedDecision, setSelectedDecision] = useState<'purchase' | 'let-go' | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [notes, setNotes] = useState('');
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchEndRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -131,15 +128,8 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   };
 
   const handleDecision = async (decision: 'purchase' | 'let-go') => {
-    setSelectedDecision(decision);
-    setShowFeedback(true);
-  };
-
-  const handleSubmitDecision = async () => {
-    if (!selectedDecision) return;
-
     try {
-      if (selectedDecision === 'purchase') {
+      if (decision === 'purchase') {
         await handleBought(item, onDelete, onClose);
       } else {
         await handleLetGo(item, onDelete, onClose);
@@ -149,11 +139,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     }
   };
 
-  const handleBackToDecision = () => {
-    setShowFeedback(false);
-    setSelectedDecision(null);
-    setNotes('');
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -211,7 +196,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           {/* Decision buttons - show to all users */}
           {(
             <>
-              {!showDecisionButtons && !showFeedback ? (
+              {!showDecisionButtons ? (
                 <div className="pt-2">
                   <button 
                     onClick={handleDecisionClick}
@@ -220,7 +205,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                     {(item.link || (item as any).url) ? 'Decide now' : 'Make a decision'}
                   </button>
                 </div>
-              ) : showDecisionButtons && !showFeedback ? (
+              ) : showDecisionButtons ? (
                 <div className="space-y-3 pt-2">
                   <button
                     onClick={() => handleDecision('purchase')}
@@ -233,48 +218,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                     className="w-full py-3 px-4 bg-decision-let-go hover:bg-decision-let-go/90 text-decision-let-go-foreground font-medium rounded-xl transition-colors"
                   >
                     {(item.link || (item as any).url) ? "I'm ready to let this go" : "I'm done thinking about this"}
-                  </button>
-                </div>
-              ) : showFeedback && selectedDecision ? (
-                <div className="pt-2">
-                  {/* Back arrow */}
-                  <button
-                    onClick={handleBackToDecision}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
-                  >
-                    <ArrowLeft size={16} />
-                    <span className="text-sm">Back to options</span>
-                  </button>
-                  
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    {(() => {
-                      const supportivePhrases = [
-                        "You've made a conscious choice.",
-                        "You've paused with presence.",
-                        "Decision made. Onward.",
-                        "Clarity is powerful."
-                      ];
-                      return supportivePhrases[Math.floor(Math.random() * supportivePhrases.length)];
-                    })()}
-                  </h3>
-                  <p className="text-foreground text-sm mb-4">
-                    {selectedDecision === 'purchase' 
-                      ? 'Any thoughts about this purchase?'
-                      : 'What helped you decide to let this go?'
-                    }
-                  </p>
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Optional reflection..."
-                    className="w-full p-3 border border-lavender/30 dark:border-gray-600 rounded-xl bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary"
-                    rows={2}
-                  />
-                  <button
-                    onClick={handleSubmitDecision}
-                    className="w-full mt-4 py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
-                  >
-                    Finish
                   </button>
                 </div>
               ) : null}
