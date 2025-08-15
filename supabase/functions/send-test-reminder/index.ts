@@ -104,7 +104,7 @@ const handler = async (req: Request): Promise<Response> => {
         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
         
         <p style="color: #999; font-size: 12px; text-align: center;">
-          This is a test email from your Pause app. 
+          This is a test email from your Pocket Pause app. 
           <a href="https://cnjznmbgxprsrovmdywe.lovable.dev" style="color: #8B5CF6;">Visit your app</a>
         </p>
       </div>
@@ -112,7 +112,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email using Resend
     const emailResponse = await resend.emails.send({
-      from: "Pause App Test <reminders@resend.dev>",
+      from: "Pocket Pause Test <reminders@resend.dev>",
       to: [email],
       subject: `🧪 Test: ${reviewItems.length} item${reviewItems.length > 1 ? 's' : ''} ready for review`,
       html: emailHtml,

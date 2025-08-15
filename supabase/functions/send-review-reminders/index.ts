@@ -105,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Send email using Resend
         const emailResponse = await resend.emails.send({
-          from: "Pause App <reminders@resend.dev>",
+          from: "Pocket Pause <reminders@resend.dev>",
           to: [authUser.user.email],
           subject: `${reviewItems.length} item${reviewItems.length > 1 ? 's' : ''} ready for review`,
           html: emailHtml,
