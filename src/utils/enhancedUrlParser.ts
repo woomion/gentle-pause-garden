@@ -152,9 +152,12 @@ const domainParsers: DomainParser[] = [
     storeName: 'Shopbop',
     parseTitle: (doc) => {
       const selectors = [
-        'h1.product-title',
+        '.js-product-name',
+        '.product-title',
+        '.product-name',
+        'h1[data-test="product-title"]',
         '.product-details h1',
-        'h1[data-test="product-title"]'
+        'h1.product-title'
       ];
       for (const selector of selectors) {
         const element = doc.querySelector(selector);
@@ -166,25 +169,147 @@ const domainParsers: DomainParser[] = [
     },
     parsePrice: (doc) => {
       const priceSelectors = [
+        '.js-product-price',
+        '.price-current',
+        '.current-price',
         '.price-current-value',
         '[data-test="current-price"]',
-        '.price-sales'
+        '.price-sales',
+        '.price'
       ];
       
       for (const selector of priceSelectors) {
         const element = doc.querySelector(selector);
         if (element?.textContent) {
-          const match = element.textContent.match(/\$(\d+\.?\d*)/);
+          const match = element.textContent.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
           if (match) {
-            return { price: match[1], currency: 'USD' };
+            return { price: match[1].replace(/,/g, ''), currency: 'USD' };
           }
         }
       }
       return null;
     },
     parseImage: (doc) => {
-      const img = doc.querySelector('.product-image img') as HTMLImageElement;
-      return img?.src || null;
+      const imgSelectors = [
+        '.js-product-image img',
+        '.product-image img',
+        '.hero-image img',
+        '.main-image img'
+      ];
+      for (const selector of imgSelectors) {
+        const img = doc.querySelector(selector) as HTMLImageElement;
+        if (img?.src && !img.src.includes('placeholder')) {
+          return img.src;
+        }
+      }
+      return null;
+    }
+  },
+  {
+    domain: 'asics.com',
+    storeName: 'ASICS',
+    parseTitle: (doc) => {
+      const selectors = [
+        'h1[data-testid="product-name"]',
+        '.pdp-product-name',
+        '.product-title',
+        'h1.product-name',
+        'h1'
+      ];
+      for (const selector of selectors) {
+        const element = doc.querySelector(selector);
+        if (element?.textContent?.trim()) {
+          return element.textContent.trim();
+        }
+      }
+      return null;
+    },
+    parsePrice: (doc) => {
+      const priceSelectors = [
+        '[data-testid="current-price"]',
+        '.price-current',
+        '.current-price',
+        '.price',
+        '.product-price'
+      ];
+      
+      for (const selector of priceSelectors) {
+        const element = doc.querySelector(selector);
+        if (element?.textContent) {
+          const match = element.textContent.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
+          if (match) {
+            return { price: match[1].replace(/,/g, ''), currency: 'USD' };
+          }
+        }
+      }
+      return null;
+    },
+    parseImage: (doc) => {
+      const imgSelectors = [
+        '.pdp-hero-image img',
+        '.product-hero img',
+        '.product-image img',
+        'img[data-testid="hero-image"]'
+      ];
+      for (const selector of imgSelectors) {
+        const img = doc.querySelector(selector) as HTMLImageElement;
+        if (img?.src && !img.src.includes('placeholder')) {
+          return img.src;
+        }
+      }
+      return null;
+    }
+  },
+  {
+    domain: 'nike.com',
+    storeName: 'Nike',
+    parseTitle: (doc) => {
+      const selectors = [
+        'h1[data-test="product-title"]',
+        '.pdp-product-name',
+        '.product-title',
+        'h1'
+      ];
+      for (const selector of selectors) {
+        const element = doc.querySelector(selector);
+        if (element?.textContent?.trim()) {
+          return element.textContent.trim();
+        }
+      }
+      return null;
+    },
+    parsePrice: (doc) => {
+      const priceSelectors = [
+        '[data-test="product-price"]',
+        '.current-price',
+        '.price-current',
+        '.product-price'
+      ];
+      
+      for (const selector of priceSelectors) {
+        const element = doc.querySelector(selector);
+        if (element?.textContent) {
+          const match = element.textContent.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
+          if (match) {
+            return { price: match[1].replace(/,/g, ''), currency: 'USD' };
+          }
+        }
+      }
+      return null;
+    },
+    parseImage: (doc) => {
+      const imgSelectors = [
+        '.hero-image img',
+        '.product-hero img',
+        '.gallery-image img'
+      ];
+      for (const selector of imgSelectors) {
+        const img = doc.querySelector(selector) as HTMLImageElement;
+        if (img?.src && !img.src.includes('placeholder')) {
+          return img.src;
+        }
+      }
+      return null;
     }
   }
 ];
@@ -345,7 +470,8 @@ const getStoreName = (hostname: string): string => {
     'zara.com': 'Zara',
     'hm.com': 'H&M',
     'nike.com': 'Nike',
-    'adidas.com': 'Adidas'
+    'adidas.com': 'Adidas',
+    'asics.com': 'ASICS'
   };
   
   if (storeMap[cleanHostname]) {
