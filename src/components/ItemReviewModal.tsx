@@ -75,10 +75,54 @@ const ItemReviewModal = ({
     }
   };
 
-  const handleDecision = (decision: 'purchase' | 'let-go') => {
+  const handleDecision = async (decision: 'purchase' | 'let-go') => {
     console.log('🎯 ItemReviewModal: handleDecision called with:', decision);
-    setSelectedDecision(decision);
-    setShowFeedback(true);
+    
+    const hasUrl = !!(currentItem.link || (currentItem as any).url);
+    
+    if (!hasUrl) {
+      // For items without URLs, process decision immediately
+      console.log('🎯 ItemReviewModal: Processing decision immediately (no URL)');
+      try {
+        // Add to pause log
+        if (user) {
+          await supabasePauseLogStore.addItem({
+            itemName: currentItem.itemName,
+            emotion: currentItem.emotion,
+            storeName: currentItem.storeName,
+            status: decision === 'purchase' ? 'purchased' : 'let-go',
+            notes: '',
+            tags: currentItem.tags
+          });
+        } else {
+          pauseLogStore.addItem({
+            itemName: currentItem.itemName,
+            emotion: currentItem.emotion,
+            storeName: currentItem.storeName,
+            status: decision === 'purchase' ? 'purchased' : 'let-go',
+            notes: '',
+            tags: currentItem.tags
+          });
+        }
+        
+        console.log('🎯 ItemReviewModal: Calling onItemDecided to remove item');
+        onItemDecided(currentItem.id);
+        
+        if (isLastItem) {
+          console.log('🎯 ItemReviewModal: Closing modal (last item)');
+          onClose();
+        } else {
+          console.log('🎯 ItemReviewModal: Navigating to next item');
+          handleNavigateNext();
+        }
+      } catch (error) {
+        console.error('❌ ItemReviewModal: Error processing decision:', error);
+      }
+    } else {
+      // For items with URLs, show feedback step first
+      setSelectedDecision(decision);
+      setShowFeedback(true);
+    }
   };
 
   const handleClose = () => {
@@ -172,14 +216,7 @@ const ItemReviewModal = ({
                         <ItemReviewDecisionButtons 
                           onDecision={handleDecision} 
                           onExtendPause={() => setShowExtendModal(true)}
-                          hasUrl={(() => {
-                            console.log('🔍 ItemReviewModal - Current item:', currentItem);
-                            console.log('🔍 ItemReviewModal - link:', currentItem.link);
-                            console.log('🔍 ItemReviewModal - url:', (currentItem as any).url);
-                            const hasUrl = !!(currentItem.link || (currentItem as any).url);
-                            console.log('🔍 ItemReviewModal - hasUrl result:', hasUrl);
-                            return hasUrl;
-                          })()}
+                          hasUrl={!!(currentItem.link || (currentItem as any).url)}
                         />
                       </div>
                     )}

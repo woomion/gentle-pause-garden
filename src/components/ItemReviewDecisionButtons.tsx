@@ -10,8 +10,6 @@ interface ItemReviewDecisionButtonsProps {
 
 const ItemReviewDecisionButtons = ({ onDecision, onExtendPause, hasUrl = true }: ItemReviewDecisionButtonsProps) => {
   
-  console.log('🔍 ItemReviewDecisionButtons - hasUrl prop:', hasUrl);
-  
   const handlePurchaseClick = () => {
     console.log('🔵 Purchase button clicked');
     onDecision('purchase');
