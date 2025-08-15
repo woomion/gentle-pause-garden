@@ -15,10 +15,9 @@ interface PausedItemCardProps {
   item: PausedItem | LocalPausedItem;
   onClick: (item: PausedItem | LocalPausedItem) => void;
   currentUserId?: string;
-  onDecideNow?: (item: PausedItem | LocalPausedItem) => void;
 }
 
-const PausedItemCard = ({ item, onClick, currentUserId, onDecideNow }: PausedItemCardProps) => {
+const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) => {
   const { handleViewItem, handleBought, handleLetGo } = useItemActions();
   const { getCommentCount, getUnreadCount, hasNewComments } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);

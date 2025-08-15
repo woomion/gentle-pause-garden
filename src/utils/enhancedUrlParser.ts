@@ -358,11 +358,11 @@ const getStoreName = (hostname: string): string => {
   return domain.charAt(0).toUpperCase() + domain.slice(1);
 };
 
-const fetchWithRetry = async (url: string, maxRetries = 2): Promise<string> => {
+const fetchWithRetry = async (url: string, maxRetries = 1): Promise<string> => {
   for (let i = 0; i <= maxRetries; i++) {
     try {
       const response = await fetch(url, {
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(5000),
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -394,8 +394,6 @@ const fetchWithRetry = async (url: string, maxRetries = 2): Promise<string> => {
 };
 
 export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
-  console.log('🚀 Enhanced URL parser called with:', url);
-  
   if (!url?.trim()) {
     return {};
   }
@@ -405,7 +403,6 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   // Check cache
   const cached = cache.get(normalizedUrl);
   if (cached && Date.now() - cached.timestamp < cached.ttl) {
-    console.log('✅ Cache hit');
     return cached.data;
   }
   
@@ -419,15 +416,11 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       hostname.includes(parser.domain)
     );
     
-    console.log('🎯 Domain parser found:', !!domainParser, 'for', hostname);
-    
     // Try to fetch the page
     let html: string;
     try {
       html = await fetchWithRetry(normalizedUrl);
-      console.log('✅ Successfully fetched HTML, length:', html.length);
     } catch (error) {
-      console.log('❌ Failed to fetch HTML:', error);
       // Return basic info from URL
       return {
         storeName,
@@ -453,12 +446,9 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       
       const image = domainParser.parseImage(doc);
       if (image) result.imageUrl = image;
-      
-      console.log('🎯 Domain-specific parsing result:', result);
     } else {
       // Use generic parser
       result = { storeName, ...parseGeneric(doc, normalizedUrl) };
-      console.log('🎯 Generic parsing result:', result);
     }
     
     // Cache with appropriate TTL
@@ -468,13 +458,9 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       timestamp: Date.now(),
       ttl
     });
-    
-    console.log('✅ Final result:', result);
     return result;
     
   } catch (error) {
-    console.error('❌ Parse failed:', error);
-    
     // Fallback: extract what we can from URL
     const urlObj = new URL(normalizedUrl);
     const storeName = getStoreName(urlObj.hostname);

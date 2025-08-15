@@ -8,10 +8,9 @@ interface PausedItemsCarouselProps {
   items: (PausedItem | LocalPausedItem)[];
   onItemClick: (item: PausedItem | LocalPausedItem) => void;
   currentUserId?: string;
-  onDecideNow?: (item: PausedItem | LocalPausedItem) => void;
 }
 
-const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId, onDecideNow }: PausedItemsCarouselProps) => {
+const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId }: PausedItemsCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
 
   useEffect(() => {
@@ -45,7 +44,6 @@ const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId, onDecideN
             item={items[0]} 
             onClick={() => onItemClick(items[0])} 
             currentUserId={currentUserId}
-            onDecideNow={onDecideNow}
           />
         </div>
         <div className="flex justify-center mt-2">
@@ -67,7 +65,6 @@ const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId, onDecideN
                   item={item} 
                   onClick={() => onItemClick(item)} 
                   currentUserId={currentUserId}
-                  onDecideNow={onDecideNow}
                 />
               </CarouselItem>
             ))}
@@ -88,7 +85,6 @@ const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId, onDecideN
                       item={item} 
                       onClick={() => onItemClick(item)}
                       currentUserId={currentUserId}
-                      onDecideNow={onDecideNow}
                     />
                   ))}
                 </div>

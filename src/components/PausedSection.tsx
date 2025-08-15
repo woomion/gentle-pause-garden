@@ -164,7 +164,6 @@ const PausedSection = () => {
       <PausedItemsCarousel 
         items={pausedItems}
         onItemClick={handleItemClick}
-        onDecideNow={handleDecideNow}
       />
 
       {selectedItem && (
