@@ -172,6 +172,7 @@ const ItemReviewModal = ({
                         <ItemReviewDecisionButtons 
                           onDecision={handleDecision} 
                           onExtendPause={() => setShowExtendModal(true)}
+                          hasUrl={!!(currentItem.link || (currentItem as any).url)}
                         />
                       </div>
                     )}
