@@ -151,15 +151,6 @@ const ItemReviewModal = ({
         {items.length > 1 ? (
           <>
             <Carousel className="w-full" setApi={setApi} opts={{ startIndex: activeIndex }}>
-              {/* Carousel Navigation at top */}
-              <div className="flex items-center justify-center gap-4 px-6 py-3">
-                <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
-                <span className="text-xs text-muted-foreground px-2">
-                  Swipe or use arrows
-                </span>
-                <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
-              </div>
-              
               <CarouselContent>
                 {items.map((item, index) => (
                   <CarouselItem key={item.id}>
@@ -182,6 +173,17 @@ const ItemReviewModal = ({
                           onDecision={handleDecision} 
                           onExtendPause={() => setShowExtendModal(true)}
                         />
+                      </div>
+                    )}
+                    
+                    {/* Carousel Navigation below item */}
+                    {index === activeIndex && (
+                      <div className="flex items-center justify-center gap-4 px-6 pb-4">
+                        <CarouselPrevious className="relative left-0 top-0 translate-y-0 static" />
+                        <span className="text-xs text-muted-foreground px-2">
+                          Swipe or use arrows
+                        </span>
+                        <CarouselNext className="relative right-0 top-0 translate-y-0 static" />
                       </div>
                     )}
                   </CarouselItem>
