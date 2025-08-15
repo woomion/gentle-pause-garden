@@ -12,8 +12,8 @@ interface RobustParsingOptions {
   validateContent?: boolean;
 }
 
-// Legacy function - redirects to new simple parser
+// Updated function - uses enhanced parser
 export const parseProductUrl = async (url: string, options: RobustParsingOptions = {}): Promise<ProductInfo> => {
-  const { parseProductUrl: newParser } = await import('./simpleUrlParser');
-  return newParser(url);
+  const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
+  return enhancedParser(url);
 };
