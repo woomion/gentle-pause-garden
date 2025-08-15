@@ -2,7 +2,11 @@ interface ProductInfo {
   itemName?: string;
   storeName?: string;
   price?: string;
+  priceCurrency?: string;
   imageUrl?: string;
+  availability?: string;
+  brand?: string;
+  sku?: string;
 }
 
 interface ParseAttempt {
@@ -12,23 +16,37 @@ interface ParseAttempt {
   data?: Partial<ProductInfo>;
 }
 
+interface StructuredData {
+  jsonLd?: any[];
+  openGraph?: Record<string, string>;
+  microdata?: any[];
+}
+
 // Enhanced in-memory cache with attempt tracking
-const cache = new Map<string, { data: ProductInfo; timestamp: number; attempts: ParseAttempt[] }>();
+const cache = new Map<string, { data: ProductInfo; timestamp: number; attempts: ParseAttempt[]; canonical?: string }>();
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 const MAX_RETRIES = 3;
 
 const normalizeUrl = (url: string): string => {
   try {
     const urlObj = new URL(url);
-    // Remove extensive tracking parameters
+    // Remove extensive tracking parameters including affiliate links
     const trackingParams = [
       'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
       'fbclid', 'gclid', 'gclsrc', 'dclid', 'msclkid',
       'ref', 'referrer', 'source', 'campaign',
-      '_ga', '_gl', 'mc_cid', 'mc_eid'
+      '_ga', '_gl', 'mc_cid', 'mc_eid',
+      // Affiliate & tracking extensions
+      'irgwc', 'affid', 'subid', 'aff_id', 'affiliate_id',
+      'clickid', 'subId1', 'subId2', 'subId3',
+      // Shopping specific
+      'tag', 'camp', 'creative', 'linkCode', 'creativeASIN'
     ];
     
     trackingParams.forEach(param => urlObj.searchParams.delete(param));
+    
+    // Remove common fragment identifiers
+    urlObj.hash = '';
     
     // Normalize URL format
     return urlObj.toString().toLowerCase();
@@ -98,6 +116,180 @@ const extractStoreName = (hostname: string): string => {
   const mainDomain = domainParts[domainParts.length - 2] || cleanHostname;
   
   return mainDomain.charAt(0).toUpperCase() + mainDomain.slice(1);
+};
+
+// Extract structured data (JSON-LD, OpenGraph, Microdata)
+const extractStructuredData = (html: string): StructuredData => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  const structured: StructuredData = {
+    jsonLd: [],
+    openGraph: {},
+    microdata: []
+  };
+
+  // Extract JSON-LD
+  const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  jsonLdScripts.forEach(script => {
+    try {
+      const jsonText = script.textContent?.trim();
+      if (jsonText) {
+        // Clean common JSON-LD issues
+        const cleanedJson = jsonText
+          .replace(/,\s*}/g, '}')  // Remove trailing commas
+          .replace(/,\s*]/g, ']'); // Remove trailing commas in arrays
+        
+        const data = JSON.parse(cleanedJson);
+        if (Array.isArray(data)) {
+          structured.jsonLd?.push(...data);
+        } else {
+          structured.jsonLd?.push(data);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to parse JSON-LD:', error);
+    }
+  });
+
+  // Extract OpenGraph
+  const ogMetas = doc.querySelectorAll('meta[property^="og:"], meta[name^="twitter:"]');
+  ogMetas.forEach(meta => {
+    const property = meta.getAttribute('property') || meta.getAttribute('name');
+    const content = meta.getAttribute('content');
+    if (property && content) {
+      structured.openGraph![property] = content;
+    }
+  });
+
+  // Extract Microdata
+  const microdataItems = doc.querySelectorAll('[itemtype*="schema.org/Product"]');
+  microdataItems.forEach(item => {
+    const itemData: any = { type: item.getAttribute('itemtype') };
+    const props = item.querySelectorAll('[itemprop]');
+    props.forEach(prop => {
+      const name = prop.getAttribute('itemprop');
+      const content = prop.getAttribute('content') || prop.textContent?.trim();
+      if (name && content) {
+        itemData[name] = content;
+      }
+    });
+    structured.microdata?.push(itemData);
+  });
+
+  return structured;
+};
+
+// Extract canonical URL
+const extractCanonicalUrl = (html: string, originalUrl: string): string => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  const canonical = doc.querySelector('link[rel="canonical"]');
+  if (canonical) {
+    const href = canonical.getAttribute('href');
+    if (href) {
+      try {
+        return new URL(href, originalUrl).toString();
+      } catch {
+        return originalUrl;
+      }
+    }
+  }
+  
+  return originalUrl;
+};
+
+// Extract product info from structured data with priority system
+const extractFromStructuredData = (structured: StructuredData, baseUrl: string): ProductInfo => {
+  const result: ProductInfo = {};
+
+  // Priority 1: JSON-LD Product schema
+  for (const item of structured.jsonLd || []) {
+    if (item['@type'] === 'Product' || (Array.isArray(item['@type']) && item['@type'].includes('Product'))) {
+      // Extract basic product info
+      if (item.name && !result.itemName) {
+        result.itemName = String(item.name).trim();
+      }
+      
+      if (item.brand?.name && !result.brand) {
+        result.brand = String(item.brand.name).trim();
+      }
+      
+      if (item.sku && !result.sku) {
+        result.sku = String(item.sku).trim();
+      }
+      
+      // Extract price from offers
+      const offers = Array.isArray(item.offers) ? item.offers : [item.offers].filter(Boolean);
+      for (const offer of offers) {
+        if (offer && !result.price) {
+          // Handle different offer types
+          if (offer['@type'] === 'AggregateOffer') {
+            if (offer.lowPrice) {
+              result.price = String(offer.lowPrice);
+              result.priceCurrency = offer.priceCurrency || 'USD';
+            }
+          } else if (offer.price || offer.priceSpecification?.price) {
+            result.price = String(offer.price || offer.priceSpecification.price);
+            result.priceCurrency = offer.priceCurrency || offer.priceSpecification?.priceCurrency || 'USD';
+          }
+          
+          if (offer.availability && !result.availability) {
+            result.availability = String(offer.availability).replace('https://schema.org/', '');
+          }
+        }
+      }
+      
+      // Extract image
+      if (item.image && !result.imageUrl) {
+        const imageData = Array.isArray(item.image) ? item.image[0] : item.image;
+        const imageUrl = typeof imageData === 'string' ? imageData : imageData?.url;
+        if (imageUrl) {
+          try {
+            result.imageUrl = new URL(imageUrl, baseUrl).toString();
+          } catch {
+            result.imageUrl = imageUrl;
+          }
+        }
+      }
+    }
+  }
+
+  // Priority 2: OpenGraph/Twitter
+  if (!result.itemName && structured.openGraph) {
+    result.itemName = structured.openGraph['og:title'] || structured.openGraph['twitter:title'];
+  }
+  
+  if (!result.imageUrl && structured.openGraph) {
+    const ogImage = structured.openGraph['og:image'] || structured.openGraph['twitter:image'];
+    if (ogImage) {
+      try {
+        result.imageUrl = new URL(ogImage, baseUrl).toString();
+      } catch {
+        result.imageUrl = ogImage;
+      }
+    }
+  }
+
+  // Priority 3: Microdata
+  for (const item of structured.microdata || []) {
+    if (!result.itemName && item.name) {
+      result.itemName = String(item.name).trim();
+    }
+    if (!result.price && item.price) {
+      result.price = String(item.price);
+    }
+    if (!result.imageUrl && item.image) {
+      try {
+        result.imageUrl = new URL(item.image, baseUrl).toString();
+      } catch {
+        result.imageUrl = item.image;
+      }
+    }
+  }
+
+  return result;
 };
 
 const extractFromDOM = (html: string, baseUrl: string): ProductInfo => {
@@ -361,6 +553,94 @@ const trackAttempt = (url: string, method: string, success: boolean, error?: str
   return attempts;
 };
 
+// Currency inference from locale/domain
+const inferCurrency = (url: string, locale?: string): string => {
+  const hostname = new URL(url).hostname.toLowerCase();
+  
+  // Domain-based currency inference
+  const currencyMap: Record<string, string> = {
+    '.co.uk': 'GBP',
+    '.uk': 'GBP',
+    '.de': 'EUR',
+    '.fr': 'EUR',
+    '.es': 'EUR',
+    '.it': 'EUR',
+    '.nl': 'EUR',
+    '.ca': 'CAD',
+    '.au': 'AUD',
+    '.jp': 'JPY',
+    '.in': 'INR',
+    '.br': 'BRL',
+    '.mx': 'MXN'
+  };
+  
+  for (const [domain, currency] of Object.entries(currencyMap)) {
+    if (hostname.includes(domain)) {
+      return currency;
+    }
+  }
+  
+  // Locale-based inference
+  if (locale) {
+    const localeMap: Record<string, string> = {
+      'en-GB': 'GBP',
+      'de-DE': 'EUR',
+      'fr-FR': 'EUR',
+      'ja-JP': 'JPY',
+      'en-CA': 'CAD',
+      'en-AU': 'AUD'
+    };
+    
+    if (localeMap[locale]) {
+      return localeMap[locale];
+    }
+  }
+  
+  return 'USD'; // Default fallback
+};
+
+// Domain-specific shims for known problematic sites
+const applyDomainShims = (result: ProductInfo, url: string, html: string): ProductInfo => {
+  const hostname = new URL(url).hostname.toLowerCase();
+  
+  if (hostname.includes('shopbop.com')) {
+    // Shopbop often has region-gated pricing
+    if (!result.price) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      // Try Shopbop-specific selectors
+      const priceSelectors = [
+        '.price-current-value',
+        '[data-test="current-price"]',
+        '.price-sales'
+      ];
+      
+      for (const selector of priceSelectors) {
+        const element = doc.querySelector(selector);
+        if (element?.textContent) {
+          const match = element.textContent.match(/\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
+          if (match) {
+            result.price = match[1];
+            result.priceCurrency = 'USD';
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  if (hostname.includes('asics.com')) {
+    // ASICS has regional templates
+    if (!result.price && !html.includes('price')) {
+      // Suggest retry with US locale headers
+      console.log('🔄 ASICS detected - may need US locale retry');
+    }
+  }
+  
+  return result;
+};
+
 export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   console.log('🔥 Enhanced URL parser called with:', url);
   
@@ -368,7 +648,7 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   
   const normalizedUrl = normalizeUrl(url);
   
-  // Check cache
+  // Check cache with canonical URL support
   const cached = cache.get(normalizedUrl);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     console.log('✅ Cache hit for:', normalizedUrl);
@@ -381,38 +661,112 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     
     const result: ProductInfo = { storeName };
     const attempts: ParseAttempt[] = [];
+    let canonicalUrl = normalizedUrl;
 
-    // Enhanced approach order based on reliability
+    // Enhanced approach order with schema-guided extraction
     const approaches = [
-      { name: 'firecrawl', fn: () => fetchViaFirecrawl(normalizedUrl) },
-      { name: 'proxy', fn: () => fetchViaProxy(normalizedUrl) },
-      { name: 'direct', fn: () => fetchDirect(normalizedUrl) }
+      { 
+        name: 'firecrawl-extract', 
+        fn: () => fetchViaFirecrawlExtract(normalizedUrl),
+        isStructured: true 
+      },
+      { 
+        name: 'firecrawl', 
+        fn: () => fetchViaFirecrawl(normalizedUrl),
+        isStructured: false 
+      },
+      { 
+        name: 'proxy', 
+        fn: () => fetchViaProxy(normalizedUrl),
+        isStructured: false 
+      },
+      { 
+        name: 'direct', 
+        fn: () => fetchDirect(normalizedUrl),
+        isStructured: false 
+      }
     ];
 
     for (const approach of approaches) {
       try {
         console.log(`🔄 Trying ${approach.name} for:`, normalizedUrl);
         
-        const html = await approach.fn();
+        const data = await approach.fn();
         
-        if (html && html.length > 500) {
-          const extracted = extractFromDOM(html, normalizedUrl);
-          Object.assign(result, extracted);
+        if (approach.isStructured && data) {
+          // Handle structured response from Firecrawl extract
+          const structuredData = data as ProductInfo;
+          Object.assign(result, structuredData);
+          
+          attempts.push({
+            method: approach.name,
+            success: !!(structuredData.itemName || structuredData.price || structuredData.imageUrl),
+            data: structuredData
+          });
+          
+          if (structuredData.itemName || structuredData.price || structuredData.imageUrl) {
+            console.log('✅ Successfully parsed with structured', approach.name, ':', result);
+            cache.set(normalizedUrl, { 
+              data: result, 
+              timestamp: Date.now(),
+              attempts,
+              canonical: canonicalUrl
+            });
+            return result;
+          }
+        } else if (!approach.isStructured && data && typeof data === 'string' && data.length > 500) {
+          // Handle HTML response
+          const html = data as string;
+          
+          // Extract canonical URL on first successful fetch
+          if (canonicalUrl === normalizedUrl) {
+            canonicalUrl = extractCanonicalUrl(html, normalizedUrl);
+            if (canonicalUrl !== normalizedUrl) {
+              console.log('📍 Found canonical URL:', canonicalUrl);
+              // Check cache with canonical URL
+              const canonicalCached = cache.get(canonicalUrl);
+              if (canonicalCached && Date.now() - canonicalCached.timestamp < CACHE_TTL) {
+                console.log('✅ Canonical cache hit:', canonicalUrl);
+                return canonicalCached.data;
+              }
+            }
+          }
+          
+          // Extract structured data first
+          const structured = extractStructuredData(html);
+          const structuredResult = extractFromStructuredData(structured, canonicalUrl);
+          Object.assign(result, structuredResult);
+          
+          // Fallback to DOM parsing if structured data insufficient
+          if (!result.itemName || !result.price || !result.imageUrl) {
+            const domResult = extractFromDOM(html, canonicalUrl);
+            Object.assign(result, domResult);
+          }
+          
+          // Apply domain-specific fixes
+          applyDomainShims(result, canonicalUrl, html);
+          
+          // Infer currency if missing
+          if (result.price && !result.priceCurrency) {
+            const locale = structured.openGraph?.['og:locale'];
+            result.priceCurrency = inferCurrency(canonicalUrl, locale);
+          }
           
           const hasUsefulData = result.itemName || result.price || result.imageUrl;
           
           attempts.push({
             method: approach.name,
             success: !!hasUsefulData,
-            data: extracted
+            data: { ...result }
           });
           
           if (hasUsefulData) {
             console.log('✅ Successfully parsed with', approach.name, ':', result);
-            cache.set(normalizedUrl, { 
+            cache.set(canonicalUrl, { 
               data: result, 
               timestamp: Date.now(),
-              attempts 
+              attempts,
+              canonical: canonicalUrl
             });
             return result;
           }
@@ -420,7 +774,7 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
           attempts.push({
             method: approach.name,
             success: false,
-            error: 'Insufficient content'
+            error: 'Insufficient content or no data'
           });
         }
       } catch (error) {
@@ -433,6 +787,37 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
           error: errorMsg
         });
         
+        // Retry with different headers for region-locked sites
+        if (errorMsg.includes('403') || errorMsg.includes('429')) {
+          try {
+            console.log(`🔄 Retrying ${approach.name} with US headers...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+            
+            if (approach.name === 'direct') {
+              const retryData = await fetchDirectWithHeaders(canonicalUrl);
+              if (retryData && retryData.length > 500) {
+                const structured = extractStructuredData(retryData);
+                const structuredResult = extractFromStructuredData(structured, canonicalUrl);
+                Object.assign(result, structuredResult);
+                
+                if (!result.itemName || !result.price || !result.imageUrl) {
+                  const domResult = extractFromDOM(retryData, canonicalUrl);
+                  Object.assign(result, domResult);
+                }
+                
+                applyDomainShims(result, canonicalUrl, retryData);
+                
+                if (result.itemName || result.price || result.imageUrl) {
+                  console.log('✅ Retry successful with US headers');
+                  break;
+                }
+              }
+            }
+          } catch (retryError) {
+            console.log('⚠️ Retry failed:', retryError);
+          }
+        }
+        
         continue;
       }
     }
@@ -441,13 +826,14 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     console.log('🔄 Using enhanced URL fallback');
     
     // Try to extract product info from URL structure
-    const urlBasedInfo = extractFromUrl(normalizedUrl);
+    const urlBasedInfo = extractFromUrl(canonicalUrl);
     Object.assign(result, urlBasedInfo);
     
-    cache.set(normalizedUrl, { 
+    cache.set(canonicalUrl, { 
       data: result, 
       timestamp: Date.now(),
-      attempts 
+      attempts,
+      canonical: canonicalUrl
     });
     
     return result;
@@ -499,6 +885,39 @@ const extractFromUrl = (url: string): Partial<ProductInfo> => {
 };
 
 // Enhanced fetch implementations with better error handling
+const fetchViaFirecrawlExtract = async (url: string): Promise<ProductInfo | null> => {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    const { data, error } = await supabase.functions.invoke('firecrawl-proxy', {
+      body: { 
+        url,
+        mode: 'extract',
+        schema: {
+          type: 'object',
+          properties: {
+            itemName: { type: 'string', description: 'Product name or title' },
+            price: { type: 'string', description: 'Product price as string' },
+            priceCurrency: { type: 'string', description: 'Currency code (ISO 4217)' },
+            availability: { type: 'string', description: 'Product availability status' },
+            imageUrl: { type: 'string', description: 'Main product image URL' },
+            brand: { type: 'string', description: 'Product brand name' },
+            sku: { type: 'string', description: 'Product SKU or identifier' }
+          },
+          required: ['itemName']
+        },
+        prompt: 'Extract product information. Prefer JSON-LD Product schema with offers. If missing, use OpenGraph/Twitter meta tags. If still missing, find visible price near add-to-cart button. Return priceCurrency as ISO 4217 code (USD, EUR, GBP, etc).'
+      }
+    });
+    
+    if (error) throw new Error(`Firecrawl extract error: ${error.message}`);
+    
+    return data?.extracted || null;
+  } catch (error) {
+    throw new Error(`Firecrawl extract failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
 const fetchViaFirecrawl = async (url: string): Promise<string | null> => {
   try {
     const { supabase } = await import('@/integrations/supabase/client');
@@ -574,5 +993,42 @@ const fetchDirect = async (url: string): Promise<string | null> => {
     return content && content.length > 500 ? content : null;
   } catch (error) {
     throw new Error(`Direct fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Enhanced direct fetch with randomized headers for retry scenarios
+const fetchDirectWithHeaders = async (url: string): Promise<string | null> => {
+  const userAgents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15'
+  ];
+  
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(10000),
+      headers: {
+        'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const content = await response.text();
+    return content && content.length > 500 ? content : null;
+  } catch (error) {
+    throw new Error(`Enhanced direct fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
