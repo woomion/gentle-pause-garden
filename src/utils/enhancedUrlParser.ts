@@ -152,12 +152,13 @@ const domainParsers: DomainParser[] = [
     storeName: 'Shopbop',
     parseTitle: (doc) => {
       const selectors = [
-        '.js-product-name',
+        'h1[data-testid="product-name"]',
+        'h1.product-name',
+        '.pdp-name h1',
         '.product-title',
-        '.product-name',
-        'h1[data-test="product-title"]',
-        '.product-details h1',
-        'h1.product-title'
+        'h1[class*="product"]',
+        '.js-product-name',
+        'h1'
       ];
       for (const selector of selectors) {
         const element = doc.querySelector(selector);
@@ -169,12 +170,13 @@ const domainParsers: DomainParser[] = [
     },
     parsePrice: (doc) => {
       const priceSelectors = [
-        '.js-product-price',
-        '.price-current',
+        '[data-testid="current-price"]',
+        '[data-testid="price"]',
         '.current-price',
-        '.price-current-value',
-        '[data-test="current-price"]',
+        '.price-current',
         '.price-sales',
+        '.product-price',
+        '.js-product-price',
         '.price'
       ];
       
@@ -191,14 +193,16 @@ const domainParsers: DomainParser[] = [
     },
     parseImage: (doc) => {
       const imgSelectors = [
-        '.js-product-image img',
-        '.product-image img',
+        'img[data-testid="product-image"]',
+        '.pdp-image img',
+        '.product-images img',
         '.hero-image img',
-        '.main-image img'
+        '.main-image img',
+        '.js-product-image img'
       ];
       for (const selector of imgSelectors) {
         const img = doc.querySelector(selector) as HTMLImageElement;
-        if (img?.src && !img.src.includes('placeholder')) {
+        if (img?.src && !img.src.includes('placeholder') && !img.src.includes('loading')) {
           return img.src;
         }
       }
@@ -210,10 +214,13 @@ const domainParsers: DomainParser[] = [
     storeName: 'ASICS',
     parseTitle: (doc) => {
       const selectors = [
+        'h1[data-testid="pdp-product-name"]',
+        'h1.pdp-product-name',
+        '.product-name h1',
+        'h1[class*="product-name"]',
+        '.pdp-name h1',
         'h1[data-testid="product-name"]',
-        '.pdp-product-name',
         '.product-title',
-        'h1.product-name',
         'h1'
       ];
       for (const selector of selectors) {
@@ -226,9 +233,11 @@ const domainParsers: DomainParser[] = [
     },
     parsePrice: (doc) => {
       const priceSelectors = [
+        '[data-testid="pdp-price-current"]',
         '[data-testid="current-price"]',
         '.price-current',
         '.current-price',
+        '.pdp-price',
         '.price',
         '.product-price'
       ];
@@ -246,14 +255,17 @@ const domainParsers: DomainParser[] = [
     },
     parseImage: (doc) => {
       const imgSelectors = [
+        'img[data-testid="pdp-image"]',
         '.pdp-hero-image img',
+        '.pdp-images img',
         '.product-hero img',
         '.product-image img',
-        'img[data-testid="hero-image"]'
+        'img[data-testid="hero-image"]',
+        '.main-product-image img'
       ];
       for (const selector of imgSelectors) {
         const img = doc.querySelector(selector) as HTMLImageElement;
-        if (img?.src && !img.src.includes('placeholder')) {
+        if (img?.src && !img.src.includes('placeholder') && !img.src.includes('loading')) {
           return img.src;
         }
       }

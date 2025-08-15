@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { formatPrice } from '../utils/priceFormatter';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
@@ -32,14 +32,14 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
     }
   };
 
-  const handleDecideClick = (e: React.MouseEvent) => {
+  const handleDecideClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('🔵 Decision button clicked for item:', item.id);
+    console.log('🔵 Decision button clicked for item:', item.id, 'current state:', showDecisionButtons);
     setShowDecisionButtons(prev => !prev);
-  };
+  }, [item.id, showDecisionButtons]);
 
-  const handleDecision = async (e: React.MouseEvent, decision: 'purchase' | 'let-go') => {
+  const handleDecision = useCallback(async (e: React.MouseEvent, decision: 'purchase' | 'let-go') => {
     e.stopPropagation();
     try {
       if (decision === 'purchase') {
@@ -51,7 +51,7 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
     } catch (error) {
       console.error('Error handling decision:', error);
     }
-  };
+  }, [item, handleBought, handleLetGo]);
 
   // Get comment info for this item
   const commentCount = currentUserId ? getCommentCount(item.id) : 0;
