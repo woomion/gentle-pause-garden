@@ -666,27 +666,22 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     const attempts: ParseAttempt[] = [];
     let canonicalUrl = normalizedUrl;
 
-    // Prioritize proven approaches - put working methods first
+    // Simplified reliable approach - prioritize what was working
     const approaches = [
-      { 
-        name: 'firecrawl', 
-        fn: () => fetchViaFirecrawl(normalizedUrl),
-        isStructured: false 
-      },
       { 
         name: 'direct', 
         fn: () => fetchDirect(normalizedUrl),
         isStructured: false 
       },
       { 
-        name: 'proxy', 
-        fn: () => fetchViaProxy(normalizedUrl),
+        name: 'firecrawl', 
+        fn: () => fetchViaFirecrawl(normalizedUrl),
         isStructured: false 
       },
       { 
-        name: 'firecrawl-extract', 
-        fn: () => fetchViaFirecrawlExtract(normalizedUrl),
-        isStructured: true 
+        name: 'proxy', 
+        fn: () => fetchViaProxy(normalizedUrl),
+        isStructured: false 
       }
     ];
 
@@ -697,38 +692,11 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
         const data = await approach.fn();
         console.log(`📊 ${approach.name} returned:`, { 
           dataType: typeof data, 
-          isString: typeof data === 'string',
-          hasContent: data ? (typeof data === 'string' ? data.length : 'object') : 'null',
-          preview: typeof data === 'string' ? data.substring(0, 100) + '...' : data
+          hasContent: data ? (typeof data === 'string' ? data.length : 'object') : 'null'
         });
         
-        if (approach.isStructured && data) {
-          // Handle structured response from Firecrawl extract
-          console.log(`🎯 Processing structured data from ${approach.name}:`, data);
-          const structuredData = data as ProductInfo;
-          Object.assign(result, structuredData);
-          
-          attempts.push({
-            method: approach.name,
-            success: !!(structuredData.itemName || structuredData.price || structuredData.imageUrl),
-            data: structuredData
-          });
-          
-          console.log(`🎯 Structured result after assignment:`, result);
-          if (structuredData.itemName || structuredData.price || structuredData.imageUrl) {
-            console.log('✅ Successfully parsed with structured', approach.name, ':', result);
-            cache.set(normalizedUrl, { 
-              data: result, 
-              timestamp: Date.now(),
-              attempts,
-              canonical: canonicalUrl
-            });
-            return result;
-          } else {
-            console.log(`⚠️ ${approach.name} returned data but no useful product info`);
-          }
-        } else if (!approach.isStructured && data && typeof data === 'string' && data.length > 500) {
-          // Handle HTML response
+        if (data && typeof data === 'string' && data.length > 500) {
+          // Handle HTML response - focus on DOM extraction
           console.log(`🎯 Processing HTML data from ${approach.name}, length:`, data.length);
           const html = data as string;
           
@@ -746,20 +714,28 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
             }
           }
           
-          // Extract structured data first
-          console.log(`🎯 Extracting structured data from HTML...`);
+          // Primary: Direct DOM extraction (what was working before)
+          console.log(`🎯 Starting DOM extraction...`);
+          const domResult = extractFromDOM(html, canonicalUrl);
+          console.log(`🎯 DOM parsing result:`, domResult);
+          Object.assign(result, domResult);
+          
+          // Secondary: Try structured data to fill gaps
+          console.log(`🎯 Checking for structured data to fill gaps...`);
           const structured = extractStructuredData(html);
-          console.log(`🎯 Structured data found:`, structured);
           const structuredResult = extractFromStructuredData(structured, canonicalUrl);
           console.log(`🎯 Structured result:`, structuredResult);
-          Object.assign(result, structuredResult);
           
-          // Fallback to DOM parsing if structured data insufficient
-          if (!result.itemName || !result.price || !result.imageUrl) {
-            console.log(`🎯 Falling back to DOM parsing. Current result:`, result);
-            const domResult = extractFromDOM(html, canonicalUrl);
-            console.log(`🎯 DOM parsing result:`, domResult);
-            Object.assign(result, domResult);
+          // Only use structured data to fill missing fields
+          if (!result.itemName && structuredResult.itemName) {
+            result.itemName = structuredResult.itemName;
+          }
+          if (!result.price && structuredResult.price) {
+            result.price = structuredResult.price;
+            result.priceCurrency = structuredResult.priceCurrency;
+          }
+          if (!result.imageUrl && structuredResult.imageUrl) {
+            result.imageUrl = structuredResult.imageUrl;
           }
           
           // Apply domain-specific fixes
@@ -799,7 +775,6 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
           }
         } else {
           console.log(`⚠️ ${approach.name} returned insufficient data:`, { 
-            isStructured: approach.isStructured,
             dataType: typeof data,
             dataLength: typeof data === 'string' ? data.length : 'N/A'
           });
