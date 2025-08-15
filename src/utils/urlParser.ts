@@ -328,6 +328,8 @@ const extractImageUrl = (doc: Document, baseUrl: string): string | undefined => 
 };
 
 export const parseProductUrl = async (url: string, options: RobustParsingOptions = {}): Promise<ProductInfo> => {
+  console.log('🔥🔥🔥 PARSE PRODUCT URL CALLED WITH:', url);
+  console.log('🔥🔥🔥 THIS IS THE URL PARSER STARTING');
   const startTime = performance.now();
   
   try {
