@@ -34,7 +34,9 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
 
   const handleDecideClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowDecisionButtons(true);
+    e.preventDefault();
+    console.log('🔵 Decision button clicked for item:', item.id);
+    setShowDecisionButtons(prev => !prev);
   };
 
   const handleDecision = async (e: React.MouseEvent, decision: 'purchase' | 'let-go') => {
