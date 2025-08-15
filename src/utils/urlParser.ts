@@ -160,7 +160,17 @@ const extractItemName = (doc: Document): string | undefined => {
 
 const extractPrice = (doc: Document): string | undefined => {
   const selectors = [
-    // Shopbop specific
+    // Shopbop specific - more comprehensive
+    '.pricing-price',
+    '.price-current',
+    '.price-display',
+    '.product-price .price',
+    '.current-price',
+    '.sale-price',
+    '.price-section .price',
+    '.product-pricing .price',
+    '[data-testid="price-current"]',
+    '[data-testid="current-price"]',
     '.prices .price-sale',
     '.prices .price',
     '[data-automation-id="product-price"]',
@@ -168,7 +178,6 @@ const extractPrice = (doc: Document): string | undefined => {
     '.price-box .price',
     '.pricing .price',
     // Generic selectors
-    '.price-current',
     '.price-now',
     '.product-price',
     '.pdp-price',
@@ -180,8 +189,26 @@ const extractPrice = (doc: Document): string | undefined => {
     '.cost',
     '.amount',
     'span[class*="price"]',
-    'div[class*="price"]'
+    'div[class*="price"]',
+    // More aggressive selectors
+    '*[class*="price" i]',
+    '*[data-testid*="price" i]'
   ];
+
+  console.log('💰 Searching for price with selectors...');
+  
+  // First, try to find any element containing a dollar sign for debugging
+  const allElements = doc.querySelectorAll('*');
+  const priceElements = Array.from(allElements).filter(el => 
+    el.textContent && el.textContent.includes('$') && el.children.length === 0
+  );
+  
+  console.log(`💰 Found ${priceElements.length} elements containing '$'`);
+  priceElements.forEach((el, i) => {
+    if (i < 10) { // Log first 10 to avoid spam
+      console.log(`💰 Price element ${i}: "${el.textContent?.trim()}" (tag: ${el.tagName}, class: ${el.className || 'no class'})`);
+    }
+  });
 
   for (const selector of selectors) {
     const element = doc.querySelector(selector);
@@ -189,14 +216,18 @@ const extractPrice = (doc: Document): string | undefined => {
     if (element) {
       const text = element.textContent?.trim();
       if (text) {
-        // More robust price matching
-        const priceMatch = text.match(/\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
+        // Enhanced price pattern - handles more formats
+        const priceMatch = text.match(/\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)|(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s*(?:USD|EUR|GBP|CAD|AUD|JPY)/i);
         if (priceMatch) {
-          let price = priceMatch[1];
-          // Remove commas for consistency
+          let price = priceMatch[1] || priceMatch[2];
+          // Clean up the price
           price = price.replace(/,/g, '');
-          console.log(`💰 Found price: ${price} from selector: ${selector}`);
-          return price;
+          
+          const priceNum = parseFloat(price);
+          if (!isNaN(priceNum) && priceNum > 0 && priceNum < 100000) {
+            console.log(`💰 Found valid price: ${priceNum} from text: "${text}"`);
+            return priceNum.toFixed(2);
+          }
         } else {
           console.log(`💰 Text "${text}" didn't match price pattern`);
         }
@@ -209,42 +240,81 @@ const extractPrice = (doc: Document): string | undefined => {
 
 const extractImageUrl = (doc: Document, baseUrl: string): string | undefined => {
   const selectors = [
-    // Shopbop specific
+    // Shopbop specific - more comprehensive
     '.product-image img',
     '.product-images img',
     '.image-container img',
     '.main-image img',
+    '.hero-image img',
+    '.gallery-image img',
+    '.product-gallery img',
+    '[data-testid="product-image"] img',
+    '[data-testid="hero-image"] img',
     // Generic selectors
     'img[data-automation-id="product-image"]',
     '.pdp-image img',
-    '[data-testid="product-image"] img',
-    '.hero-image img',
-    'img[alt*="product"]',
-    'img[src*="product"]',
-    'img[class*="product"]',
-    'img[class*="main"]',
-    'img[class*="primary"]',
+    'img[alt*="product" i]',
+    'img[src*="product" i]',
+    'img[class*="product" i]',
+    'img[class*="main" i]',
+    'img[class*="primary" i]',
+    'img[class*="hero" i]',
     '.gallery img:first-child',
     '.images img:first-child',
     'img[data-src]',
-    'img[srcset]'
+    'img[srcset]',
+    // More aggressive selectors
+    'picture img',
+    'figure img',
+    'img[width][height]'
   ];
+
+  console.log('🖼️ Searching for images...');
+  
+  // First, log all images we can find for debugging
+  const allImages = doc.querySelectorAll('img');
+  console.log(`🖼️ Found ${allImages.length} total images on page`);
+  
+  // Log first few images with their attributes
+  allImages.forEach((img, i) => {
+    if (i < 10) { // Log first 10 to avoid spam
+      const imgElement = img as HTMLImageElement;
+      console.log(`🖼️ Image ${i}:`, {
+        src: imgElement.src || 'no src',
+        dataSrc: imgElement.getAttribute('data-src') || 'no data-src',
+        alt: imgElement.alt || 'no alt',
+        className: imgElement.className || 'no class',
+        width: imgElement.width || 'no width',
+        height: imgElement.height || 'no height'
+      });
+    }
+  });
 
   for (const selector of selectors) {
     const img = doc.querySelector(selector) as HTMLImageElement;
     console.log(`🔍 Image selector ${selector}:`, img ? `Found img with src: "${img.src || img.getAttribute('data-src') || 'no src'}"` : 'No img found');
     if (img) {
       // Try multiple src attributes
-      let imgSrc = img.src || img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('srcset')?.split(' ')[0];
+      let imgSrc = img.src || 
+                   img.getAttribute('data-src') || 
+                   img.getAttribute('data-original') || 
+                   img.getAttribute('data-lazy') ||
+                   img.getAttribute('data-image') ||
+                   img.getAttribute('srcset')?.split(' ')[0];
+      
+      console.log(`🖼️ Trying image src: "${imgSrc}" from selector: ${selector}`);
       
       if (imgSrc) {
         try {
-          const url = new URL(imgSrc, baseUrl);
-          if (isValidImageUrl(url.toString())) {
-            console.log(`🖼️ Found valid image: ${url.toString()} from selector: ${selector}`);
-            return url.toString();
+          // Handle relative URLs
+          const url = imgSrc.startsWith('http') ? imgSrc : new URL(imgSrc, baseUrl).toString();
+          console.log(`🖼️ Processed URL: ${url}`);
+          
+          if (isValidImageUrl(url)) {
+            console.log(`🖼️ Found valid image: ${url} from selector: ${selector}`);
+            return url;
           } else {
-            console.log(`🖼️ Image ${url.toString()} failed validation`);
+            console.log(`🖼️ Image ${url} failed validation`);
           }
         } catch (e) {
           console.log(`🖼️ Failed to create URL from ${imgSrc}:`, e);
