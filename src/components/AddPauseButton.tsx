@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
-import { X } from 'lucide-react';
+import { X, Edit } from 'lucide-react';
 import FirstUseTooltip from './FirstUseTooltip';
 import ClipboardButton from './ClipboardButton';
 import ShareButton from './ShareButton';
+import { ItemFeedbackModal } from './ItemFeedbackModal';
+import { rulesStore } from '@/utils/parsingRulesStore';
 
 interface AddPauseButtonProps {
   onAddPause: (parsedData?: any) => void;
@@ -22,11 +24,14 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const [isParsingUrl, setIsParsingUrl] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
   const [showFirstUseTooltip, setShowFirstUseTooltip] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
 
-  // Check if this is first time user
+  // Initialize rules store and check first time user
   useEffect(() => {
+    rulesStore.initialize();
+    
     const hasEverPaused = localStorage.getItem('pausedItems') || localStorage.getItem('hasSeenFirstUseTooltip');
     if (!hasEverPaused) {
       setShowFirstUseTooltip(true);
@@ -219,8 +224,17 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
           </div>
         )}
         {parsedData && (
-          <div className="mt-2 text-sm text-dark-gray/70">
-            Found: {parsedData.itemName || 'Product'}{parsedData.storeName ? ` from ${parsedData.storeName}` : ''}
+          <div className="mt-2 flex items-center justify-between">
+            <div className="text-sm text-dark-gray/70">
+              Found: {parsedData.itemName || 'Product'}{parsedData.storeName ? ` from ${parsedData.storeName}` : ''}
+            </div>
+            <button
+              onClick={() => setShowFeedbackModal(true)}
+              className="p-1 hover:bg-white/20 rounded-md transition-colors text-dark-gray/60 hover:text-dark-gray"
+              title="Fix Details"
+            >
+              <Edit size={14} />
+            </button>
           </div>
         )}
       </div>
@@ -239,6 +253,17 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         
         + Add to Pause
       </button>
+
+      {/* Feedback Modal */}
+      <ItemFeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        originalUrl={url}
+        originalData={parsedData}
+        onSave={(correctedData) => {
+          setParsedData(correctedData);
+        }}
+      />
     </div>
   );
 });

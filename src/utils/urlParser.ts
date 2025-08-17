@@ -12,8 +12,8 @@ interface RobustParsingOptions {
   validateContent?: boolean;
 }
 
-// Updated function - uses enhanced parser
+// Updated function - uses smart parser with layered strategy
 export const parseProductUrl = async (url: string, options: RobustParsingOptions = {}): Promise<ProductInfo> => {
-  const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
-  return enhancedParser(url);
+  const { parseProductUrl: smartParser } = await import('./smartUrlParser');
+  return smartParser(url);
 };
