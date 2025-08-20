@@ -384,6 +384,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_reminder_sent: string | null
           notification_batch_window: number | null
           notification_profile: string | null
           notification_schedule_type: string | null
@@ -394,6 +395,7 @@ export type Database = {
           quiet_hours_end: string | null
           quiet_hours_start: string | null
           theme: string
+          timezone: string | null
           updated_at: string
           user_id: string
           values_selected: string[] | null
@@ -402,6 +404,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          last_reminder_sent?: string | null
           notification_batch_window?: number | null
           notification_profile?: string | null
           notification_schedule_type?: string | null
@@ -412,6 +415,7 @@ export type Database = {
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           theme?: string
+          timezone?: string | null
           updated_at?: string
           user_id: string
           values_selected?: string[] | null
@@ -420,6 +424,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          last_reminder_sent?: string | null
           notification_batch_window?: number | null
           notification_profile?: string | null
           notification_schedule_type?: string | null
@@ -430,6 +435,7 @@ export type Database = {
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           theme?: string
+          timezone?: string | null
           updated_at?: string
           user_id?: string
           values_selected?: string[] | null
@@ -473,6 +479,10 @@ export type Database = {
       has_pause_partner_access: {
         Args: { user_uuid?: string }
         Returns: boolean
+      }
+      send_timezone_aware_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
