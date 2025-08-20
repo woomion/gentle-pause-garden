@@ -8,10 +8,11 @@ interface PausedItemsCarouselProps {
   items: (PausedItem | LocalPausedItem)[];
   onItemClick: (item: PausedItem | LocalPausedItem) => void;
   onDelete?: (id: string) => void;
+  onDecideNow?: (item: PausedItem | LocalPausedItem) => void;
   currentUserId?: string;
 }
 
-const PausedItemsCarousel = memo(({ items, onItemClick, onDelete, currentUserId }: PausedItemsCarouselProps) => {
+const PausedItemsCarousel = memo(({ items, onItemClick, onDelete, onDecideNow, currentUserId }: PausedItemsCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
 
   useEffect(() => {
@@ -45,6 +46,7 @@ const PausedItemsCarousel = memo(({ items, onItemClick, onDelete, currentUserId 
             item={items[0]} 
             onClick={() => onItemClick(items[0])} 
             onDelete={onDelete}
+            onDecideNow={onDecideNow}
             currentUserId={currentUserId}
           />
         </div>
@@ -67,6 +69,7 @@ const PausedItemsCarousel = memo(({ items, onItemClick, onDelete, currentUserId 
                   item={item} 
                   onClick={() => onItemClick(item)} 
                   onDelete={onDelete}
+                  onDecideNow={onDecideNow}
                   currentUserId={currentUserId}
                 />
               </CarouselItem>
@@ -88,6 +91,7 @@ const PausedItemsCarousel = memo(({ items, onItemClick, onDelete, currentUserId 
                       item={item} 
                       onClick={() => onItemClick(item)}
                       onDelete={onDelete}
+                      onDecideNow={onDecideNow}
                       currentUserId={currentUserId}
                     />
                   ))}

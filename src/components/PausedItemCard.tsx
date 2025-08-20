@@ -15,10 +15,11 @@ interface PausedItemCardProps {
   item: PausedItem | LocalPausedItem;
   onClick: (item: PausedItem | LocalPausedItem) => void;
   onDelete?: (id: string) => void;
+  onDecideNow?: (item: PausedItem | LocalPausedItem) => void;
   currentUserId?: string;
 }
 
-const PausedItemCard = ({ item, onClick, onDelete, currentUserId }: PausedItemCardProps) => {
+const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }: PausedItemCardProps) => {
   const { handleViewItem, handleBought, handleLetGo } = useItemActions();
   const { getCommentCount, getUnreadCount, hasNewComments } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
@@ -36,9 +37,14 @@ const PausedItemCard = ({ item, onClick, onDelete, currentUserId }: PausedItemCa
   const handleDecideClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('🔵 Decision button clicked for item:', item.id, 'current state:', showDecisionButtons);
-    setShowDecisionButtons(prev => !prev);
-  }, [item.id, showDecisionButtons]);
+    console.log('🔵 Decide now button clicked for item:', item.id);
+    if (onDecideNow) {
+      onDecideNow(item);
+    } else {
+      // Fallback to local state if no handler provided
+      setShowDecisionButtons(prev => !prev);
+    }
+  }, [item, onDecideNow]);
 
   // Reset decision buttons when item changes
   const [previousItemId, setPreviousItemId] = useState(item.id);

@@ -168,6 +168,7 @@ const PausedSection = () => {
         items={pausedItems}
         onItemClick={handleItemClick}
         onDelete={handleDeleteItem}
+        onDecideNow={handleDecideNow}
         currentUserId={user?.id}
       />
 
