@@ -148,26 +148,13 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
       </div>
       
       {/* Decision area at bottom of card */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
+      <div className="absolute bottom-0 left-0 right-0">
         {isReadyForReview ? (
           <div className="p-3 bg-indigo-50 dark:bg-indigo-950/50 border-t border-indigo-200 dark:border-indigo-800">
             {!showDecisionButtons ? (
               <button
-                onClick={(e) => {
-                  console.log('🚨 BUTTON CLICKED!', item.itemName);
-                  console.log('🚨 onDecideNow available:', !!onDecideNow);
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (onDecideNow) {
-                    console.log('🚨 Calling onDecideNow');
-                    onDecideNow(item);
-                  } else {
-                    console.log('🚨 Using fallback - showing decision buttons');
-                    setShowDecisionButtons(true);
-                  }
-                }}
-                className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors relative z-20"
-                style={{ pointerEvents: 'auto' }}
+                onClick={handleDecideClick}
+                className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
               >
                 {item.link ? 'Decide now' : 'Make a decision'}
               </button>
