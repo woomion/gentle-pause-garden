@@ -27,6 +27,12 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
   const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
   const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
 
+  // Check if item is ready for review
+  const isReadyForReview = useMemo(() => {
+    const now = new Date();
+    return new Date(item.checkInDate) <= now;
+  }, [item.checkInDate]);
+
   const handleLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (item.link) {
@@ -41,6 +47,8 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
     console.log('🔵 Item name:', item.itemName);
     console.log('🔵 onDecideNow handler available:', !!onDecideNow);
     console.log('🔵 onDecideNow type:', typeof onDecideNow);
+    console.log('🔵 isReadyForReview:', isReadyForReview);
+    console.log('🔵 showDecisionButtons:', showDecisionButtons);
     
     if (onDecideNow) {
       console.log('🔵 Calling onDecideNow handler with item:', item);
@@ -51,11 +59,15 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
         console.error('🔵 Error calling onDecideNow:', error);
       }
     } else {
-      console.log('🔵 No onDecideNow handler, using fallback');
+      console.log('🔵 No onDecideNow handler, using fallback to show decision buttons');
       // Fallback to local state if no handler provided
-      setShowDecisionButtons(prev => !prev);
+      setShowDecisionButtons(prev => {
+        const newState = !prev;
+        console.log('🔵 Setting showDecisionButtons to:', newState);
+        return newState;
+      });
     }
-  }, [item, onDecideNow]);
+  }, [item, onDecideNow, isReadyForReview, showDecisionButtons]);
 
   // Reset decision buttons when item changes
   const [previousItemId, setPreviousItemId] = useState(item.id);
@@ -89,12 +101,6 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
 
   // Show comments section for shared items
   const showComments = false;
-  
-  // Check if item is ready for review
-  const isReadyForReview = useMemo(() => {
-    const now = new Date();
-    return new Date(item.checkInDate) <= now;
-  }, [item.checkInDate]);
 
   return (
     <div 
