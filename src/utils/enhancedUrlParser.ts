@@ -59,25 +59,24 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       required: ["itemName"]
     };
 
-    const response = await fetch('/functions/v1/firecrawl-proxy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // Import supabase client to get the correct URL
+    const { supabase } = await import('../integrations/supabase/client');
+    
+    const response = await supabase.functions.invoke('firecrawl-proxy', {
+      body: {
         url,
         mode: 'extract',
         schema: extractSchema,
         prompt: 'Extract detailed product information including name, price, image, and other relevant details from this e-commerce page.'
-      })
+      }
     });
 
-    if (!response.ok) {
-      throw new Error(`Firecrawl request failed: ${response.status}`);
+    if (response.error) {
+      throw new Error(`Firecrawl request failed: ${response.error.message}`);
     }
 
-    const data = await response.json();
-    console.log('🔍 Enhanced parser: Firecrawl response status:', response.status);
+    const data = response.data;
+    console.log('🔍 Enhanced parser: Firecrawl response success');
     console.log('🔍 Enhanced parser: Full response data:', JSON.stringify(data, null, 2));
 
     if (data.extracted && Object.keys(data.extracted).length > 0) {
