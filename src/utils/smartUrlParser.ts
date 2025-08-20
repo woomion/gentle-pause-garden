@@ -726,28 +726,52 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
     const pathname = urlObj.pathname;
     
     console.log('🔍 Extracting product name from URL:', pathname);
+    console.log('🔍 Full URL:', url);
     
     // Check if this is a shopbop URL for specific handling
     const isShopbop = url.toLowerCase().includes('shopbop.com');
     
     if (isShopbop) {
-      console.log('🛍️ SHOPBOP: Direct pattern match for:', pathname);
+      console.log('🛍️ SHOPBOP: Processing URL:', pathname);
       
-      // Simple direct extraction for /product-name/vp/ structure
-      const directMatch = pathname.match(/\/([^\/]+)\/vp\//);
-      if (directMatch && directMatch[1]) {
-        const rawName = directMatch[1];
-        const productName = rawName
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, l => l.toUpperCase())
-          .trim();
-        console.log('🛍️ SHOPBOP: Extracted product name:', productName);
-        if (productName && productName.length > 2) {
-          return productName;
+      // Multiple patterns to try for Shopbop URLs
+      const shopbopPatterns = [
+        // Pattern: /product-name/vp/v=1/1234567890.htm
+        /\/([^\/]+)\/vp\/.*$/,
+        // Pattern: /v/product-name
+        /\/v\/([^\/\?]+)/,
+        // Pattern: anything before /vp/
+        /\/([^\/]+)\/vp\//,
+        // General product pattern
+        /\/([a-zA-Z0-9\-_]+)(?:\/|$)/
+      ];
+      
+      for (const pattern of shopbopPatterns) {
+        const match = pathname.match(pattern);
+        if (match && match[1]) {
+          console.log('🛍️ SHOPBOP: Pattern matched:', pattern, 'Raw:', match[1]);
+          
+          // Skip if it's just "v" or other single letters
+          if (match[1].length <= 2 || match[1] === 'v') {
+            continue;
+          }
+          
+          const rawName = match[1];
+          const productName = rawName
+            .replace(/-/g, ' ')
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, l => l.toUpperCase())
+            .trim();
+          
+          console.log('🛍️ SHOPBOP: Extracted product name:', productName);
+          
+          if (productName && productName.length > 2 && isValidProductName(productName)) {
+            return productName;
+          }
         }
       }
       
-      console.log('🛍️ SHOPBOP: No direct match found');
+      console.log('🛍️ SHOPBOP: No valid pattern match found');
     }
     
     // General e-commerce URL patterns
