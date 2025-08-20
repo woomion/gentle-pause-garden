@@ -16,13 +16,8 @@ const PauseLogHeader = ({ itemCount }: PauseLogHeaderProps) => {
   const [showUserModal, setShowUserModal] = useState(false);
 
   const handleBackClick = () => {
-    if (user) {
-      // If authenticated, show the account modal
-      setShowUserModal(true);
-    } else {
-      // If not authenticated, go back to home
-      navigate('/');
-    }
+    // Always navigate back to the main page (home)
+    navigate('/');
   };
 
   return (
