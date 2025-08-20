@@ -65,6 +65,7 @@ export const useItemDecisions = () => {
   };
 
   const handleBought = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void, reflectionNotes?: string) => {
+    console.log('🛒 DEBUG: handleBought called for item:', item.itemName, 'has link:', !!item.link);
     console.log('📝 Adding item to pause log (purchased):', {
       itemName: item.itemName,
       emotion: item.emotion,
@@ -104,7 +105,10 @@ export const useItemDecisions = () => {
       
       // If item has a link, open it in browser
       if (item.link) {
+        console.log('🌐 DEBUG: Opening item link:', item.link);
         handleViewItem(item);
+      } else {
+        console.log('🌐 DEBUG: No link found for item');
       }
       
       // Show success toast that auto-dismisses

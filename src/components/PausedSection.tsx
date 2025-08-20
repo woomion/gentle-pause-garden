@@ -167,6 +167,8 @@ const PausedSection = () => {
       <PausedItemsCarousel 
         items={pausedItems}
         onItemClick={handleItemClick}
+        onDelete={handleDeleteItem}
+        currentUserId={user?.id}
       />
 
       {selectedItem && (

@@ -14,10 +14,11 @@ import { CommentActivityIndicator } from './CommentActivityIndicator';
 interface PausedItemCardProps {
   item: PausedItem | LocalPausedItem;
   onClick: (item: PausedItem | LocalPausedItem) => void;
+  onDelete?: (id: string) => void;
   currentUserId?: string;
 }
 
-const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) => {
+const PausedItemCard = ({ item, onClick, onDelete, currentUserId }: PausedItemCardProps) => {
   const { handleViewItem, handleBought, handleLetGo } = useItemActions();
   const { getCommentCount, getUnreadCount, hasNewComments } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
@@ -48,15 +49,19 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
 
   const handleDecision = useCallback(async (e: React.MouseEvent, decision: 'purchase' | 'let-go') => {
     e.stopPropagation();
+    console.log('🔵 DEBUG: handleDecision called with:', decision, 'for item:', item.itemName);
     try {
       if (decision === 'purchase') {
-        await handleBought(item, () => {}, () => {});
+        console.log('🔵 DEBUG: Calling handleBought for item:', item.itemName, 'link:', item.link);
+        await handleBought(item, onDelete || (() => {}), () => {});
       } else {
-        await handleLetGo(item, () => {}, () => {});
+        console.log('🔵 DEBUG: Calling handleLetGo for item:', item.itemName);
+        await handleLetGo(item, onDelete || (() => {}), () => {});
       }
       setShowDecisionButtons(false);
+      console.log('🔵 DEBUG: Decision completed successfully');
     } catch (error) {
-      console.error('Error handling decision:', error);
+      console.error('❌ Error handling decision:', error);
     }
   }, [item, handleBought, handleLetGo]);
 

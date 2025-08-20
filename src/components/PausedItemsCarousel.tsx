@@ -7,10 +7,11 @@ import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 interface PausedItemsCarouselProps {
   items: (PausedItem | LocalPausedItem)[];
   onItemClick: (item: PausedItem | LocalPausedItem) => void;
+  onDelete?: (id: string) => void;
   currentUserId?: string;
 }
 
-const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId }: PausedItemsCarouselProps) => {
+const PausedItemsCarousel = memo(({ items, onItemClick, onDelete, currentUserId }: PausedItemsCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
 
   useEffect(() => {
@@ -43,6 +44,7 @@ const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId }: PausedI
           <PausedItemCard 
             item={items[0]} 
             onClick={() => onItemClick(items[0])} 
+            onDelete={onDelete}
             currentUserId={currentUserId}
           />
         </div>
@@ -64,6 +66,7 @@ const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId }: PausedI
                 <PausedItemCard 
                   item={item} 
                   onClick={() => onItemClick(item)} 
+                  onDelete={onDelete}
                   currentUserId={currentUserId}
                 />
               </CarouselItem>
@@ -84,6 +87,7 @@ const PausedItemsCarousel = memo(({ items, onItemClick, currentUserId }: PausedI
                       key={item.id}
                       item={item} 
                       onClick={() => onItemClick(item)}
+                      onDelete={onDelete}
                       currentUserId={currentUserId}
                     />
                   ))}
