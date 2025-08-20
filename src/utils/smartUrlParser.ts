@@ -738,6 +738,8 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
       const shopbopPatterns = [
         // New pattern for /product-name/vp/v=1/number.htm structure
         /\/([^\/]+)\/vp\/v=\d+\/\d+\.htm$/,
+        // Alternative pattern without the trailing slash requirement
+        /([^\/]+)\/vp\/v=\d+\/\d+\.htm$/,
         // Pattern like /tory-burch/mini-kira-chevron-flap-shoulder-bag-v123456.html
         /\/[^\/]+\/([^\/]+)-v\d+\.html$/,
         // Pattern like /brand/product-name.html (without v-number)
@@ -751,8 +753,9 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
       ];
       
       // Try Shopbop-specific patterns first
-      for (const pattern of shopbopPatterns) {
-        console.log('🛍️ DEBUG: Trying pattern:', pattern);
+      for (let i = 0; i < shopbopPatterns.length; i++) {
+        const pattern = shopbopPatterns[i];
+        console.log('🛍️ DEBUG: Trying pattern', i + 1, ':', pattern);
         const match = pathname.match(pattern);
         console.log('🛍️ DEBUG: Pattern match result:', match);
         if (match && match[1]) {
@@ -763,10 +766,12 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
             console.log('🛍️ DEBUG: Valid product name found, returning:', productName);
             return productName;
           } else {
-            console.log('🛍️ DEBUG: Product name validation failed');
+            console.log('🛍️ DEBUG: Product name validation failed for:', productName);
           }
         }
       }
+      
+      console.log('🛍️ DEBUG: No Shopbop patterns matched, trying fallback');
     }
     
     // General e-commerce URL patterns
