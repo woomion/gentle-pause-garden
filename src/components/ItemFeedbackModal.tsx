@@ -37,27 +37,30 @@ export const ItemFeedbackModal = ({ isOpen, onClose, originalUrl, originalData, 
     try {
       const correctedData = {
         itemName: itemName.trim(),
-        price: price.trim(),
-        imageUrl: imageUrl.trim(),
-        brand: brand.trim(),
+        price: price.trim() || undefined,
+        imageUrl: imageUrl.trim() || undefined,
+        brand: brand.trim() || undefined,
         storeName: originalData?.storeName,
         priceCurrency: originalData?.priceCurrency || 'USD'
       };
 
-      // Track feedback for future improvements
-      const feedback = {
-        url: originalUrl,
-        userCorrection: {
-          ...(itemName !== originalData?.itemName && { itemName }),
-          ...(price !== originalData?.price && { price }),
-          ...(imageUrl !== originalData?.imageUrl && { imageUrl }),
-          ...(brand !== originalData?.brand && { brand })
-        },
-        originalParsed: originalData,
-        timestamp: new Date().toISOString()
-      };
+      // Only track feedback if there are actual corrections
+      const userCorrection: any = {};
+      if (itemName !== (originalData?.itemName || '')) userCorrection.itemName = itemName;
+      if (price !== (originalData?.price || '')) userCorrection.price = price;
+      if (imageUrl !== (originalData?.imageUrl || '')) userCorrection.imageUrl = imageUrl;
+      if (brand !== (originalData?.brand || '')) userCorrection.brand = brand;
 
-      await rulesStore.addFeedback(feedback);
+      if (Object.keys(userCorrection).length > 0) {
+        const feedback = {
+          url: originalUrl,
+          userCorrection,
+          originalParsed: originalData,
+          timestamp: new Date().toISOString()
+        };
+
+        await rulesStore.addFeedback(feedback);
+      }
       
       onSave(correctedData);
       onClose();
@@ -67,6 +70,7 @@ export const ItemFeedbackModal = ({ isOpen, onClose, originalUrl, originalData, 
         description: "Product details updated successfully",
       });
     } catch (error) {
+      console.error('Feedback submission error:', error);
       toast({
         title: "Error", 
         description: "Failed to update product details",

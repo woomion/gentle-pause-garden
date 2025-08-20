@@ -26,6 +26,7 @@ interface SiteConfig {
 
 // Configuration for site-specific handling
 const SITE_CONFIGS: SiteConfig[] = [
+  // Fashion sites that heavily use JS
   { domain: 'shopbop.com', problematic: true, requiresJs: true },
   { domain: 'asics.com', problematic: true, requiresJs: true },
   { domain: 'nike.com', problematic: true, requiresJs: true },
@@ -33,9 +34,24 @@ const SITE_CONFIGS: SiteConfig[] = [
   { domain: 'zara.com', problematic: true, requiresJs: true },
   { domain: 'hm.com', problematic: true, requiresJs: true },
   { domain: 'lululemon.com', problematic: true, requiresJs: true },
+  { domain: 'anthropologie.com', problematic: true, requiresJs: true },
+  { domain: 'freepeople.com', problematic: true, requiresJs: true },
+  { domain: 'nordstrom.com', problematic: true, requiresJs: true },
+  { domain: 'saksfifthavenue.com', problematic: true, requiresJs: true },
+  { domain: 'barneys.com', problematic: true, requiresJs: true },
+  { domain: 'ssense.com', problematic: true, requiresJs: true },
+  { domain: 'mrporter.com', problematic: true, requiresJs: true },
+  { domain: 'netaporter.com', problematic: true, requiresJs: true },
+  
+  // Well-structured e-commerce sites
   { domain: 'amazon.com', problematic: false, requiresJs: false },
   { domain: 'target.com', problematic: false, requiresJs: false },
   { domain: 'walmart.com', problematic: false, requiresJs: false },
+  { domain: 'bestbuy.com', problematic: false, requiresJs: false },
+  { domain: 'homedepot.com', problematic: false, requiresJs: false },
+  { domain: 'lowes.com', problematic: false, requiresJs: false },
+  { domain: 'wayfair.com', problematic: false, requiresJs: false },
+  { domain: 'overstock.com', problematic: false, requiresJs: false },
 ];
 
 // Structured extraction schema for Firecrawl
@@ -149,36 +165,51 @@ const getBiggestImageByArea = (doc: Document, baseUrl: string): string | null =>
 // Find price near "Add to cart" or "Buy now" buttons for proximity detection
 const findPriceNearBuyButton = (doc: Document): string | null => {
   const buySelectors = [
-    'button:contains("Add to cart")',
-    'button:contains("Buy now")', 
-    'button:contains("Add to bag")',
-    'button:contains("Purchase")',
     '[class*="add-to-cart"]',
-    '[class*="buy-now"]',
-    '[data-testid*="add-to-cart"]'
+    '[class*="buy-now"]', 
+    '[class*="add-to-bag"]',
+    '[data-testid*="add-to-cart"]',
+    '[data-testid*="buy"]',
+    'button[type="submit"]'
   ];
 
+  // Also look for buttons with specific text content
+  const buttons = doc.querySelectorAll('button');
+  const buyButtons: Element[] = [];
+  
+  for (const button of buttons) {
+    const text = button.textContent?.toLowerCase() || '';
+    if (text.includes('add to cart') || text.includes('buy now') || 
+        text.includes('add to bag') || text.includes('purchase') ||
+        text.includes('add to basket')) {
+      buyButtons.push(button);
+    }
+  }
+
+  // Add selector-matched elements
   for (const selector of buySelectors) {
-    const button = doc.querySelector(selector);
-    if (button) {
-      // Look for price elements within 3 parent levels
-      let current = button.parentElement;
-      let level = 0;
+    const elements = doc.querySelectorAll(selector);
+    buyButtons.push(...Array.from(elements));
+  }
+
+  for (const button of buyButtons) {
+    // Look for price elements within 4 parent levels
+    let current = button.parentElement;
+    let level = 0;
+    
+    while (current && level < 4) {
+      const priceElements = current.querySelectorAll('[class*="price"], [data-testid*="price"], [class*="cost"]');
       
-      while (current && level < 3) {
-        const priceElements = current.querySelectorAll('[class*="price"], [data-testid*="price"]');
-        
-        for (const priceEl of priceElements) {
-          const text = priceEl.textContent || '';
-          const match = text.match(/[\$€£¥₹](\d+(?:,\d{3})*(?:\.\d{2})?)/);
-          if (match) {
-            return match[1].replace(/,/g, '');
-          }
+      for (const priceEl of priceElements) {
+        const text = priceEl.textContent || '';
+        const match = text.match(/[\$€£¥₹](\d+(?:,\d{3})*(?:\.\d{2})?)/);
+        if (match) {
+          return match[1].replace(/,/g, '');
         }
-        
-        current = current.parentElement;
-        level++;
       }
+      
+      current = current.parentElement;
+      level++;
     }
   }
   
@@ -190,6 +221,9 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
   try {
     console.log('🎯 Using Firecrawl extract mode for:', url);
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
     const response = await fetch('https://cnjznmbgxprsrovmdywe.supabase.co/functions/v1/firecrawl-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -198,30 +232,42 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
         mode: 'extract',
         schema: PRODUCT_EXTRACTION_SCHEMA,
         prompt: 'Extract product information including name, price, brand, and main image from this product page'
-      })
+      }),
+      signal: controller.signal
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      throw new Error(`Firecrawl extract failed: ${response.status}`);
+      throw new Error(`Firecrawl extract failed: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    if (data.extracted) {
+    
+    if (data.success && data.extracted) {
+      const extracted = data.extracted;
       const result: ProductInfo = {
-        itemName: data.extracted.itemName,
-        price: data.extracted.price,
-        priceCurrency: data.extracted.currency || 'USD',
-        brand: data.extracted.brand,
-        imageUrl: data.extracted.imageUrl,
-        availability: data.extracted.availability,
-        storeName: extractStoreName(url)
+        itemName: extracted.itemName?.trim(),
+        price: extracted.price ? String(extracted.price).replace(/[^\d.]/g, '') : undefined,
+        priceCurrency: extracted.currency || 'USD',
+        brand: extracted.brand?.trim(),
+        imageUrl: extracted.imageUrl && isValidUrl(extracted.imageUrl) ? extracted.imageUrl : undefined,
+        availability: extracted.availability,
+        storeName: getEnhancedStoreName(url)
       };
+
+      // Calculate confidence based on data quality
+      let confidence = 0.3; // Base confidence for Firecrawl
+      if (result.itemName && result.itemName.length > 3) confidence += 0.3;
+      if (result.price && !isNaN(parseFloat(result.price))) confidence += 0.2;
+      if (result.imageUrl) confidence += 0.1;
+      if (result.brand) confidence += 0.1;
 
       return {
         success: true,
         data: result,
         method: 'firecrawl-extract',
-        confidence: data.extracted.itemName ? 0.8 : 0.4
+        confidence
       };
     }
 
@@ -230,7 +276,7 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
     console.error('Firecrawl extract failed:', error);
     return {
       success: false,
-      data: { storeName: extractStoreName(url) },
+      data: { storeName: getEnhancedStoreName(url) },
       method: 'firecrawl-extract',
       confidence: 0,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -244,7 +290,7 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     const result: ProductInfo = {
-      storeName: extractStoreName(url)
+      storeName: getEnhancedStoreName(url)
     };
 
     // Extract structured data first
@@ -347,16 +393,24 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
     // Enhanced image extraction with biggest-by-area fallback
     if (!result.imageUrl) {
       const imgSelectors = [
-        '.product-image img',
-        '.hero-image img',
-        'img[data-testid*="product"]'
+        'img[itemprop="image"]',
+        '.product-image img[src]:not([src*="placeholder"]):not([src*="loading"])',
+        '.hero-image img[src]',
+        'img[data-testid*="product"]:not([src*="placeholder"])',
+        '.main-image img[src]',
+        'img[alt*="product" i][src]'
       ];
       
       for (const selector of imgSelectors) {
         const img = doc.querySelector(selector) as HTMLImageElement;
-        if (img?.src) {
-          result.imageUrl = img.src;
-          break;
+        if (img?.src && !img.src.includes('placeholder') && !img.src.includes('loading')) {
+          try {
+            result.imageUrl = new URL(img.src, url).toString();
+            break;
+          } catch {
+            result.imageUrl = img.src;
+            break;
+          }
         }
       }
       
@@ -377,7 +431,7 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
   } catch (error) {
     return {
       success: false,
-      data: { storeName: extractStoreName(url) },
+      data: { storeName: getEnhancedStoreName(url) },
       method: 'enhanced-generic',
       confidence: 0,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -409,30 +463,52 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
       if (!result.success || result.confidence < 0.3) {
         console.log('📋 Extract mode failed, trying enhanced parser');
         
-        // Try to get HTML via Firecrawl first
+        // Try to get HTML via Firecrawl first, then fallback chain
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+
           const response = await fetch('https://cnjznmbgxprsrovmdywe.supabase.co/functions/v1/firecrawl-proxy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url })
+            body: JSON.stringify({ url }),
+            signal: controller.signal
           });
+          
+          clearTimeout(timeoutId);
           
           if (response.ok) {
             const data = await response.json();
-            if (data.html) {
+            if (data.success && data.html) {
               result = await parseGenericEnhanced(data.html, url);
+            } else {
+              throw new Error('No HTML content received');
             }
+          } else {
+            throw new Error(`Firecrawl failed: ${response.status}`);
           }
         } catch (error) {
-          console.log('📋 Firecrawl HTML fetch failed, using simple parser');
-          const { parseProductUrl: simpleParser } = await import('./simpleUrlParser');
-          const simpleResult = await simpleParser(url);
-          result = {
-            success: true,
-            data: simpleResult,
-            method: 'simple-fallback',
-            confidence: 0.2
-          };
+          console.log('📋 Firecrawl HTML fetch failed, trying enhanced parser');
+          try {
+            const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
+            const enhancedResult = await enhancedParser(url);
+            result = {
+              success: true,
+              data: enhancedResult,
+              method: 'enhanced-fallback',
+              confidence: 0.4
+            };
+          } catch (enhancedError) {
+            console.log('📋 Enhanced parser failed, using simple parser');
+            const { parseProductUrl: simpleParser } = await import('./simpleUrlParser');
+            const simpleResult = await simpleParser(url);
+            result = {
+              success: true,
+              data: simpleResult,
+              method: 'simple-fallback',
+              confidence: 0.2
+            };
+          }
         }
       }
     } else {
@@ -455,7 +531,7 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
   } catch (error) {
     const errorResult: ParseResult = {
       success: false,
-      data: { storeName: extractStoreName(url) },
+      data: { storeName: getEnhancedStoreName(url) },
       method: 'error',
       confidence: 0,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -463,6 +539,56 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
     
     cache.set(normalizedUrl, { data: errorResult, timestamp: Date.now() });
     return errorResult;
+  }
+};
+
+// Helper function to validate URLs
+const isValidUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// Enhanced store name extraction with common retailer mappings
+const getEnhancedStoreName = (url: string): string => {
+  const storeMap: Record<string, string> = {
+    'amazon.com': 'Amazon',
+    'target.com': 'Target',
+    'walmart.com': 'Walmart',
+    'bestbuy.com': 'Best Buy',
+    'homedepot.com': 'Home Depot',
+    'lowes.com': "Lowe's",
+    'shopbop.com': 'Shopbop',
+    'nordstrom.com': 'Nordstrom',
+    'saksfifthavenue.com': 'Saks Fifth Avenue',
+    'anthropologie.com': 'Anthropologie',
+    'freepeople.com': 'Free People',
+    'lululemon.com': 'Lululemon',
+    'nike.com': 'Nike',
+    'adidas.com': 'Adidas',
+    'zara.com': 'Zara',
+    'hm.com': 'H&M'
+  };
+
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+    
+    // Check for exact matches first
+    for (const [domain, name] of Object.entries(storeMap)) {
+      if (hostname === domain || hostname.endsWith('.' + domain)) {
+        return name;
+      }
+    }
+    
+    // Fallback to domain extraction
+    const parts = hostname.split('.');
+    const domain = parts[parts.length - 2] || hostname;
+    return domain.charAt(0).toUpperCase() + domain.slice(1);
+  } catch {
+    return 'Unknown Store';
   }
 };
 
