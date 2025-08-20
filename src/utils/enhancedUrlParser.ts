@@ -77,9 +77,10 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     }
 
     const data = await response.json();
-    console.log('🔍 Enhanced parser: Firecrawl extract result:', data);
+    console.log('🔍 Enhanced parser: Firecrawl response status:', response.status);
+    console.log('🔍 Enhanced parser: Full response data:', JSON.stringify(data, null, 2));
 
-    if (data.extracted) {
+    if (data.extracted && Object.keys(data.extracted).length > 0) {
       const result: ProductInfo = {
         storeName: extractStoreName(url),
         canonicalUrl: url,
