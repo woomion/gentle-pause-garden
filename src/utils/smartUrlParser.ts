@@ -736,6 +736,8 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
       console.log('🛍️ DEBUG: Pathname:', pathname);
       // Enhanced Shopbop patterns - they use more varied formats
       const shopbopPatterns = [
+        // New pattern for /product-name/vp/v=1/number.htm structure
+        /\/([^\/]+)\/vp\/v=\d+\/\d+\.htm$/,
         // Pattern like /tory-burch/mini-kira-chevron-flap-shoulder-bag-v123456.html
         /\/[^\/]+\/([^\/]+)-v\d+\.html$/,
         // Pattern like /brand/product-name.html (without v-number)
