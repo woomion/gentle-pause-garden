@@ -39,6 +39,13 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
     setShowDecisionButtons(prev => !prev);
   }, [item.id, showDecisionButtons]);
 
+  // Reset decision buttons when item changes
+  const [previousItemId, setPreviousItemId] = useState(item.id);
+  if (previousItemId !== item.id) {
+    setShowDecisionButtons(false);
+    setPreviousItemId(item.id);
+  }
+
   const handleDecision = useCallback(async (e: React.MouseEvent, decision: 'purchase' | 'let-go') => {
     e.stopPropagation();
     try {
