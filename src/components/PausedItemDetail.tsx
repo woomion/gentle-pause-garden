@@ -128,7 +128,13 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   };
 
   const handleDecisionClick = () => {
-    setShowDecisionButtons(true);
+    console.log('🚨 DECIDE NOW BUTTON CLICKED in PausedItemDetail!', item.itemName);
+    console.log('🚨 Current showDecisionButtons state:', showDecisionButtons);
+    setShowDecisionButtons(prev => {
+      const newValue = !prev;
+      console.log('🚨 Setting showDecisionButtons to:', newValue);
+      return newValue;
+    });
   };
 
   const handleDecision = async (decision: 'purchase' | 'let-go') => {
