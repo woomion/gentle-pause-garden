@@ -86,10 +86,15 @@ export const createFallbackResult = async (
   const urlObj = new URL(url);
   const domain = urlObj.hostname.replace(/^www\./, '');
   
+  // Import URL-based extraction
+  const { extractProductNameFromUrl } = await import('./smartUrlParser');
+  const urlBasedName = extractProductNameFromUrl(url);
+  
   return {
     success: true,
     data: {
       itemName: partialData.itemName || 
+                urlBasedName ||
                 urlObj.pathname.split('/').pop()?.replace(/-/g, ' ') || 
                 'Product',
       storeName: partialData.storeName || 
@@ -102,8 +107,8 @@ export const createFallbackResult = async (
       canonicalUrl: partialData.canonicalUrl || url,
       ...partialData
     },
-    method: 'screenshot_fallback',
-    confidence: screenshotUrl ? 0.4 : 0.2, // Higher confidence if we have screenshot
+    method: 'url_fallback',
+    confidence: urlBasedName ? 0.6 : (screenshotUrl ? 0.4 : 0.2), // Higher confidence if we extracted from URL
     url: url,
     canonicalUrl: partialData.canonicalUrl || url,
     screenshot: screenshotUrl,

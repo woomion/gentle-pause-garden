@@ -507,31 +507,63 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
             throw new Error(`Firecrawl failed: ${response.status}`);
           }
         } catch (error) {
-          console.log('📋 Firecrawl HTML fetch failed, trying enhanced parser');
+          console.log('📋 Firecrawl HTML fetch failed, trying enhanced parser with URL extraction');
+          
+          // Try enhanced fallback  
           try {
             const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
             const enhancedResult = await enhancedParser(url);
+            
+            // If enhanced parser failed to get name, try URL extraction
+            if (!enhancedResult.itemName) {
+              enhancedResult.itemName = extractProductNameFromUrl(url);
+            }
+            
+            if (enhancedResult.itemName || enhancedResult.price || enhancedResult.imageUrl) {
+              result = {
+                success: true,
+                data: enhancedResult,
+                method: 'enhanced-fallback',
+                confidence: 0.4,
+                url,
+                canonicalUrl: enhancedResult.canonicalUrl || url,
+                raw: enhancedResult
+              };
+            } else {
+              // Simple fallback with URL extraction
+              const { parseProductUrl: simpleParser } = await import('./simpleUrlParser');
+              const simpleResult = await simpleParser(url);
+              
+              if (!simpleResult.itemName) {
+                simpleResult.itemName = extractProductNameFromUrl(url);
+              }
+              
+              result = {
+                success: true,
+                data: simpleResult,
+                method: 'url-extraction-fallback',
+                confidence: simpleResult.itemName ? 0.3 : 0.2,
+                url,
+                canonicalUrl: simpleResult.canonicalUrl || url,
+                raw: simpleResult
+              };
+            }
+          } catch (fallbackError) {
+            console.error('All fallbacks failed:', fallbackError);
+            
+            // Last resort: URL-only extraction
+            const urlName = extractProductNameFromUrl(url);
             result = {
               success: true,
-              data: enhancedResult,
-              method: 'enhanced-fallback',
-              confidence: 0.4,
+              data: {
+                itemName: urlName || 'Product',
+                storeName: getEnhancedStoreName(url),
+                canonicalUrl: url
+              },
+              method: 'url-only',
+              confidence: urlName ? 0.3 : 0.1,
               url,
-              canonicalUrl: enhancedResult.canonicalUrl || url,
-              raw: enhancedResult
-            };
-          } catch (enhancedError) {
-            console.log('📋 Enhanced parser failed, using simple parser');
-            const { parseProductUrl: simpleParser } = await import('./simpleUrlParser');
-            const simpleResult = await simpleParser(url);
-            result = {
-              success: true,
-              data: simpleResult,
-              method: 'simple-fallback',
-              confidence: 0.2,
-              url,
-              canonicalUrl: simpleResult.canonicalUrl || url,
-              raw: simpleResult
+              canonicalUrl: url
             };
           }
         }
@@ -541,6 +573,12 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
       console.log('📋 Using enhanced parser for well-behaved site');
       const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
       const enhancedResult = await enhancedParser(url);
+      
+      // Even for well-behaved sites, try URL extraction if no name found
+      if (!enhancedResult.itemName) {
+        enhancedResult.itemName = extractProductNameFromUrl(url);
+      }
+      
       result = {
         success: true,
         data: enhancedResult,
@@ -650,6 +688,66 @@ const getEnhancedStoreName = (url: string): string => {
   } catch {
     return 'Unknown Store';
   }
+};
+
+// Enhanced URL-based product name extraction
+export const extractProductNameFromUrl = (url: string): string | undefined => {
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    
+    // Common e-commerce URL patterns
+    const patterns = [
+      // Shopbop pattern: /shop/product/123456 or /brand/product-name-v12345.html
+      /\/([^\/]+)[-_]v?\d*\.html?$/,
+      // General product patterns
+      /\/products?\/([^\/\?]+)/,
+      /\/p\/([^\/\?]+)/,
+      /\/shop\/([^\/\?]+)/,
+      /\/item\/([^\/\?]+)/,
+      /\/dp\/([^\/\?]+)/,
+      // Extract last meaningful segment
+      /\/([^\/\?]{10,})(?:\.html?)?$/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = pathname.match(pattern);
+      if (match && match[1]) {
+        const productName = match[1]
+          .replace(/[-_]/g, ' ')
+          .replace(/\+/g, ' ')
+          .replace(/%20/g, ' ')
+          .replace(/\w\S*/g, (txt) => 
+            txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+          )
+          .trim();
+        
+        // Filter out obvious non-product names
+        const blacklist = ['product', 'item', 'shop', 'category', 'brand', 'collection'];
+        if (productName.length > 3 && !blacklist.includes(productName.toLowerCase())) {
+          return productName;
+        }
+      }
+    }
+    
+    // Last resort: clean up the last path segment
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length > 0) {
+      const lastSegment = segments[segments.length - 1];
+      if (lastSegment.length > 5) {
+        return lastSegment
+          .replace(/[-_]/g, ' ')
+          .replace(/\w\S*/g, (txt) => 
+            txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+          )
+          .trim();
+      }
+    }
+  } catch (error) {
+    console.error('Error extracting product name from URL:', error);
+  }
+  
+  return undefined;
 };
 
 // Legacy compatibility function
