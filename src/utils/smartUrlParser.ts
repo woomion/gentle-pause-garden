@@ -7,6 +7,8 @@ interface ProductInfo {
   availability?: string;
   brand?: string;
   sku?: string;
+  description?: string;
+  canonicalUrl?: string;
 }
 
 interface ParseResult {
@@ -15,6 +17,10 @@ interface ParseResult {
   method: string;
   confidence: number;
   error?: string;
+  url: string;
+  canonicalUrl?: string;
+  screenshot?: string;
+  raw?: any;
 }
 
 interface SiteConfig {
@@ -267,7 +273,9 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
         success: true,
         data: result,
         method: 'firecrawl-extract',
-        confidence
+        confidence,
+        url,
+        canonicalUrl: result.canonicalUrl || url
       };
     }
 
@@ -279,7 +287,9 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
       data: { storeName: getEnhancedStoreName(url) },
       method: 'firecrawl-extract',
       confidence: 0,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
+      url,
+      canonicalUrl: url
     };
   }
 };
@@ -426,7 +436,10 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
       success: true,
       data: result,
       method: 'enhanced-generic',
-      confidence
+      confidence,
+      url,
+      canonicalUrl: result.canonicalUrl || url,
+      raw: result
     };
   } catch (error) {
     return {
@@ -434,7 +447,9 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
       data: { storeName: getEnhancedStoreName(url) },
       method: 'enhanced-generic',
       confidence: 0,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
+      url,
+      canonicalUrl: url
     };
   }
 };
@@ -453,6 +468,10 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
   
   try {
     let result: ParseResult;
+
+    // Import content extraction and screenshot fallback
+    const { extractContent, detectCurrency } = await import('./contentExtractor');
+    const { shouldUseScreenshotFallback, captureScreenshotFallback, createFallbackResult } = await import('./screenshotFallback');
 
     // Phase 1: Smart routing based on site configuration
     if (siteConfig?.problematic) {
@@ -496,7 +515,10 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
               success: true,
               data: enhancedResult,
               method: 'enhanced-fallback',
-              confidence: 0.4
+              confidence: 0.4,
+              url,
+              canonicalUrl: enhancedResult.canonicalUrl || url,
+              raw: enhancedResult
             };
           } catch (enhancedError) {
             console.log('📋 Enhanced parser failed, using simple parser');
@@ -506,7 +528,10 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
               success: true,
               data: simpleResult,
               method: 'simple-fallback',
-              confidence: 0.2
+              confidence: 0.2,
+              url,
+              canonicalUrl: simpleResult.canonicalUrl || url,
+              raw: simpleResult
             };
           }
         }
@@ -520,8 +545,24 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
         success: true,
         data: enhancedResult,
         method: 'enhanced',
-        confidence: 0.7
+        confidence: 0.7,
+        url,
+        canonicalUrl: enhancedResult.canonicalUrl || url,
+        raw: enhancedResult
       };
+    }
+
+    // Check if we should use screenshot fallback
+    if (shouldUseScreenshotFallback([result])) {
+      console.log('🖼️ Using screenshot fallback for low-confidence result');
+      const screenshotResult = await captureScreenshotFallback(url);
+      
+      if (screenshotResult.success) {
+        result = await createFallbackResult(url, result.data, screenshotResult.screenshotUrl);
+        if (screenshotResult.title && !result.data.itemName) {
+          result.data.itemName = screenshotResult.title;
+        }
+      }
     }
 
     // Cache the result
@@ -529,12 +570,31 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
     
     return result;
   } catch (error) {
+    // Try screenshot fallback even on complete failure
+    try {
+      const { captureScreenshotFallback, createFallbackResult } = await import('./screenshotFallback');
+      const screenshotResult = await captureScreenshotFallback(url);
+      
+      if (screenshotResult.success) {
+        const fallbackResult = await createFallbackResult(url, { storeName: getEnhancedStoreName(url) }, screenshotResult.screenshotUrl);
+        if (screenshotResult.title) {
+          fallbackResult.data.itemName = screenshotResult.title;
+        }
+        cache.set(normalizedUrl, { data: fallbackResult, timestamp: Date.now() });
+        return fallbackResult;
+      }
+    } catch (screenshotError) {
+      console.error('Screenshot fallback also failed:', screenshotError);
+    }
+    
     const errorResult: ParseResult = {
       success: false,
       data: { storeName: getEnhancedStoreName(url) },
       method: 'error',
       confidence: 0,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
+      url,
+      canonicalUrl: url
     };
     
     cache.set(normalizedUrl, { data: errorResult, timestamp: Date.now() });

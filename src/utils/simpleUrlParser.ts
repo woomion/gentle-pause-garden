@@ -5,6 +5,8 @@ interface ProductInfo {
   priceCurrency?: string;
   imageUrl?: string;
   brand?: string;
+  description?: string;
+  canonicalUrl?: string;
 }
 
 // Simple fallback parser for when everything else fails
@@ -26,7 +28,8 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     const doc = parser.parseFromString(html, 'text/html');
 
     const result: ProductInfo = {
-      storeName: extractStoreName(url)
+      storeName: extractStoreName(url),
+      canonicalUrl: doc.querySelector('link[rel="canonical"]')?.getAttribute('href') || url
     };
 
     // Basic title extraction

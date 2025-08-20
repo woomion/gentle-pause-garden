@@ -6,6 +6,8 @@ interface ProductInfo {
   imageUrl?: string;
   brand?: string;
   availability?: string;
+  description?: string;
+  canonicalUrl?: string;
 }
 
 // Enhanced parser for well-behaved sites
@@ -33,7 +35,8 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     const doc = parser.parseFromString(html, 'text/html');
 
     const result: ProductInfo = {
-      storeName: extractStoreName(url)
+      storeName: extractStoreName(url),
+      canonicalUrl: doc.querySelector('link[rel="canonical"]')?.getAttribute('href') || url
     };
 
     // Extract from JSON-LD structured data
