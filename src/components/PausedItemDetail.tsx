@@ -209,8 +209,28 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
               {!showDecisionButtons ? (
                 <div className="pt-2">
                   <button 
-                    onClick={handleDecisionClick}
-                    className="w-full py-3 px-4 bg-decide-now hover:bg-decide-now/90 text-decide-now-foreground font-medium rounded-xl transition-colors"
+                    onClick={(e) => {
+                      console.log('🚨 RAW CLICK EVENT FIRED!', e);
+                      console.log('🚨 Event target:', e.target);
+                      console.log('🚨 Event currentTarget:', e.currentTarget);
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDecisionClick();
+                    }}
+                    onMouseDown={(e) => {
+                      console.log('🚨 MOUSE DOWN EVENT!', e);
+                    }}
+                    onTouchStart={(e) => {
+                      console.log('🚨 TOUCH START EVENT!', e);
+                    }}
+                    style={{ 
+                      position: 'relative',
+                      zIndex: 9999,
+                      pointerEvents: 'auto',
+                      backgroundColor: 'hsl(var(--decide-now))',
+                      color: 'hsl(var(--decide-now-foreground))'
+                    }}
+                    className="w-full py-3 px-4 font-medium rounded-xl transition-colors hover:opacity-90 border-2 border-red-500"
                   >
                     {(item.link || (item as any).url) ? 'Decide now' : 'Make a decision'}
                   </button>
