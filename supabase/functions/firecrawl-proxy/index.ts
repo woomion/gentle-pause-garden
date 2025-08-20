@@ -96,7 +96,7 @@ serve(async (req: Request) => {
         }
         
         // Return extracted data from polling
-        const extracted = resultData.data?.[0] || {};
+        const extracted = resultData.data || {};
         console.log('✅ Final extracted data:', JSON.stringify(extracted, null, 2));
         return new Response(JSON.stringify({ extracted }), {
           status: 200,
