@@ -10,56 +10,87 @@ interface ProductInfo {
   canonicalUrl?: string;
 }
 
-// Enhanced parser for well-behaved sites
+// Enhanced parser using Firecrawl extract mode
 export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   try {
-    const response = await fetch(url, {
-      method: 'GET',
+    console.log('🔍 Enhanced parser: Starting Firecrawl extract for', url);
+    
+    // Use Firecrawl extract mode with product schema
+    const extractSchema = {
+      type: "object",
+      properties: {
+        itemName: {
+          type: "string",
+          description: "The product name or title"
+        },
+        price: {
+          type: "string", 
+          description: "The current price of the product (numbers only, no currency symbols)"
+        },
+        priceCurrency: {
+          type: "string",
+          description: "The currency of the price (USD, EUR, GBP, etc.)"
+        },
+        imageUrl: {
+          type: "string",
+          description: "The main product image URL"
+        },
+        brand: {
+          type: "string",
+          description: "The brand or manufacturer of the product"
+        },
+        description: {
+          type: "string",
+          description: "Brief product description"
+        },
+        availability: {
+          type: "string",
+          description: "Product availability status (in stock, out of stock, etc.)"
+        }
+      },
+      required: ["itemName"]
+    };
+
+    const response = await fetch('/functions/v1/firecrawl-proxy', {
+      method: 'POST',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1'
-      }
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+        mode: 'extract',
+        schema: extractSchema,
+        prompt: 'Extract detailed product information including name, price, image, and other relevant details from this e-commerce page.'
+      })
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      throw new Error(`Firecrawl request failed: ${response.status}`);
     }
 
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    const data = await response.json();
+    console.log('🔍 Enhanced parser: Firecrawl extract result:', data);
 
-    const result: ProductInfo = {
-      storeName: extractStoreName(url),
-      canonicalUrl: doc.querySelector('link[rel="canonical"]')?.getAttribute('href') || url
-    };
+    if (data.extracted) {
+      const result: ProductInfo = {
+        storeName: extractStoreName(url),
+        canonicalUrl: url,
+        ...data.extracted
+      };
 
-    // Extract from JSON-LD structured data
-    await extractFromJsonLd(doc, result);
-
-    // Extract from Open Graph tags
-    extractFromOpenGraph(doc, result, url);
-
-    // Extract from common selectors
-    extractFromSelectors(doc, result, url);
-
-    // Extract from microdata
-    extractFromMicrodata(doc, result);
-
-    // Validate and clean the results
-    cleanAndValidateResult(result);
-
-    return result;
+      // Clean and validate the results
+      cleanAndValidateResult(result);
+      
+      console.log('🔍 Enhanced parser: Final result:', result);
+      return result;
+    } else {
+      throw new Error('No data extracted');
+    }
   } catch (error) {
-    console.error('Enhanced parser failed:', error);
+    console.error('🔍 Enhanced parser failed:', error);
     return {
       storeName: extractStoreName(url),
-      itemName: 'Product'
+      itemName: undefined
     };
   }
 };
