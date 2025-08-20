@@ -52,15 +52,61 @@ serve(async (req: Request) => {
       });
 
       const extractData = await extractRes.json();
-      console.log('📋 Firecrawl extract response:', extractData);
+      console.log('📋 Firecrawl extract response:', JSON.stringify(extractData, null, 2));
       
       if (!extractRes.ok || !extractData.success) {
         console.error('❌ Extract failed:', extractData.error);
         return new Response(JSON.stringify({ error: extractData.error || 'Firecrawl extract failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
 
-      // Return extracted data
+      // Check if this is an async job response
+      if (extractData.id && !extractData.data) {
+        console.log('🔄 Extract job started, polling for results...');
+        
+        // Poll for results
+        let attempts = 0;
+        const maxAttempts = 10;
+        let resultData;
+        
+        while (attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          
+          const statusRes = await fetch(`https://api.firecrawl.dev/v1/extract/${extractData.id}`, {
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+            },
+          });
+          
+          resultData = await statusRes.json();
+          console.log(`📋 Extract status attempt ${attempts + 1}:`, JSON.stringify(resultData, null, 2));
+          
+          if (resultData.status === 'completed' && resultData.data) {
+            break;
+          } else if (resultData.status === 'failed') {
+            console.error('❌ Extract job failed:', resultData.error);
+            return new Response(JSON.stringify({ error: resultData.error || 'Extract job failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+          
+          attempts++;
+        }
+        
+        if (!resultData?.data) {
+          console.error('❌ Extract job timed out or failed');
+          return new Response(JSON.stringify({ error: 'Extract job timed out' }), { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        
+        // Return extracted data from polling
+        const extracted = resultData.data?.[0] || {};
+        console.log('✅ Final extracted data:', JSON.stringify(extracted, null, 2));
+        return new Response(JSON.stringify({ extracted }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Return extracted data immediately if available
       const extracted = extractData.data?.[0] || {};
+      console.log('✅ Immediate extracted data:', JSON.stringify(extracted, null, 2));
       return new Response(JSON.stringify({ extracted }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
