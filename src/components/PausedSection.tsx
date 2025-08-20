@@ -116,13 +116,14 @@ const PausedSection = () => {
 
   const handleDecideNow = useCallback((item: PausedItem | LocalPausedItem) => {
     console.log('🎯 PausedSection: handleDecideNow called for item:', item.id);
+    console.log('🎯 PausedSection: Current showReviewModal state:', showReviewModal);
+    
     // Open the review modal with just this specific item
     setReviewItem(item);
     setShowReviewModal(true);
     
-    // Prevent event bubbling to avoid triggering other modals
-    return false;
-  }, []);
+    console.log('🎯 PausedSection: Set reviewItem and showReviewModal to true');
+  }, [showReviewModal]);
 
   // Loading state
   if (isLoading) {

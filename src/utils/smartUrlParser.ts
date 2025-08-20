@@ -516,7 +516,9 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
             
             // If enhanced parser failed to get name, try URL extraction
             if (!enhancedResult.itemName) {
+              console.log('🔍 Enhanced parser failed, trying URL extraction for:', url);
               enhancedResult.itemName = extractProductNameFromUrl(url);
+              console.log('🔍 URL extraction result:', enhancedResult.itemName);
             }
             
             if (enhancedResult.itemName || enhancedResult.price || enhancedResult.imageUrl) {
@@ -535,7 +537,9 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
               const simpleResult = await simpleParser(url);
               
               if (!simpleResult.itemName) {
+                console.log('🔍 Simple parser failed, trying URL extraction for:', url);
                 simpleResult.itemName = extractProductNameFromUrl(url);
+                console.log('🔍 URL extraction result:', simpleResult.itemName);
               }
               
               result = {
