@@ -14,6 +14,9 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],
     },
+    Browser: {
+      presentationStyle: 'overCurrentContext'
+    },
   },
   android: {
     intentFilters: [
@@ -27,7 +30,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'always',
     scheme: 'pocketpause',
-    limitsNavigationsToAppBoundDomains: true,
+    limitsNavigationsToAppBoundDomains: false,
     minVersion: '13.0'
   }
 };
