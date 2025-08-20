@@ -15,48 +15,23 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   try {
     console.log('🔍 Enhanced parser: Starting Firecrawl extract for', url);
     
-    // Use Firecrawl extract mode with enhanced product schema
+    // Simplified schema focusing on essential data
     const extractSchema = {
       type: "object",
       properties: {
-        itemName: {
+        name: {
           type: "string",
-          description: "The full product name or title, excluding store name"
+          description: "Product name or title"
         },
         price: {
           type: "string", 
-          description: "Current selling price as a number (e.g. '299.99', '45.00') - extract only the numeric value without currency symbols"
+          description: "Price with currency symbol (e.g. '$299.99')"
         },
-        originalPrice: {
+        image: {
           type: "string",
-          description: "Original price before discount if different from current price"
-        },
-        priceCurrency: {
-          type: "string",
-          description: "Currency code (USD, EUR, GBP, etc.) or currency symbol ($, €, £)"
-        },
-        imageUrl: {
-          type: "string",
-          description: "Main high-resolution product image URL - the primary product photo displayed prominently"
-        },
-        brand: {
-          type: "string",
-          description: "Brand or manufacturer name of the product"
-        },
-        description: {
-          type: "string",
-          description: "Product description or key features"
-        },
-        availability: {
-          type: "string",
-          description: "Stock status (In Stock, Out of Stock, Limited, etc.)"
-        },
-        category: {
-          type: "string",
-          description: "Product category or type"
+          description: "Main product image URL"
         }
-      },
-      required: ["itemName"]
+      }
     };
 
     // Import supabase client to get the correct URL
@@ -80,10 +55,13 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
     console.log('🔍 Enhanced parser: Full response data:', JSON.stringify(data, null, 2));
 
     if (data.extracted && Object.keys(data.extracted).length > 0) {
+      const extracted = data.extracted;
       const result: ProductInfo = {
         storeName: extractStoreName(url),
         canonicalUrl: url,
-        ...data.extracted
+        itemName: extracted.name || extracted.itemName,
+        price: extracted.price,
+        imageUrl: extracted.image || extracted.imageUrl
       };
 
       // Clean and validate the results
@@ -92,6 +70,41 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
       console.log('🔍 Enhanced parser: Final result:', result);
       return result;
     } else {
+      console.log('🔍 Enhanced parser: No data from Firecrawl, trying direct scraping fallback');
+      
+      // Fallback: Try to get basic HTML and parse manually
+      try {
+        const htmlResponse = await supabase.functions.invoke('firecrawl-proxy', {
+          body: {
+            url,
+            mode: 'crawl'
+          }
+        });
+
+        if (htmlResponse.data?.content) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(htmlResponse.data.content, 'text/html');
+          
+          const result: ProductInfo = {
+            storeName: extractStoreName(url),
+            canonicalUrl: url
+          };
+
+          // Try different extraction methods
+          await extractFromJsonLd(doc, result);
+          extractFromOpenGraph(doc, result, url);
+          extractFromSelectors(doc, result, url);
+          extractFromMicrodata(doc, result);
+          
+          cleanAndValidateResult(result);
+          
+          console.log('🔍 Enhanced parser: Fallback extraction result:', result);
+          return result;
+        }
+      } catch (fallbackError) {
+        console.error('🔍 Enhanced parser: Fallback also failed:', fallbackError);
+      }
+      
       throw new Error('No data extracted');
     }
   } catch (error) {
