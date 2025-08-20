@@ -123,6 +123,7 @@ const PausedSection = () => {
     setShowReviewModal(true);
     
     console.log('🎯 PausedSection: Set reviewItem and showReviewModal to true');
+    console.log('🎯 PausedSection: reviewItem now set to:', item);
   }, [showReviewModal]);
 
   // Loading state
