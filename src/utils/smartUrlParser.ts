@@ -696,58 +696,111 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
     const urlObj = new URL(url);
     const pathname = urlObj.pathname;
     
-    // Common e-commerce URL patterns
-    const patterns = [
-      // Shopbop pattern: /shop/product/123456 or /brand/product-name-v12345.html
-      /\/([^\/]+)[-_]v?\d*\.html?$/,
-      // General product patterns
-      /\/products?\/([^\/\?]+)/,
-      /\/p\/([^\/\?]+)/,
-      /\/shop\/([^\/\?]+)/,
-      /\/item\/([^\/\?]+)/,
-      /\/dp\/([^\/\?]+)/,
-      // Extract last meaningful segment
-      /\/([^\/\?]{10,})(?:\.html?)?$/
+    console.log('🔍 Extracting product name from URL:', pathname);
+    
+    // Shopbop specific patterns - they use formats like:
+    // /shop/product/123456 or /brand/product-name-v12345.html
+    const shopbopPatterns = [
+      // Pattern like /tory-burch/mini-kira-chevron-flap-shoulder-bag-v123456.html
+      /\/[^\/]+\/([^\/]+)-v\d+\.html$/,
+      // Pattern like /brand/product-name.html
+      /\/[^\/]+\/([^\/]+)\.html$/,
+      // Pattern like /shop/product-name-123
+      /\/shop\/([^\/\?]+?)(?:-\d+)?$/
     ];
     
-    for (const pattern of patterns) {
+    // Try Shopbop-specific patterns first
+    for (const pattern of shopbopPatterns) {
       const match = pathname.match(pattern);
       if (match && match[1]) {
-        const productName = match[1]
-          .replace(/[-_]/g, ' ')
-          .replace(/\+/g, ' ')
-          .replace(/%20/g, ' ')
-          .replace(/\w\S*/g, (txt) => 
-            txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-          )
-          .trim();
-        
-        // Filter out obvious non-product names
-        const blacklist = ['product', 'item', 'shop', 'category', 'brand', 'collection'];
-        if (productName.length > 3 && !blacklist.includes(productName.toLowerCase())) {
+        const productName = cleanUrlProductName(match[1]);
+        console.log('✅ Shopbop pattern matched:', productName);
+        if (productName && productName.length > 3) {
           return productName;
         }
       }
     }
     
-    // Last resort: clean up the last path segment
+    // General e-commerce URL patterns
+    const generalPatterns = [
+      // /products/product-name or /product/product-name
+      /\/products?\/([^\/\?]+)/,
+      // /p/product-name
+      /\/p\/([^\/\?]+)/,
+      // /item/product-name
+      /\/item\/([^\/\?]+)/,
+      // /dp/product-name (Amazon style)
+      /\/dp\/([^\/\?]+)/,
+      // Any meaningful last segment (at least 10 chars)
+      /\/([^\/\?]{10,})(?:\.html?)?$/
+    ];
+    
+    for (const pattern of generalPatterns) {
+      const match = pathname.match(pattern);
+      if (match && match[1]) {
+        const productName = cleanUrlProductName(match[1]);
+        console.log('✅ General pattern matched:', productName);
+        if (productName && isValidProductName(productName)) {
+          return productName;
+        }
+      }
+    }
+    
+    // Last resort: try the last meaningful path segment
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length > 0) {
       const lastSegment = segments[segments.length - 1];
       if (lastSegment.length > 5) {
-        return lastSegment
-          .replace(/[-_]/g, ' ')
-          .replace(/\w\S*/g, (txt) => 
-            txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-          )
-          .trim();
+        const productName = cleanUrlProductName(lastSegment);
+        console.log('✅ Last segment extraction:', productName);
+        if (productName && isValidProductName(productName)) {
+          return productName;
+        }
       }
     }
+    
+    console.log('❌ No valid product name found in URL');
   } catch (error) {
     console.error('Error extracting product name from URL:', error);
   }
   
   return undefined;
+};
+
+// Helper function to clean and format URL product names
+const cleanUrlProductName = (urlSegment: string): string => {
+  return urlSegment
+    .replace(/[-_+%20]/g, ' ')  // Replace separators with spaces
+    .replace(/\.(html?|php|asp)$/i, '') // Remove file extensions
+    .replace(/\w\S*/g, (txt) => 
+      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    ) // Title case each word
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim();
+};
+
+// Helper function to validate if extracted text is a real product name
+const isValidProductName = (name: string): boolean => {
+  if (!name || name.length < 4) return false;
+  
+  const blacklist = [
+    'product', 'item', 'shop', 'category', 'brand', 'collection',
+    'products', 'items', 'page', 'index', 'home', 'search',
+    'cart', 'checkout', 'account', 'login', 'register'
+  ];
+  
+  const lowerName = name.toLowerCase();
+  
+  // Check if it's in blacklist
+  if (blacklist.includes(lowerName)) return false;
+  
+  // Check if it's mostly numbers (like product IDs)
+  if (/^\d+$/.test(name.replace(/\s/g, ''))) return false;
+  
+  // Should have at least some letters
+  if (!/[a-zA-Z]/.test(name)) return false;
+  
+  return true;
 };
 
 // Legacy compatibility function
