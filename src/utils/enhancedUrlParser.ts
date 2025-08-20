@@ -15,37 +15,45 @@ export const parseProductUrl = async (url: string): Promise<ProductInfo> => {
   try {
     console.log('🔍 Enhanced parser: Starting Firecrawl extract for', url);
     
-    // Use Firecrawl extract mode with product schema
+    // Use Firecrawl extract mode with enhanced product schema
     const extractSchema = {
       type: "object",
       properties: {
         itemName: {
           type: "string",
-          description: "The product name or title"
+          description: "The full product name or title, excluding store name"
         },
         price: {
           type: "string", 
-          description: "The current price of the product (numbers only, no currency symbols)"
+          description: "Current selling price as a number (e.g. '299.99', '45.00') - extract only the numeric value without currency symbols"
+        },
+        originalPrice: {
+          type: "string",
+          description: "Original price before discount if different from current price"
         },
         priceCurrency: {
           type: "string",
-          description: "The currency of the price (USD, EUR, GBP, etc.)"
+          description: "Currency code (USD, EUR, GBP, etc.) or currency symbol ($, €, £)"
         },
         imageUrl: {
           type: "string",
-          description: "The main product image URL"
+          description: "Main high-resolution product image URL - the primary product photo displayed prominently"
         },
         brand: {
           type: "string",
-          description: "The brand or manufacturer of the product"
+          description: "Brand or manufacturer name of the product"
         },
         description: {
           type: "string",
-          description: "Brief product description"
+          description: "Product description or key features"
         },
         availability: {
           type: "string",
-          description: "Product availability status (in stock, out of stock, etc.)"
+          description: "Stock status (In Stock, Out of Stock, Limited, etc.)"
+        },
+        category: {
+          type: "string",
+          description: "Product category or type"
         }
       },
       required: ["itemName"]

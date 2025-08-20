@@ -38,11 +38,8 @@ serve(async (req: Request) => {
       
       const extractPayload = {
         urls: [url],
-        extractorOptions: {
-          extractionSchema: schema,
-          mode: 'llm-extraction',
-          extractionPrompt: prompt || 'Extract product information from this page'
-        }
+        schema: schema,
+        prompt: prompt || 'Extract detailed product information including name, current price, image URL, brand, and availability from this e-commerce page.'
       };
 
       const extractRes = await fetch('https://api.firecrawl.dev/v1/extract', {
