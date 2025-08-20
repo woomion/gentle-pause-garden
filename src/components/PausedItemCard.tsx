@@ -38,9 +38,14 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
     e.stopPropagation();
     e.preventDefault();
     console.log('🔵 Decide now button clicked for item:', item.id);
+    console.log('🔵 onDecideNow handler available:', !!onDecideNow);
+    console.log('🔵 onDecideNow type:', typeof onDecideNow);
+    
     if (onDecideNow) {
+      console.log('🔵 Calling onDecideNow handler');
       onDecideNow(item);
     } else {
+      console.log('🔵 No onDecideNow handler, using fallback');
       // Fallback to local state if no handler provided
       setShowDecisionButtons(prev => !prev);
     }
