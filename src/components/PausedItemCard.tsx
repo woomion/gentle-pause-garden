@@ -43,13 +43,10 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
   const handleDecideClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('🔵 Decide now button clicked for item:', item.itemName);
     
     if (onDecideNow) {
-      console.log('🔵 Calling onDecideNow handler');
       onDecideNow(item);
     } else {
-      console.log('🔵 No onDecideNow handler, using fallback to show decision buttons');
       setShowDecisionButtons(prev => !prev);
     }
   }, [item, onDecideNow]);
