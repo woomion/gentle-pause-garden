@@ -24,7 +24,6 @@ import AuthGuard from "./components/AuthGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import MobileDebugger from "./components/MobileDebugger";
 
-import { pushNotificationService } from "./services/pushNotificationService";
 import { offlineSyncService } from "./services/offlineSyncService";
 
 const queryClient = new QueryClient();
@@ -83,7 +82,8 @@ const App = () => {
           return;
         }
         
-        const success = await pushNotificationService.initialize();
+        // Push notifications removed - using web notifications instead
+        const success = true;
         console.log('🔔 Push notification initialization result:', success);
         
       } catch (error) {

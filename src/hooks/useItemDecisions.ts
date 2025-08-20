@@ -4,10 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabasePauseLogStore } from '../stores/supabasePauseLogStore';
 import { pauseLogStore } from '../stores/pauseLogStore';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { useItemNavigation } from './useItemNavigation';
 
 export const useItemDecisions = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { handleViewItem } = useItemNavigation();
 
   const handleLetGo = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void, reflectionNotes?: string) => {
     console.log('📝 Adding item to pause log (let go):', {
@@ -100,10 +102,15 @@ export const useItemDecisions = () => {
       // Remove from paused items
       onDelete(item.id);
       
+      // If item has a link, open it in browser
+      if (item.link) {
+        handleViewItem(item);
+      }
+      
       // Show success toast that auto-dismisses
       const toastInstance = toast({
         title: "Great, you made a conscious choice!",
-        description: "We've moved this thoughtful decision to your Pause Log for future reference.",
+        description: item.link ? "Opening product page..." : "We've moved this thoughtful decision to your Pause Log for future reference.",
       });
       
       // Auto-dismiss after 3 seconds

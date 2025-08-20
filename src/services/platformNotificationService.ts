@@ -1,7 +1,5 @@
-
-import { Capacitor } from '@capacitor/core';
 import { notificationService } from './notificationService';
-import { pushNotificationService } from './pushNotificationService';
+import { webNotificationService } from './webNotificationService';
 
 export class PlatformNotificationService {
   private static instance: PlatformNotificationService;
@@ -16,14 +14,50 @@ export class PlatformNotificationService {
   }
 
   isNativePlatform(): boolean {
-    const platform = Capacitor.getPlatform();
-    const isNative = platform === 'ios' || platform === 'android';
-    console.log('🔔 Platform detection details:');
-    console.log('  - Capacitor.getPlatform():', platform);
-    console.log('  - Capacitor.isNativePlatform():', Capacitor.isNativePlatform());
-    console.log('  - User Agent:', navigator.userAgent);
-    console.log('  - Is Native:', isNative);
-    return isNative;
+    // Always return false since we removed Capacitor
+    return false;
+  }
+
+  async initialize(): Promise<boolean> {
+    console.log('🔔 PlatformNotificationService: Initializing web notifications...');
+    return await webNotificationService.requestPermission();
+  }
+
+  async scheduleNotification(
+    title: string,
+    body: string,
+    options: {
+      delayMs?: number;
+      userId?: string;
+    } = {}
+  ): Promise<void> {
+    const { delayMs = 0 } = options;
+    
+    console.log('🔔 PlatformNotificationService: Scheduling web notification:', {
+      title,
+      body,
+      delayMs
+    });
+
+    await webNotificationService.scheduleNotification(title, body, delayMs);
+  }
+
+  async requestPermission(): Promise<boolean> {
+    console.log('🔔 Platform service: Requesting browser notification permission');
+    return await webNotificationService.requestPermission();
+  }
+
+  async showNotification(title: string, options: NotificationOptions = {}): Promise<void> {
+    // On web, show browser notification
+    notificationService.showNotification(title, options);
+  }
+
+  setEnabled(enabled: boolean): void {
+    notificationService.setEnabled(enabled);
+  }
+
+  getEnabled(): boolean {
+    return notificationService.getEnabled();
   }
 
   isMobileWeb(): boolean {
@@ -31,56 +65,7 @@ export class PlatformNotificationService {
     return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
   }
 
-  async requestPermission(): Promise<boolean> {
-    if (this.isNativePlatform()) {
-      // On native platforms, use push notifications
-      console.log('🔔 Platform service: Requesting push notification permission');
-      return await pushNotificationService.initialize();
-    } else {
-      // On web, use browser notifications
-      console.log('🔔 Platform service: Requesting browser notification permission');
-      return await notificationService.requestPermission();
-    }
-  }
-
-  async showNotification(title: string, options: NotificationOptions = {}): Promise<void> {
-    if (this.isNativePlatform()) {
-      // For native platforms, notifications are handled by the push service
-      // which sends to the device through FCM/APNs
-      console.log('🔔 Native platform - notifications handled by push service');
-      return;
-    } else {
-      // On web, show browser notification
-      notificationService.showNotification(title, options);
-    }
-  }
-
-  setEnabled(enabled: boolean): void {
-    if (this.isNativePlatform()) {
-      // Push notifications are managed differently - they're enabled/disabled
-      // through the native system settings
-      console.log('🔔 Native platform - push notifications managed by system');
-    } else {
-      notificationService.setEnabled(enabled);
-    }
-  }
-
-  getEnabled(): boolean {
-    if (this.isNativePlatform()) {
-      // Check if push notification service is initialized and has permission
-      const isInitialized = pushNotificationService.isServiceInitialized();
-      const hasPermission = pushNotificationService.getPermissionStatus();
-      console.log('🔔 Platform service: Push service initialized:', isInitialized, 'has permission:', hasPermission);
-      return isInitialized && hasPermission;
-    } else {
-      return notificationService.getEnabled();
-    }
-  }
-
   getPlatformName(): string {
-    if (this.isNativePlatform()) {
-      return Capacitor.getPlatform();
-    }
     return 'web';
   }
 }

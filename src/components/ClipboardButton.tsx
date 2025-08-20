@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Clipboard, Check } from 'lucide-react';
-import { Clipboard as CapacitorClipboard } from '@capacitor/clipboard';
 import { toast } from '@/hooks/use-toast';
 
 interface ClipboardButtonProps {
@@ -12,7 +11,8 @@ const ClipboardButton = ({ onUrlPasted }: ClipboardButtonProps) => {
 
   const handleReadClipboard = async () => {
     try {
-      const { value } = await CapacitorClipboard.read();
+      // Use web clipboard API
+      const value = await navigator.clipboard.readText();
       
       if (value && value.trim()) {
         // Check if it looks like a URL

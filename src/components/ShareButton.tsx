@@ -1,5 +1,4 @@
 import { Share2 } from 'lucide-react';
-import { Share } from '@capacitor/share';
 import { toast } from '@/hooks/use-toast';
 
 interface ShareButtonProps {
@@ -21,35 +20,24 @@ const ShareButton = ({ url, text, itemName, price, storeName }: ShareButtonProps
         url: url || ''
       };
 
-      await Share.share(shareData);
-    } catch (error) {
-      console.error('Error sharing:', error);
-      
-      // Fallback to web share API if available
+      // Use web share API if available
       if (navigator.share) {
-        try {
-          await navigator.share({
-            title: 'Pause this item',
-            text: text || (itemName && price 
-              ? `Should I buy this ${itemName} for ${price}${storeName ? ` from ${storeName}` : ''}? Help me decide!`
-              : 'I want to pause this purchase decision'),
-            url: url || ''
-          });
-        } catch (webShareError) {
-          console.error('Web share also failed:', webShareError);
-          toast({
-            title: "Can't share right now",
-            description: "Try copying the URL manually",
-            variant: "destructive"
-          });
-        }
+        await navigator.share(shareData);
       } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareData.url);
         toast({
-          title: "Can't share right now",
-          description: "Try copying the URL manually",
-          variant: "destructive"
+          title: "Link copied to clipboard",
+          description: "Share it with friends!",
         });
       }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: "Can't share right now",
+        description: "Try copying the URL manually",
+        variant: "destructive"
+      });
     }
   };
 

@@ -2,8 +2,6 @@
 import { useToast } from '@/hooks/use-toast';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
-import { Browser } from '@capacitor/browser';
-import { Capacitor } from '@capacitor/core';
 
 export const useItemNavigation = () => {
   const { toast } = useToast();
@@ -46,25 +44,7 @@ export const useItemNavigation = () => {
     console.log('🌐 DEBUG: Final URL to open:', url);
     console.log('📱 DEBUG: User agent:', navigator.userAgent);
 
-    // Detect platform
-    let platform: 'ios' | 'android' | 'web' = 'web';
     try {
-      // Capacitor v7
-      // @ts-ignore - guard in case getPlatform is undefined on web
-      platform = Capacitor.getPlatform?.() ?? 'web';
-    } catch (e) {
-      platform = 'web';
-    }
-    const isNative = platform !== 'web';
-
-    try {
-      // Prefer opening OUTSIDE the app when installed/native
-      if (isNative) {
-        console.log('📲 Native platform detected, opening via Capacitor Browser');
-        toast({ title: 'Opening in your browser...' });
-        await Browser.open({ url });
-        return;
-      }
 
       if (installed) {
         console.log('📦 Installed PWA detected, forcing external browser');
@@ -116,7 +96,6 @@ export const useItemNavigation = () => {
         finalUrl: url,
         isMobile,
         installed,
-        platform,
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
