@@ -43,31 +43,16 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
   const handleDecideClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('🔵 Decide now button clicked for item:', item.id);
-    console.log('🔵 Item name:', item.itemName);
-    console.log('🔵 onDecideNow handler available:', !!onDecideNow);
-    console.log('🔵 onDecideNow type:', typeof onDecideNow);
-    console.log('🔵 isReadyForReview:', isReadyForReview);
-    console.log('🔵 showDecisionButtons:', showDecisionButtons);
+    console.log('🔵 Decide now button clicked for item:', item.itemName);
     
     if (onDecideNow) {
-      console.log('🔵 Calling onDecideNow handler with item:', item);
-      try {
-        onDecideNow(item);
-        console.log('🔵 onDecideNow called successfully');
-      } catch (error) {
-        console.error('🔵 Error calling onDecideNow:', error);
-      }
+      console.log('🔵 Calling onDecideNow handler');
+      onDecideNow(item);
     } else {
       console.log('🔵 No onDecideNow handler, using fallback to show decision buttons');
-      // Fallback to local state if no handler provided
-      setShowDecisionButtons(prev => {
-        const newState = !prev;
-        console.log('🔵 Setting showDecisionButtons to:', newState);
-        return newState;
-      });
+      setShowDecisionButtons(prev => !prev);
     }
-  }, [item, onDecideNow, isReadyForReview, showDecisionButtons]);
+  }, [item, onDecideNow]);
 
   // Reset decision buttons when item changes
   const [previousItemId, setPreviousItemId] = useState(item.id);
@@ -107,11 +92,7 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
       className={`relative overflow-hidden bg-card rounded-lg border border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in ${
         hasActivity ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''
       }`}
-      onClick={(e) => {
-        console.log('🔴 Card container clicked, target:', e.target);
-        console.log('🔴 Current target:', e.currentTarget);
-        onClick(item);
-      }}
+      onClick={() => onClick(item)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
