@@ -38,12 +38,18 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
     e.stopPropagation();
     e.preventDefault();
     console.log('🔵 Decide now button clicked for item:', item.id);
+    console.log('🔵 Item name:', item.itemName);
     console.log('🔵 onDecideNow handler available:', !!onDecideNow);
     console.log('🔵 onDecideNow type:', typeof onDecideNow);
     
     if (onDecideNow) {
-      console.log('🔵 Calling onDecideNow handler');
-      onDecideNow(item);
+      console.log('🔵 Calling onDecideNow handler with item:', item);
+      try {
+        onDecideNow(item);
+        console.log('🔵 onDecideNow called successfully');
+      } catch (error) {
+        console.error('🔵 Error calling onDecideNow:', error);
+      }
     } else {
       console.log('🔵 No onDecideNow handler, using fallback');
       // Fallback to local state if no handler provided
