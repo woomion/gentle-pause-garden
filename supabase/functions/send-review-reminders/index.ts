@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
         // Get items ready for review for this user
         const { data: reviewItems, error: itemsError } = await supabase
           .from('paused_items')
-          .select('id, title, store_name, review_at')
+          .select('id, title, store_name, review_at, price, created_at')
           .eq('user_id', userSetting.user_id)
           .eq('status', 'paused')
           .lte('review_at', new Date().toISOString());
@@ -65,41 +65,78 @@ const handler = async (req: Request): Promise<Response> => {
 
         console.log(`Sending reminder to ${authUser.user.email} for ${reviewItems.length} items`);
 
+        // Calculate items paused for more than 10 days
+        const tenDaysAgo = new Date();
+        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+        const longPausedCount = reviewItems.filter(item => 
+          new Date(item.created_at) < tenDaysAgo
+        ).length;
+
         // Create email content
+        const formatPrice = (price: number | null) => {
+          if (!price) return '';
+          return `, $${price.toFixed(2)}`;
+        };
+
         const itemsList = reviewItems.map(item => 
-          `• ${item.title}${item.store_name ? ` from ${item.store_name}` : ''}`
-        ).join('\n');
+          `${item.title}${item.store_name ? `, ${item.store_name}` : ''}${formatPrice(item.price)}`
+        ).join('<br>');
 
         const emailHtml = `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #333; font-size: 24px; margin-bottom: 24px;">Time to Review Your Paused Items</h1>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #333;">
             
-            <p style="color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
-              You have <strong>${reviewItems.length} item${reviewItems.length > 1 ? 's' : ''}</strong> ready for review:
-            </p>
-            
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0;">
-              <pre style="margin: 0; color: #333; font-size: 14px; white-space: pre-wrap;">${itemsList}</pre>
+            <div style="text-align: center; margin-bottom: 32px;">
+              <h2 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">
+                ${reviewItems.length} item${reviewItems.length > 1 ? 's' : ''} ${reviewItems.length > 1 ? 'are' : 'is'} ready whenever you are.
+              </h2>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+              <h1 style="color: #333; font-size: 20px; font-weight: bold; margin: 0 0 4px 0;">Pocket Pause</h1>
+              <p style="color: #666; font-style: italic; margin: 0 0 16px 0; font-size: 16px;">Your paused items are ready for review.</p>
+              
+              <p style="color: #333; font-size: 16px; line-height: 1.5; margin: 0 0 24px 0;">
+                Here's what's been waiting for you. Take a breath and choose with clarity.
+              </p>
             </div>
             
-            <p style="color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">
-              Take a moment to reflect: Do you still want these items? Have your priorities changed? 
-              Trust your instincts and make decisions that align with your values.
-            </p>
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #8B5CF6;">
+              <div style="color: #333; font-size: 15px; line-height: 1.6;">
+                ${itemsList}
+              </div>
+            </div>
             
-            <div style="text-align: center; margin: 30px 0;">
+            <div style="text-align: center; margin: 32px 0;">
               <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.dev') || 'https://cnjznmbgxprsrovmdywe.lovable.dev'}" 
-                 style="background: #8B5CF6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">
-                Review Your Items
+                 style="background: #8B5CF6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 500; display: inline-block; font-size: 16px;">
+                Review Now →
               </a>
             </div>
             
-            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            ${longPausedCount > 0 ? `
+            <div style="background: #fff9e6; border: 1px solid #f0d000; border-radius: 8px; padding: 16px; margin: 24px 0; text-align: center;">
+              <p style="color: #8B5CF6; font-size: 14px; margin: 0;">
+                ✦ Notice: ${longPausedCount} of these items ${longPausedCount > 1 ? 'have' : 'has'} been paused for more than 10 days. ${longPausedCount > 1 ? 'Do they' : 'Does it'} still hold meaning?
+              </p>
+            </div>
+            ` : ''}
             
-            <p style="color: #999; font-size: 12px; text-align: center;">
-              You're receiving this because you have notifications enabled. 
-              <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.dev') || 'https://cnjznmbgxprsrovmdywe.lovable.dev'}" style="color: #8B5CF6;">Manage preferences</a>
-            </p>
+            <div style="text-align: center; margin: 32px 0 16px 0;">
+              <p style="color: #666; font-style: italic; margin: 0; font-size: 16px;">
+                Clarity grows in pauses. Thanks for taking yours.
+              </p>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+            
+            <div style="text-align: center;">
+              <p style="color: #999; font-size: 12px; margin: 0 0 8px 0;">
+                <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.dev') || 'https://cnjznmbgxprsrovmdywe.lovable.dev'}" style="color: #8B5CF6; text-decoration: none;">Manage account / settings</a>
+              </p>
+              <p style="color: #ccc; font-size: 11px; margin: 0;">
+                Pocket-sized presence before you buy.
+              </p>
+            </div>
           </div>
         `;
 
@@ -107,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
         const emailResponse = await resend.emails.send({
           from: "Pocket Pause <reminders@resend.dev>",
           to: [authUser.user.email],
-          subject: `${reviewItems.length} item${reviewItems.length > 1 ? 's' : ''} ready for review`,
+          subject: "Your paused items are ready when you are ✦",
           html: emailHtml,
         });
 
