@@ -76,6 +76,7 @@ export const useUserSettings = () => {
           notifications_enabled: false,
           notification_schedule_type: 'custom_time',
           notification_time_preference: '19:00:00', // 7pm default
+          timezone: 'UTC', // Default timezone
           theme: 'light'
         });
 
