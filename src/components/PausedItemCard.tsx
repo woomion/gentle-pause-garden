@@ -143,7 +143,10 @@ const PausedItemCard = ({ item, onClick, currentUserId }: PausedItemCardProps) =
           <div className="p-3 bg-indigo-50 dark:bg-indigo-950/50 border-t border-indigo-200 dark:border-indigo-800">
             {!showDecisionButtons ? (
               <button
-                onClick={handleDecideClick}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent event bubbling
+                  handleDecideClick(e);
+                }}
                 className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
               >
                 {item.link ? 'Decide now' : 'Make a decision'}

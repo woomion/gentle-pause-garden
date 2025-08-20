@@ -551,17 +551,46 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
           } catch (fallbackError) {
             console.error('All fallbacks failed:', fallbackError);
             
-            // Last resort: URL-only extraction
+            // Last resort: URL-only extraction with better fallback
             const urlName = extractProductNameFromUrl(url);
+            console.log('🔄 URL extraction result:', urlName);
+            
+            // Try basic title extraction if URL extraction fails
+            let finalName = urlName;
+            if (!urlName || urlName === 'Product') {
+              console.log('📝 Trying basic title extraction as final fallback');
+              try {
+                const response = await fetch(url, {
+                  method: 'GET',
+                  headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+                  signal: AbortSignal.timeout(5000)
+                });
+                
+                if (response.ok) {
+                  const html = await response.text();
+                  const titleMatch = html.match(/<title[^>]*>([^<]+)</i);
+                  if (titleMatch && titleMatch[1]) {
+                    const title = titleMatch[1].trim().replace(/\s*[|\-–—]\s*[^|\-–—]*$/, '').trim();
+                    if (title.length > 3 && !title.toLowerCase().includes('error')) {
+                      finalName = title;
+                      console.log('✅ Extracted title as fallback:', title);
+                    }
+                  }
+                }
+              } catch (error) {
+                console.log('❌ Basic title extraction failed:', error);
+              }
+            }
+            
             result = {
-              success: true,
+              success: finalName !== 'Product',
               data: {
-                itemName: urlName || 'Product',
+                itemName: finalName || 'Product',
                 storeName: getEnhancedStoreName(url),
                 canonicalUrl: url
               },
               method: 'url-only',
-              confidence: urlName ? 0.3 : 0.1,
+              confidence: finalName && finalName !== 'Product' ? 0.3 : 0.1,
               url,
               canonicalUrl: url
             };
@@ -698,25 +727,34 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
     
     console.log('🔍 Extracting product name from URL:', pathname);
     
-    // Shopbop specific patterns - they use formats like:
-    // /shop/product/123456 or /brand/product-name-v12345.html
-    const shopbopPatterns = [
-      // Pattern like /tory-burch/mini-kira-chevron-flap-shoulder-bag-v123456.html
-      /\/[^\/]+\/([^\/]+)-v\d+\.html$/,
-      // Pattern like /brand/product-name.html
-      /\/[^\/]+\/([^\/]+)\.html$/,
-      // Pattern like /shop/product-name-123
-      /\/shop\/([^\/\?]+?)(?:-\d+)?$/
-    ];
+    // Check if this is a shopbop URL for specific handling
+    const isShopbop = url.toLowerCase().includes('shopbop.com');
     
-    // Try Shopbop-specific patterns first
-    for (const pattern of shopbopPatterns) {
-      const match = pathname.match(pattern);
-      if (match && match[1]) {
-        const productName = cleanUrlProductName(match[1]);
-        console.log('✅ Shopbop pattern matched:', productName);
-        if (productName && productName.length > 3) {
-          return productName;
+    if (isShopbop) {
+      console.log('🛍️ Detected Shopbop URL, using enhanced patterns');
+      // Enhanced Shopbop patterns - they use more varied formats
+      const shopbopPatterns = [
+        // Pattern like /tory-burch/mini-kira-chevron-flap-shoulder-bag-v123456.html
+        /\/[^\/]+\/([^\/]+)-v\d+\.html$/,
+        // Pattern like /brand/product-name.html (without v-number)
+        /\/[^\/]+\/([^\/]+)\.html$/,
+        // Pattern like /shop/product-name-123
+        /\/shop\/([^\/\?]+?)(?:-\d+)?$/,
+        // Pattern like /brand-name/product-name (last segment)
+        /\/[^\/]+\/([^\/\?]+)$/,
+        // Any meaningful segment before .html
+        /\/([^\/\?]{8,})\.html$/
+      ];
+      
+      // Try Shopbop-specific patterns first
+      for (const pattern of shopbopPatterns) {
+        const match = pathname.match(pattern);
+        if (match && match[1]) {
+          const productName = cleanUrlProductName(match[1]);
+          console.log('✅ Shopbop pattern matched:', productName);
+          if (productName && isValidProductName(productName)) {
+            return productName;
+          }
         }
       }
     }
@@ -801,6 +839,35 @@ const isValidProductName = (name: string): boolean => {
   if (!/[a-zA-Z]/.test(name)) return false;
   
   return true;
+};
+
+// Basic title extraction as absolute fallback
+const tryBasicTitleExtraction = async (url: string): Promise<string | null> => {
+  try {
+    console.log('🔄 Trying basic title extraction for:', url);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      signal: AbortSignal.timeout(5000)
+    });
+    
+    if (response.ok) {
+      const html = await response.text();
+      const titleMatch = html.match(/<title[^>]*>([^<]+)</i);
+      if (titleMatch && titleMatch[1]) {
+        const title = titleMatch[1].trim()
+          .replace(/\s*[|\-–—]\s*[^|\-–—]*$/, '')
+          .trim();
+        console.log('✅ Extracted title:', title);
+        return title.length > 3 ? title : null;
+      }
+    }
+  } catch (error) {
+    console.log('❌ Basic title extraction failed:', error);
+  }
+  return null;
 };
 
 // Legacy compatibility function

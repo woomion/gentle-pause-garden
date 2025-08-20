@@ -119,6 +119,9 @@ const PausedSection = () => {
     // Open the review modal with just this specific item
     setReviewItem(item);
     setShowReviewModal(true);
+    
+    // Prevent event bubbling to avoid triggering other modals
+    return false;
   }, []);
 
   // Loading state
