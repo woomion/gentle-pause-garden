@@ -107,7 +107,11 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
       className={`relative overflow-hidden bg-card rounded-lg border border-border cursor-pointer hover:bg-muted/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 animate-fade-in ${
         hasActivity ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''
       }`}
-      onClick={() => onClick(item)}
+      onClick={(e) => {
+        console.log('🔴 Card container clicked, target:', e.target);
+        console.log('🔴 Current target:', e.currentTarget);
+        onClick(item);
+      }}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
