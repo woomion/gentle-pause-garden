@@ -70,37 +70,28 @@ export const useItemNavigation = () => {
         console.log('📦 Installed PWA detected, forcing external browser');
         toast({ title: 'Opening in your browser...' });
         
-        // Force external browser for PWAs - more aggressive approach
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        // For PWAs, we need to force the link to open in the system browser
+        // Create a link element with target="_blank" and click it
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
         
-        if (isMobile) {
-          // On mobile PWAs, force system browser by direct navigation
-          console.log('📱 Mobile PWA - forcing system browser via location.href');
-          window.location.href = url;
-          return;
-        }
+        // Add to DOM temporarily
+        link.style.display = 'none';
+        document.body.appendChild(link);
         
-        // Desktop PWA - try multiple methods to ensure external opening
-        console.log('💻 Desktop PWA - trying external opening methods');
-        try {
-          // Try creating a temporary link element and clicking it
-          const link = document.createElement('a');
-          link.href = url;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          console.log('💻 Used temporary link method');
-        } catch (linkError) {
-          console.log('💻 Link method failed, trying window.open');
-          const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-          if (!newWindow) {
-            console.log('💻 Window.open failed, using location.href');
-            window.location.href = url;
+        // Trigger click
+        link.click();
+        
+        // Clean up
+        setTimeout(() => {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
           }
-        }
+        }, 100);
+        
+        console.log('📦 PWA external link triggered');
         return;
       }
 
