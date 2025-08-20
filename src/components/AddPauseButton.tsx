@@ -69,9 +69,10 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
       setIsParsingUrl(true);
       parseTimeoutRef.current = setTimeout(async () => {
         try {
-          console.log('Calling parseProductUrl with:', value);
+          console.log('🔍 DEBUG: Calling parseProductUrl with URL:', value);
+          console.log('🔍 DEBUG: URL contains shopbop?', value.toLowerCase().includes('shopbop'));
           const productInfo = await parseProductUrl(value);
-          console.log('Parse result:', productInfo);
+          console.log('🔍 DEBUG: Parse result from parseProductUrl:', JSON.stringify(productInfo, null, 2));
           
           const parsedData = {
             itemName: productInfo.itemName,

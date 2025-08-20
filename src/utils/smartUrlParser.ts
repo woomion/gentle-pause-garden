@@ -731,7 +731,9 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
     const isShopbop = url.toLowerCase().includes('shopbop.com');
     
     if (isShopbop) {
-      console.log('🛍️ Detected Shopbop URL, using enhanced patterns');
+      console.log('🛍️ DEBUG: Detected Shopbop URL, using enhanced patterns');
+      console.log('🛍️ DEBUG: Full URL:', url);
+      console.log('🛍️ DEBUG: Pathname:', pathname);
       // Enhanced Shopbop patterns - they use more varied formats
       const shopbopPatterns = [
         // Pattern like /tory-burch/mini-kira-chevron-flap-shoulder-bag-v123456.html
@@ -748,12 +750,18 @@ export const extractProductNameFromUrl = (url: string): string | undefined => {
       
       // Try Shopbop-specific patterns first
       for (const pattern of shopbopPatterns) {
+        console.log('🛍️ DEBUG: Trying pattern:', pattern);
         const match = pathname.match(pattern);
+        console.log('🛍️ DEBUG: Pattern match result:', match);
         if (match && match[1]) {
           const productName = cleanUrlProductName(match[1]);
+          console.log('🛍️ DEBUG: Cleaned product name:', productName);
           console.log('✅ Shopbop pattern matched:', productName);
           if (productName && isValidProductName(productName)) {
+            console.log('🛍️ DEBUG: Valid product name found, returning:', productName);
             return productName;
+          } else {
+            console.log('🛍️ DEBUG: Product name validation failed');
           }
         }
       }
