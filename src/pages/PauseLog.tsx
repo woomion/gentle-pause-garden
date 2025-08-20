@@ -29,7 +29,6 @@ const PauseLog = () => {
   
   
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<PauseLogItem | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -49,18 +48,12 @@ const PauseLog = () => {
   }, [user, loadItems]);
 
 
-  const uniqueTags = useMemo(() => {
-    const allTags = items.flatMap(item => item.tags || []);
-    return [...new Set(allTags)];
-  }, [items]);
 
   // Filter and sort items based on selected filters and sort order
   const filteredItems = useMemo(() => {
     let filtered = items.filter(item => {
       const statusMatch = statusFilters.length === 0 || statusFilters.includes(item.status);
-      const tagMatch = tagFilters.length === 0 || (item.tags && item.tags.some(tag => tagFilters.includes(tag)));
-      
-      return statusMatch && tagMatch;
+      return statusMatch;
     });
 
     // Sort by date decided (letGoDate) - newest first
@@ -71,7 +64,7 @@ const PauseLog = () => {
     });
 
     return filtered;
-  }, [items, statusFilters, tagFilters]);
+  }, [items, statusFilters]);
 
   // Create hierarchical structure from filtered items
   const hierarchicalData = useMemo(() => {
@@ -91,21 +84,11 @@ const PauseLog = () => {
       });
     });
     
-    // Add tag filters
-    tagFilters.forEach(tag => {
-      filters.push({ 
-        type: 'tag', 
-        value: tag, 
-        label: tag
-      });
-    });
-    
     return filters;
-  }, [statusFilters, tagFilters]);
+  }, [statusFilters]);
 
   const clearAllFilters = () => {
     setStatusFilters([]);
-    setTagFilters([]);
   };
 
   const removeFilter = (filterType: string, value?: string) => {
@@ -113,11 +96,6 @@ const PauseLog = () => {
       case 'status':
         if (value) {
           setStatusFilters(prev => prev.filter(s => s !== value));
-        }
-        break;
-      case 'tag':
-        if (value) {
-          setTagFilters(prev => prev.filter(t => t !== value));
         }
         break;
     }
@@ -247,10 +225,7 @@ const PauseLog = () => {
         <div className="mb-6">
           <PauseLogFilterControls
             statusFilters={statusFilters}
-            tagFilters={tagFilters}
-            uniqueTags={uniqueTags}
             onStatusFiltersChange={setStatusFilters}
-            onTagFiltersChange={setTagFilters}
           />
         </div>
 

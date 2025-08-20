@@ -7,18 +7,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 interface PauseLogFilterControlsProps {
   statusFilters: string[];
-  tagFilters: string[];
-  uniqueTags: string[];
   onStatusFiltersChange: (filters: string[]) => void;
-  onTagFiltersChange: (filters: string[]) => void;
 }
 
 const PauseLogFilterControls = ({
   statusFilters,
-  tagFilters,
-  uniqueTags,
-  onStatusFiltersChange,
-  onTagFiltersChange
+  onStatusFiltersChange
 }: PauseLogFilterControlsProps) => {
 
   const handleStatusToggle = (status: string) => {
@@ -29,13 +23,6 @@ const PauseLogFilterControls = ({
     }
   };
 
-  const handleTagToggle = (tag: string) => {
-    if (tagFilters.includes(tag)) {
-      onTagFiltersChange(tagFilters.filter(t => t !== tag));
-    } else {
-      onTagFiltersChange([...tagFilters, tag]);
-    }
-  };
 
   return (
     <>
@@ -76,36 +63,6 @@ const PauseLogFilterControls = ({
           </PopoverContent>
         </Popover>
 
-        {/* Tags Multi-Select */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-40 justify-between text-black dark:text-[#F9F5EB] border-gray-200 dark:border-gray-600 bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20">
-              {tagFilters.length === 0 
-                ? "All tags" 
-                : `${tagFilters.length} tag${tagFilters.length > 1 ? 's' : ''}`
-              }
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-60 bg-white dark:bg-[#200E3B] border-gray-200 dark:border-gray-600 z-50">
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {uniqueTags.map(tag => (
-                <div key={tag} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`tag-${tag}`}
-                    checked={tagFilters.includes(tag)}
-                    onCheckedChange={() => handleTagToggle(tag)}
-                  />
-                  <label
-                    htmlFor={`tag-${tag}`}
-                    className="text-sm cursor-pointer flex-1 text-black dark:text-[#F9F5EB]"
-                  >
-                    {tag}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
       </div>
     </>
   );
