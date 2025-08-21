@@ -156,7 +156,7 @@ const PauseLog = () => {
     });
   };
 
-  const handleViewLink = (item: PauseLogItem) => {
+  const handleViewLink = async (item: PauseLogItem) => {
     // Check multiple possible locations for the link
     const link = item.originalPausedItem?.link || 
                  item.originalPausedItem?.url || 
@@ -184,33 +184,19 @@ const PauseLog = () => {
     console.log('🌐 DEBUG: Final URL to open:', url);
     
     try {
-      // For mobile devices, use a more direct approach
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const { openExternalUrl } = await import('../utils/browserUtils');
+      await openExternalUrl(url);
       
-      if (isMobile) {
-        console.log('📱 Mobile device detected, using direct navigation');
-        window.location.href = url;
-      } else {
-        console.log('💻 Desktop device, using window.open');
-        const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-        
-        if (!newWindow) {
-          console.log('💻 Popup blocked, using direct navigation');
-          window.location.href = url;
-        }
-      }
-      
-      console.log('🎯 Navigation completed for:', {
+      console.log('🎯 External URL opened successfully:', {
         itemName: item.itemName,
         finalUrl: url,
-        isMobile,
         timestamp: new Date().toISOString()
       });
       
     } catch (error) {
       console.error('❌ Error opening URL:', error);
       toast({
-        title: "Error opening link",
+        title: "Error opening link", 
         description: "Unable to open the product link. Please try again.",
         variant: "destructive"
       });

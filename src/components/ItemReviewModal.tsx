@@ -69,10 +69,11 @@ const ItemReviewModal = ({
     }
   };
 
-  const handleTakeToLink = () => {
+  const handleTakeToLink = async () => {
     const url = currentItem.link || (currentItem as any).url;
     if (url) {
-      window.open(url, '_blank');
+      const { openExternalUrl } = await import('../utils/browserUtils');
+      await openExternalUrl(url);
     }
   };
 
