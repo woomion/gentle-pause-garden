@@ -156,24 +156,27 @@ console.log('Rendering main Index content');
 
   return (
     <>
-      <div
-        ref={scrollContainerRef}
-        onScroll={(e) => {
-          const scrollTop = (e.currentTarget as HTMLDivElement).scrollTop;
-          console.log('📜 Scroll event:', { scrollTop, maxHeight: e.currentTarget.scrollHeight, clientHeight: e.currentTarget.clientHeight });
-          setCompactQuickBar(scrollTop > 8);
-        }}
-        className={`min-h-screen min-h-[100dvh] max-h-screen max-h-[100dvh] bg-background transition-colors duration-300 overflow-y-auto ${
-        sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
-      }`}
-        style={{ scrollBehavior: 'auto' }}
-      >
-
-        <div className={`max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
+      <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 flex flex-col">
+        {/* Header area - fixed height */}
+        <div className={`flex-shrink-0 max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
           <PauseHeader />
           <GuestModeIndicator show={!user} />
           <WelcomeWithValues />
-          
+        </div>
+
+        {/* Scrollable content area */}
+        <div 
+          ref={scrollContainerRef}
+          onScroll={(e) => {
+            const scrollTop = (e.currentTarget as HTMLDivElement).scrollTop;
+            console.log('📜 Scroll event:', { scrollTop, maxHeight: e.currentTarget.scrollHeight, clientHeight: e.currentTarget.clientHeight });
+            setCompactQuickBar(scrollTop > 8);
+          }}
+          className={`flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${
+            sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
+          }`}
+          style={{ scrollBehavior: 'auto' }}
+        >
           {/* Wisdom Orb Remnant - Hidden for now */}
           {/* 
           <div className="relative mb-6">
@@ -233,8 +236,8 @@ console.log('Rendering main Index content');
                   >
                     Recently paused
                   </button>
-                </div>
-              </div>
+        </div>
+      </div>
 
               {/* Pill list */}
               <div className="space-y-2">
