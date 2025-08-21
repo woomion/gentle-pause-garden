@@ -382,6 +382,7 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          color_theme: string | null
           created_at: string
           id: string
           last_reminder_sent: string | null
@@ -402,6 +403,7 @@ export type Database = {
           values_setup_completed: boolean | null
         }
         Insert: {
+          color_theme?: string | null
           created_at?: string
           id?: string
           last_reminder_sent?: string | null
@@ -422,6 +424,7 @@ export type Database = {
           values_setup_completed?: boolean | null
         }
         Update: {
+          color_theme?: string | null
           created_at?: string
           id?: string
           last_reminder_sent?: string | null
