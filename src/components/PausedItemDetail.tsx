@@ -207,21 +207,12 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           {!showDecisionButtons ? (
             <div className="pt-2">
               <button 
-                onClick={(e) => {
-                  console.log('🚨 RAW CLICK EVENT FIRED!', e);
-                  console.log('🚨 Event target:', e.target);
-                  console.log('🚨 Event currentTarget:', e.currentTarget);
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleDecisionClick();
+                onClick={() => {
+                  console.log('🚨 BUTTON CLICKED! Current state:', showDecisionButtons);
+                  setShowDecisionButtons(true);
+                  console.log('🚨 State should now be true');
                 }}
-                onMouseDown={(e) => {
-                  console.log('🚨 MOUSE DOWN EVENT!', e);
-                }}
-                onTouchStart={(e) => {
-                  console.log('🚨 TOUCH START EVENT!', e);
-                }}
-                className="w-full py-3 px-4 font-medium rounded-xl transition-colors hover:opacity-90 bg-decide-now text-decide-now-foreground relative z-[9999] pointer-events-auto border-2 border-red-500"
+                className="w-full py-3 px-4 font-medium rounded-xl transition-colors hover:opacity-90 bg-decide-now text-decide-now-foreground"
               >
                 {(item.link || (item as any).url) ? 'Decide now' : 'Make a decision'}
               </button>
