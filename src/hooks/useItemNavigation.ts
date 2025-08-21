@@ -50,26 +50,21 @@ export const useItemNavigation = () => {
         console.log('📦 Installed PWA detected, forcing external browser');
         toast({ title: 'Opening in your browser...' });
         
-        // For PWAs, we need to force the link to open in the system browser
-        // Create a link element with target="_blank" and click it
-        const link = document.createElement('a');
-        link.href = url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        
-        // Add to DOM temporarily
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        
-        // Trigger click
-        link.click();
-        
-        // Clean up
-        setTimeout(() => {
-          if (document.body.contains(link)) {
-            document.body.removeChild(link);
+        // For PWAs, force external browser opening using window.open with specific parameters
+        // This is more reliable than creating a link element
+        try {
+          // Try multiple methods to ensure external opening
+          const opened = window.open(url, '_blank', 'noopener,noreferrer,external');
+          
+          // If window.open failed or was blocked, try location.assign
+          if (!opened) {
+            console.log('📦 window.open failed, trying location.assign');
+            window.location.assign(url);
           }
-        }, 100);
+        } catch (error) {
+          console.log('📦 Error with window.open, using location.assign fallback');
+          window.location.assign(url);
+        }
         
         console.log('📦 PWA external link triggered');
         return;
