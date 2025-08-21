@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
-import { parseProductUrl } from '../utils/urlParser';
+import { parseProductUrl } from '../utils/optimizedUrlParser';
 import { useIsMobile } from '../hooks/use-mobile';
 import { X, Edit } from 'lucide-react';
 import FirstUseTooltip from './FirstUseTooltip';

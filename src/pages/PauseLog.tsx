@@ -231,13 +231,13 @@ const PauseLog = () => {
 
         {/* Active Filters */}
         {activeFilters.length > 0 && (
-          <div className="mb-4 p-4 bg-white/60 rounded-2xl border border-lavender/30">
+          <div className="mb-4 p-4 bg-white/60 rounded-2xl border border-primary/30">
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <span className="text-sm font-medium text-black">Active filters:</span>
               {activeFilters.map((filter) => (
                  <div
                   key={`${filter.type}-${filter.value}`}
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border bg-lavender/20 text-dark-gray border-lavender/30"
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border bg-primary/20 text-foreground border-primary/30"
                 >
                   <span>{filter.label}</span>
                    <button

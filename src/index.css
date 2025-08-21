@@ -68,7 +68,7 @@
     --decision-let-go-foreground: 220 13% 18%;
     --decide-now: 270 60% 85%;
     --decide-now-foreground: 220 13% 18%;
-    --section-header: 270 35% 88%;
+    --section-header: 270 60% 85%;
     --section-header-foreground: 220 13% 18%;
     --whisper-lavender: 260 47% 25%;
 
@@ -137,7 +137,7 @@
     --decision-let-go-foreground: 220 13% 18%;
     --decide-now: 35 60% 85%;
     --decide-now-foreground: 220 13% 18%;
-    --section-header: 35 35% 88%;
+    --section-header: 35 60% 85%;
     --section-header-foreground: 220 13% 18%;
     --whisper-lavender: 35 47% 25%;
 
@@ -205,7 +205,7 @@
     --decision-let-go-foreground: 260 47% 15%;
     --decide-now: 270 50% 65%;
     --decide-now-foreground: 260 47% 15%;
-    --section-header: 270 40% 60%;
+    --section-header: 270 50% 65%;
     --section-header-foreground: 44 69% 97%;
 
     /* Miro-style accent (dark) */
@@ -273,7 +273,7 @@
     --decision-let-go-foreground: 35 47% 15%;
     --decide-now: 35 50% 65%;
     --decide-now-foreground: 35 47% 15%;
-    --section-header: 35 40% 60%;
+    --section-header: 35 50% 65%;
     --section-header-foreground: 39 100% 95%;
 
     /* Miro-style accent (dark) */
