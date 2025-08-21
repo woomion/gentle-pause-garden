@@ -33,10 +33,6 @@ export const ReviewReminderEmail = ({
   appUrl,
   longPausedCount,
 }: ReviewReminderEmailProps) => {
-  const formatPrice = (price: number | null) => {
-    if (!price) return '';
-    return `, $${price.toFixed(2)}`;
-  };
 
   return (
     <Html>
@@ -62,21 +58,11 @@ export const ReviewReminderEmail = ({
             </Text>
           </Section>
 
-          {/* Items List */}
-          <Section style={itemsSection}>
-            {reviewItems.map((item, index) => (
-              <div key={item.id} style={itemCard}>
-                <Text style={itemText}>
-                  <strong>{item.title}</strong>
-                  {item.store_name && (
-                    <span style={storeText}> • {item.store_name}</span>
-                  )}
-                  {item.price && (
-                    <span style={priceText}>{formatPrice(item.price)}</span>
-                  )}
-                </Text>
-              </div>
-            ))}
+          {/* Items Count */}
+          <Section style={countSection}>
+            <Text style={countText}>
+              You have <strong>{reviewItems.length}</strong> item{reviewItems.length > 1 ? 's' : ''} ready for review.
+            </Text>
           </Section>
 
           {/* CTA Button */}
@@ -173,34 +159,20 @@ const introText = {
   textAlign: 'left' as const,
 }
 
-const itemsSection = {
+const countSection = {
+  textAlign: 'center' as const,
   margin: '32px 0',
-}
-
-const itemCard = {
   background: 'linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%)',
   borderRadius: '12px',
-  padding: '16px 20px',
-  margin: '8px 0',
+  padding: '24px',
   borderLeft: '4px solid #8B5CF6',
-  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
 }
 
-const itemText = {
+const countText = {
   color: '#333',
-  fontSize: '15px',
+  fontSize: '18px',
   lineHeight: '1.5',
   margin: '0',
-}
-
-const storeText = {
-  color: '#666',
-  fontWeight: 'normal',
-}
-
-const priceText = {
-  color: '#8B5CF6',
-  fontWeight: '600',
 }
 
 const buttonSection = {
