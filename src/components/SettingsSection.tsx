@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTheme } from '@/components/ThemeProvider';
+import { ThemeSelector } from '@/components/ThemeSelector';
 import NotificationSettingsModal from './NotificationSettingsModal';
 
 import { useUserSettings } from '@/hooks/useUserSettings';
@@ -203,7 +204,10 @@ const SettingsSection = () => {
                   </Button>
                 </div>
               </div>
-
+              
+              <div className="pt-2 border-t border-border">
+                <ThemeSelector />
+              </div>
               <div className="space-y-2 pt-2 border-t border-border">
                 <Button
                   variant="outline"
