@@ -49,6 +49,10 @@ const SITE_CONFIGS: SiteConfig[] = [
   { domain: 'mrporter.com', problematic: true, requiresJs: true },
   { domain: 'netaporter.com', problematic: true, requiresJs: true },
   
+  // Amazon shortener domains - need expansion first
+  { domain: 'a.co', problematic: false, requiresJs: false },
+  { domain: 'amzn.to', problematic: false, requiresJs: false },
+  
   // Well-structured e-commerce sites
   { domain: 'amazon.com', problematic: false, requiresJs: false },
   { domain: 'target.com', problematic: false, requiresJs: false },
@@ -456,15 +460,29 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
 
 // Main smart parser with layered strategy
 export const parseProductUrlSmart = async (url: string): Promise<ParseResult> => {
-  const normalizedUrl = normalizeUrl(url);
+  // Phase 0: URL Expansion for shortened links
+  console.log('🔗 Starting URL expansion check for:', url);
+  const { expandUrl } = await import('./urlExpander');
+  const expandResult = await expandUrl(url);
   
-  // Check cache first
+  const finalUrl = expandResult.success ? expandResult.finalUrl : url;
+  console.log('🎯 Using final URL for parsing:', finalUrl);
+  
+  // If URL was expanded, log the redirect chain
+  if (expandResult.redirectChain.length > 1) {
+    console.log('↪️ Redirect chain:', expandResult.redirectChain);
+  }
+
+  const normalizedUrl = normalizeUrl(finalUrl);
+  
+  // Check cache first (using final URL)
   const cached = cache.get(normalizedUrl);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    console.log('✅ Cache hit for:', normalizedUrl);
     return cached.data;
   }
 
-  const siteConfig = getSiteConfig(url);
+  const siteConfig = getSiteConfig(finalUrl);
   
   try {
     let result: ParseResult;
@@ -476,7 +494,7 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
     // Phase 1: Smart routing based on site configuration
     if (siteConfig?.problematic) {
       console.log('🎯 Detected problematic site, using Firecrawl extract mode');
-      result = await fetchViaFirecrawlExtract(url);
+      result = await fetchViaFirecrawlExtract(finalUrl);
       
       // If extract mode fails, fallback to enhanced generic
       if (!result.success || result.confidence < 0.3) {
@@ -490,7 +508,7 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
           const response = await fetch('https://cnjznmbgxprsrovmdywe.supabase.co/functions/v1/firecrawl-proxy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url }),
+            body: JSON.stringify({ url: finalUrl }),
             signal: controller.signal
           });
           
@@ -499,7 +517,7 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.html) {
-              result = await parseGenericEnhanced(data.html, url);
+              result = await parseGenericEnhanced(data.html, finalUrl);
             } else {
               throw new Error('No HTML content received');
             }
@@ -512,13 +530,13 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
           // Try enhanced fallback  
           try {
             const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
-            const enhancedResult = await enhancedParser(url);
+            const enhancedResult = await enhancedParser(finalUrl);
             
             // If enhanced parser failed to get name, try URL extraction
             if (!enhancedResult.itemName) {
-              console.log('🔍 Enhanced parser failed for', url, ', trying URL extraction');
-              enhancedResult.itemName = extractProductNameFromUrl(url);
-              console.log('🔍 URL extraction result for', url, ':', enhancedResult.itemName);
+              console.log('🔍 Enhanced parser failed for', finalUrl, ', trying URL extraction');
+              enhancedResult.itemName = extractProductNameFromUrl(finalUrl);
+              console.log('🔍 URL extraction result for', finalUrl, ':', enhancedResult.itemName);
             }
             
             if (enhancedResult.itemName || enhancedResult.price || enhancedResult.imageUrl) {
@@ -527,19 +545,19 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
                 data: enhancedResult,
                 method: 'enhanced-fallback',
                 confidence: 0.4,
-                url,
-                canonicalUrl: enhancedResult.canonicalUrl || url,
+                url: finalUrl,
+                canonicalUrl: enhancedResult.canonicalUrl || finalUrl,
                 raw: enhancedResult
               };
             } else {
               // Simple fallback with URL extraction
               const { parseProductUrl: simpleParser } = await import('./simpleUrlParser');
-              const simpleResult = await simpleParser(url);
+              const simpleResult = await simpleParser(finalUrl);
               
               if (!simpleResult.itemName) {
-                console.log('🔍 Simple parser failed for', url, ', trying URL extraction');
-                simpleResult.itemName = extractProductNameFromUrl(url);
-                console.log('🔍 URL extraction result for', url, ':', simpleResult.itemName);
+                console.log('🔍 Simple parser failed for', finalUrl, ', trying URL extraction');
+                simpleResult.itemName = extractProductNameFromUrl(finalUrl);
+                console.log('🔍 URL extraction result for', finalUrl, ':', simpleResult.itemName);
               }
               
               result = {
@@ -547,8 +565,8 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
                 data: simpleResult,
                 method: 'url-extraction-fallback',
                 confidence: simpleResult.itemName ? 0.3 : 0.2,
-                url,
-                canonicalUrl: simpleResult.canonicalUrl || url,
+                url: finalUrl,
+                canonicalUrl: simpleResult.canonicalUrl || finalUrl,
                 raw: simpleResult
               };
             }
@@ -556,7 +574,7 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
             console.error('All fallbacks failed:', fallbackError);
             
             // Last resort: URL-only extraction with better fallback
-            const urlName = extractProductNameFromUrl(url);
+            const urlName = extractProductNameFromUrl(finalUrl);
             console.log('🔄 URL extraction result:', urlName);
             
             // Try basic title extraction if URL extraction fails
@@ -564,7 +582,7 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
             if (!urlName || urlName === 'Product') {
               console.log('📝 Trying basic title extraction as final fallback');
               try {
-                const response = await fetch(url, {
+                const response = await fetch(finalUrl, {
                   method: 'GET',
                   headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
                   signal: AbortSignal.timeout(5000)
@@ -590,13 +608,13 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
               success: finalName !== 'Product',
               data: {
                 itemName: finalName || 'Product',
-                storeName: getEnhancedStoreName(url),
-                canonicalUrl: url
+                storeName: getEnhancedStoreName(finalUrl),
+                canonicalUrl: finalUrl
               },
               method: 'url-only',
               confidence: finalName && finalName !== 'Product' ? 0.3 : 0.1,
-              url,
-              canonicalUrl: url
+              url: finalUrl,
+              canonicalUrl: finalUrl
             };
           }
         }
@@ -605,11 +623,11 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
       // For non-problematic sites, use the enhanced parser
       console.log('📋 Using enhanced parser for well-behaved site');
       const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
-      const enhancedResult = await enhancedParser(url);
+      const enhancedResult = await enhancedParser(finalUrl);
       
       // Even for well-behaved sites, try URL extraction if no name found
       if (!enhancedResult.itemName) {
-        enhancedResult.itemName = extractProductNameFromUrl(url);
+        enhancedResult.itemName = extractProductNameFromUrl(finalUrl);
       }
       
       result = {
@@ -617,8 +635,8 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
         data: enhancedResult,
         method: 'enhanced',
         confidence: 0.7,
-        url,
-        canonicalUrl: enhancedResult.canonicalUrl || url,
+        url: finalUrl,
+        canonicalUrl: enhancedResult.canonicalUrl || finalUrl,
         raw: enhancedResult
       };
     }
@@ -626,10 +644,10 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
     // Check if we should use screenshot fallback
     if (shouldUseScreenshotFallback([result])) {
       console.log('🖼️ Using screenshot fallback for low-confidence result');
-      const screenshotResult = await captureScreenshotFallback(url);
+      const screenshotResult = await captureScreenshotFallback(finalUrl);
       
       if (screenshotResult.success) {
-        result = await createFallbackResult(url, result.data, screenshotResult.screenshotUrl);
+        result = await createFallbackResult(finalUrl, result.data, screenshotResult.screenshotUrl);
         if (screenshotResult.title && !result.data.itemName) {
           result.data.itemName = screenshotResult.title;
         }
@@ -644,10 +662,10 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
     // Try screenshot fallback even on complete failure
     try {
       const { captureScreenshotFallback, createFallbackResult } = await import('./screenshotFallback');
-      const screenshotResult = await captureScreenshotFallback(url);
+      const screenshotResult = await captureScreenshotFallback(finalUrl);
       
       if (screenshotResult.success) {
-        const fallbackResult = await createFallbackResult(url, { storeName: getEnhancedStoreName(url) }, screenshotResult.screenshotUrl);
+        const fallbackResult = await createFallbackResult(finalUrl, { storeName: getEnhancedStoreName(finalUrl) }, screenshotResult.screenshotUrl);
         if (screenshotResult.title) {
           fallbackResult.data.itemName = screenshotResult.title;
         }
@@ -660,12 +678,12 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
     
     const errorResult: ParseResult = {
       success: false,
-      data: { storeName: getEnhancedStoreName(url) },
+      data: { storeName: getEnhancedStoreName(finalUrl) },
       method: 'error',
       confidence: 0,
       error: error instanceof Error ? error.message : 'Unknown error',
-      url,
-      canonicalUrl: url
+      url: finalUrl,
+      canonicalUrl: finalUrl
     };
     
     cache.set(normalizedUrl, { data: errorResult, timestamp: Date.now() });
