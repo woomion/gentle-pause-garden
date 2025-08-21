@@ -146,7 +146,7 @@ console.log('Rendering main Index content');
       <div
         ref={scrollContainerRef}
         onScroll={(e) => setCompactQuickBar((e.currentTarget as HTMLDivElement).scrollTop > 8)}
-        className={`min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 overflow-y-auto ${
+        className={`min-h-screen min-h-[100dvh] max-h-screen max-h-[100dvh] bg-background transition-colors duration-300 overflow-y-auto ${
         sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
       }`}>
 
