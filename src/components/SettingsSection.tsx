@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Bell, User, Moon, Sun, Palette, ChevronDown, ChevronRight, Heart } from 'lucide-react';
+import { Settings, Bell, User, Moon, Sun, ChevronDown, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -197,8 +197,9 @@ const SettingsSection = () => {
                     size="sm" 
                     className="h-8 w-8 p-0"
                     onClick={() => setTheme('system')}
+                    title="Auto (follow system)"
                   >
-                    <Palette className="h-4 w-4" />
+                    <Settings className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

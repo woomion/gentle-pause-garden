@@ -2,7 +2,6 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SettingsSection from './SettingsSection';
-import { ThemeSelector } from './ThemeSelector';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -29,10 +28,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
           </Button>
         </div>
         
-        <div className="space-y-6">
-          <ThemeSelector />
-          <SettingsSection />
-        </div>
+        <SettingsSection />
       </div>
     </div>
   );
