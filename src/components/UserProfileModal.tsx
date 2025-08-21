@@ -68,7 +68,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <Avatar className="w-16 h-16">
-              <AvatarFallback className="bg-lavender text-dark-gray text-lg font-medium">
+              <AvatarFallback className="bg-primary text-primary-foreground text-lg font-medium">
                 {initials}
               </AvatarFallback>
             </Avatar>
