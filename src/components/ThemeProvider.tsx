@@ -97,6 +97,13 @@ export function ThemeProvider({
       
       // Set color theme
       root.setAttribute('data-color-theme', colorTheme);
+      
+      // Update PWA theme color dynamically
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        const themeColor = colorTheme === 'sporty' ? '#FF9E1B' : '#CAB6F7';
+        metaThemeColor.setAttribute('content', themeColor);
+      }
     };
 
     updateTheme();
