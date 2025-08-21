@@ -66,7 +66,7 @@ const PauseHeader = () => {
           >
             {user ? (
               <Avatar className="w-6 h-6">
-                <AvatarFallback className="bg-lavender text-dark-gray text-xs font-medium">
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                   {initials}
                 </AvatarFallback>
               </Avatar>
