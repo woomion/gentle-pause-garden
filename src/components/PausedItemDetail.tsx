@@ -30,6 +30,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
   const { markAsRead } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState<'purchase' | 'let-go' | null>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchEndRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -49,6 +50,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   // Reset decision buttons only when item changes, not when modal opens
   useEffect(() => {
     setShowDecisionButtons(false);
+    setShowConfirmation(null);
   }, [item.id]);
 
   // Add keyboard navigation
@@ -138,16 +140,28 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     });
   };
 
-  const handleDecision = async (decision: 'purchase' | 'let-go') => {
+  const handleInitialDecision = (decision: 'purchase' | 'let-go') => {
+    setShowConfirmation(decision);
+  };
+
+  const handleConfirmedDecision = async (action: 'take-to-link' | 'mark-purchased' | 'let-go') => {
     try {
-      if (decision === 'purchase') {
+      if (action === 'take-to-link') {
+        // Open link and mark as purchased
         await handleBought(item, onDelete, onClose);
-      } else {
+      } else if (action === 'mark-purchased') {
+        // Just mark as purchased without opening link
+        await handleBought(item, onDelete, onClose);
+      } else if (action === 'let-go') {
         await handleLetGo(item, onDelete, onClose);
       }
     } catch (error) {
       console.error('Error handling decision:', error);
     }
+  };
+
+  const handleBackToDecisions = () => {
+    setShowConfirmation(null);
   };
 
 
@@ -204,8 +218,8 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             )}
           </div>
 
-          {/* Decision buttons */}
-          {!showDecisionButtons ? (
+          {/* Decision buttons flow */}
+          {!showDecisionButtons && !showConfirmation ? (
             <div className="pt-2">
               <button 
                 onClick={() => {
@@ -218,22 +232,66 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 {(item.link || (item as any).url) ? 'Decide now' : 'Make a decision'}
               </button>
             </div>
-          ) : (
+          ) : showDecisionButtons && !showConfirmation ? (
             <div className="space-y-3 pt-2">
               <button
-                onClick={() => handleDecision('purchase')}
+                onClick={() => handleInitialDecision('purchase')}
                 className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
               >
                 {(item.link || (item as any).url) ? "I'm going to buy this" : "I'm interested in this"}
               </button>
               <button
-                onClick={() => handleDecision('let-go')}
+                onClick={() => handleInitialDecision('let-go')}
                 className="w-full py-3 px-4 bg-decision-let-go hover:bg-decision-let-go/90 text-decision-let-go-foreground font-medium rounded-xl transition-colors"
               >
                 {(item.link || (item as any).url) ? "I'm ready to let this go" : "I'm done thinking about this"}
               </button>
             </div>
-          )}
+          ) : showConfirmation === 'purchase' ? (
+            <div className="space-y-3 pt-2">
+              <div className="text-center text-sm text-muted-foreground mb-3">
+                You're ready to buy this item:
+              </div>
+              {(item.link || (item as any).url) && (
+                <button
+                  onClick={() => handleConfirmedDecision('take-to-link')}
+                  className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
+                >
+                  Take me to the product
+                </button>
+              )}
+              <button
+                onClick={() => handleConfirmedDecision('mark-purchased')}
+                className="w-full py-3 px-4 bg-decision-buy/20 hover:bg-decision-buy/30 text-decision-buy border border-decision-buy/30 font-medium rounded-xl transition-colors"
+              >
+                Mark as purchased (no link)
+              </button>
+              <button
+                onClick={handleBackToDecisions}
+                className="w-full py-2 px-4 text-muted-foreground hover:text-foreground text-sm transition-colors"
+              >
+                ← Back to decisions
+              </button>
+            </div>
+          ) : showConfirmation === 'let-go' ? (
+            <div className="space-y-3 pt-2">
+              <div className="text-center text-sm text-muted-foreground mb-3">
+                Are you sure you're ready to let this go?
+              </div>
+              <button
+                onClick={() => handleConfirmedDecision('let-go')}
+                className="w-full py-3 px-4 bg-decision-let-go hover:bg-decision-let-go/90 text-decision-let-go-foreground font-medium rounded-xl transition-colors"
+              >
+                Yes, let it go
+              </button>
+              <button
+                onClick={handleBackToDecisions}
+                className="w-full py-2 px-4 text-muted-foreground hover:text-foreground text-sm transition-colors"
+              >
+                ← Back to decisions
+              </button>
+            </div>
+          ) : null}
 
           {/* Footer actions */}
           <div className="pt-2 flex items-center justify-between">
