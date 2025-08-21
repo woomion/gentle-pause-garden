@@ -99,6 +99,19 @@ const Index = () => {
     return () => window.removeEventListener('scroll', onWinScroll);
   }, []);
 
+  // Debug scroll container dimensions
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      console.log('📐 Container dimensions:', {
+        scrollHeight: container.scrollHeight,
+        clientHeight: container.clientHeight,
+        offsetHeight: container.offsetHeight,
+        canScroll: container.scrollHeight > container.clientHeight
+      });
+    }
+  }, [items, sectionsExpanded]);
+
   const handleStartReview = () => {
     itemReview.resetReviewIndex();
     modalStates.handleStartReview('solo');
@@ -145,10 +158,16 @@ console.log('Rendering main Index content');
     <>
       <div
         ref={scrollContainerRef}
-        onScroll={(e) => setCompactQuickBar((e.currentTarget as HTMLDivElement).scrollTop > 8)}
+        onScroll={(e) => {
+          const scrollTop = (e.currentTarget as HTMLDivElement).scrollTop;
+          console.log('📜 Scroll event:', { scrollTop, maxHeight: e.currentTarget.scrollHeight, clientHeight: e.currentTarget.clientHeight });
+          setCompactQuickBar(scrollTop > 8);
+        }}
         className={`min-h-screen min-h-[100dvh] max-h-screen max-h-[100dvh] bg-background transition-colors duration-300 overflow-y-auto ${
         sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
-      }`}>
+      }`}
+        style={{ scrollBehavior: 'auto' }}
+      >
 
         <div className={`max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
           <PauseHeader />
