@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "npm:resend@4.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.10';
+import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import React from 'npm:react@18.3.1';
+import { ReviewReminderEmail } from './_templates/review-reminder.tsx';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -26,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get all users who have items ready for review and notifications enabled
     const { data: usersWithSettings, error: usersError } = await supabase
       .from('user_settings')
-      .select('user_id, notifications_enabled')
+      .select('user_id, notifications_enabled, timezone, notification_time_preference, last_reminder_sent')
       .eq('notifications_enabled', true);
 
     if (usersError) {
@@ -37,6 +40,33 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const userSetting of usersWithSettings || []) {
       try {
+        // Check if user should receive reminder based on their timezone and time preference
+        const userTimezone = userSetting.timezone || 'UTC';
+        const preferredTime = userSetting.notification_time_preference || '19:00:00'; // Default to 7 PM
+        const lastReminderSent = userSetting.last_reminder_sent;
+        
+        // Convert current UTC time to user's timezone
+        const now = new Date();
+        const userLocalTime = new Intl.DateTimeFormat('en-US', {
+          timeZone: userTimezone,
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }).format(now);
+        
+        const userLocalHour = parseInt(userLocalTime.split(':')[0]);
+        const preferredHour = parseInt(preferredTime.split(':')[0]);
+        
+        // Check if we should skip based on timing and last reminder
+        const today = new Date().toISOString().split('T')[0];
+        const alreadySentToday = lastReminderSent && lastReminderSent.split('T')[0] === today;
+        
+        // Only send if it's within 1 hour of their preferred time and haven't sent today
+        if (Math.abs(userLocalHour - preferredHour) > 1 || alreadySentToday) {
+          console.log(`Skipping user ${userSetting.user_id} - wrong time (${userLocalHour} vs ${preferredHour}) or already sent today`);
+          continue;
+        }
+
         // Get user's email from auth.users (using service role key)
         const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userSetting.user_id);
         
@@ -72,73 +102,16 @@ const handler = async (req: Request): Promise<Response> => {
           new Date(item.created_at) < tenDaysAgo
         ).length;
 
-        // Create email content
-        const formatPrice = (price: number | null) => {
-          if (!price) return '';
-          return `, $${price.toFixed(2)}`;
-        };
-
-        const itemsList = reviewItems.map(item => 
-          `${item.title}${item.store_name ? `, ${item.store_name}` : ''}${formatPrice(item.price)}`
-        ).join('<br>');
-
-        const emailHtml = `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #333;">
-            
-            <div style="text-align: center; margin-bottom: 32px;">
-              <h2 style="color: #333; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">
-                ${reviewItems.length} item${reviewItems.length > 1 ? 's' : ''} ${reviewItems.length > 1 ? 'are' : 'is'} ready whenever you are.
-              </h2>
-            </div>
-
-            <div style="margin-bottom: 24px;">
-              <h1 style="color: #333; font-size: 20px; font-weight: bold; margin: 0 0 4px 0;">Pocket Pause</h1>
-              <p style="color: #666; font-style: italic; margin: 0 0 16px 0; font-size: 16px;">Your paused items are ready for review.</p>
-              
-              <p style="color: #333; font-size: 16px; line-height: 1.5; margin: 0 0 24px 0;">
-                Here's what's been waiting for you. Take a breath and choose with clarity.
-              </p>
-            </div>
-            
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 24px 0; border-left: 4px solid #8B5CF6;">
-              <div style="color: #333; font-size: 15px; line-height: 1.6;">
-                ${itemsList}
-              </div>
-            </div>
-            
-            <div style="text-align: center; margin: 32px 0;">
-              <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.dev') || 'https://cnjznmbgxprsrovmdywe.lovable.dev'}" 
-                 style="background: #8B5CF6; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 500; display: inline-block; font-size: 16px;">
-                Review Now →
-              </a>
-            </div>
-            
-            ${longPausedCount > 0 ? `
-            <div style="background: #fff9e6; border: 1px solid #f0d000; border-radius: 8px; padding: 16px; margin: 24px 0; text-align: center;">
-              <p style="color: #8B5CF6; font-size: 14px; margin: 0;">
-                ✦ Notice: ${longPausedCount} of these items ${longPausedCount > 1 ? 'have' : 'has'} been paused for more than 10 days. ${longPausedCount > 1 ? 'Do they' : 'Does it'} still hold meaning?
-              </p>
-            </div>
-            ` : ''}
-            
-            <div style="text-align: center; margin: 32px 0 16px 0;">
-              <p style="color: #666; font-style: italic; margin: 0; font-size: 16px;">
-                Clarity grows in pauses. Thanks for taking yours.
-              </p>
-            </div>
-            
-            <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
-            
-            <div style="text-align: center;">
-              <p style="color: #999; font-size: 12px; margin: 0 0 8px 0;">
-                <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.dev') || 'https://cnjznmbgxprsrovmdywe.lovable.dev'}" style="color: #8B5CF6; text-decoration: none;">Manage account / settings</a>
-              </p>
-              <p style="color: #ccc; font-size: 11px; margin: 0;">
-                Pocket-sized presence before you buy.
-              </p>
-            </div>
-          </div>
-        `;
+        // Generate beautiful email HTML using React Email
+        const appUrl = Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.dev') || 'https://cnjznmbgxprsrovmdywe.lovable.dev';
+        
+        const emailHtml = await renderAsync(
+          React.createElement(ReviewReminderEmail, {
+            reviewItems,
+            appUrl,
+            longPausedCount,
+          })
+        );
 
         // Send email using Resend
         const emailResponse = await resend.emails.send({
@@ -152,6 +125,12 @@ const handler = async (req: Request): Promise<Response> => {
           console.log(`Failed to send email to ${authUser.user.email}:`, emailResponse.error);
         } else {
           console.log(`Successfully sent reminder to ${authUser.user.email}`);
+          
+          // Update last reminder sent timestamp
+          await supabase
+            .from('user_settings')
+            .update({ last_reminder_sent: new Date().toISOString() })
+            .eq('user_id', userSetting.user_id);
         }
 
       } catch (userError) {
