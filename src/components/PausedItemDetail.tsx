@@ -258,16 +258,16 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                     onClick={() => handleConfirmedDecision('take-to-link')}
                     className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
                   >
-                    Take me to the product
+                    Take me to the link
                   </button>
-                  <p className="text-xs text-muted-foreground text-center">(and mark as purchased)</p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 text-center">(and then mark as purchased)</p>
                 </div>
               )}
               <button
                 onClick={() => handleConfirmedDecision('mark-purchased')}
                 className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
               >
-                Mark as purchased (no link)
+                Mark as purchased
               </button>
               <button
                 onClick={handleBackToDecisions}
