@@ -109,10 +109,8 @@ const ItemReviewModal = ({
       if (isLastItem) {
         console.log('🎯 ItemReviewModal: Closing modal (last item)');
         onClose();
-      } else {
-        console.log('🎯 ItemReviewModal: Navigating to next item');
-        handleNavigateNext();
       }
+      // Don't call handleNavigateNext() - the item removal will automatically show the next item
     } catch (error) {
       console.error('❌ ItemReviewModal: Error processing decision:', error);
     }
