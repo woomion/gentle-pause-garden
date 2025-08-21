@@ -88,7 +88,7 @@
     --popover: 39 100% 95%;
     --popover-foreground: 220 13% 18%;
 
-    --primary: 32 100% 55%;
+    --primary: 35 100% 55%;
     --primary-foreground: 39 100% 95%;
 
     --secondary: 32 40% 88%;
@@ -105,17 +105,17 @@
 
     --border: 32 20% 88%;
     --input: 32 20% 88%;
-    --ring: 32 100% 55%;
+    --ring: 35 100% 55%;
 
     /* App-specific colors */
     --cream: 39 100% 95%;
-    --lavender: 32 60% 85%;
-    --lavender-hover: 32 50% 75%;
+    --lavender: 35 60% 85%;
+    --lavender-hover: 35 50% 75%;
     --dark-gray: 220 13% 18%;
     --light-gray: 220 13% 45%;
     --placeholder: 32 20% 70%;
 
-    --invite-button: 32 60% 85%;
+    --invite-button: 35 60% 85%;
     --invite-button-foreground: 220 13% 18%;
 
     --shared-review: 152 57% 88%;
@@ -124,22 +124,22 @@
 
     --sidebar-background: 39 100% 95%;
     --sidebar-foreground: 220 13% 18%;
-    --sidebar-primary: 32 47% 25%;
+    --sidebar-primary: 35 47% 25%;
     --sidebar-primary-foreground: 39 100% 95%;
     --sidebar-accent: 32 20% 90%;
     --sidebar-accent-foreground: 220 13% 18%;
     --sidebar-border: 32 20% 88%;
-    --sidebar-ring: 32 47% 25%;
+    --sidebar-ring: 35 47% 25%;
 
-    --decision-buy: 32 60% 85%;
+    --decision-buy: 35 60% 85%;
     --decision-buy-foreground: 220 13% 18%;
-    --decision-let-go: 32 60% 85%;
+    --decision-let-go: 35 60% 85%;
     --decision-let-go-foreground: 220 13% 18%;
-    --decide-now: 32 60% 85%;
+    --decide-now: 35 60% 85%;
     --decide-now-foreground: 220 13% 18%;
-    --section-header: 32 35% 88%;
+    --section-header: 35 35% 88%;
     --section-header-foreground: 220 13% 18%;
-    --whisper-lavender: 32 47% 25%;
+    --whisper-lavender: 35 47% 25%;
 
     /* Miro-style accent */
     --brand-yellow: 48 100% 60%;
@@ -215,70 +215,70 @@
 
   /* Sporty orange theme - dark mode */
   .dark[data-color-theme="sporty"] {
-    --background: 32 47% 15%;
+    --background: 35 47% 15%;
     --foreground: 39 100% 95%;
 
-    --card: 32 47% 20%;
+    --card: 35 47% 20%;
     --card-foreground: 39 100% 95%;
 
-    --popover: 32 47% 20%;
+    --popover: 35 47% 20%;
     --popover-foreground: 39 100% 95%;
 
-    --primary: 32 83% 62%;
+    --primary: 35 83% 62%;
     --primary-foreground: 39 100% 95%;
 
-    --secondary: 32 30% 25%;
+    --secondary: 35 30% 25%;
     --secondary-foreground: 39 100% 95%;
 
-    --muted: 32 30% 25%;
+    --muted: 35 30% 25%;
     --muted-foreground: 39 50% 80%;
 
-    --accent: 32 30% 30%;
+    --accent: 35 30% 30%;
     --accent-foreground: 39 100% 95%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 39 100% 95%;
 
-    --border: 32 20% 35%;
-    --input: 32 20% 35%;
-    --ring: 32 83% 62%;
+    --border: 35 20% 35%;
+    --input: 35 20% 35%;
+    --ring: 35 83% 62%;
 
     /* App-specific dark colors */
-    --cream: 32 47% 20%;
-    --lavender: 32 50% 65%;
-    --lavender-hover: 32 40% 55%;
+    --cream: 35 47% 20%;
+    --lavender: 35 50% 65%;
+    --lavender-hover: 35 40% 55%;
     --dark-gray: 39 100% 95%;
     --light-gray: 39 50% 80%;
     --placeholder: 32 30% 60%;
 
-    --invite-button: 32 50% 65%;
-    --invite-button-foreground: 32 47% 15%;
+    --invite-button: 35 50% 65%;
+    --invite-button-foreground: 35 47% 15%;
 
     --shared-review: 152 57% 40%;
     --shared-review-foreground: 152 70% 80%;
     --shared-review-muted: 152 30% 60%;
 
-    --sidebar-background: 32 47% 15%;
+    --sidebar-background: 35 47% 15%;
     --sidebar-foreground: 39 100% 95%;
     --sidebar-primary: 39 100% 95%;
-    --sidebar-primary-foreground: 32 47% 15%;
-    --sidebar-accent: 32 30% 25%;
+    --sidebar-primary-foreground: 35 47% 15%;
+    --sidebar-accent: 35 30% 25%;
     --sidebar-accent-foreground: 39 100% 95%;
-    --sidebar-border: 32 20% 35%;
+    --sidebar-border: 35 20% 35%;
     --sidebar-ring: 39 100% 95%;
 
-    --decision-buy: 32 50% 65%;
-    --decision-buy-foreground: 32 47% 15%;
-    --decision-let-go: 32 50% 65%;
-    --decision-let-go-foreground: 32 47% 15%;
-    --decide-now: 32 50% 65%;
-    --decide-now-foreground: 32 47% 15%;
-    --section-header: 32 40% 60%;
+    --decision-buy: 35 50% 65%;
+    --decision-buy-foreground: 35 47% 15%;
+    --decision-let-go: 35 50% 65%;
+    --decision-let-go-foreground: 35 47% 15%;
+    --decide-now: 35 50% 65%;
+    --decide-now-foreground: 35 47% 15%;
+    --section-header: 35 40% 60%;
     --section-header-foreground: 39 100% 95%;
 
     /* Miro-style accent (dark) */
     --brand-yellow: 48 95% 55%;
-    --brand-yellow-foreground: 32 47% 15%;
+    --brand-yellow-foreground: 35 47% 15%;
   }
 
 }

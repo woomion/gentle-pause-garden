@@ -18,7 +18,7 @@ export function ThemeSelector() {
       id: 'sporty' as const,
       name: 'Sporty Orange',
       description: 'Energetic orange for an active mindset',
-      preview: 'linear-gradient(135deg, hsl(32, 100%, 55%), hsl(32, 60%, 85%))',
+      preview: 'linear-gradient(135deg, hsl(35, 100%, 55%), hsl(35, 60%, 85%))',
     },
   ];
 
