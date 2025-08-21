@@ -39,16 +39,17 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     return new Date(item.checkInDate) <= now;
   }, [item.checkInDate]);
 
-  // Mark comments as read when opening the detail view and reset decision buttons
+  // Mark comments as read when opening the detail view and reset decision buttons only when item changes
   useEffect(() => {
     if (isOpen && currentUserId) {
       markAsRead(item.id);
     }
-    // Reset decision buttons when opening modal or when item changes
-    if (isOpen) {
-      setShowDecisionButtons(false);
-    }
-  }, [isOpen, item.id, currentUserId, markAsRead]);
+  }, [isOpen, currentUserId, markAsRead]);
+
+  // Reset decision buttons only when item changes, not when modal opens
+  useEffect(() => {
+    setShowDecisionButtons(false);
+  }, [item.id]);
 
   // Add keyboard navigation
   useEffect(() => {
