@@ -41,13 +41,13 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
           <>
             <button
               onClick={() => handleInitialDecision('purchase')}
-              className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
             >
               I'm going to buy this
             </button>
             <button
               onClick={() => handleInitialDecision('let-go')}
-              className="w-full py-3 px-4 bg-decision-let-go hover:bg-decision-let-go/90 text-decision-let-go-foreground font-medium rounded-xl transition-colors"
+              className="w-full py-3 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-xl transition-colors"
             >
               I'm ready to let this go
             </button>
@@ -56,14 +56,14 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
           <>
             <button
               onClick={() => handleInitialDecision('purchase')}
-              className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <Check size={18} />
               I'm interested in this
             </button>
             <button
               onClick={() => handleInitialDecision('let-go')}
-              className="w-full py-3 px-4 bg-decision-let-go hover:bg-decision-let-go/90 text-decision-let-go-foreground font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <X size={18} />
               I'm done thinking about this
@@ -84,16 +84,16 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
           <div className="space-y-1">
             <button
               onClick={() => handleConfirmedDecision('take-to-link')}
-              className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
             >
               Take me to the link
             </button>
-            <p className="text-xs text-purple-600 dark:text-purple-400 text-center">(and then mark as purchased)</p>
+            <p className="text-xs text-primary/70 text-center">(and then mark as purchased)</p>
           </div>
         )}
         <button
           onClick={() => handleConfirmedDecision('mark-purchased')}
-          className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
+          className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
         >
           Mark as purchased
         </button>
@@ -115,7 +115,7 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
         </div>
         <button
           onClick={() => handleConfirmedDecision('let-go')}
-          className="w-full py-3 px-4 bg-decision-let-go hover:bg-decision-let-go/90 text-decision-let-go-foreground font-medium rounded-xl transition-colors"
+          className="w-full py-3 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-xl transition-colors"
         >
           Yes, let it go
         </button>

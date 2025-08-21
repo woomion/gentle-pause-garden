@@ -54,13 +54,11 @@ const PauseDurationBanner = ({ checkInTime, pausedAt, isReadyForReview, onDecide
 
   return (
     <div 
-      className={`py-2 px-4 rounded-b-lg text-center text-xs font-medium flex items-center justify-center gap-2 ${
-        isReadyForReview && showDecideButton ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+      className={`py-2 px-4 rounded-b-lg text-center text-xs font-medium flex items-center justify-center gap-2 transition-all ${
+        isReadyForReview && showDecideButton 
+          ? 'cursor-pointer hover:opacity-80 bg-primary text-primary-foreground' 
+          : 'bg-muted text-muted-foreground'
       }`}
-      style={{ 
-        backgroundColor: isReadyForReview && showDecideButton ? '#6366f1' : '#eeeaf8',
-        color: isReadyForReview && showDecideButton ? '#fff' : '#000'
-      }}
       onClick={isReadyForReview && showDecideButton && onDecideNow ? onDecideNow : undefined}
     >
       {isReadyForReview && showDecideButton ? (
