@@ -39,12 +39,21 @@ export function ThemeProvider({
 }) {
   const { user } = useAuth();
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [colorTheme, setColorThemeState] = useState<ColorTheme>('sporty');
+  const [colorTheme, setColorThemeState] = useState<ColorTheme | null>(null); // Start with null to prevent flash
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // Load theme from database for authenticated users or localStorage for guests
     const loadTheme = async () => {
+      // First, try to load from localStorage synchronously to prevent flash
+      const storedColorTheme = localStorage.getItem(colorStorageKey) as ColorTheme;
+      if (storedColorTheme) {
+        setColorThemeState(storedColorTheme);
+      } else {
+        setColorThemeState('sporty'); // Default fallback
+      }
+
       if (user) {
         try {
           const { data } = await supabase
@@ -61,24 +70,26 @@ export function ThemeProvider({
           }
         } catch (error) {
           console.error('Failed to load theme from database:', error);
-          // Fallback to localStorage
+          // Fallback already set above
           const storedTheme = localStorage.getItem(storageKey) as Theme;
-          const storedColorTheme = localStorage.getItem(colorStorageKey) as ColorTheme;
           setThemeState(storedTheme || defaultTheme);
-          setColorThemeState(storedColorTheme || defaultColorTheme);
         }
       } else {
         const storedTheme = localStorage.getItem(storageKey) as Theme;
-        const storedColorTheme = localStorage.getItem(colorStorageKey) as ColorTheme;
         setThemeState(storedTheme || defaultTheme);
-        setColorThemeState('sporty'); // Force sporty theme for now
+        // Color theme already set above
       }
+      
+      setIsLoaded(true);
     };
 
     loadTheme();
-  }, [user, storageKey, colorStorageKey, defaultTheme, defaultColorTheme]);
+  }, [user, storageKey, colorStorageKey, defaultTheme]);
 
   useEffect(() => {
+    // Only apply theme changes after initial load and when colorTheme is not null
+    if (!isLoaded || colorTheme === null) return;
+
     const root = window.document.documentElement;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -116,7 +127,7 @@ export function ThemeProvider({
 
     mediaQuery.addEventListener('change', handleMediaChange);
     return () => mediaQuery.removeEventListener('change', handleMediaChange);
-  }, [theme, colorTheme]);
+  }, [theme, colorTheme, isLoaded]);
 
   const setTheme = async (newTheme: Theme) => {
     setThemeState(newTheme);
@@ -160,7 +171,7 @@ export function ThemeProvider({
     theme,
     setTheme,
     actualTheme,
-    colorTheme,
+    colorTheme: colorTheme || 'sporty', // Provide fallback to prevent null issues
     setColorTheme,
   };
 
