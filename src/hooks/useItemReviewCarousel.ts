@@ -40,9 +40,14 @@ export const useItemReviewCarousel = (
   const navigateToNext = () => {
     const nextIndex = activeIndex + 1;
     if (nextIndex < itemsLength) {
-      setActiveIndex(nextIndex);
       if (api) {
         api.scrollTo(nextIndex);
+        // Wait for carousel to update before setting activeIndex
+        setTimeout(() => {
+          setActiveIndex(nextIndex);
+        }, 50);
+      } else {
+        setActiveIndex(nextIndex);
       }
       return nextIndex;
     }

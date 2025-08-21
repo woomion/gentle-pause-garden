@@ -69,6 +69,13 @@ const ItemReviewModal = ({
     }
   };
 
+  const handleTakeToLink = () => {
+    const url = currentItem.link || (currentItem as any).url;
+    if (url) {
+      window.open(url, '_blank');
+    }
+  };
+
   const handleDecision = async (decision: 'purchase' | 'let-go') => {
     console.log('🎯 ItemReviewModal: handleDecision called with:', decision);
     
@@ -159,15 +166,16 @@ const ItemReviewModal = ({
                       userValues={[]}
                     />
                     
-                    {/* Decision buttons right after values section for current item */}
-                    {index === activeIndex && (
-                      <div className="px-6 pb-6">
-                        <ItemReviewDecisionButtons 
-                          onDecision={handleDecision} 
-                          hasUrl={!!(currentItem.link || (currentItem as any).url)}
-                        />
-                      </div>
-                    )}
+                     {/* Decision buttons right after values section for current item */}
+                     {index === activeIndex && (
+                       <div className="px-6 pb-6">
+                         <ItemReviewDecisionButtons 
+                           onDecision={handleDecision} 
+                           onTakeToLink={handleTakeToLink}
+                           hasUrl={!!(currentItem.link || (currentItem as any).url)}
+                         />
+                       </div>
+                     )}
                     
                     {/* Carousel Navigation below item */}
                     {index === activeIndex && (
