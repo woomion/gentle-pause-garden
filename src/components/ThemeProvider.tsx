@@ -39,7 +39,7 @@ export function ThemeProvider({
 }) {
   const { user } = useAuth();
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [colorTheme, setColorThemeState] = useState<ColorTheme>(defaultColorTheme);
+  const [colorTheme, setColorThemeState] = useState<ColorTheme>('sporty');
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export function ThemeProvider({
         const storedTheme = localStorage.getItem(storageKey) as Theme;
         const storedColorTheme = localStorage.getItem(colorStorageKey) as ColorTheme;
         setThemeState(storedTheme || defaultTheme);
-        setColorThemeState(storedColorTheme || defaultColorTheme);
+        setColorThemeState('sporty'); // Force sporty theme for now
       }
     };
 
