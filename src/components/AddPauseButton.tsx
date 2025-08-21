@@ -180,7 +180,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const shouldBeCompact = isMobile ? isCompact : (isCompact || isScrolled);
 
   return (
-    <div className={`relative w-full bg-lavender hover:bg-lavender-hover text-dark-gray font-medium px-6 transition-all duration-300 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg rounded-2xl ${
+    <div className={`relative w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6 transition-all duration-300 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg rounded-2xl ${
       shouldBeCompact 
         ? 'py-4 sm:py-3' 
         : 'py-6 sm:py-8'
@@ -201,7 +201,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
               value={url}
               onChange={(e) => handleUrlChange(e.target.value)}
               placeholder="Paste a product URL"
-              className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/10 text-dark-gray placeholder-dark-gray/60 focus:outline-none focus:border-white/40 transition-colors"
+              className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/60 focus:outline-none focus:border-white/40 transition-colors"
             />
             {url && (
               <button
@@ -209,7 +209,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded-full transition-colors"
                 type="button"
               >
-                <X size={16} className="text-dark-gray/60" />
+                <X size={16} className="text-primary-foreground/60" />
               </button>
             )}
           </div>
@@ -220,18 +220,18 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         </div>
         
         {isParsingUrl && (
-          <div className="mt-2 text-sm text-dark-gray/70">
+          <div className="mt-2 text-sm text-primary-foreground/70">
             Parsing product details...
           </div>
         )}
         {parsedData && (
           <div className="mt-2 flex items-center justify-between">
-            <div className="text-sm text-dark-gray/70">
+            <div className="text-sm text-primary-foreground/70">
               Found: {parsedData.itemName || 'Product'}{parsedData.storeName ? ` from ${parsedData.storeName}` : ''}
             </div>
             <button
               onClick={() => setShowFeedbackModal(true)}
-              className="p-1 hover:bg-white/20 rounded-md transition-colors text-dark-gray/60 hover:text-dark-gray"
+              className="p-1 hover:bg-white/20 rounded-md transition-colors text-primary-foreground/60 hover:text-primary-foreground"
               title="Fix Details"
             >
               <Edit size={14} />
@@ -243,7 +243,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
       {/* Add to Pause Button */}
       <button
         onClick={handleClick}
-        className="relative w-full bg-white/20 hover:bg-white/30 text-dark-gray font-medium py-4 rounded-xl transition-colors"
+        className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-4 rounded-xl transition-colors"
       >
         {/* Ripple effect */}
         {showRipple && (
