@@ -162,13 +162,13 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, currentUserId }:
               <div className="space-y-2">
                 <button
                   onClick={(e) => handleDecision(e, 'purchase')}
-                  className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+                  className="w-full py-2 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
                 >
                   {item.link ? "I'm going to buy this" : "I'm interested in this"}
                 </button>
                 <button
                   onClick={(e) => handleDecision(e, 'let-go')}
-                  className="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors"
+                  className="w-full py-2 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
                 >
                   {item.link ? "I'm ready to let this go" : "I'm done thinking about this"}
                 </button>

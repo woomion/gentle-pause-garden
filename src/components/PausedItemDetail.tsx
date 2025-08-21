@@ -242,7 +242,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
               </button>
               <button
                 onClick={() => handleInitialDecision('let-go')}
-                className="w-full py-3 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-xl transition-colors"
+                className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
               >
                 {(item.link || (item as any).url) ? "I'm ready to let this go" : "I'm done thinking about this"}
               </button>

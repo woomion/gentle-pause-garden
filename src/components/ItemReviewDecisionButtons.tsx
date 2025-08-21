@@ -47,7 +47,7 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
             </button>
             <button
               onClick={() => handleInitialDecision('let-go')}
-              className="w-full py-3 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-xl transition-colors"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
             >
               I'm ready to let this go
             </button>
@@ -63,7 +63,7 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
             </button>
             <button
               onClick={() => handleInitialDecision('let-go')}
-              className="w-full py-3 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <X size={18} />
               I'm done thinking about this
@@ -115,7 +115,7 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
         </div>
         <button
           onClick={() => handleConfirmedDecision('let-go')}
-          className="w-full py-3 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium rounded-xl transition-colors"
+          className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
         >
           Yes, let it go
         </button>
