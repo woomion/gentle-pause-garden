@@ -62,11 +62,21 @@ export const ReviewReminderEmail = ({
             </Text>
           </Section>
 
-          {/* Simple Item Count */}
+          {/* Items List */}
           <Section style={itemsSection}>
-            <Text style={itemCountText}>
-              You have {reviewItems.length} item{reviewItems.length > 1 ? 's' : ''} ready for review.
-            </Text>
+            {reviewItems.map((item, index) => (
+              <div key={item.id} style={itemCard}>
+                <Text style={itemText}>
+                  <strong>{item.title}</strong>
+                  {item.store_name && (
+                    <span style={storeText}> • {item.store_name}</span>
+                  )}
+                  {item.price && (
+                    <span style={priceText}>{formatPrice(item.price)}</span>
+                  )}
+                </Text>
+              </div>
+            ))}
           </Section>
 
           {/* CTA Button */}
@@ -165,15 +175,32 @@ const introText = {
 
 const itemsSection = {
   margin: '32px 0',
-  textAlign: 'center' as const,
 }
 
-const itemCountText = {
+const itemCard = {
+  background: 'linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%)',
+  borderRadius: '12px',
+  padding: '16px 20px',
+  margin: '8px 0',
+  borderLeft: '4px solid #8B5CF6',
+  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+}
+
+const itemText = {
   color: '#333',
-  fontSize: '18px',
-  fontWeight: '600',
-  margin: '0',
+  fontSize: '15px',
   lineHeight: '1.5',
+  margin: '0',
+}
+
+const storeText = {
+  color: '#666',
+  fontWeight: 'normal',
+}
+
+const priceText = {
+  color: '#8B5CF6',
+  fontWeight: '600',
 }
 
 const buttonSection = {

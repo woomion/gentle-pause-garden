@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { usePausedItems } from '@/hooks/usePausedItems';
 import { useUsageLimit } from '@/hooks/useUsageLimit';
-import { parseProductUrl } from '@/utils/optimizedUrlParser';
+import { parseProductUrl } from '@/utils/urlParser';
 import { extractStoreName } from '@/utils/pausedItemsUtils';
 
 // Quick add bar for Pill Mode only. Keeps UI minimal and fast.
