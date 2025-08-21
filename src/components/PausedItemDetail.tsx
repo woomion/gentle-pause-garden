@@ -253,16 +253,19 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 You're ready to buy this item:
               </div>
               {(item.link || (item as any).url) && (
-                <button
-                  onClick={() => handleConfirmedDecision('take-to-link')}
-                  className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
-                >
-                  Take me to the product
-                </button>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => handleConfirmedDecision('take-to-link')}
+                    className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
+                  >
+                    Take me to the product
+                  </button>
+                  <p className="text-xs text-muted-foreground text-center">(and mark as purchased)</p>
+                </div>
               )}
               <button
                 onClick={() => handleConfirmedDecision('mark-purchased')}
-                className="w-full py-3 px-4 bg-decision-buy/20 hover:bg-decision-buy/30 text-decision-buy border border-decision-buy/30 font-medium rounded-xl transition-colors"
+                className="w-full py-3 px-4 bg-decision-buy hover:bg-decision-buy/90 text-decision-buy-foreground font-medium rounded-xl transition-colors"
               >
                 Mark as purchased (no link)
               </button>
