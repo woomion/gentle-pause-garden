@@ -221,14 +221,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 onTouchStart={(e) => {
                   console.log('🚨 TOUCH START EVENT!', e);
                 }}
-                style={{ 
-                  position: 'relative',
-                  zIndex: 9999,
-                  pointerEvents: 'auto',
-                  backgroundColor: 'hsl(var(--decide-now))',
-                  color: 'hsl(var(--decide-now-foreground))'
-                }}
-                className="w-full py-3 px-4 font-medium rounded-xl transition-colors hover:opacity-90 border-2 border-red-500"
+                className="w-full py-3 px-4 font-medium rounded-xl transition-colors hover:opacity-90 bg-decide-now text-decide-now-foreground relative z-[9999] pointer-events-auto border-2 border-red-500"
               >
                 {(item.link || (item as any).url) ? 'Decide now' : 'Make a decision'}
               </button>
