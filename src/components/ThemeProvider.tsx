@@ -26,7 +26,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  defaultColorTheme = 'lavender',
+  defaultColorTheme = 'sporty',
   storageKey = 'pocket-pause-theme',
   colorStorageKey = 'pocket-pause-color-theme',
   ...props
