@@ -147,7 +147,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
               onExpandRequest();
             }
           }}
-          placeholder="Paste a link or type a thought..."
+          placeholder="Paste a link..."
           className="flex-1 h-12 rounded-full text-base"
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSubmit();
