@@ -181,33 +181,35 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
   return (
     <div className={`w-full rounded-xl bg-card/70 backdrop-blur px-3 ${compact ? 'py-2' : 'py-3'}`}>
       <div className="flex items-center gap-2">
-        <Input
-          ref={inputRef}
-          value={value}
-          onChange={(e) => {
-            const v = e.target.value;
-            setValue(v);
-            if (compact && onExpandRequest && isProbablyUrl(v)) {
-              onExpandRequest();
-            }
-          }}
-          placeholder="Paste a link..."
-          className="flex-1 h-12 rounded-full text-base"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSubmit();
-          }}
-        />
-        <button
-          onClick={handleReadClipboard}
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-muted/40 hover:bg-muted transition-colors border border-border"
-          title="Paste from clipboard"
-        >
-          {showClipboardSuccess ? (
-            <Check size={18} className="text-green-600" />
-          ) : (
-            <Clipboard size={18} className="text-muted-foreground" />
-          )}
-        </button>
+        <div className="flex-1 relative">
+          <Input
+            ref={inputRef}
+            value={value}
+            onChange={(e) => {
+              const v = e.target.value;
+              setValue(v);
+              if (compact && onExpandRequest && isProbablyUrl(v)) {
+                onExpandRequest();
+              }
+            }}
+            placeholder="Paste a link..."
+            className="h-12 rounded-full text-base pr-12"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSubmit();
+            }}
+          />
+          <button
+            onClick={handleReadClipboard}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-primary/20 rounded-full transition-colors bg-primary/10"
+            title="Paste from clipboard"
+          >
+            {showClipboardSuccess ? (
+              <Check size={18} className="text-primary" />
+            ) : (
+              <Clipboard size={18} className="text-primary" />
+            )}
+          </button>
+        </div>
       </div>
       {!compact && (
         <>
