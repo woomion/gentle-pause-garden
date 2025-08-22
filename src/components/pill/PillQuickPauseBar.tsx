@@ -200,7 +200,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
           />
           <button
             onClick={handleReadClipboard}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-primary/20 rounded-full transition-colors bg-primary/10"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted/20 rounded-full transition-colors"
             title="Paste from clipboard"
           >
             {showClipboardSuccess ? (
