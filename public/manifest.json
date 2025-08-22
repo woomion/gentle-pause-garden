@@ -24,10 +24,25 @@
     "method": "GET",
     "params": {
       "url": "shared_url",
-      "text": "shared_text",
+      "text": "shared_text", 
       "title": "shared_title"
     },
     "enctype": "application/x-www-form-urlencoded"
   },
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "text/plain": [".txt"],
+        "text/html": [".html"]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+pocketpause",
+      "url": "/?url=%s"
+    }
+  ],
   "categories": ["shopping", "lifestyle", "productivity"]
 }
