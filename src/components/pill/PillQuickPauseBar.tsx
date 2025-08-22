@@ -6,6 +6,7 @@ import { usePausedItems } from '@/hooks/usePausedItems';
 import { useUsageLimit } from '@/hooks/useUsageLimit';
 import { parseProductUrl } from '@/utils/urlParser';
 import { extractStoreName } from '@/utils/pausedItemsUtils';
+import { Clipboard, Check } from 'lucide-react';
 
 // Quick add bar for Pill Mode only. Keeps UI minimal and fast.
 const DURATION_PRESETS: { key: string; label: string }[] = [
@@ -51,6 +52,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
   const [value, setValue] = useState('');
   const [duration, setDuration] = useState<string>('1 week');
   const [submitting, setSubmitting] = useState(false);
+  const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastAppliedPrefill, setLastAppliedPrefill] = useState<string | undefined>(undefined);
 
@@ -134,6 +136,48 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
     }
   };
 
+  const handleReadClipboard = async () => {
+    try {
+      const clipboardValue = await navigator.clipboard.readText();
+      
+      if (clipboardValue && clipboardValue.trim()) {
+        const urlPattern = /https?:\/\//i;
+        if (urlPattern.test(clipboardValue.trim())) {
+          setValue(clipboardValue.trim());
+          setShowClipboardSuccess(true);
+          setTimeout(() => setShowClipboardSuccess(false), 2000);
+          toast({
+            title: "URL pasted from clipboard!",
+            description: "Ready to pause",
+          });
+          if (compact && onExpandRequest) {
+            onExpandRequest();
+          }
+          setTimeout(() => inputRef.current?.focus(), 0);
+        } else {
+          toast({
+            title: "No URL found",
+            description: "Please copy a product URL to your clipboard first",
+            variant: "destructive"
+          });
+        }
+      } else {
+        toast({
+          title: "Clipboard is empty",
+          description: "Please copy a product URL to your clipboard first",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Failed to read clipboard:', error);
+      toast({
+        title: "Can't access clipboard",
+        description: "Please paste the URL manually",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className={`w-full rounded-xl bg-card/70 backdrop-blur px-3 ${compact ? 'py-2' : 'py-3'}`}>
       <div className="flex items-center gap-2">
@@ -153,6 +197,17 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
             if (e.key === 'Enter') handleSubmit();
           }}
         />
+        <button
+          onClick={handleReadClipboard}
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-muted/40 hover:bg-muted transition-colors border border-border"
+          title="Paste from clipboard"
+        >
+          {showClipboardSuccess ? (
+            <Check size={18} className="text-green-600" />
+          ) : (
+            <Clipboard size={18} className="text-muted-foreground" />
+          )}
+        </button>
       </div>
       {!compact && (
         <>
