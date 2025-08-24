@@ -216,46 +216,45 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
 
   return (
     <div className={`w-full rounded-xl bg-card/70 backdrop-blur px-3 ${compact ? 'py-2' : 'py-3'}`}>
-      <div className="flex items-center gap-2">
-        <div className="flex-1 relative">
-          <Input
-            ref={inputRef}
-            value={value}
-            onChange={(e) => {
-              const v = e.target.value;
-              setValue(v);
-              if (compact && onExpandRequest && isProbablyUrl(v)) {
-                onExpandRequest();
-              }
-            }}
-            placeholder="Paste a link..."
-            className="h-12 rounded-full text-base pr-12"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSubmit();
-            }}
-          />
-          <button
-            onClick={handleReadClipboard}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted/20 rounded-full transition-colors"
-            title="Paste from clipboard"
-          >
-            {showClipboardSuccess ? (
-              <Check size={18} className="text-primary" />
-            ) : (
-              <Clipboard size={18} className="text-primary" />
-            )}
-          </button>
-        </div>
-        {!compact && (
+        <div className="flex items-center gap-2">
+          <div className="flex-1 relative">
+            <Input
+              ref={inputRef}
+              value={value}
+              onChange={(e) => {
+                const v = e.target.value;
+                setValue(v);
+                if (compact && onExpandRequest && isProbablyUrl(v)) {
+                  onExpandRequest();
+                }
+              }}
+              placeholder="Paste a link..."
+              className="h-12 rounded-full text-base pr-12"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSubmit();
+              }}
+            />
+            <button
+              onClick={handleReadClipboard}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted/20 rounded-full transition-colors"
+              title="Paste from clipboard"
+            >
+              {showClipboardSuccess ? (
+                <Check size={18} className="text-primary" />
+              ) : (
+                <Clipboard size={18} className="text-primary" />
+              )}
+            </button>
+          </div>
           <button
             onClick={() => setShowBarcodeScanner(true)}
-            className="p-3 bg-primary/10 hover:bg-primary/20 rounded-full border border-primary/20 hover:border-primary/40 transition-colors"
+            className="h-12 px-4 bg-primary/10 hover:bg-primary/20 rounded-full border border-primary/20 hover:border-primary/40 transition-colors flex items-center gap-2"
             title="Scan Barcode"
           >
             <Scan size={20} className="text-primary" />
+            {!compact && <span className="text-sm text-primary">Scan</span>}
           </button>
-        )}
-      </div>
+        </div>
       {!compact && (
         <>
           <div className="mt-3 grid grid-cols-5 gap-2">
