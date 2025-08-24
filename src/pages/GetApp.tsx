@@ -76,7 +76,7 @@ const GetApp = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-8 sm:py-12 px-4 bg-stone-50 dark:bg-stone-900/10">
+      <section className="pt-8 sm:pt-12 pb-12 sm:pb-16 px-4 bg-stone-50 dark:bg-stone-900/10">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-purple-900 dark:text-purple-100 mb-6 sm:mb-12 font-inter px-2">
             How It Works
