@@ -119,42 +119,30 @@ const GetApp = () => {
         </div>
       </section>
 
-      {/* Why It Matters Section */}
+      {/* Benefits Section */}
       <section className="py-20 px-4 bg-purple-50/50 dark:bg-purple-900/10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center text-purple-900 dark:text-purple-100 mb-16 font-inter">
-            Why Pocket Pause Matters
-          </h2>
-          
           <div className="space-y-8 text-center">
             <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-purple-900 dark:text-purple-100 italic font-inter">
               Clarity lives in the pause.
             </p>
             
-            <div className="space-y-6 text-lg sm:text-xl text-purple-700 dark:text-purple-200 font-inter max-w-3xl mx-auto">
-              <p>Impulse fades — what you truly value stays.</p>
-              <p>No guilt, no judgment — Pocket Pause isn't about saying no, it's about choosing yes with ease.</p>
-              <p>Conscious shopping — build a list that reflects what you actually want, not just what caught your eye.</p>
+            <div className="grid md:grid-cols-3 gap-8 mt-12">
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">Impulse fades</h3>
+                <p className="text-lg text-purple-700 dark:text-purple-200 font-inter">what you truly value stays.</p>
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">No guilt, no judgment</h3>
+                <p className="text-lg text-purple-700 dark:text-purple-200 font-inter">Pocket Pause isn't about saying no, it's about choosing yes with ease.</p>
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">Conscious shopping</h3>
+                <p className="text-lg text-purple-700 dark:text-purple-200 font-inter">build a list that reflects what you actually want, not just what caught your eye.</p>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8">
-            <blockquote className="text-center p-8 bg-white/50 dark:bg-purple-900/20 rounded-2xl">
-              <p className="text-lg italic text-purple-700 dark:text-purple-200 font-inter mb-4">
-                "I didn't realize how many things I didn't actually want until I paused first."
-              </p>
-            </blockquote>
-            
-            <blockquote className="text-center p-8 bg-white/50 dark:bg-purple-900/20 rounded-2xl">
-              <p className="text-lg italic text-purple-700 dark:text-purple-200 font-inter mb-4">
-                "It makes me feel lighter — like I have control, but without pressure."
-              </p>
-            </blockquote>
           </div>
         </div>
       </section>
