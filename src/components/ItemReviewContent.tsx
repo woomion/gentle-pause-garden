@@ -44,12 +44,12 @@ const ItemReviewContent = ({
     ('userId' in item && item.userId === user.id)
   );
 
-  const handleDecisionDirect = async (decision: 'purchase' | 'let-go') => {
+  const handleDecisionDirect = async (decision: 'purchase' | 'let-go', shouldOpenLink: boolean = false) => {
     console.log('🎯 ItemReviewContent: handleDecisionDirect called with:', decision, 'for item:', item.id);
     try {
       if (decision === 'purchase') {
-        console.log('🎯 ItemReviewContent: Calling handleBought');
-        await handleBought(item, onItemDecided, () => {});
+        console.log('🎯 ItemReviewContent: Calling handleBought, shouldOpenLink:', shouldOpenLink);
+        await handleBought(item, onItemDecided, () => {}, undefined, shouldOpenLink);
       } else {
         console.log('🎯 ItemReviewContent: Calling handleLetGo');
         await handleLetGo(item, onItemDecided, () => {});

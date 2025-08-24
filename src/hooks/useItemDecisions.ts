@@ -64,7 +64,7 @@ export const useItemDecisions = () => {
     }
   };
 
-  const handleBought = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void, reflectionNotes?: string) => {
+  const handleBought = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void, reflectionNotes?: string, shouldOpenLink: boolean = false) => {
     console.log('🛒 DEBUG: handleBought called for item:', item.itemName, 'has link:', !!item.link);
     console.log('📝 Adding item to pause log (purchased):', {
       itemName: item.itemName,
@@ -103,18 +103,18 @@ export const useItemDecisions = () => {
       // Remove from paused items
       onDelete(item.id);
       
-      // If item has a link, open it in browser
-      if (item.link) {
+      // Only open link if explicitly requested
+      if (shouldOpenLink && item.link) {
         console.log('🌐 DEBUG: Opening item link:', item.link);
         handleViewItem(item);
       } else {
-        console.log('🌐 DEBUG: No link found for item');
+        console.log('🌐 DEBUG: Not opening link (shouldOpenLink:', shouldOpenLink, ', hasLink:', !!item.link, ')');
       }
       
       // Show success toast that auto-dismisses
       const toastInstance = toast({
         title: "Great, you made a conscious choice!",
-        description: item.link ? "Opening product page..." : "We've moved this thoughtful decision to your Pause Log for future reference.",
+        description: shouldOpenLink && item.link ? "Opening product page..." : "We've moved this thoughtful decision to your Pause Log for future reference.",
       });
       
       // Auto-dismiss after 3 seconds

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 
 interface ItemReviewDecisionButtonsProps {
-  onDecision: (decision: 'purchase' | 'let-go') => void;
+  onDecision: (decision: 'purchase' | 'let-go', shouldOpenLink?: boolean) => void;
   onTakeToLink?: () => void;
   hasUrl?: boolean;
 }
@@ -19,12 +19,10 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
   const handleConfirmedDecision = (action: 'take-to-link' | 'mark-purchased' | 'let-go') => {
     console.log('🔴 Confirmed decision:', action);
     
-    if (action === 'take-to-link' && onTakeToLink) {
-      onTakeToLink();
-    }
-    
-    if (action === 'take-to-link' || action === 'mark-purchased') {
-      onDecision('purchase');
+    if (action === 'take-to-link') {
+      onDecision('purchase', true); // true = should open link
+    } else if (action === 'mark-purchased') {
+      onDecision('purchase', false); // false = should not open link
     } else if (action === 'let-go') {
       onDecision('let-go');
     }
@@ -81,15 +79,15 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
           You're ready to buy this item:
         </div>
         {hasUrl && (
-          <div className="space-y-1">
-            <button
-              onClick={() => handleConfirmedDecision('take-to-link')}
-              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
-            >
-              Take me to the link
-            </button>
-            <p className="text-xs text-primary/70 text-center">(and then mark as purchased)</p>
-          </div>
+          <button
+            onClick={() => handleConfirmedDecision('take-to-link')}
+            className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
+          >
+            <div className="text-center">
+              <div>Take me to the link</div>
+              <div className="text-xs opacity-70">(and then mark as purchased)</div>
+            </div>
+          </button>
         )}
         <button
           onClick={() => handleConfirmedDecision('mark-purchased')}
