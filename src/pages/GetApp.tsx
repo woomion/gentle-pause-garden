@@ -46,10 +46,10 @@ const GetApp = () => {
           </div>
           
           <div className="space-y-3">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-purple-900 dark:text-purple-100 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-purple-900 dark:text-purple-100 leading-tight font-inter">
               Pocket Pause
             </h1>
-            <p className="text-xl sm:text-2xl md:text-3xl text-purple-700 dark:text-purple-200 leading-relaxed">
+            <p className="text-xl sm:text-2xl md:text-3xl text-purple-700 dark:text-purple-200 leading-relaxed font-inter italic">
               A little space before you buy.
             </p>
           </div>
