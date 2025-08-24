@@ -57,7 +57,7 @@ const GetApp = () => {
                 A moment between want and yes.
               </h1>
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-purple-700 dark:text-purple-200 leading-relaxed font-inter italic max-w-3xl mx-auto px-4">
-                A pause button for shopping. Paste a product link, choose how long to wait, and review later with clarity.
+                A pause button for shopping with clarity.
               </p>
             </div>
             
@@ -121,27 +121,6 @@ const GetApp = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-12 sm:py-20 px-4 bg-purple-50/50 dark:bg-purple-900/10">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid gap-6 sm:gap-8 md:grid-cols-3">
-            <div className="space-y-2 sm:space-y-3 px-2 text-center">
-              <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">Impulse fades</h3>
-              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">what you truly value stays.</p>
-            </div>
-            
-            <div className="space-y-2 sm:space-y-3 px-2 text-center">
-              <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">No guilt, no judgment</h3>
-              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">Pocket Pause isn't about saying no, it's about choosing yes with ease.</p>
-            </div>
-            
-            <div className="space-y-2 sm:space-y-3 px-2 text-center">
-              <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">Conscious shopping</h3>
-              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">build a list that reflects what you actually want, not just what caught your eye.</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Closing CTA Section */}
       <section className="py-12 sm:py-20 px-4">
