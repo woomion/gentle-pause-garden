@@ -6,7 +6,9 @@ import { usePausedItems } from '@/hooks/usePausedItems';
 import { useUsageLimit } from '@/hooks/useUsageLimit';
 import { parseProductUrl } from '@/utils/urlParser';
 import { extractStoreName } from '@/utils/pausedItemsUtils';
-import { Clipboard, Check } from 'lucide-react';
+import { Clipboard, Check, Scan } from 'lucide-react';
+import BarcodeScanner from '../BarcodeScanner';
+import { lookupProductByBarcode } from '@/utils/productLookup';
 
 // Quick add bar for Pill Mode only. Keeps UI minimal and fast.
 const DURATION_PRESETS: { key: string; label: string }[] = [
@@ -53,6 +55,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
   const [duration, setDuration] = useState<string>('1 week');
   const [submitting, setSubmitting] = useState(false);
   const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastAppliedPrefill, setLastAppliedPrefill] = useState<string | undefined>(undefined);
 
@@ -177,6 +180,40 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
     }
   };
 
+  const handleBarcodeScanned = async (barcode: string) => {
+    console.log('Barcode scanned:', barcode);
+    
+    try {
+      const productInfo = await lookupProductByBarcode(barcode);
+      
+      // Set the scanned product as the value
+      setValue(productInfo.itemName || `Scanned Item ${barcode.slice(-4)}`);
+      
+      if (compact && onExpandRequest) {
+        onExpandRequest();
+      }
+      
+      toast({
+        title: "Product scanned!",
+        description: productInfo.itemName || "Barcode detected",
+      });
+      
+      setTimeout(() => inputRef.current?.focus(), 0);
+    } catch (error) {
+      console.error('Error looking up product:', error);
+      setValue(`Scanned Item ${barcode.slice(-4)}`);
+      
+      if (compact && onExpandRequest) {
+        onExpandRequest();
+      }
+      
+      toast({
+        title: "Barcode scanned",
+        description: "You can edit the details after pausing",
+      });
+    }
+  };
+
   return (
     <div className={`w-full rounded-xl bg-card/70 backdrop-blur px-3 ${compact ? 'py-2' : 'py-3'}`}>
       <div className="flex items-center gap-2">
@@ -209,6 +246,15 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
             )}
           </button>
         </div>
+        {!compact && (
+          <button
+            onClick={() => setShowBarcodeScanner(true)}
+            className="p-3 bg-primary/10 hover:bg-primary/20 rounded-full border border-primary/20 hover:border-primary/40 transition-colors"
+            title="Scan Barcode"
+          >
+            <Scan size={20} className="text-primary" />
+          </button>
+        )}
       </div>
       {!compact && (
         <>
@@ -237,6 +283,13 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
           </div>
         </>
       )}
+      
+      {/* Barcode Scanner */}
+      <BarcodeScanner
+        isOpen={showBarcodeScanner}
+        onClose={() => setShowBarcodeScanner(false)}
+        onScan={handleBarcodeScanned}
+      />
     </div>
   );
 };
