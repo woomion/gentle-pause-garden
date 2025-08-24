@@ -39,6 +39,10 @@ const GetApp = () => {
       <section className="flex items-center justify-center min-h-screen px-4">
         <div className="text-center max-w-4xl mx-auto space-y-10">
           <div className="space-y-6">
+            <h2 className="text-xl sm:text-2xl font-inter text-purple-800 dark:text-purple-200">
+              Pocket Pause
+            </h2>
+            
             {/* Pause Image */}
             <div className="flex justify-center">
               <img 
@@ -52,14 +56,14 @@ const GetApp = () => {
               <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-purple-900 dark:text-purple-100 leading-tight font-inter">
                 A moment between want and yes.
               </h1>
-              <p className="text-lg sm:text-xl md:text-2xl text-purple-700 dark:text-purple-200 leading-relaxed font-inter max-w-3xl mx-auto">
+              <p className="text-lg sm:text-xl md:text-2xl text-purple-700 dark:text-purple-200 leading-relaxed font-inter italic max-w-3xl mx-auto">
                 A pause button for shopping. Paste a product link, choose how long to wait, and review later with clarity.
               </p>
             </div>
             
             <Button 
               asChild 
-              className="bg-purple-600 text-white hover:bg-purple-700 font-semibold text-lg sm:text-xl py-6 sm:py-8 px-8 sm:px-12 gap-3 rounded-xl font-inter"
+              className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-lg sm:text-xl py-6 sm:py-8 px-8 sm:px-12 gap-3 rounded-xl font-inter"
             >
               <Link to={appPath}>
                 A Moment Between Want and Yes → Try It Free
@@ -105,7 +109,7 @@ const GetApp = () => {
           <div className="text-center mt-12">
             <Button 
               asChild 
-              className="bg-purple-600 text-white hover:bg-purple-700 font-semibold text-lg sm:text-xl py-6 px-8 gap-3 rounded-xl font-inter"
+              className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-lg sm:text-xl py-6 px-8 gap-3 rounded-xl font-inter"
             >
               <Link to={appPath}>
                 Pause Your First Link
@@ -169,7 +173,7 @@ const GetApp = () => {
           
           <Button 
             asChild 
-            className="bg-purple-600 text-white hover:bg-purple-700 font-semibold text-xl sm:text-2xl py-6 sm:py-8 px-8 sm:px-12 gap-3 rounded-xl font-inter"
+            className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-xl sm:text-2xl py-6 sm:py-8 px-8 sm:px-12 gap-3 rounded-xl font-inter"
           >
             <Link to={appPath}>
                 Pause Now, Decide Later
