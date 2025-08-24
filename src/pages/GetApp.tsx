@@ -67,7 +67,7 @@ const GetApp = () => {
                 className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-sm sm:text-lg md:text-xl py-4 sm:py-6 md:py-8 px-6 sm:px-8 md:px-12 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
               >
                 <Link to={appPath}>
-                  Make Space Before You Buy
+                  Pause Your First Link
                 </Link>
               </Button>
             </div>
@@ -114,7 +114,7 @@ const GetApp = () => {
               className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-base sm:text-lg md:text-xl py-4 sm:py-6 px-6 sm:px-8 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
             >
               <Link to={appPath}>
-                Pause Your First Link
+                Make Space Before You Buy
               </Link>
             </Button>
           </div>
