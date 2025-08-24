@@ -50,6 +50,29 @@ const BarcodeScanner = ({ isOpen, onClose, onScan }: BarcodeScannerProps) => {
       )?.deviceId || videoInputDevices[0].deviceId;
 
       if (videoRef.current) {
+        // Configure video constraints for better barcode scanning
+        const constraints = {
+          video: {
+            deviceId: selectedDeviceId,
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: { ideal: 'environment' },
+            focusMode: { ideal: 'continuous' },
+            exposureMode: { ideal: 'continuous' }
+          }
+        };
+
+        // Get user media with better settings
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoRef.current.srcObject = stream;
+        
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+          if (videoRef.current) {
+            videoRef.current.onloadedmetadata = resolve;
+          }
+        });
+
         await codeReaderRef.current.decodeFromVideoDevice(
           selectedDeviceId,
           videoRef.current,
@@ -60,7 +83,8 @@ const BarcodeScanner = ({ isOpen, onClose, onScan }: BarcodeScannerProps) => {
               onScan(barcodeText);
               onClose();
             }
-            if (error) {
+            // Only log errors that aren't the common "not found" error
+            if (error && !error.message.includes('No MultiFormat Readers')) {
               console.log('Scanning error:', error);
             }
           }
