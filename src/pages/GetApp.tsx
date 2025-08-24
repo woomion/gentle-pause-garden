@@ -59,10 +59,10 @@ const GetApp = () => {
             
             <Button 
               asChild 
-              className="bg-purple-600 text-white hover:bg-purple-700 font-semibold text-xl sm:text-2xl py-6 sm:py-8 px-8 sm:px-12 gap-3 rounded-xl font-inter"
+              className="bg-purple-600 text-white hover:bg-purple-700 font-semibold text-lg sm:text-xl py-6 sm:py-8 px-8 sm:px-12 gap-3 rounded-xl font-inter"
             >
               <Link to={appPath}>
-                👉 Pause Now — Free
+                A Moment Between Want and Yes → Try It Free
               </Link>
             </Button>
           </div>
@@ -108,7 +108,7 @@ const GetApp = () => {
               className="bg-purple-600 text-white hover:bg-purple-700 font-semibold text-lg sm:text-xl py-6 px-8 gap-3 rounded-xl font-inter"
             >
               <Link to={appPath}>
-                👉 Start Your First Pause
+                Pause Your First Link
               </Link>
             </Button>
           </div>
@@ -172,7 +172,7 @@ const GetApp = () => {
             className="bg-purple-600 text-white hover:bg-purple-700 font-semibold text-xl sm:text-2xl py-6 sm:py-8 px-8 sm:px-12 gap-3 rounded-xl font-inter"
           >
             <Link to={appPath}>
-              👉 Pause Your First Link — Free
+                Pause Now, Decide Later
             </Link>
           </Button>
         </div>
