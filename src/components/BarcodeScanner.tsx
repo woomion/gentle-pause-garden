@@ -135,16 +135,26 @@ const BarcodeScanner = ({ isOpen, onClose, onScan }: BarcodeScannerProps) => {
               {isScanning && (
                 <div className="absolute inset-0 border-2 border-primary rounded-lg">
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-48 h-32 border-2 border-white rounded-lg opacity-50"></div>
+                    <div className="w-48 h-32 border-2 border-white rounded-lg opacity-70">
+                      <div className="absolute inset-0 border-4 border-transparent border-t-primary border-l-primary animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                    Scanning automatically...
                   </div>
                 </div>
               )}
             </div>
           )}
           
-          <p className="text-sm text-muted-foreground text-center">
-            Position the barcode within the frame to scan
-          </p>
+          <div className="text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Hold your phone 6-8 inches away from the barcode
+            </p>
+            <p className="text-xs text-muted-foreground">
+              The scanner will automatically detect and read the barcode
+            </p>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2">
