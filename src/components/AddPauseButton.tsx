@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
-import { X, Edit } from 'lucide-react';
+import { X, Edit, Scan } from 'lucide-react';
 import FirstUseTooltip from './FirstUseTooltip';
 import ClipboardButton from './ClipboardButton';
 import ShareButton from './ShareButton';
 import { ItemFeedbackModal } from './ItemFeedbackModal';
+import BarcodeScanner from './BarcodeScanner';
+import { lookupProductByBarcode } from '../utils/productLookup';
 import { rulesStore } from '@/utils/parsingRulesStore';
 
 interface AddPauseButtonProps {
@@ -25,6 +27,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const [parsedData, setParsedData] = useState<any>(null);
   const [showFirstUseTooltip, setShowFirstUseTooltip] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
 
@@ -170,6 +173,36 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
     }
   };
 
+  const handleBarcodeScanned = async (barcode: string) => {
+    console.log('Barcode scanned:', barcode);
+    
+    try {
+      const productInfo = await lookupProductByBarcode(barcode);
+      
+      const barcodeData = {
+        itemName: productInfo.itemName,
+        storeName: productInfo.storeName || '',
+        price: productInfo.price || '',
+        imageUrl: productInfo.imageUrl || '',
+        link: '' // No link for scanned items
+      };
+      
+      console.log('Product lookup result:', barcodeData);
+      setParsedData(barcodeData);
+      setUrl(''); // Clear URL since this is a scanned item
+    } catch (error) {
+      console.error('Error looking up product:', error);
+      // Set basic data with barcode
+      setParsedData({
+        itemName: `Scanned Item ${barcode.slice(-4)}`,
+        storeName: '',
+        price: '',
+        imageUrl: '',
+        link: ''
+      });
+    }
+  };
+
   // Expose the clear function to parent via ref
   useImperativeHandle(ref, () => ({
     clearUrl: handleClearUrl
@@ -216,6 +249,13 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
           
           {/* Action buttons */}
           <ClipboardButton onUrlPasted={handleUrlChange} />
+          <button
+            onClick={() => setShowBarcodeScanner(true)}
+            className="p-3 bg-white/10 hover:bg-white/20 rounded-xl border-2 border-white/20 hover:border-white/40 transition-colors"
+            title="Scan Barcode"
+          >
+            <Scan size={20} className="text-primary-foreground" />
+          </button>
           {url && <ShareButton url={url} text={parsedData?.itemName} />}
         </div>
         
@@ -264,6 +304,13 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         onSave={(correctedData) => {
           setParsedData(correctedData);
         }}
+      />
+
+      {/* Barcode Scanner */}
+      <BarcodeScanner
+        isOpen={showBarcodeScanner}
+        onClose={() => setShowBarcodeScanner(false)}
+        onScan={handleBarcodeScanned}
       />
     </div>
   );

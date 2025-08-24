@@ -126,6 +126,22 @@ const PausedSection = () => {
     console.log('🎯 PausedSection: reviewItem now set to:', item);
   }, [showReviewModal]);
 
+  const handleEditItem = useCallback(async (item: PausedItem | LocalPausedItem, updates: Partial<PausedItem | LocalPausedItem>) => {
+    try {
+      if (user) {
+        // Update in Supabase store for authenticated users
+        // For now, just log - we'll need to add this method to the store
+        console.log('Editing item in Supabase store:', item.id, updates);
+      } else {
+        // Update in local store for guest users
+        // For now, just log - we'll need to add this method to the store
+        console.log('Editing item in local store:', item.id, updates);
+      }
+    } catch (error) {
+      console.error('Error editing item:', error);
+    }
+  }, [user]);
+
   // Loading state
   if (isLoading) {
     return <PausedSectionLoading />;
@@ -171,6 +187,7 @@ const PausedSection = () => {
         onItemClick={handleItemClick}
         onDelete={handleDeleteItem}
         onDecideNow={handleDecideNow}
+        onEdit={handleEditItem}
         currentUserId={user?.id}
       />
 
