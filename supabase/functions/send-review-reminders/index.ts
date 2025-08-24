@@ -103,7 +103,7 @@ const handler = async (req: Request): Promise<Response> => {
         ).length;
 
         // Generate beautiful email HTML using React Email
-        const appUrl = Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.dev') || 'https://cnjznmbgxprsrovmdywe.lovable.dev';
+        const appUrl = 'https://cnjznmbgxprsrovmdywe.lovable.dev';
         
         const emailHtml = await renderAsync(
           React.createElement(ReviewReminderEmail, {
