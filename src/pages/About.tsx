@@ -60,22 +60,22 @@ const About = () => {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-black dark:text-cream mb-2">1. Add a Pause</h3>
-                  <p>When you feel the pull to buy something (or say yes to something, or reach for something), open Pocket Pause. Instead of acting on impulse, you log the item, name the emotion, and take a breath.</p>
+                  <p>When you feel the pull to buy something, open Pocket Pause. Add the item with its link, name the emotion you're feeling, and choose which store or category it's from. Take a moment to reflect on why this caught your attention.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-black dark:text-cream mb-2">2. Set a Soft Intention</h3>
-                  <p>Write a quiet note to yourself—a reason, a reminder, or a simple reflection. This helps root the moment in awareness instead of automaticity.</p>
+                  <h3 className="font-semibold text-black dark:text-cream mb-2">2. Set Your Pause Duration</h3>
+                  <p>Choose how long you want to pause—from a few hours to several weeks. This gives your impulse time to settle and lets you revisit the decision with fresh perspective.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-black dark:text-cream mb-2">3. Come Back Later</h3>
-                  <p>Return when you're ready. Whether you buy the item or not, you'll do it with clarity. Each decision adds to your Greater Joy Fund—a gentle log of the mindful, aligned choices you've made.</p>
+                  <h3 className="font-semibold text-black dark:text-cream mb-2">3. Reflect and Decide</h3>
+                  <p>When your pause period ends, you'll get a gentle notification to review the item. Look at the details, remember why you wanted it, and make a conscious choice: "Take me to the link" to purchase, or "Mark as purchased" if you bought it elsewhere, or "Let it go" if you've moved on.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-black dark:text-cream mb-2">4. See the Patterns</h3>
-                  <p>Over time, you'll notice trends: what emotions often lead to impulse, what kinds of things you pass on, and what you truly value. Awareness becomes your compass.</p>
+                  <h3 className="font-semibold text-black dark:text-cream mb-2">4. Track Your Journey</h3>
+                  <p>Every decision—whether you purchase or let go—gets logged in your Pause Log. Over time, you'll see patterns in your emotions, spending triggers, and what truly brings you joy versus what was just a passing impulse.</p>
                 </div>
               </div>
               
