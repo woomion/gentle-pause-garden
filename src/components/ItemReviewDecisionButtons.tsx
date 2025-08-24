@@ -83,9 +83,9 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
             onClick={() => handleConfirmedDecision('take-to-link')}
             className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
           >
-            <div className="text-center">
+            <div className="text-center leading-tight">
               <div>Take me to the link</div>
-              <div className="text-xs opacity-70">(and then mark as purchased)</div>
+              <div className="text-xs opacity-80 mt-0.5">(and then mark as purchased)</div>
             </div>
           </button>
         )}
