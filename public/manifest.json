@@ -2,8 +2,9 @@
   "name": "Pocket Pause",
   "short_name": "PocketPause",
   "description": "Pause before you purchase",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#FF9E1B",
   "icons": [
@@ -20,7 +21,7 @@
     }
   ],
   "share_target": {
-    "action": "/",
+    "action": "/?share-target",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {
