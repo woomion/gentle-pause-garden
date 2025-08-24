@@ -107,17 +107,6 @@ const GetApp = () => {
               </p>
             </div>
           </div>
-          
-          <div className="text-center mt-8 sm:mt-12 px-4">
-            <Button 
-              asChild 
-              className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-base sm:text-lg md:text-xl py-4 sm:py-6 px-6 sm:px-8 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
-            >
-              <Link to={appPath}>
-                Make Space Before You Buy
-              </Link>
-            </Button>
-          </div>
         </div>
       </section>
 
