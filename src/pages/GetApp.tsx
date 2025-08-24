@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const GetApp = () => {
@@ -32,13 +33,13 @@ const GetApp = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#200E3B] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/30 flex items-center justify-center px-4">
       <div className="text-center max-w-md mx-auto space-y-8">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-white">
+          <h1 className="text-4xl font-bold text-purple-900 dark:text-purple-100">
             Pocket Pause
           </h1>
-          <p className="text-lg text-white/80">
+          <p className="text-lg text-purple-700 dark:text-purple-200">
             A little space before you buy.
           </p>
         </div>
@@ -46,16 +47,17 @@ const GetApp = () => {
         <div className="space-y-4">
           <Input 
             placeholder="Paste a link. Pause. Review later." 
-            className="text-center bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-white/40"
+            className="text-center bg-white/70 border-purple-200 text-purple-900 placeholder:text-purple-500 focus:border-purple-400 dark:bg-purple-900/20 dark:border-purple-700 dark:text-purple-100 dark:placeholder:text-purple-300"
             disabled
           />
           
           <Button 
             asChild 
-            className="w-full bg-white text-[#200E3B] hover:bg-white/90 font-semibold text-lg py-6"
+            className="w-full bg-purple-600 text-white hover:bg-purple-700 font-semibold text-lg py-6 gap-2"
           >
             <Link to={appPath}>
-              👉 Start Free
+              Start for Free
+              <ArrowRight size={20} />
             </Link>
           </Button>
         </div>
