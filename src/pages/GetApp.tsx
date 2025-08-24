@@ -36,8 +36,8 @@ const GetApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/30">
       
       {/* Hero Section */}
-      <section className="flex items-center justify-center min-h-screen px-4 py-12">
-        <div className="text-center max-w-4xl mx-auto space-y-8 sm:space-y-10">
+      <section className="flex items-center justify-center min-h-[60vh] sm:min-h-screen px-4 py-8 sm:py-12">
+        <div className="text-center max-w-4xl mx-auto space-y-6 sm:space-y-8 md:space-y-10">
           <div className="space-y-4 sm:space-y-6">
             <h2 className="text-lg sm:text-xl md:text-2xl font-inter text-purple-800 dark:text-purple-200">
               Pocket Pause
@@ -64,7 +64,7 @@ const GetApp = () => {
             <div className="pt-4">
               <Button 
                 asChild 
-                className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-sm sm:text-lg md:text-xl py-4 sm:py-6 md:py-8 px-6 sm:px-8 md:px-12 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
+                className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-base sm:text-lg md:text-xl py-4 sm:py-6 px-6 sm:px-8 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
               >
                 <Link to={appPath}>
                   Pause Your First Link
@@ -76,9 +76,9 @@ const GetApp = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-12 sm:py-20 px-4">
+      <section className="py-8 sm:py-12 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-purple-900 dark:text-purple-100 mb-8 sm:mb-16 font-inter px-2">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-purple-900 dark:text-purple-100 mb-6 sm:mb-12 font-inter px-2">
             How It Works
           </h2>
           
@@ -95,7 +95,7 @@ const GetApp = () => {
               <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-purple-600 dark:text-purple-400 font-inter">2</div>
               <h3 className="text-xl sm:text-2xl font-bold text-purple-900 dark:text-purple-100 font-inter">Wait</h3>
               <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter px-2">
-                It rests quietly in your Pause List for the time you choose.
+                It rests quietly in your Pause List for the duration you choose.
               </p>
             </div>
             
@@ -103,7 +103,7 @@ const GetApp = () => {
               <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-purple-600 dark:text-purple-400 font-inter">3</div>
               <h3 className="text-xl sm:text-2xl font-bold text-purple-900 dark:text-purple-100 font-inter">Review</h3>
               <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter px-2">
-                When the pause is up, it returns — so you can decide with space.
+                When the pause duration is up, the item returns for review, so you can decide with space.
               </p>
             </div>
           </div>
@@ -124,26 +124,20 @@ const GetApp = () => {
       {/* Benefits Section */}
       <section className="py-12 sm:py-20 px-4 bg-purple-50/50 dark:bg-purple-900/10">
         <div className="max-w-4xl mx-auto">
-          <div className="space-y-6 sm:space-y-8 text-center">
-            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-purple-900 dark:text-purple-100 italic font-inter px-2">
-              Clarity lives in the pause.
-            </p>
+          <div className="grid gap-6 sm:gap-8 md:grid-cols-3">
+            <div className="space-y-2 sm:space-y-3 px-2 text-center">
+              <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">Impulse fades</h3>
+              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">what you truly value stays.</p>
+            </div>
             
-            <div className="grid gap-6 sm:gap-8 md:grid-cols-3 mt-8 sm:mt-12">
-              <div className="space-y-2 sm:space-y-3 px-2">
-                <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">Impulse fades</h3>
-                <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">what you truly value stays.</p>
-              </div>
-              
-              <div className="space-y-2 sm:space-y-3 px-2">
-                <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">No guilt, no judgment</h3>
-                <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">Pocket Pause isn't about saying no, it's about choosing yes with ease.</p>
-              </div>
-              
-              <div className="space-y-2 sm:space-y-3 px-2">
-                <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">Conscious shopping</h3>
-                <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">build a list that reflects what you actually want, not just what caught your eye.</p>
-              </div>
+            <div className="space-y-2 sm:space-y-3 px-2 text-center">
+              <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">No guilt, no judgment</h3>
+              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">Pocket Pause isn't about saying no, it's about choosing yes with ease.</p>
+            </div>
+            
+            <div className="space-y-2 sm:space-y-3 px-2 text-center">
+              <h3 className="text-lg sm:text-xl font-bold text-purple-900 dark:text-purple-100 font-inter">Conscious shopping</h3>
+              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter">build a list that reflects what you actually want, not just what caught your eye.</p>
             </div>
           </div>
         </div>
@@ -164,7 +158,7 @@ const GetApp = () => {
           <div className="pt-2">
             <Button 
               asChild 
-              className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-base sm:text-xl md:text-2xl py-4 sm:py-6 md:py-8 px-6 sm:px-8 md:px-12 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
+              className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-base sm:text-lg md:text-xl py-4 sm:py-6 px-6 sm:px-8 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
             >
               <Link to={appPath}>
                   Pause Now, Decide Later
