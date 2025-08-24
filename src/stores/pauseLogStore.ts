@@ -3,7 +3,6 @@ export interface PauseLogItem {
   id: string;
   itemName: string;
   storeName: string;
-  emotion: string;
   letGoDate: string;
   status: 'purchased' | 'let-go';
   notes?: string;

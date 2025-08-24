@@ -14,7 +14,6 @@ export const useItemDecisions = () => {
   const handleLetGo = async (item: PausedItem, onDelete: (id: string) => void, onClose: () => void, reflectionNotes?: string) => {
     console.log('📝 Adding item to pause log (let go):', {
       itemName: item.itemName,
-      emotion: item.emotion,
       storeName: item.storeName,
       status: 'let-go',
       originalItemNotes: item.notes,
@@ -27,7 +26,6 @@ export const useItemDecisions = () => {
       if (user) {
         await supabasePauseLogStore.addItem({
           itemName: item.itemName,
-          emotion: item.emotion,
           storeName: item.storeName,
           status: 'let-go',
           notes: reflectionNotes,
@@ -37,7 +35,6 @@ export const useItemDecisions = () => {
       } else {
         pauseLogStore.addItem({
           itemName: item.itemName,
-          emotion: item.emotion,
           storeName: item.storeName,
           status: 'let-go',
           notes: reflectionNotes,
@@ -68,7 +65,6 @@ export const useItemDecisions = () => {
     console.log('🛒 DEBUG: handleBought called for item:', item.itemName, 'has link:', !!item.link);
     console.log('📝 Adding item to pause log (purchased):', {
       itemName: item.itemName,
-      emotion: item.emotion,
       storeName: item.storeName,
       status: 'purchased',
       originalItemNotes: item.notes,
@@ -81,7 +77,6 @@ export const useItemDecisions = () => {
       if (user) {
         await supabasePauseLogStore.addItem({
           itemName: item.itemName,
-          emotion: item.emotion,
           storeName: item.storeName,
           status: 'purchased',
           notes: reflectionNotes,
@@ -91,7 +86,6 @@ export const useItemDecisions = () => {
       } else {
         pauseLogStore.addItem({
           itemName: item.itemName,
-          emotion: item.emotion,
           storeName: item.storeName,
           status: 'purchased',
           notes: reflectionNotes,

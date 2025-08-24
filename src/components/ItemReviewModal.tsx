@@ -87,7 +87,6 @@ const ItemReviewModal = ({
       if (user) {
         await supabasePauseLogStore.addItem({
           itemName: currentItem.itemName,
-          emotion: 'something else',
           storeName: currentItem.storeName,
           status: decision === 'purchase' ? 'purchased' : 'let-go',
           notes: '',
@@ -96,7 +95,6 @@ const ItemReviewModal = ({
       } else {
         pauseLogStore.addItem({
           itemName: currentItem.itemName,
-          emotion: 'something else',
           storeName: currentItem.storeName,
           status: decision === 'purchase' ? 'purchased' : 'let-go',
           notes: '',

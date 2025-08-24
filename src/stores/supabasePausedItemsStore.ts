@@ -10,7 +10,6 @@ export interface PausedItem {
   storeName: string;
   price: string;
   imageUrl?: string;
-  emotion: string;
   notes?: string;
   duration: string;
   otherDuration?: string;
@@ -122,7 +121,7 @@ class SupabasePausedItemsStore {
       console.log('1. Adding item for user:', user.id, 'with data:', {
         itemName: item.itemName,
         storeName: item.storeName,
-        emotion: item.emotion,
+        
         hasPhoto: !!item.photo,
         hasImageUrl: !!item.imageUrl,
         imageUrlValue: item.imageUrl,
@@ -199,7 +198,7 @@ class SupabasePausedItemsStore {
         id: newItem.id,
         storeName: newItem.storeName,
         imageUrl: newItem.imageUrl,
-        emotion: newItem.emotion,
+        
         tags: newItem.tags,
         tagsLength: newItem.tags?.length || 0
       });

@@ -111,7 +111,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
         itemName: itemName,
         storeName,
         price: price ?? '',
-        emotion: 'something else',
         notes: undefined,
         duration,
         link,

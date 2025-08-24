@@ -31,7 +31,7 @@ export const useModalStates = () => {
           itemName: parsedData.itemName || 'Product',
           storeName: parsedData.storeName || '',
           price: parsedData.price || '',
-          emotion: 'something else',
+          
           notes: undefined,
           duration: '1 week',
           link: parsedData.link,

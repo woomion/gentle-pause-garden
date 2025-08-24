@@ -65,7 +65,7 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     storeName: dbItem.store_name || storeName,
     price: dbItem.price?.toString() || '',
     imageUrl: dbItem.image_url || imageUrl,
-    emotion: dbItem.emotion || dbItem.reason || 'something else',
+    
     notes: actualNotes || undefined,
     duration: `${dbItem.pause_duration_days} days`,
     otherDuration: dbItem.other_duration || undefined,
@@ -110,7 +110,6 @@ export const convertLocalToDb = (
   
   console.log('Converting local to DB:', {
     itemName: item.itemName,
-    emotion: item.emotion,
     storeName: item.storeName,
     productLink: item.link,
     uploadedImageUrl: imageUrl,
@@ -123,14 +122,14 @@ export const convertLocalToDb = (
     title: item.itemName,
     price: item.price ? parseFloat(item.price) : null,
     url: finalUrl,
-    reason: item.emotion,
+    reason: null,
     notes: notesWithMetadata,
     pause_duration_days: pauseDurationDays,
     review_at: reviewAt.toISOString(),
     status: 'paused',
     tags: item.tags || [],
     shared_with_partners: [],
-    emotion: item.emotion,
+    emotion: null,
     image_url: imageUrl || item.imageUrl || '',
     is_cart: item.isCart || false,
     item_type: item.itemType || 'item',

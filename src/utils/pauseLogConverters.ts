@@ -52,7 +52,7 @@ export const convertDbToPauseLogItem = (dbItem: DbPausedItem): PauseLogItem => {
     id: dbItem.id,
     itemName: dbItem.title,
     storeName: storeName,
-    emotion: dbItem.reason || 'something else',
+    
     letGoDate: new Date(dbItem.created_at).toLocaleDateString('en-US', { 
       year: 'numeric',
       month: 'short', 
@@ -83,19 +83,18 @@ export const convertPauseLogItemToDb = (
 
   console.log('Insert data being prepared:', {
     title: item.itemName,
-    reason: item.emotion,
     notes: notesWithStore,
     status: dbStatus
   });
 
   return {
     title: item.itemName,
-    reason: item.emotion,
+    reason: null,
     notes: notesWithStore,
     status: dbStatus,
     tags: item.tags || [],
     shared_with_partners: [],
-    emotion: item.emotion,
+    emotion: null,
     image_url: '',
     is_cart: false,
     item_type: 'item',

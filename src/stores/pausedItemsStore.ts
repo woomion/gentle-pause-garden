@@ -5,7 +5,6 @@ export interface PausedItem {
   storeName: string;
   price: string;
   imageUrl?: string;
-  emotion: string;
   notes?: string;
   duration: string;
   otherDuration?: string;
@@ -54,7 +53,7 @@ class PausedItemsStore {
           itemName: 'Test Item Ready for Review',
           storeName: 'Test Store',
           price: '99.99',
-          emotion: 'excited',
+          
           duration: '24 hours',
           pausedAt: new Date(Date.now() - 25 * 60 * 60 * 1000), // 25 hours ago
           checkInDate: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago (past due)
