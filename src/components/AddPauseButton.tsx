@@ -251,10 +251,11 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
           <ClipboardButton onUrlPasted={handleUrlChange} />
           <button
             onClick={() => setShowBarcodeScanner(true)}
-            className="p-3 bg-white/10 hover:bg-white/20 rounded-xl border-2 border-white/20 hover:border-white/40 transition-colors"
+            className="flex items-center gap-2 p-3 bg-white/10 hover:bg-white/20 rounded-xl border-2 border-white/20 hover:border-white/40 transition-colors whitespace-nowrap"
             title="Scan Barcode"
           >
             <Scan size={20} className="text-primary-foreground" />
+            <span className="text-sm text-primary-foreground hidden sm:inline">Scan</span>
           </button>
           {url && <ShareButton url={url} text={parsedData?.itemName} />}
         </div>
