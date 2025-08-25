@@ -16,6 +16,9 @@ export const useModalStates = () => {
 
   const handleAddPause = async (parsedData?: any) => {
     console.log('🎯 handleAddPause called with data:', parsedData);
+    console.log('🔍 Usage limit check - canAddItem:', usageLimit.canAddItem());
+    console.log('🔍 Usage limit check - isAtLimit:', usageLimit.isAtLimit);
+    console.log('🔍 Usage limit check - freeItemsUsed:', usageLimit.freeItemsUsed);
     
     // Check usage limit first
     if (!usageLimit.checkUsageLimit()) {
