@@ -35,6 +35,7 @@ const ItemImage = ({ item }: ItemImageProps) => {
         </div>
       ) : imageUrl ? (
         <img 
+          key={`${item.id}-${imageUrl}`}
           src={imageUrl} 
           alt={item.itemName}
           className="w-full h-full object-cover"
