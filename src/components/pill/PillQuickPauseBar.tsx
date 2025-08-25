@@ -185,35 +185,33 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
   };
 
   const handleBarcodeScanned = async (barcode: string) => {
-    console.log('Barcode scanned:', barcode);
+    console.log('📱 PillQuickPauseBar received barcode:', barcode);
     
     try {
+      console.log('🔄 Starting product lookup...');
       const productInfo = await lookupProductByBarcode(barcode);
+      console.log('📦 Product lookup result:', productInfo);
       
       // Set the scanned product as the value
-      setValue(productInfo.itemName || `Scanned Item ${barcode.slice(-4)}`);
+      const displayName = productInfo.itemName || `Scanned Item ${barcode.slice(-4)}`;
+      console.log('✅ Setting value to:', displayName);
+      setValue(displayName);
       
       if (compact && onExpandRequest) {
+        console.log('📏 Expanding from compact mode');
         onExpandRequest();
       }
       
       toast({
-        title: "Product scanned!",
-        description: productInfo.itemName || "Barcode detected",
+        title: "Barcode scanned!",
+        description: `Found: ${displayName}`,
       });
-      
-      setTimeout(() => inputRef.current?.focus(), 0);
     } catch (error) {
-      console.error('Error looking up product:', error);
-      setValue(`Scanned Item ${barcode.slice(-4)}`);
-      
-      if (compact && onExpandRequest) {
-        onExpandRequest();
-      }
-      
+      console.error('❌ Error in handleBarcodeScanned:', error);
       toast({
-        title: "Barcode scanned",
-        description: "You can edit the details after pausing",
+        title: "Scan failed",
+        description: "Please try scanning again",
+        variant: "destructive"
       });
     }
   };

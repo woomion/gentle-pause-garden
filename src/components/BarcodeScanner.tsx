@@ -79,8 +79,10 @@ const BarcodeScanner = ({ isOpen, onClose, onScan }: BarcodeScannerProps) => {
           (result, error) => {
             if (result) {
               const barcodeText = result.getText();
-              console.log('Barcode detected:', barcodeText);
+              console.log('🔍 Barcode detected by scanner:', barcodeText);
+              console.log('📞 Calling onScan callback with barcode:', barcodeText);
               onScan(barcodeText);
+              console.log('✅ Scanner closing after successful scan');
               onClose();
             }
             // Only log errors that aren't the common "not found" error
