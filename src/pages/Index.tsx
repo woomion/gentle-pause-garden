@@ -56,8 +56,27 @@ const Index = () => {
       ? a.checkInDate.getTime() - b.checkInDate.getTime()
       : b.pausedAt.getTime() - a.pausedAt.getTime()
   );
-  const currentPausedItems = sortedItems.filter((i) => i.checkInDate.getTime() > Date.now());
+  
+  const now = Date.now();
+  const currentPausedItems = sortedItems.filter((i) => i.checkInDate.getTime() > now);
+  const readyItems = sortedItems.filter((i) => i.checkInDate.getTime() <= now);
   const readyCount = (getItemsForReview && getItemsForReview())?.length || 0;
+  
+  // Debug logging to help identify the issue
+  console.log('🔍 Pill Filtering Debug:', {
+    totalItems: sortedItems.length,
+    currentPausedItems: currentPausedItems.length,
+    readyItemsFromFilter: readyItems.length,
+    readyCountFromStore: readyCount,
+    now: new Date(now).toISOString(),
+    itemsWithTimes: sortedItems.map(item => ({
+      id: item.id,
+      name: item.itemName,
+      checkInDate: item.checkInDate.toISOString(),
+      isReady: item.checkInDate.getTime() <= now,
+      checkInTime: item.checkInTime
+    }))
+  });
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [compactQuickBar, setCompactQuickBar] = useState(false);
