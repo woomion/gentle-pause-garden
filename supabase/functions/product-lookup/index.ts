@@ -43,54 +43,64 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     }
 
     console.log('🌍 Trying Open Food Facts API...');
-    const offResponse = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-    console.log('📡 Open Food Facts response status:', offResponse.status);
     
-    if (offResponse.ok) {
-      const data = await offResponse.json();
-      console.log('📦 Raw Open Food Facts data keys:', Object.keys(data));
-      console.log('📦 Product exists?', !!data.product);
-      
-      if (data.status === 1 && data.product) {
-        console.log('📦 Product data keys:', Object.keys(data.product));
+    // Try multiple Open Food Facts endpoints
+    const endpoints = [
+      `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`,
+      `https://us.openfoodfacts.org/api/v0/product/${barcode}.json`,
+      `https://world.openfoodfacts.org/api/v2/product/${barcode}`,
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`📡 Trying endpoint: ${endpoint}`);
+        const offResponse = await fetch(endpoint);
+        console.log('📡 Response status:', offResponse.status);
         
-        const productName = data.product.product_name || data.product.product_name_en || data.product.generic_name;
-        console.log('📝 Product name found:', productName);
-        
-        if (productName) {
-          console.log('🔍 Image data available:', {
-            image_url: data.product.image_url,
-            image_front_url: data.product.image_front_url,
-            has_images: !!data.product.images,
-            images_keys: data.product.images ? Object.keys(data.product.images) : 'none'
-          });
+        if (offResponse.ok) {
+          const data = await offResponse.json();
+          console.log('📦 Raw data keys:', Object.keys(data));
           
-          // Try to get the best image available
-          let imageUrl = '';
-          if (data.product.image_url) {
-            imageUrl = data.product.image_url;
-            console.log('📸 Using image_url:', imageUrl);
-          } else if (data.product.image_front_url) {
-            imageUrl = data.product.image_front_url;
-            console.log('📸 Using image_front_url:', imageUrl);
-          } else if (data.product.images?.front?.display) {
-            imageUrl = data.product.images.front.display;
-            console.log('📸 Using images.front.display:', imageUrl);
-          } else if (data.product.images?.front?.small) {
-            imageUrl = data.product.images.front.small;
-            console.log('📸 Using images.front.small:', imageUrl);
+          // Handle both v0 and v2 API responses
+          const product = data.product || data;
+          if ((data.status === 1 || data.status_verbose === 'product found') && product) {
+            console.log('📦 Product data keys:', Object.keys(product));
+            
+            const productName = product.product_name || 
+                              product.product_name_en || 
+                              product.generic_name ||
+                              product.abbreviated_product_name;
+            console.log('📝 Product name found:', productName);
+            
+            if (productName) {
+              // Try to get the best image available
+              let imageUrl = '';
+              if (product.image_url) {
+                imageUrl = product.image_url;
+              } else if (product.image_front_url) {
+                imageUrl = product.image_front_url;
+              } else if (product.selected_images?.front?.display?.en) {
+                imageUrl = product.selected_images.front.display.en;
+              } else if (product.images?.front?.display) {
+                imageUrl = product.images.front.display;
+              } else if (product.images?.front?.small) {
+                imageUrl = product.images.front.small;
+              }
+              
+              const result = {
+                itemName: productName,
+                storeName: product.brands || product.brand_owner || product.manufacturers || 'Unknown Brand',
+                price: '',
+                imageUrl: imageUrl || '',
+                usePlaceholder: !imageUrl
+              };
+              console.log('✅ SUCCESS! Found product:', JSON.stringify(result));
+              return result;
+            }
           }
-          
-          const result = {
-            itemName: productName,
-            storeName: data.product.brands || data.product.brand_owner || 'Unknown Brand',
-            price: '',
-            imageUrl: imageUrl || '',
-            usePlaceholder: !imageUrl
-          };
-          console.log('✅ SUCCESS! Found product:', JSON.stringify(result));
-          return result;
         }
+      } catch (error) {
+        console.log(`❌ Error with endpoint ${endpoint}:`, error.message);
       }
     }
 
