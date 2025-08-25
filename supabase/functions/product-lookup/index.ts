@@ -50,14 +50,23 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
         
         const productName = data.product.product_name || data.product.product_name_en || data.product.generic_name;
         if (productName) {
+          console.log('🔍 Product data available:', JSON.stringify({
+            image_url: data.product.image_url,
+            image_front_url: data.product.image_front_url,
+            images: data.product.images ? Object.keys(data.product.images) : 'no images object'
+          }));
+          
           // Try to get the best image available
           let imageUrl = '';
           if (data.product.image_url) {
             imageUrl = data.product.image_url;
+            console.log('📸 Using image_url:', imageUrl);
           } else if (data.product.image_front_url) {
             imageUrl = data.product.image_front_url;
+            console.log('📸 Using image_front_url:', imageUrl);
           } else if (data.product.images && data.product.images.front && data.product.images.front.display) {
             imageUrl = data.product.images.front.display;
+            console.log('📸 Using images.front.display:', imageUrl);
           }
           
           const result = {
