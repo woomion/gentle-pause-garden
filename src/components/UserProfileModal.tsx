@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { X, Timer, MessageSquare, ChevronRight, Settings } from 'lucide-react';
+import { X, Timer, MessageSquare, ChevronRight, ChevronDown, Settings, Palette, Bell, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -18,7 +18,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const { user, signOut } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -39,7 +39,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   };
 
   const handleSettingsClick = () => {
-    setSettingsOpen(true);
+    setSettingsExpanded(!settingsExpanded);
   };
 
 
@@ -97,8 +97,43 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                     Settings
                   </span>
                 </div>
-                <ChevronRight size={16} className="text-muted-foreground" />
+                {settingsExpanded ? (
+                  <ChevronDown size={16} className="text-muted-foreground" />
+                ) : (
+                  <ChevronRight size={16} className="text-muted-foreground" />
+                )}
               </div>
+              
+              {/* Expanded Settings Options */}
+              {settingsExpanded && (
+                <div className="mt-2 ml-6 space-y-1">
+                  <div 
+                    onClick={() => setSettingsOpen(true)}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-muted/20 transition-colors rounded p-2 -m-1"
+                  >
+                    <Palette size={14} className="text-muted-foreground" />
+                    <span className="text-sm text-foreground">App Preferences</span>
+                  </div>
+                  <div 
+                    onClick={() => {
+                      // Future: Add notification settings modal
+                    }}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-muted/20 transition-colors rounded p-2 -m-1"
+                  >
+                    <Bell size={14} className="text-muted-foreground" />
+                    <span className="text-sm text-foreground">Notifications</span>
+                  </div>
+                  <div 
+                    onClick={() => {
+                      // Future: Add account settings modal
+                    }}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-muted/20 transition-colors rounded p-2 -m-1"
+                  >
+                    <User size={14} className="text-muted-foreground" />
+                    <span className="text-sm text-foreground">Account</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Decision Log Section */}
