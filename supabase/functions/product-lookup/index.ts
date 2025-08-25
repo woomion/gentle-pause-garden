@@ -15,21 +15,25 @@ interface ProductInfo {
 async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
   console.log('🔍 Looking up product for barcode:', barcode);
 
-  // Strategy 1: Try Open Food Facts
+  // Strategy 1: Try Open Food Facts (best for European products)
   try {
     console.log('🍕 Trying Open Food Facts...');
     const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
     const data = await response.json();
-    console.log('📋 Open Food Facts response:', JSON.stringify(data, null, 2));
-    if (data.status === 1 && data.product && data.product.product_name) {
-      const result = {
-        itemName: data.product.product_name,
-        storeName: data.product.brands || '',
-        price: '',
-        imageUrl: data.product.image_url || ''
-      };
-      console.log('✅ Found product via Open Food Facts:', result);
-      return result;
+    console.log('📋 Open Food Facts response status:', data.status);
+    console.log('📋 Open Food Facts product:', data.product ? 'found' : 'not found');
+    if (data.status === 1 && data.product) {
+      const productName = data.product.product_name || data.product.product_name_en || data.product.generic_name;
+      if (productName) {
+        const result = {
+          itemName: productName,
+          storeName: data.product.brands || data.product.brand_owner || '',
+          price: '',
+          imageUrl: data.product.image_url || data.product.image_front_url || ''
+        };
+        console.log('✅ Found product via Open Food Facts:', result);
+        return result;
+      }
     }
   } catch (error) {
     console.log('❌ Open Food Facts lookup failed:', error);
@@ -40,7 +44,7 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     console.log('🏷️ Trying UPC Database...');
     const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
     const data = await response.json();
-    console.log('📋 UPC Database response:', JSON.stringify(data, null, 2));
+    console.log('📋 UPC Database response code:', data.code);
     if (data.code === 'OK' && data.items && data.items.length > 0) {
       const item = data.items[0];
       const productName = item.title || item.description || '';
@@ -59,27 +63,51 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     console.log('❌ UPC Database lookup failed:', error);
   }
 
-  // Strategy 3: Try Google Shopping API alternative (BarcodeLookup.com)
+  // Strategy 3: Try EAN Data API (good for European barcodes)
   try {
-    console.log('🛒 Trying BarcodeLookup.com...');
-    const response = await fetch(`https://api.barcodelookup.com/v3/products?barcode=${barcode}&formatted=y&key=free`);
-    const data = await response.json();
-    console.log('📋 BarcodeLookup response:', JSON.stringify(data, null, 2));
-    if (data.products && data.products.length > 0) {
-      const product = data.products[0];
-      if (product.title || product.product_name) {
+    console.log('🇪🇺 Trying EAN Data...');
+    const response = await fetch(`https://ean-data.com/api/v1/lookup?op=barcode-lookup&barcode=${barcode}&format=json`);
+    if (response.ok) {
+      const data = await response.json();
+      console.log('📋 EAN Data response:', data);
+      if (data && data.product && data.product.attributes) {
+        const attrs = data.product.attributes;
+        if (attrs.title || attrs.description) {
+          const result = {
+            itemName: attrs.title || attrs.description || '',
+            storeName: attrs.brand || attrs.manufacturer || '',
+            price: '',
+            imageUrl: ''
+          };
+          console.log('✅ Found product via EAN Data:', result);
+          return result;
+        }
+      }
+    }
+  } catch (error) {
+    console.log('❌ EAN Data lookup failed:', error);
+  }
+
+  // Strategy 4: Try GoUPC API
+  try {
+    console.log('📦 Trying GoUPC...');
+    const response = await fetch(`https://go-upc.com/api/v1/code/${barcode}`);
+    if (response.ok) {
+      const data = await response.json();
+      console.log('📋 GoUPC response:', data);
+      if (data && data.product && data.product.name) {
         const result = {
-          itemName: product.title || product.product_name,
-          storeName: product.brand || product.manufacturer || '',
+          itemName: data.product.name,
+          storeName: data.product.brand || '',
           price: '',
-          imageUrl: product.images && product.images.length > 0 ? product.images[0] : ''
+          imageUrl: data.product.imageUrl || ''
         };
-        console.log('✅ Found product via BarcodeLookup:', result);
+        console.log('✅ Found product via GoUPC:', result);
         return result;
       }
     }
   } catch (error) {
-    console.log('❌ BarcodeLookup lookup failed:', error);
+    console.log('❌ GoUPC lookup failed:', error);
   }
 
   // Strategy 3: Try Barcode Spider
