@@ -181,7 +181,10 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
       >
         <DialogHeader className="flex flex-row justify-between items-start mb-2">
           <button
-            onClick={() => setShowEditModal(true)}
+            onClick={() => {
+              setShowEditModal(true);
+              setLocalItem(item); // Ensure we're using the current item
+            }}
             className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
             title="Edit item"
           >
