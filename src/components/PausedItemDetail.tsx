@@ -173,8 +173,16 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
       <DialogContent 
         className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-card border-border max-h-[85vh] overflow-y-auto fixed"
       >
-        <DialogHeader>
+        <DialogHeader className="relative">
           <DialogTitle className="sr-only">Item Details</DialogTitle>
+          {/* Edit icon in upper left */}
+          <button
+            onClick={() => setShowEditModal(true)}
+            className="absolute top-0 left-0 p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+            title="Edit item"
+          >
+            <Edit size={18} />
+          </button>
         </DialogHeader>
         
         <div className="space-y-6">
@@ -193,18 +201,9 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           <div className="space-y-2">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-bold text-foreground leading-tight flex-1 min-w-0 pr-2">{item.itemName}</h3>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {formattedPrice && (
-                  <span className="text-xl font-bold text-foreground">{formattedPrice}</span>
-                )}
-                <button
-                  onClick={() => setShowEditModal(true)}
-                  className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
-                  title="Edit item"
-                >
-                  <Edit size={18} />
-                </button>
-              </div>
+              {formattedPrice && (
+                <span className="text-xl font-bold text-foreground">{formattedPrice}</span>
+              )}
             </div>
             
             <p className="text-muted-foreground text-base">{item.storeName}</p>
