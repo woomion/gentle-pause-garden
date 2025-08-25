@@ -226,8 +226,21 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
               onChange={(e) => {
                 const v = e.target.value;
                 setValue(v);
-                if (compact && onExpandRequest && isProbablyUrl(v)) {
+                // Expand when user starts typing/pasting content
+                if (compact && onExpandRequest && v.trim().length > 0) {
                   onExpandRequest();
+                }
+              }}
+              onFocus={() => {
+                // Expand when input is focused and there's content
+                if (compact && onExpandRequest && (value.trim().length > 0 || prefillValue)) {
+                  onExpandRequest();
+                }
+              }}
+              onPaste={() => {
+                // Expand immediately on paste
+                if (compact && onExpandRequest) {
+                  setTimeout(() => onExpandRequest(), 10); // Small delay to allow paste to complete
                 }
               }}
               placeholder="Paste a link..."

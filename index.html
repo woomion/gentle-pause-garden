@@ -14,6 +14,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Domine:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Pocket Pause</title>
+    <style>
+      /* Block any flash during theme loading */
+      html {
+        background-color: #1a1a1a !important; /* Dark fallback */
+        color: #ffffff !important;
+      }
+      
+      /* Hide content until theme is properly loaded */
+      body {
+        visibility: hidden;
+      }
+      
+      /* Show content after theme is applied */
+      body.theme-loaded {
+        visibility: visible;
+      }
+    </style>
     <script>
       // Prevent theme flash by setting color theme immediately  
       (function() {
@@ -30,12 +47,26 @@
         document.documentElement.classList.remove('light', 'dark');
         document.documentElement.classList.add(resolvedTheme);
         
+        // Update HTML background to match theme
+        if (resolvedTheme === 'light') {
+          document.documentElement.style.backgroundColor = '#ffffff';
+          document.documentElement.style.color = '#000000';
+        } else {
+          document.documentElement.style.backgroundColor = '#1a1a1a';
+          document.documentElement.style.color = '#ffffff';
+        }
+        
         // Update theme color meta tag
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
           const themeColor = colorTheme === 'sporty' ? '#FF9E1B' : '#CAB6F7';
           metaThemeColor.setAttribute('content', themeColor);
         }
+        
+        // Show body content after theme is applied
+        document.addEventListener('DOMContentLoaded', function() {
+          document.body.classList.add('theme-loaded');
+        });
       })();
     </script>
   </head>
