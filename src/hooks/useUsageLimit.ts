@@ -1,39 +1,105 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
-const MAX_FREE_ITEMS = 3;
+const MAX_FREE_ITEMS_MONTHLY = 10;
 
 export const useUsageLimit = () => {
   const { user } = useAuth();
-  const [freeItemsUsed, setFreeItemsUsed] = useState(0);
+  const [monthlyItemsUsed, setMonthlyItemsUsed] = useState(0);
   const [showUsageLimitModal, setShowUsageLimitModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load free items count from localStorage for guest users
+  // Load monthly usage from database for authenticated users or localStorage for guest users
   useEffect(() => {
-    if (!user) {
-      const stored = localStorage.getItem('freeItemsUsed');
-      setFreeItemsUsed(stored ? parseInt(stored, 10) : 0);
-    } else {
-      // For authenticated users, we'll eventually check their subscription
-      // For now, they get unlimited access
-      setFreeItemsUsed(0);
-    }
+    loadUsageData();
   }, [user]);
 
-  const canAddItem = () => {
-    if (user) return true; // Authenticated users have unlimited access for now
-    return freeItemsUsed < MAX_FREE_ITEMS;
+  const loadUsageData = async () => {
+    if (!user) {
+      // For guest users, use localStorage with monthly tracking
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      const stored = localStorage.getItem('monthlyUsage');
+      
+      if (stored) {
+        const { month, year, count } = JSON.parse(stored);
+        if (month === currentMonth && year === currentYear) {
+          setMonthlyItemsUsed(count);
+        } else {
+          // Reset for new month
+          setMonthlyItemsUsed(0);
+          localStorage.setItem('monthlyUsage', JSON.stringify({
+            month: currentMonth,
+            year: currentYear,
+            count: 0
+          }));
+        }
+      } else {
+        setMonthlyItemsUsed(0);
+      }
+      setLoading(false);
+    } else {
+      // For authenticated users, check database
+      try {
+        // First reset monthly usage if month has changed
+        await supabase.rpc('reset_monthly_usage');
+        
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('monthly_usage_count')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching usage data:', error);
+          setMonthlyItemsUsed(0);
+        } else {
+          setMonthlyItemsUsed(data?.monthly_usage_count || 0);
+        }
+      } catch (error) {
+        console.error('Error in loadUsageData:', error);
+        setMonthlyItemsUsed(0);
+      }
+      setLoading(false);
+    }
   };
 
-  const incrementUsage = () => {
-    if (user) return; // Don't track for authenticated users
+  const canAddItem = () => {
+    // Free users get 10 items per month, paid users get unlimited
+    return monthlyItemsUsed < MAX_FREE_ITEMS_MONTHLY;
+  };
+
+  const incrementUsage = async () => {
+    const newCount = monthlyItemsUsed + 1;
+    setMonthlyItemsUsed(newCount);
     
-    const newCount = freeItemsUsed + 1;
-    setFreeItemsUsed(newCount);
-    localStorage.setItem('freeItemsUsed', newCount.toString());
+    if (!user) {
+      // Update localStorage for guest users
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      localStorage.setItem('monthlyUsage', JSON.stringify({
+        month: currentMonth,
+        year: currentYear,
+        count: newCount
+      }));
+    } else {
+      // Update database for authenticated users
+      try {
+        await supabase
+          .from('user_settings')
+          .update({ 
+            monthly_usage_count: newCount,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+      } catch (error) {
+        console.error('Error updating usage count:', error);
+      }
+    }
     
     // Show modal when at limit
-    if (newCount >= MAX_FREE_ITEMS) {
+    if (newCount >= MAX_FREE_ITEMS_MONTHLY) {
       setShowUsageLimitModal(true);
     }
   };
@@ -50,20 +116,36 @@ export const useUsageLimit = () => {
     setShowUsageLimitModal(false);
   };
 
-  const resetUsage = () => {
-    setFreeItemsUsed(0);
-    localStorage.removeItem('freeItemsUsed');
+  const resetUsage = async () => {
+    setMonthlyItemsUsed(0);
+    
+    if (!user) {
+      localStorage.removeItem('monthlyUsage');
+    } else {
+      try {
+        await supabase
+          .from('user_settings')
+          .update({ 
+            monthly_usage_count: 0,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+      } catch (error) {
+        console.error('Error resetting usage:', error);
+      }
+    }
   };
 
   return {
-    freeItemsUsed,
-    maxFreeItems: MAX_FREE_ITEMS,
+    monthlyItemsUsed,
+    maxFreeItems: MAX_FREE_ITEMS_MONTHLY,
     canAddItem,
     incrementUsage,
     checkUsageLimit,
     showUsageLimitModal,
     closeUsageLimitModal,
     resetUsage,
-    isAtLimit: freeItemsUsed >= MAX_FREE_ITEMS,
+    isAtLimit: monthlyItemsUsed >= MAX_FREE_ITEMS_MONTHLY,
+    loading,
   };
 };

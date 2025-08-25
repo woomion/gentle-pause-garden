@@ -10,13 +10,15 @@ import { Clipboard, Check, Scan } from 'lucide-react';
 import BarcodeScanner from '../BarcodeScanner';
 import { lookupProductByBarcode } from '@/utils/productLookup';
 
+import { useSubscription } from '@/hooks/useSubscription';
+
 // Quick add bar for Pill Mode only. Keeps UI minimal and fast.
-const DURATION_PRESETS: { key: string; label: string }[] = [
-  { key: '24 hours', label: '1 day' },
-  { key: '3 days', label: '3 days' },
-  { key: '1 week', label: '1 week' },
-  { key: '2 weeks', label: '2 weeks' },
-  { key: '1 month', label: '1 month' },
+const DURATION_PRESETS: { key: string; label: string; isPremium?: boolean }[] = [
+  { key: '24 hours', label: '1 day', isPremium: false },
+  { key: '3 days', label: '3 days', isPremium: true },
+  { key: '1 week', label: '1 week', isPremium: true },
+  { key: '2 weeks', label: '2 weeks', isPremium: true },
+  { key: '1 month', label: '1 month', isPremium: true },
 ];
 
 const isProbablyUrl = (text: string) => {
@@ -57,6 +59,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
   const { addItem } = usePausedItems();
   const { toast } = useToast();
   const usageLimit = useUsageLimit();
+  const { isPremiumUser } = useSubscription();
   const [value, setValue] = useState('');
   const [duration, setDuration] = useState<string>('1 week');
   const [submitting, setSubmitting] = useState(false);
@@ -289,22 +292,31 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
       {!compact && (
         <>
           <div className="mt-3 grid grid-cols-5 gap-2">
-            {DURATION_PRESETS.map((d) => (
-              <button
-                key={d.key}
-                type="button"
-                onClick={() => setDuration(d.key)}
-                aria-pressed={duration === d.key}
-                className={
-                  `flex-1 h-10 rounded-full border text-sm transition-colors ` +
-                  (duration === d.key
-                    ? 'bg-primary/15 text-primary border-primary/30'
+            {DURATION_PRESETS.map((d) => {
+              const isLocked = d.isPremium && !isPremiumUser();
+              const isDisabled = isLocked && duration !== d.key;
+              
+              return (
+                <button
+                  key={d.key}
+                  type="button"
+                  onClick={() => !isDisabled && setDuration(d.key)}
+                  aria-pressed={duration === d.key}
+                  disabled={isDisabled}
+                  className={
+                    `flex-1 h-10 rounded-full border text-sm transition-colors ${
+                      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                    } ` +
+                    (duration === d.key
+                      ? 'bg-primary/15 text-primary border-primary/30'
                     : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted')
                 }
               >
                 {d.label}
+                {d.isPremium && !isPremiumUser() && !isDisabled && ' 🔒'}
               </button>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-3">
             <Button 

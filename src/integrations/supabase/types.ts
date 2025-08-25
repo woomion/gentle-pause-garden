@@ -14,186 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      comment_read_status: {
-        Row: {
-          comment_id: string
-          created_at: string
-          id: string
-          item_id: string
-          read_at: string
-          user_id: string
-        }
-        Insert: {
-          comment_id: string
-          created_at?: string
-          id?: string
-          item_id: string
-          read_at?: string
-          user_id: string
-        }
-        Update: {
-          comment_id?: string
-          created_at?: string
-          id?: string
-          item_id?: string
-          read_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comment_read_status_comment_id_fkey"
-            columns: ["comment_id"]
-            isOneToOne: false
-            referencedRelation: "item_comments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      item_comments: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          item_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          item_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          item_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "item_comments_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "paused_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notification_history: {
-        Row: {
-          clicked: boolean | null
-          clicked_at: string | null
-          id: string
-          items_count: number
-          notification_type: string
-          sent_at: string
-          user_id: string
-        }
-        Insert: {
-          clicked?: boolean | null
-          clicked_at?: string | null
-          id?: string
-          items_count?: number
-          notification_type: string
-          sent_at?: string
-          user_id: string
-        }
-        Update: {
-          clicked?: boolean | null
-          clicked_at?: string | null
-          id?: string
-          items_count?: number
-          notification_type?: string
-          sent_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      notification_queue: {
-        Row: {
-          body: string
-          created_at: string
-          data: Json | null
-          id: string
-          item_id: string
-          notification_type: string
-          scheduled_for: string
-          sent_at: string | null
-          status: string
-          title: string
-          user_id: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          data?: Json | null
-          id?: string
-          item_id: string
-          notification_type?: string
-          scheduled_for: string
-          sent_at?: string | null
-          status?: string
-          title: string
-          user_id: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          data?: Json | null
-          id?: string
-          item_id?: string
-          notification_type?: string
-          scheduled_for?: string
-          sent_at?: string | null
-          status?: string
-          title?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notification_queue_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "paused_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      partner_invitations: {
-        Row: {
-          created_at: string
-          id: string
-          invitee_email: string
-          invitee_id: string | null
-          inviter_id: string
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          invitee_email: string
-          invitee_id?: string | null
-          inviter_id: string
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          invitee_email?: string
-          invitee_id?: string | null
-          inviter_id?: string
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       paused_items: {
         Row: {
           created_at: string
@@ -384,8 +204,10 @@ export type Database = {
         Row: {
           color_theme: string | null
           created_at: string
+          email_batching_enabled: boolean | null
           id: string
           last_reminder_sent: string | null
+          monthly_usage_count: number | null
           notification_batch_window: number | null
           notification_profile: string | null
           notification_schedule_type: string | null
@@ -398,6 +220,8 @@ export type Database = {
           theme: string
           timezone: string | null
           updated_at: string
+          usage_month: number | null
+          usage_year: number | null
           user_id: string
           values_selected: string[] | null
           values_setup_completed: boolean | null
@@ -405,8 +229,10 @@ export type Database = {
         Insert: {
           color_theme?: string | null
           created_at?: string
+          email_batching_enabled?: boolean | null
           id?: string
           last_reminder_sent?: string | null
+          monthly_usage_count?: number | null
           notification_batch_window?: number | null
           notification_profile?: string | null
           notification_schedule_type?: string | null
@@ -419,6 +245,8 @@ export type Database = {
           theme?: string
           timezone?: string | null
           updated_at?: string
+          usage_month?: number | null
+          usage_year?: number | null
           user_id: string
           values_selected?: string[] | null
           values_setup_completed?: boolean | null
@@ -426,8 +254,10 @@ export type Database = {
         Update: {
           color_theme?: string | null
           created_at?: string
+          email_batching_enabled?: boolean | null
           id?: string
           last_reminder_sent?: string | null
+          monthly_usage_count?: number | null
           notification_batch_window?: number | null
           notification_profile?: string | null
           notification_schedule_type?: string | null
@@ -440,6 +270,8 @@ export type Database = {
           theme?: string
           timezone?: string | null
           updated_at?: string
+          usage_month?: number | null
+          usage_year?: number | null
           user_id?: string
           values_selected?: string[] | null
           values_setup_completed?: boolean | null
@@ -482,6 +314,10 @@ export type Database = {
       has_pause_partner_access: {
         Args: { user_uuid?: string }
         Returns: boolean
+      }
+      reset_monthly_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       send_timezone_aware_reminders: {
         Args: Record<PropertyKey, never>

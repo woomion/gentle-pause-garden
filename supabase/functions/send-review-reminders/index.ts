@@ -29,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get all users who have items ready for review and notifications enabled
     const { data: usersWithSettings, error: usersError } = await supabase
       .from('user_settings')
-      .select('user_id, notifications_enabled, timezone, notification_time_preference, last_reminder_sent')
+      .select('user_id, notifications_enabled, email_batching_enabled, timezone, notification_time_preference, last_reminder_sent')
       .eq('notifications_enabled', true);
 
     if (usersError) {
@@ -44,6 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
         const userTimezone = userSetting.timezone || 'UTC';
         const preferredTime = userSetting.notification_time_preference || '19:00:00'; // Default to 7 PM
         const lastReminderSent = userSetting.last_reminder_sent;
+        const emailBatchingEnabled = userSetting.email_batching_enabled || false;
         
         // Convert current UTC time to user's timezone
         const now = new Date();
@@ -61,10 +62,20 @@ const handler = async (req: Request): Promise<Response> => {
         const today = new Date().toISOString().split('T')[0];
         const alreadySentToday = lastReminderSent && lastReminderSent.split('T')[0] === today;
         
-        // Only send if it's within 1 hour of their preferred time and haven't sent today
-        if (Math.abs(userLocalHour - preferredHour) > 1 || alreadySentToday) {
-          console.log(`Skipping user ${userSetting.user_id} - wrong time (${userLocalHour} vs ${preferredHour}) or already sent today`);
-          continue;
+        // For batching mode: only send if it's within 1 hour of their preferred time and haven't sent today
+        // For immediate mode: send whenever items are ready, but still respect daily limit
+        if (emailBatchingEnabled) {
+          // Batch mode: only send at preferred time once per day
+          if (Math.abs(userLocalHour - preferredHour) > 1 || alreadySentToday) {
+            console.log(`Skipping user ${userSetting.user_id} - batch mode: wrong time (${userLocalHour} vs ${preferredHour}) or already sent today`);
+            continue;
+          }
+        } else {
+          // Immediate mode: send as items become ready, but respect daily limit
+          if (alreadySentToday) {
+            console.log(`Skipping user ${userSetting.user_id} - immediate mode: already sent today`);
+            continue;
+          }
         }
 
         // Get user's email from auth.users (using service role key)

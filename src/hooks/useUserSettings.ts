@@ -9,6 +9,7 @@ export const useUserSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [emailBatchingEnabled, setEmailBatchingEnabled] = useState(false);
   const [scheduleSettings, setScheduleSettings] = useState<NotificationScheduleSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +32,7 @@ export const useUserSettings = () => {
         .from('user_settings')
         .select(`
           notifications_enabled,
+          email_batching_enabled,
           notification_schedule_type,
           notification_time_preference,
           notification_batch_window,
@@ -49,6 +51,7 @@ export const useUserSettings = () => {
         }
       } else {
         setNotificationsEnabled(data.notifications_enabled);
+        setEmailBatchingEnabled(data.email_batching_enabled || false);
         setScheduleSettings({
           notification_schedule_type: (data.notification_schedule_type as any) || 'immediate',
           notification_time_preference: data.notification_time_preference || '20:00',
@@ -84,6 +87,7 @@ export const useUserSettings = () => {
         console.error('Error creating default settings:', error);
       } else {
         setNotificationsEnabled(false);
+        setEmailBatchingEnabled(false);
         setScheduleSettings({
           notification_schedule_type: 'custom_time',
           notification_time_preference: '19:00',
@@ -133,10 +137,47 @@ export const useUserSettings = () => {
     }
   };
 
+  const updateEmailBatchingSetting = async (enabled: boolean) => {
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('user_settings')
+          .update({ 
+            email_batching_enabled: enabled,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error updating email batching setting:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save email batching preference. Please try again.",
+            variant: "destructive"
+          });
+          return false;
+        } else {
+          setEmailBatchingEnabled(enabled);
+          return true;
+        }
+      } catch (error) {
+        console.error('Error in updateEmailBatchingSetting:', error);
+        return false;
+      }
+    } else {
+      // For non-authenticated users, fall back to localStorage
+      localStorage.setItem('emailBatchingEnabled', JSON.stringify(enabled));
+      setEmailBatchingEnabled(enabled);
+      return true;
+    }
+  };
+
   return {
     notificationsEnabled,
+    emailBatchingEnabled,
     scheduleSettings,
     updateNotificationSetting,
+    updateEmailBatchingSetting,
     loading
   };
 };

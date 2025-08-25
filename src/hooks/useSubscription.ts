@@ -14,9 +14,11 @@ export const useSubscription = () => {
   const { user } = useAuth();
 
   const hasPausePartnerAccess = () => {
-    // Temporarily allow free tier for testing
-    return true;
-    // return subscription?.tier === 'premium' || subscription?.tier === 'pause_partner';
+    return subscription?.tier === 'premium' || subscription?.tier === 'pause_partner';
+  };
+
+  const isPremiumUser = () => {
+    return subscription?.tier === 'premium' || subscription?.tier === 'pause_partner';
   };
 
   const loadSubscription = async () => {
@@ -56,6 +58,7 @@ export const useSubscription = () => {
     subscription,
     loading,
     hasPausePartnerAccess,
+    isPremiumUser,
     reload: loadSubscription
   };
 };
