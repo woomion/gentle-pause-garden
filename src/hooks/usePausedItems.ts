@@ -126,6 +126,18 @@ export const usePausedItems = () => {
     }
   };
 
+  const updateItem = async (itemId: string, updates: Partial<PausedItem | LocalPausedItem>) => {
+    // For now, we'll implement update as remove + add since the stores don't have update methods
+    const currentItems = user ? supabasePausedItemsStore.getItems() : pausedItemsStore.getItems();
+    const itemToUpdate = currentItems.find(item => item.id === itemId);
+    
+    if (itemToUpdate) {
+      const updatedItem = { ...itemToUpdate, ...updates };
+      await removeItem(itemId);
+      await addItem(updatedItem);
+    }
+  };
+
   const getItemsForReview = () => {
     if (!user) {
       return pausedItemsStore.getItemsForReview();
@@ -138,6 +150,7 @@ export const usePausedItems = () => {
     loading,
     addItem,
     removeItem,
+    updateItem,
     extendPause,
     getItemsForReview
   };

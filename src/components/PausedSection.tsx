@@ -201,6 +201,7 @@ const PausedSection = () => {
           onDelete={handleDeleteItem}
           onNavigateNext={handleNavigateNext}
           onNavigatePrevious={handleNavigatePrevious}
+          onEdit={handleEditItem}
           currentUserId={user?.id}
         />
       )}

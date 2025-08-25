@@ -44,7 +44,7 @@ const Index = () => {
   const itemReview = useItemReview();
 
   // Pill mode state (sorting and items)
-  const { items, loading: itemsLoading, getItemsForReview, removeItem } = usePausedItems();
+  const { items, loading: itemsLoading, getItemsForReview, removeItem, updateItem } = usePausedItems();
   const [sortMode, setSortMode] = useState<'soonest' | 'newest'>(
     (localStorage.getItem('pill_sort') as 'soonest' | 'newest') || 'soonest'
   );
@@ -338,6 +338,9 @@ console.log('Rendering main Index content');
           onDelete={(id: string) => {
             removeItem(id);
             setShowItemDetail(false);
+          }}
+          onEdit={async (item, updates) => {
+            await updateItem(item.id, updates);
           }}
           currentUserId={user?.id}
         />

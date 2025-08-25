@@ -1,4 +1,4 @@
-import { ExternalLink, ArrowLeft } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Edit } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,6 +8,7 @@ import { useMemo, useEffect, useState, useRef } from 'react';
 import { formatPrice } from '../utils/priceFormatter';
 import { useItemActions } from '../hooks/useItemActions';
 import ItemImage from './ItemImage';
+import ItemEditModal from './ItemEditModal';
 import PauseDurationBanner from './PauseDurationBanner';
 
 import { extractActualNotes } from '../utils/notesMetadataUtils';
@@ -23,14 +24,16 @@ interface PausedItemDetailProps {
   onDelete: (id: string) => void;
   onNavigateNext?: () => void;
   onNavigatePrevious?: () => void;
+  onEdit?: (item: PausedItem | LocalPausedItem, updates: Partial<PausedItem | LocalPausedItem>) => void;
   currentUserId?: string;
 }
 
-const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose, onDelete, onNavigateNext, onNavigatePrevious, currentUserId }: PausedItemDetailProps) => {
+const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose, onDelete, onNavigateNext, onNavigatePrevious, onEdit, currentUserId }: PausedItemDetailProps) => {
   const { handleViewItem, handleLetGo, handleBought } = useItemActions();
   const { markAsRead } = useItemComments(currentUserId);
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState<'purchase' | 'let-go' | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchEndRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -189,10 +192,19 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           {/* Item details */}
           <div className="space-y-2">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-foreground leading-tight">{item.itemName}</h3>
-              {formattedPrice && (
-                <span className="text-xl font-bold text-foreground ml-2">{formattedPrice}</span>
-              )}
+              <h3 className="text-xl font-bold text-foreground leading-tight flex-1 min-w-0 pr-2">{item.itemName}</h3>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {formattedPrice && (
+                  <span className="text-xl font-bold text-foreground">{formattedPrice}</span>
+                )}
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+                  title="Edit item"
+                >
+                  <Edit size={18} />
+                </button>
+              </div>
             </div>
             
             <p className="text-muted-foreground text-base">{item.storeName}</p>
@@ -337,6 +349,19 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
               </AlertDialogContent>
             </AlertDialog>
           </div>
+
+          {/* Edit Modal */}
+          <ItemEditModal
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            item={item}
+            onSave={(updates) => {
+              if (onEdit) {
+                onEdit(item, updates);
+              }
+              setShowEditModal(false);
+            }}
+          />
         </div>
       </DialogContent>
     </Dialog>
