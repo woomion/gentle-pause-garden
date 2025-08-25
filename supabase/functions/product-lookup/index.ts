@@ -50,13 +50,24 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
         
         const productName = data.product.product_name || data.product.product_name_en || data.product.generic_name;
         if (productName) {
+          // Try to get the best image available
+          let imageUrl = '';
+          if (data.product.image_url) {
+            imageUrl = data.product.image_url;
+          } else if (data.product.image_front_url) {
+            imageUrl = data.product.image_front_url;
+          } else if (data.product.images && data.product.images.front && data.product.images.front.display) {
+            imageUrl = data.product.images.front.display;
+          }
+          
           const result = {
             itemName: productName,
             storeName: data.product.brands || data.product.brand_owner || 'Unknown Brand',
             price: '',
-            imageUrl: data.product.image_url || data.product.image_front_url || ''
+            imageUrl: imageUrl
           };
           console.log('✅ SUCCESS! Found product:', JSON.stringify(result));
+          console.log('🖼️ Image URL found:', imageUrl);
           return result;
         }
       }
@@ -75,11 +86,21 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
       if (data.status === 1 && data.product) {
         const productName = data.product.product_name || data.product.product_name_en;
         if (productName) {
+          // Try to get the best image from OpenFoodFacts
+          let imageUrl = '';
+          if (data.product.image_url) {
+            imageUrl = data.product.image_url;
+          } else if (data.product.image_front_url) {
+            imageUrl = data.product.image_front_url;
+          } else if (data.product.images && data.product.images.front) {
+            imageUrl = data.product.images.front.display || data.product.images.front.small || data.product.images.front.thumb;
+          }
+          
           return {
             itemName: productName,
             storeName: data.product.brands || 'Unknown Brand',
             price: '',
-            imageUrl: data.product.image_url || ''
+            imageUrl: imageUrl
           };
         }
       }
