@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTheme } from '@/components/ThemeProvider';
 import { ThemeSelector } from '@/components/ThemeSelector';
+import { EmailBatchingSettings } from '@/components/EmailBatchingSettings';
 
 interface AppPreferencesModalProps {
   isOpen: boolean;
@@ -78,6 +79,9 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
             </Label>
             <ThemeSelector />
           </div>
+
+          {/* Email Batching Settings */}
+          <EmailBatchingSettings />
         </div>
       </div>
     </div>
