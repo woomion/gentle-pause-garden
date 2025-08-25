@@ -12,12 +12,6 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
   console.log('Looking up product for barcode:', barcode);
   
   try {
-    // For demo purposes, return mock data
-    // In a real implementation, you would call a service like:
-    // - Open Food Facts API
-    // - UPC Database
-    // - Your own product database
-    
     // Mock implementation with better examples
     const mockProducts: Record<string, ProductInfo> = {
       '012345678905': {
@@ -26,7 +20,6 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
         price: '19.99',
         imageUrl: ''
       },
-      // Add some common test barcodes
       '123456789012': {
         itemName: 'Test Product',
         storeName: 'Sample Store',
@@ -40,24 +33,57 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
       return product;
     }
 
-    // Try to get basic info from Open Food Facts API (free service)
-    try {
-      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-      const data = await response.json();
+    // Try multiple free APIs for different product types
+    const lookupStrategies = [
+      // Try Open Food Facts for food items
+      async () => {
+        const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+        const data = await response.json();
+        if (data.status === 1 && data.product) {
+          return {
+            itemName: data.product.product_name || null,
+            storeName: data.product.brands || '',
+            price: '',
+            imageUrl: data.product.image_url || ''
+          };
+        }
+        return null;
+      },
       
-      if (data.status === 1 && data.product) {
-        return {
-          itemName: data.product.product_name || `Scanned Item (${barcode.slice(-4)})`,
-          storeName: data.product.brands || '',
-          price: '',
-          imageUrl: data.product.image_url || ''
-        };
+      // Try UPCitemdb (free tier available)
+      async () => {
+        try {
+          const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+          const data = await response.json();
+          if (data.code === 'OK' && data.items && data.items.length > 0) {
+            const item = data.items[0];
+            return {
+              itemName: item.title || null,
+              storeName: item.brand || '',
+              price: '',
+              imageUrl: item.images && item.images.length > 0 ? item.images[0] : ''
+            };
+          }
+        } catch (error) {
+          console.log('UPCitemdb lookup failed');
+        }
+        return null;
       }
-    } catch (apiError) {
-      console.log('API lookup failed, using fallback');
+    ];
+
+    // Try each strategy until one succeeds
+    for (const strategy of lookupStrategies) {
+      try {
+        const result = await strategy();
+        if (result && result.itemName) {
+          return result;
+        }
+      } catch (error) {
+        console.log('Lookup strategy failed, trying next...');
+      }
     }
 
-    // Fallback: Create a more descriptive placeholder
+    // Fallback: Create a descriptive placeholder that can be edited
     return {
       itemName: `Scanned Item (${barcode.slice(-4)})`,
       storeName: '',
