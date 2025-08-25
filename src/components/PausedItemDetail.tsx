@@ -179,17 +179,18 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
       <DialogContent 
         className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-card border-border max-h-[85vh] overflow-y-auto fixed"
       >
-        <DialogHeader className="relative">
+        <DialogHeader>
           <DialogTitle className="sr-only">Item Details</DialogTitle>
-          {/* Edit icon in upper left corner of entire dialog */}
-          <button
-            onClick={() => setShowEditModal(true)}
-            className="absolute left-6 top-6 z-50 p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
-            title="Edit item"
-          >
-            <Edit size={18} />
-          </button>
         </DialogHeader>
+        
+        {/* Edit icon in upper left corner */}
+        <button
+          onClick={() => setShowEditModal(true)}
+          className="absolute left-4 top-4 z-50 p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+          title="Edit item"
+        >
+          <Edit size={18} />
+        </button>
         
         <div className="space-y-6">
           {/* Product image */}
