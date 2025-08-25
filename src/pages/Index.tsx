@@ -94,12 +94,29 @@ const Index = () => {
     clearSharedContent();
   }, [sharedContent, pillMode]);
 
-  // Fallback: also react to window scrolling (if body scrolls instead of the container)
+  // Enhanced scroll handling for both container and window scrolling
   useEffect(() => {
-    const onWinScroll = () => setCompactQuickBar(window.scrollY > 8);
+    const handleScroll = (scrollTop: number) => {
+      const scrollingDown = scrollTop > lastScrollY;
+      
+      // Compact mode when scrolling just a bit
+      setCompactQuickBar(scrollTop > 8);
+      
+      // Hide completely when scrolling down more
+      if (scrollingDown && scrollTop > 100) {
+        setHideBottomArea(true);
+      } else if (!scrollingDown || scrollTop < 30) {
+        setHideBottomArea(false);
+      }
+      
+      setLastScrollY(scrollTop);
+    };
+
+    // Fallback: window scroll handler
+    const onWinScroll = () => handleScroll(window.scrollY);
     window.addEventListener('scroll', onWinScroll, { passive: true });
     return () => window.removeEventListener('scroll', onWinScroll);
-  }, []);
+  }, [lastScrollY]);
 
   // Debug scroll container dimensions
   useEffect(() => {
