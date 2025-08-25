@@ -8,11 +8,18 @@ import { Clock, Mail } from 'lucide-react';
 export function EmailBatchingSettings() {
   const { emailBatchingEnabled, updateEmailBatchingSetting, loading } = useUserSettings();
 
+  console.log('🔍 EmailBatchingSettings Debug:', {
+    emailBatchingEnabled,
+    loading,
+    component: 'EmailBatchingSettings'
+  });
+
   const handleBatchingToggle = async (enabled: boolean) => {
     await updateEmailBatchingSetting(enabled);
   };
 
   if (loading) {
+    console.log('📦 EmailBatchingSettings still loading...');
     return <div className="h-32 animate-pulse bg-muted rounded-lg" />;
   }
 
