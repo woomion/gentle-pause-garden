@@ -29,16 +29,8 @@ export function ThemeSelector() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-lg font-medium">Color Theme</h3>
-        <p className="text-sm text-muted-foreground">
-          Choose your preferred color scheme
-        </p>
-      </div>
-      
-      <div className="grid gap-3">
-        {themes.map((theme) => (
+    <div className="grid gap-3">
+      {themes.map((theme) => (
           <Card
             key={theme.id}
             className={`cursor-pointer transition-all hover:shadow-md ${
@@ -69,7 +61,6 @@ export function ThemeSelector() {
             </CardContent>
           </Card>
         ))}
-      </div>
     </div>
   );
 }
