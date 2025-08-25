@@ -179,9 +179,10 @@ console.log('Rendering main Index content');
         {/* Header area - fixed height */}
         <div className={`flex-shrink-0 max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
           <PauseHeader onProfileModalChange={(isOpen) => {
-            // When profile modal is open, collapse the footer
+            // When profile modal is open, collapse footer to smallest form
             if (isOpen) {
-              setHideBottomArea(true);
+              setCompactQuickBar(true);
+              setHideBottomArea(false); // Keep footer visible but compact
             }
           }} />
           <GuestModeIndicator show={!user} />

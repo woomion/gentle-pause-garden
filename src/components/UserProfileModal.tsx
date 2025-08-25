@@ -56,7 +56,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const initials = firstName ? firstName.charAt(0).toUpperCase() : email.charAt(0).toUpperCase();
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center px-6 pt-16">
       <div className="bg-card rounded-2xl max-w-sm w-full p-6 relative">
         <button 
           onClick={onClose}
