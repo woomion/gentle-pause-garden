@@ -9,9 +9,10 @@ interface ProductInfo {
 }
 
 export const lookupProductByBarcode = async (barcode: string): Promise<ProductInfo> => {
-  console.log('Looking up product for barcode:', barcode);
+  console.log('🔍 Starting product lookup for barcode:', barcode);
   
   try {
+    console.log('📡 Calling Supabase edge function...');
     // Use our Supabase edge function to avoid CORS issues
     const response = await fetch('https://cnjznmbgxprsrovmdywe.supabase.co/functions/v1/product-lookup', {
       method: 'POST',
@@ -21,16 +22,24 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
       body: JSON.stringify({ barcode })
     });
 
+    console.log('📥 Response status:', response.status);
+    console.log('📥 Response ok:', response.ok);
+
     if (!response.ok) {
-      throw new Error('Product lookup failed');
+      console.error('❌ Response not ok:', response.status, response.statusText);
+      throw new Error(`Product lookup failed: ${response.status}`);
     }
 
     const productInfo = await response.json();
+    console.log('📦 Product info received:', productInfo);
     
     // If we got a real product name (not just a placeholder), return it
-    if (productInfo.itemName && !productInfo.itemName.startsWith('Product ')) {
+    if (productInfo.itemName && !productInfo.itemName.startsWith('Product ') && productInfo.itemName !== 'Unknown Brand') {
+      console.log('✅ Found real product:', productInfo.itemName);
       return productInfo;
     }
+
+    console.log('⚠️ Got placeholder result, checking fallbacks...');
 
     // Fallback: Try direct API calls for common products
     const mockProducts: Record<string, ProductInfo> = {
@@ -68,7 +77,7 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
     };
     
   } catch (error) {
-    console.error('Error looking up product:', error);
+    console.error('🚨 Error looking up product:', error);
     
     // Return placeholder if everything fails
     return {
