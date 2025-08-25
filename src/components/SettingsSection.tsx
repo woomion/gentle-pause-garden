@@ -17,10 +17,7 @@ const SettingsSection = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Settings className="h-5 w-5 text-muted-foreground" />
-        <h3 className="text-lg font-bold text-foreground">Settings</h3>
-      </div>
+      {/* Removed duplicate Settings header and icon */}
 
       {/* Account & Profile */}
       <Collapsible open={accountOpen} onOpenChange={setAccountOpen}>
