@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { ExternalLink, Edit } from 'lucide-react';
+import { ExternalLink, Edit, Search } from 'lucide-react';
 import { formatPrice } from '../utils/priceFormatter';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
@@ -41,6 +41,15 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, onEdit, currentU
     if (item.link) {
       handleViewItem(item);
     }
+  };
+
+  const handleSearchClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const searchQuery = encodeURIComponent(
+      `${item.itemName}${item.storeName && item.storeName !== 'Unknown Store' ? ` ${item.storeName}` : ''}`
+    );
+    const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
+    window.open(googleSearchUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleDecideClick = useCallback((e: React.MouseEvent) => {
@@ -156,7 +165,7 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, onEdit, currentU
           </div>
 
           {/* View item button aligned to bottom of image */}
-          {item.link && (
+          {item.link ? (
             <div className="flex justify-start mt-auto">
               <button
                 onClick={handleLinkClick}
@@ -165,6 +174,17 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, onEdit, currentU
               >
                 <ExternalLink size={14} />
                 <span className="text-sm">View item</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-start mt-auto">
+              <button
+                onClick={handleSearchClick}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted/50 rounded-lg"
+                title="Search for this item"
+              >
+                <Search size={14} />
+                <span className="text-sm">Search</span>
               </button>
             </div>
           )}

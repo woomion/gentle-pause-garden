@@ -1,5 +1,5 @@
 
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Search } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { formatPrice } from '../utils/priceFormatter';
@@ -47,6 +47,14 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
     }
   };
 
+  const handleSearchClick = () => {
+    const searchQuery = encodeURIComponent(
+      `${item.itemName}${item.storeName && item.storeName !== 'Unknown Store' ? ` ${item.storeName}` : ''}`
+    );
+    const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
+    window.open(googleSearchUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="flex items-start gap-4 mb-2">
       <div className="flex flex-col items-center gap-2">
@@ -72,12 +80,20 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
            )}
         </div>
         
-        {item.link && item.link.trim() && (
+        {item.link && item.link.trim() ? (
           <button
             onClick={() => onViewItem(item)}
             className="text-black dark:text-[#F9F5EB] text-xs underline hover:no-underline transition-all duration-200"
           >
             view link
+          </button>
+        ) : (
+          <button
+            onClick={handleSearchClick}
+            className="text-black dark:text-[#F9F5EB] text-xs underline hover:no-underline transition-all duration-200 flex items-center gap-1"
+          >
+            <Search size={12} />
+            search
           </button>
         )}
       </div>
