@@ -1,7 +1,8 @@
 
 import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 
-export const getImageUrl = (item: PausedItem): string | null => {
+export const getImageUrl = (item: PausedItem | LocalPausedItem): string | null => {
   console.log('📸 getImageUrl - Processing item:', {
     itemId: item.id,
     itemName: item.itemName,

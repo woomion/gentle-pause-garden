@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Camera } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 
@@ -22,6 +22,8 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -44,12 +46,11 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
     };
 
     if (imageFile) {
-      // For now, just save the item without the photo - the photo handling will be implemented separately
-      onSave(updatedItem);
-    } else {
-      onSave(updatedItem);
+      // For now, store the file object in the photo field
+      updatedItem.photo = imageFile;
     }
 
+    onSave(updatedItem);
     onClose();
   };
 
@@ -116,16 +117,34 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50">
-                  <Upload size={24} className="text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground mt-1">Upload image</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
+                <div className="flex gap-2">
+                  {/* Upload from files */}
+                  <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50">
+                    <Upload size={20} className="text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground mt-1 text-center px-1">Upload Image</span>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                  
+                  {/* Camera capture */}
+                  <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50">
+                    <Camera size={20} className="text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground mt-1 text-center px-1">Take Photo</span>
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               )}
             </div>
           </div>

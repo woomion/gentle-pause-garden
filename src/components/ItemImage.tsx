@@ -2,9 +2,10 @@
 import { ShoppingCart, Pause } from 'lucide-react';
 import { getImageUrl } from '../utils/imageUrlHelper';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
+import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 
 interface ItemImageProps {
-  item: PausedItem;
+  item: PausedItem | LocalPausedItem;
 }
 
 const ItemImage = ({ item }: ItemImageProps) => {
