@@ -17,7 +17,7 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
   console.log('🔍 Looking up barcode:', barcode);
 
   try {
-    // Only include test barcodes, not real product data
+    // Test barcodes with known data
     const knownProducts: Record<string, ProductInfo> = {
       '7630585322278': {
         itemName: 'Prosecco Valdobbiadene DOCG',
@@ -26,7 +26,6 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
         imageUrl: 'https://images.openfoodfacts.org/images/products/763/058/532/2278/front_en.3.400.jpg',
         usePlaceholder: false
       },
-      // Only test/demo barcodes - never fake real product data
       '123456789012': {
         itemName: 'Demo Product for Testing',
         storeName: 'Demo Brand',
@@ -36,153 +35,157 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
       }
     };
 
-    // Check our known products first (only test data)
+    // Check test products first
     if (knownProducts[barcode]) {
-      console.log('🧪 Test product detected, using local database');
+      console.log('🧪 Test product detected');
       return knownProducts[barcode];
     }
 
-    console.log('🌍 Trying Open Food Facts API...');
-    
-    // Try multiple Open Food Facts endpoints
-    const endpoints = [
-      `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`,
-      `https://us.openfoodfacts.org/api/v0/product/${barcode}.json`,
-      `https://world.openfoodfacts.org/api/v2/product/${barcode}`,
-    ];
-    
-    for (const endpoint of endpoints) {
-      try {
-        console.log(`📡 Trying endpoint: ${endpoint}`);
-        const offResponse = await fetch(endpoint);
-        console.log('📡 Response status:', offResponse.status);
+    // Try Open Food Facts API (most comprehensive food database)
+    try {
+      console.log('📡 Trying Open Food Facts API...');
+      const offResponse = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      
+      if (offResponse.ok) {
+        const data = await offResponse.json();
+        console.log('📦 Open Food Facts status:', data.status);
         
-        if (offResponse.ok) {
-          const data = await offResponse.json();
-          console.log('📦 Raw data keys:', Object.keys(data));
+        if (data.status === 1 && data.product) {
+          const product = data.product;
+          console.log('📦 Product keys:', Object.keys(product));
           
-          // Handle both v0 and v2 API responses
-          const product = data.product || data;
-          if ((data.status === 1 || data.status_verbose === 'product found') && product) {
-            console.log('📦 Product data keys:', Object.keys(product));
-            
-            const productName = product.product_name || 
-                              product.product_name_en || 
-                              product.generic_name ||
-                              product.abbreviated_product_name;
-            console.log('📝 Product name found:', productName);
-            
-            if (productName) {
-              // Try to get the best image available
-              let imageUrl = '';
-              if (product.image_url) {
-                imageUrl = product.image_url;
-              } else if (product.image_front_url) {
-                imageUrl = product.image_front_url;
-              } else if (product.selected_images?.front?.display?.en) {
-                imageUrl = product.selected_images.front.display.en;
-              } else if (product.images?.front?.display) {
-                imageUrl = product.images.front.display;
-              } else if (product.images?.front?.small) {
-                imageUrl = product.images.front.small;
-              }
-              
-              const result = {
-                itemName: productName,
-                storeName: product.brands || product.brand_owner || product.manufacturers || 'Unknown Brand',
-                price: '',
-                imageUrl: imageUrl || '',
-                usePlaceholder: !imageUrl
-              };
-              console.log('✅ SUCCESS! Found product:', JSON.stringify(result));
-              return result;
+          // Get product name
+          const productName = product.product_name || 
+                             product.product_name_en || 
+                             product.generic_name ||
+                             product.abbreviated_product_name;
+          
+          if (productName && productName.trim() && productName.length > 2) {
+            // Get best available image
+            let imageUrl = '';
+            if (product.image_url && product.image_url.includes('openfoodfacts')) {
+              imageUrl = product.image_url;
+            } else if (product.image_front_url) {
+              imageUrl = product.image_front_url;
+            } else if (product.selected_images?.front?.display?.en) {
+              imageUrl = product.selected_images.front.display.en;
             }
+            
+            const result = {
+              itemName: productName.trim(),
+              storeName: product.brands || product.brand_owner || product.manufacturer || 'Food Product',
+              price: '',
+              imageUrl: imageUrl || '',
+              usePlaceholder: !imageUrl
+            };
+            
+            console.log('✅ SUCCESS from Open Food Facts:', result.itemName);
+            return result;
           }
         }
-      } catch (error) {
-        console.log(`❌ Error with endpoint ${endpoint}:`, error.message);
       }
+    } catch (error) {
+      console.log('❌ Open Food Facts error:', error.message);
     }
 
-    console.log('⚠️ Open Food Facts failed, trying general endpoint...');
-    const generalResponse = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}`);
-    console.log('📡 General endpoint response status:', generalResponse.status);
-    
-    if (generalResponse.ok) {
-      const data = await generalResponse.json();
-      console.log('📦 General endpoint data:', JSON.stringify(data, null, 2));
+    // Try UPC Database API
+    try {
+      console.log('📡 Trying UPC Database...');
+      const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
       
-      if (data.status === 1 && data.product) {
-        const productName = data.product.product_name || data.product.product_name_en;
-        console.log('📝 General endpoint product name:', productName);
+      if (upcResponse.ok) {
+        const upcData = await upcResponse.json();
+        console.log('📦 UPC Database status:', upcData.code);
         
-        if (productName) {
-          let imageUrl = '';
-          if (data.product.image_url) {
-            imageUrl = data.product.image_url;
-          } else if (data.product.image_front_url) {
-            imageUrl = data.product.image_front_url;
-          } else if (data.product.images?.front) {
-            imageUrl = data.product.images.front.display || data.product.images.front.small || data.product.images.front.thumb;
+        if (upcData.code === "OK" && upcData.items && upcData.items.length > 0) {
+          const item = upcData.items[0];
+          if (item.title && item.title.trim() && item.title.length > 2) {
+            const result = {
+              itemName: item.title.trim(),
+              storeName: item.brand || 'Retail Product',
+              price: '',
+              imageUrl: item.images && item.images.length > 0 ? item.images[0] : '',
+              usePlaceholder: !item.images || item.images.length === 0
+            };
+            
+            console.log('✅ SUCCESS from UPC Database:', result.itemName);
+            return result;
           }
-          
-          return {
-            itemName: productName,
-            storeName: data.product.brands || 'Unknown Brand',
-            price: '',
-            imageUrl: imageUrl || '',
-            usePlaceholder: !imageUrl
-          };
         }
       }
+    } catch (error) {
+      console.log('❌ UPC Database error:', error.message);
     }
 
-    console.log('🔍 Trying UPC Database...');
-    const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
-    console.log('📡 UPC Database response status:', upcResponse.status);
-    
-    if (upcResponse.ok) {
-      const upcData = await upcResponse.json();
-      console.log('📦 UPC Database data:', JSON.stringify(upcData, null, 2));
+    // Try Barcode Lookup API with demo key
+    try {
+      console.log('📡 Trying Barcode Lookup API...');
+      const blResponse = await fetch(`https://api.barcodelookup.com/v3/products?barcode=${barcode}&formatted=y&key=demo`);
       
-      if (upcData.code === "OK" && upcData.items && upcData.items.length > 0) {
-        const item = upcData.items[0];
-        return {
-          itemName: item.title,
-          storeName: item.brand || 'Unknown Brand',
-          price: '',
-          imageUrl: item.images && item.images.length > 0 ? item.images[0] : '',
-          usePlaceholder: !item.images || item.images.length === 0
-        };
+      if (blResponse.ok) {
+        const blData = await blResponse.json();
+        console.log('📦 Barcode Lookup response:', blData);
+        
+        if (blData.products && blData.products.length > 0) {
+          const product = blData.products[0];
+          if (product.product_name && product.product_name.trim()) {
+            const result = {
+              itemName: product.product_name.trim(),
+              storeName: product.brand || product.manufacturer || 'Product',
+              price: '',
+              imageUrl: product.images && product.images.length > 0 ? product.images[0] : '',
+              usePlaceholder: !product.images || product.images.length === 0
+            };
+            
+            console.log('✅ SUCCESS from Barcode Lookup:', result.itemName);
+            return result;
+          }
+        }
       }
+    } catch (error) {
+      console.log('❌ Barcode Lookup error:', error.message);
     }
 
-    console.log('❌ All APIs failed, generating smart fallback');
+    console.log('⚠️ All APIs failed, generating smart fallback');
     
-    // Generate a more meaningful fallback based on barcode patterns
-    let fallbackName = 'Scanned Product';
+    // Generate a meaningful fallback based on barcode patterns
+    let fallbackName = 'Unknown Product';
+    let fallbackStore = 'Edit details';
     
-    // Try to infer product type from barcode patterns (this is approximate)
-    const lastFour = barcode.slice(-4);
-    if (barcode.startsWith('8') || barcode.startsWith('7')) {
-      fallbackName = `Food Item ${lastFour}`;
-    } else if (barcode.startsWith('0') || barcode.startsWith('1')) {
-      fallbackName = `Product ${lastFour}`;
-    } else if (barcode.startsWith('2')) {
-      fallbackName = `Fresh Item ${lastFour}`;
-    } else if (barcode.startsWith('3') || barcode.startsWith('4')) {
-      fallbackName = `Pharmacy Item ${lastFour}`;
-    } else if (barcode.startsWith('5')) {
-      fallbackName = `Coupon/Special ${lastFour}`;
-    } else if (barcode.startsWith('6')) {
-      fallbackName = `Retail Item ${lastFour}`;
-    } else if (barcode.startsWith('9')) {
-      fallbackName = `Book/Media ${lastFour}`;
+    // EAN/UPC patterns can give hints about product categories
+    if (barcode.length === 13 || barcode.length === 12) {
+      const prefix = barcode.substring(0, 3);
+      
+      if (prefix >= '000' && prefix <= '019') {
+        fallbackName = 'US/Canada Product';
+        fallbackStore = 'North America';
+      } else if (prefix >= '020' && prefix <= '029') {
+        fallbackName = 'Store Brand Item';
+        fallbackStore = 'Private Label';
+      } else if (prefix >= '200' && prefix <= '299') {
+        fallbackName = 'Fresh/Weighted Item';
+        fallbackStore = 'Fresh Foods';
+      } else if (prefix >= '300' && prefix <= '379') {
+        fallbackName = 'Pharmaceutical Product';
+        fallbackStore = 'Health & Beauty';
+      } else if (prefix >= '400' && prefix <= '440') {
+        fallbackName = 'European Product';
+        fallbackStore = 'Germany';
+      } else if (prefix >= '690' && prefix <= '699') {
+        fallbackName = 'Chinese Product';
+        fallbackStore = 'China';
+      } else if (prefix >= '800' && prefix <= '899') {
+        fallbackName = 'Italian Product';
+        fallbackStore = 'Italy';
+      } else {
+        fallbackName = `Product ${barcode.slice(-4)}`;
+        fallbackStore = 'Unknown Brand';
+      }
     }
     
     return {
       itemName: fallbackName,
-      storeName: 'Edit details',
+      storeName: fallbackStore,
       price: '',
       imageUrl: '',
       usePlaceholder: true
@@ -209,11 +212,8 @@ serve(async (req) => {
 
   try {
     console.log('🚀 Product lookup function called');
-    console.log('📝 Method:', req.method);
-    console.log('📝 Headers:', Object.fromEntries(req.headers.entries()));
 
     if (req.method !== 'POST') {
-      console.log('❌ Invalid method:', req.method);
       return new Response(
         JSON.stringify({ error: 'Method not allowed' }),
         { 
@@ -224,13 +224,9 @@ serve(async (req) => {
     }
 
     const body = await req.text();
-    console.log('📝 Raw body:', body);
-    
     const { barcode } = JSON.parse(body);
-    console.log('📝 Parsed barcode:', barcode);
 
     if (!barcode) {
-      console.log('❌ No barcode provided');
       return new Response(
         JSON.stringify({ error: 'Barcode is required' }),
         { 
@@ -241,7 +237,7 @@ serve(async (req) => {
     }
 
     const productInfo = await lookupProductByBarcode(barcode);
-    console.log('🎯 Final result:', JSON.stringify(productInfo));
+    console.log('🎯 Final result:', productInfo.itemName);
 
     return new Response(
       JSON.stringify(productInfo),

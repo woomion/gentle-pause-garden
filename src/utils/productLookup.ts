@@ -13,34 +13,26 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
   
   try {
     console.log('📡 Calling Supabase edge function...');
-    // Use our Supabase edge function to avoid CORS issues
-    const response = await fetch('https://cnjznmbgxprsrovmdywe.supabase.co/functions/v1/product-lookup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ barcode })
+    
+    // Import the supabase client
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    // Use Supabase client to call the edge function
+    const { data, error } = await supabase.functions.invoke('product-lookup', {
+      body: { barcode }
     });
 
-    console.log('📥 Response status:', response.status);
-    console.log('📥 Response ok:', response.ok);
-
-    if (!response.ok) {
-      console.error('❌ Response not ok:', response.status, response.statusText);
-      throw new Error(`Product lookup failed: ${response.status}`);
+    if (error) {
+      console.error('❌ Supabase function error:', error);
+      throw error;
     }
 
-    const productInfo = await response.json();
+    const productInfo = data;
     console.log('📦 Product info received:', productInfo);
     
-    // If we got a real product name (not just a placeholder), return it
-    if (productInfo.itemName && 
-        !productInfo.itemName.startsWith('Product ') && 
-        !productInfo.itemName.startsWith('Food Item ') &&
-        !productInfo.itemName.startsWith('Scanned Item ') &&
-        productInfo.itemName !== 'Unknown Brand' &&
-        productInfo.storeName !== 'Edit details') {
-      console.log('✅ Found real product:', productInfo.itemName);
+    // Return the data directly from the edge function
+    if (productInfo && productInfo.itemName) {
+      console.log('✅ Found product:', productInfo.itemName);
       return productInfo;
     }
 
