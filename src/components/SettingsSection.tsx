@@ -11,6 +11,8 @@ import { useAuth } from '@/contexts/AuthContext';
 const SettingsSection = () => {
   // Collapsible state for account section
   const [accountOpen, setAccountOpen] = useState(false);
+  // Collapsible state for color theme section
+  const [colorThemeOpen, setColorThemeOpen] = useState(false);
   
   const { user } = useAuth();
   const { theme, setTheme, actualTheme } = useTheme();
@@ -73,9 +75,23 @@ const SettingsSection = () => {
                 </div>
               </div>
               
-              <div className="pt-2 border-t border-border">
-                <ThemeSelector />
-              </div>
+              <Collapsible open={colorThemeOpen} onOpenChange={setColorThemeOpen}>
+                <CollapsibleTrigger className="w-full pt-2 border-t border-border">
+                  <div className="flex items-center justify-between py-2">
+                    <Label className="text-sm font-medium">Color Theme</Label>
+                    {colorThemeOpen ? (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="pt-2">
+                    <ThemeSelector />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
               <div className="space-y-2 pt-2 border-t border-border">
                 <Button
                   variant="outline"
