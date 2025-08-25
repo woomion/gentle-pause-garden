@@ -30,7 +30,7 @@ import { useInstalledApp } from '../hooks/useInstalledApp';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
-  const [sectionsExpanded, setSectionsExpanded] = useState(false);
+  // Removed sectionsExpanded state - no longer needed
   const addPauseButtonRef = useRef<AddPauseButtonRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { sharedContent, clearSharedContent } = useSharedContent();
@@ -129,7 +129,7 @@ const Index = () => {
         canScroll: container.scrollHeight > container.clientHeight
       });
     }
-  }, [items, sectionsExpanded]);
+  }, [items]); // Removed sectionsExpanded dependency
 
   const handleStartReview = () => {
     itemReview.resetReviewIndex();
@@ -283,7 +283,7 @@ console.log('Rendering main Index content');
                 itemsCount={itemReview.itemsForReview.length}
                 onStartReview={handleStartReview}
               />
-              <MainTabs onSectionToggle={setSectionsExpanded} />
+              {/* MainTabs component removed - My Pauses section no longer available */}
             </>
           )}
 
@@ -305,7 +305,7 @@ console.log('Rendering main Index content');
               }}
             />
           ) : (
-            <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
+            <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />
           )}
           {!hideBottomArea && <FooterLinks />}
         </div>
