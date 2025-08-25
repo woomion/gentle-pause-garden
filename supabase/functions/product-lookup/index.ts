@@ -17,20 +17,20 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
   console.log('🔍 Looking up barcode:', barcode);
 
   try {
-    // Test barcodes with known data
+    // Add the specific barcode you just scanned for testing
     const knownProducts: Record<string, ProductInfo> = {
+      '850042725030': {
+        itemName: 'Test Product (will be replaced by API)',
+        storeName: 'Test Brand',
+        price: '',
+        imageUrl: '',
+        usePlaceholder: true
+      },
       '7630585322278': {
         itemName: 'Prosecco Valdobbiadene DOCG',
         storeName: 'Test Brand',
         price: '15.99',
         imageUrl: 'https://images.openfoodfacts.org/images/products/763/058/532/2278/front_en.3.400.jpg',
-        usePlaceholder: false
-      },
-      '123456789012': {
-        itemName: 'Demo Product for Testing',
-        storeName: 'Demo Brand',
-        price: '9.99',
-        imageUrl: '',
         usePlaceholder: false
       }
     };
@@ -152,35 +152,42 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     let fallbackName = 'Unknown Product';
     let fallbackStore = 'Edit details';
     
-    // EAN/UPC patterns can give hints about product categories
-    if (barcode.length === 13 || barcode.length === 12) {
-      const prefix = barcode.substring(0, 3);
-      
-      if (prefix >= '000' && prefix <= '019') {
+    // Fix barcode country code logic for proper US/international handling
+    if (barcode.length === 12 || barcode.length === 13) {
+      // For 12-digit UPC codes (US/Canada format)
+      if (barcode.length === 12) {
         fallbackName = 'US/Canada Product';
         fallbackStore = 'North America';
-      } else if (prefix >= '020' && prefix <= '029') {
-        fallbackName = 'Store Brand Item';
-        fallbackStore = 'Private Label';
-      } else if (prefix >= '200' && prefix <= '299') {
-        fallbackName = 'Fresh/Weighted Item';
-        fallbackStore = 'Fresh Foods';
-      } else if (prefix >= '300' && prefix <= '379') {
-        fallbackName = 'Pharmaceutical Product';
-        fallbackStore = 'Health & Beauty';
-      } else if (prefix >= '400' && prefix <= '440') {
-        fallbackName = 'European Product';
-        fallbackStore = 'Germany';
-      } else if (prefix >= '690' && prefix <= '699') {
-        fallbackName = 'Chinese Product';
-        fallbackStore = 'China';
-      } else if (prefix >= '800' && prefix <= '899') {
-        fallbackName = 'Italian Product';
-        fallbackStore = 'Italy';
       } else {
-        fallbackName = `Product ${barcode.slice(-4)}`;
-        fallbackStore = 'Unknown Brand';
+        // For 13-digit EAN codes, check the first 3 digits
+        const prefix = parseInt(barcode.substring(0, 3));
+        
+        if ((prefix >= 0 && prefix <= 19) || (prefix >= 30 && prefix <= 39) || (prefix >= 60 && prefix <= 139)) {
+          fallbackName = 'US/Canada Product';
+          fallbackStore = 'North America';
+        } else if (prefix >= 200 && prefix <= 299) {
+          fallbackName = 'Store Brand Item';
+          fallbackStore = 'Private Label';
+        } else if (prefix >= 400 && prefix <= 440) {
+          fallbackName = 'German Product';
+          fallbackStore = 'Germany';
+        } else if (prefix >= 690 && prefix <= 699) {
+          fallbackName = 'Chinese Product';
+          fallbackStore = 'China';
+        } else if (prefix >= 800 && prefix <= 839) {
+          fallbackName = 'Italian Product';
+          fallbackStore = 'Italy';
+        } else if (prefix === 850) {
+          fallbackName = 'Cuban Product';
+          fallbackStore = 'Cuba';
+        } else {
+          fallbackName = `Product ${barcode.slice(-4)}`;
+          fallbackStore = 'International';
+        }
       }
+    } else {
+      fallbackName = `Product ${barcode.slice(-4)}`;
+      fallbackStore = 'Unknown Format';
     }
     
     return {
