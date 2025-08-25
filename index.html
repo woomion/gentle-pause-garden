@@ -14,6 +14,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Domine:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Pocket Pause</title>
+    <script>
+      // Prevent theme flash by setting color theme immediately
+      (function() {
+        const colorTheme = localStorage.getItem('pocket-pause-color-theme') || 'sporty';
+        const theme = localStorage.getItem('pocket-pause-theme') || 'system';
+        
+        let resolvedTheme = theme;
+        if (theme === 'system') {
+          resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        
+        document.documentElement.setAttribute('data-color-theme', colorTheme);
+        document.documentElement.classList.add(resolvedTheme);
+        
+        // Update theme color meta tag
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+          const themeColor = colorTheme === 'sporty' ? '#FF9E1B' : '#CAB6F7';
+          metaThemeColor.setAttribute('content', themeColor);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

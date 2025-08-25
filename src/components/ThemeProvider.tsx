@@ -38,22 +38,32 @@ export function ThemeProvider({
   colorStorageKey?: string;
 }) {
   const { user } = useAuth();
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [colorTheme, setColorThemeState] = useState<ColorTheme | null>(null); // Start with null to prevent flash
+  
+  // Initialize theme and colorTheme from localStorage immediately to prevent flash
+  const getInitialTheme = (): Theme => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(storageKey) as Theme;
+      return stored || defaultTheme;
+    }
+    return defaultTheme;
+  };
+  
+  const getInitialColorTheme = (): ColorTheme => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(colorStorageKey) as ColorTheme;
+      return stored || defaultColorTheme;
+    }
+    return defaultColorTheme;
+  };
+  
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const [colorTheme, setColorThemeState] = useState<ColorTheme>(getInitialColorTheme);
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Load theme from database for authenticated users or localStorage for guests
+    // Load theme from database for authenticated users, but don't override localStorage values unless needed
     const loadTheme = async () => {
-      // First, try to load from localStorage synchronously to prevent flash
-      const storedColorTheme = localStorage.getItem(colorStorageKey) as ColorTheme;
-      if (storedColorTheme) {
-        setColorThemeState(storedColorTheme);
-      } else {
-        setColorThemeState('sporty'); // Default fallback
-      }
-
       if (user) {
         try {
           const { data } = await supabase
@@ -70,14 +80,8 @@ export function ThemeProvider({
           }
         } catch (error) {
           console.error('Failed to load theme from database:', error);
-          // Fallback already set above
-          const storedTheme = localStorage.getItem(storageKey) as Theme;
-          setThemeState(storedTheme || defaultTheme);
+          // Keep the localStorage values that are already set
         }
-      } else {
-        const storedTheme = localStorage.getItem(storageKey) as Theme;
-        setThemeState(storedTheme || defaultTheme);
-        // Color theme already set above
       }
       
       setIsLoaded(true);
@@ -87,9 +91,7 @@ export function ThemeProvider({
   }, [user, storageKey, colorStorageKey, defaultTheme]);
 
   useEffect(() => {
-    // Only apply theme changes after initial load and when colorTheme is not null
-    if (!isLoaded || colorTheme === null) return;
-
+    // Apply theme changes immediately since we now initialize from localStorage
     const root = window.document.documentElement;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -127,7 +129,7 @@ export function ThemeProvider({
 
     mediaQuery.addEventListener('change', handleMediaChange);
     return () => mediaQuery.removeEventListener('change', handleMediaChange);
-  }, [theme, colorTheme, isLoaded]);
+  }, [theme, colorTheme]);
 
   const setTheme = async (newTheme: Theme) => {
     setThemeState(newTheme);
@@ -171,7 +173,7 @@ export function ThemeProvider({
     theme,
     setTheme,
     actualTheme,
-    colorTheme: colorTheme || 'sporty', // Provide fallback to prevent null issues
+    colorTheme,
     setColorTheme,
   };
 
