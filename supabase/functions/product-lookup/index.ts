@@ -31,21 +31,42 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     console.log('Open Food Facts lookup failed:', error);
   }
 
-  // Strategy 2: Try UPC Database API
+  // Strategy 2: Try UPC Database API  
   try {
     const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
     const data = await response.json();
+    console.log('UPC Database response:', data);
     if (data.code === 'OK' && data.items && data.items.length > 0) {
       const item = data.items[0];
-      return {
-        itemName: item.title || item.description || '',
-        storeName: item.brand || '',
-        price: '',
-        imageUrl: item.images && item.images.length > 0 ? item.images[0] : ''
-      };
+      const productName = item.title || item.description || '';
+      if (productName) {
+        return {
+          itemName: productName,
+          storeName: item.brand || '',
+          price: '',
+          imageUrl: item.images && item.images.length > 0 ? item.images[0] : ''
+        };
+      }
     }
   } catch (error) {
     console.log('UPC Database lookup failed:', error);
+  }
+
+  // Strategy 2.5: Try Digit-Eyes API (free tier)
+  try {
+    const response = await fetch(`https://www.digit-eyes.com/gtin/v2_0/?upcCode=${barcode}&field_names=description,brand,image&language=en&app_key=33fd0c4cc24af82fe3e2b59aef04de32`);
+    const data = await response.json();
+    console.log('Digit-Eyes response:', data);
+    if (data && data.description) {
+      return {
+        itemName: data.description,
+        storeName: data.brand || '',
+        price: '',
+        imageUrl: data.image || ''
+      };
+    }
+  } catch (error) {
+    console.log('Digit-Eyes lookup failed:', error);
   }
 
   // Strategy 3: Try Barcode Spider

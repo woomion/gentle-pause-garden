@@ -13,7 +13,7 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
   
   try {
     // Use our Supabase edge function to avoid CORS issues
-    const response = await fetch('/functions/v1/product-lookup', {
+    const response = await fetch('https://cnjznmbgxprsrovmdywe.supabase.co/functions/v1/product-lookup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
