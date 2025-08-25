@@ -190,9 +190,9 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           <DialogTitle className="sr-only">Item Details</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Product image */}
-          <div className="relative">
+          <div className="relative -mt-2">
             <ItemImage item={localItem} />
             {/* Pause Duration Banner - touching bottom of image */}
         <PauseDurationBanner 
