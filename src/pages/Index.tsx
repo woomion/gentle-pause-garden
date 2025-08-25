@@ -186,23 +186,24 @@ console.log('Rendering main Index content');
         <div 
           ref={scrollContainerRef}
           onScroll={(e) => {
-            const scrollTop = (e.currentTarget as HTMLDivElement).scrollTop;
+            const element = e.currentTarget;
+            const scrollTop = element.scrollTop;
             const scrollingDown = scrollTop > lastScrollY;
             
-            // Show compact mode when scrolling down
-            setCompactQuickBar(scrollTop > 8);
+            // Make compact when scrolling even a little
+            setCompactQuickBar(scrollTop > 20);
             
-            // Hide bottom area completely when scrolling down fast
-            if (scrollingDown && scrollTop > 50) {
+            // Hide bottom area when scrolling down significantly
+            if (scrollingDown && scrollTop > 80) {
               setHideBottomArea(true);
-            } else if (!scrollingDown || scrollTop < 20) {
+            } else if (scrollTop < 40) {
               setHideBottomArea(false);
             }
             
             setLastScrollY(scrollTop);
           }}
           className={`flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${
-            sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
+            hideBottomArea ? 'pb-4' : sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
           }`}
           style={{ scrollBehavior: 'auto' }}
         >
