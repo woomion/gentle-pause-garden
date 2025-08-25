@@ -188,9 +188,9 @@ console.log('Rendering main Index content');
           onScroll={(e) => {
             const scrollTop = e.currentTarget.scrollTop;
             if (scrollTop > 30) {
-              setHideBottomArea(true);
+              setCompactQuickBar(true);
             } else {
-              setHideBottomArea(false);
+              setCompactQuickBar(false);
             }
           }}
           className="flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 pb-80"
@@ -291,18 +291,13 @@ console.log('Rendering main Index content');
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
-      <div className={`fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50 transition-transform duration-300 ${
-        hideBottomArea ? 'transform translate-y-full' : 'transform translate-y-0'
-      }`}>
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           {pillMode ? (
             <PillQuickPauseBar
               compact={compactQuickBar && !sharedPrefill}
               prefillValue={sharedPrefill}
-              onExpandRequest={() => {
-                setCompactQuickBar(false);
-                setHideBottomArea(false);
-              }}
+              onExpandRequest={() => setCompactQuickBar(false)}
             />
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
