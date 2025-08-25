@@ -14,32 +14,18 @@ interface ProductInfo {
 }
 
 async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
-  // Known test products for immediate success
+  // Only keep test barcodes that are clearly fake/demo
   const testProducts: Record<string, ProductInfo> = {
-    '850042725030': {
-      itemName: 'Organic Energy Bar',
-      storeName: 'Health Brand',
-      price: '3.99',
-      imageUrl: '',
-      usePlaceholder: false
-    },
-    '012345678905': {
-      itemName: 'Coca-Cola Classic',
-      storeName: 'Coca-Cola',
-      price: '1.99',
-      imageUrl: '',
-      usePlaceholder: false
-    },
-    '049000028058': {
-      itemName: "Lay's Classic Potato Chips",
-      storeName: "Frito-Lay",
-      price: '3.49',
+    '123456789012': {
+      itemName: 'Demo Test Product',
+      storeName: 'Test Brand',
+      price: '9.99',
       imageUrl: '',
       usePlaceholder: false
     }
   };
 
-  // Check test products first
+  // Check test products first (only fake barcodes)
   if (testProducts[barcode]) {
     return testProducts[barcode];
   }
