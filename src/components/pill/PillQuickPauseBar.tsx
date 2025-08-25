@@ -254,6 +254,11 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
             <Scan size={20} className="text-primary" />
             {!compact && <span className="text-sm text-primary">Scan</span>}
           </button>
+          {compact && (
+            <Button onClick={handleSubmit} disabled={!value.trim() || submitting} size="lg" shape="pill">
+              {submitting ? 'Pausing…' : 'Pause'}
+            </Button>
+          )}
         </div>
       {!compact && (
         <>
