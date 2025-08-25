@@ -61,6 +61,8 @@ const Index = () => {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [compactQuickBar, setCompactQuickBar] = useState(false);
+  const [hideBottomArea, setHideBottomArea] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const [sharedPrefill, setSharedPrefill] = useState<string | undefined>(undefined);
   const installed = useInstalledApp();
   
@@ -164,13 +166,23 @@ console.log('Rendering main Index content');
           <WelcomeWithValues />
         </div>
 
-        {/* Scrollable content area */}
         <div 
           ref={scrollContainerRef}
           onScroll={(e) => {
             const scrollTop = (e.currentTarget as HTMLDivElement).scrollTop;
-            console.log('📜 Scroll event:', { scrollTop, maxHeight: e.currentTarget.scrollHeight, clientHeight: e.currentTarget.clientHeight });
+            const scrollingDown = scrollTop > lastScrollY;
+            
+            // Show compact mode when scrolling down
             setCompactQuickBar(scrollTop > 8);
+            
+            // Hide bottom area completely when scrolling down fast
+            if (scrollingDown && scrollTop > 50) {
+              setHideBottomArea(true);
+            } else if (!scrollingDown || scrollTop < 20) {
+              setHideBottomArea(false);
+            }
+            
+            setLastScrollY(scrollTop);
           }}
           className={`flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${
             sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
@@ -272,13 +284,18 @@ console.log('Rendering main Index content');
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50">
+      <div className={`fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50 transition-transform duration-300 ${
+        hideBottomArea ? 'transform translate-y-full' : 'transform translate-y-0'
+      }`}>
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           {pillMode ? (
             <PillQuickPauseBar
               compact={compactQuickBar && !sharedPrefill}
               prefillValue={sharedPrefill}
-              onExpandRequest={() => setCompactQuickBar(false)}
+              onExpandRequest={() => {
+                setCompactQuickBar(false);
+                setHideBottomArea(false);
+              }}
             />
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={sectionsExpanded} />
