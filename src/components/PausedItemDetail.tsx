@@ -245,7 +245,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 }}
                 className="w-full py-3 px-4 font-medium rounded-xl transition-colors hover:opacity-90 bg-primary text-primary-foreground"
               >
-                {(localItem.link || (localItem as any).url) ? 'Decide now' : 'Make a decision'}
+                Decide now
               </button>
             </div>
           ) : showDecisionButtons && !showConfirmation ? (
@@ -254,13 +254,13 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 onClick={() => handleInitialDecision('purchase')}
                 className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
               >
-                {(localItem.link || (localItem as any).url) ? "I'm going to buy this" : "I'm interested in this"}
+                I'm going to buy this
               </button>
               <button
                 onClick={() => handleInitialDecision('let-go')}
                 className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
               >
-                {(localItem.link || (localItem as any).url) ? "I'm ready to let this go" : "I'm done thinking about this"}
+                I'm ready to let this go
               </button>
             </div>
           ) : showConfirmation === 'purchase' ? (
