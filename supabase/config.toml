@@ -1,4 +1,7 @@
 project_id = "cnjznmbgxprsrovmdywe"
 
+[functions.product-lookup]
+verify_jwt = false
+
 [functions.firecrawl-proxy]
 verify_jwt = false
