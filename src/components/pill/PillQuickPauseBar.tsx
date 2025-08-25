@@ -73,11 +73,15 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
     const raw = value.trim();
     if (!raw || submitting) return;
     
+    console.log('🔘 PillQuickPauseBar handleSubmit called with:', raw);
+    
     // Check usage limit before proceeding
     if (!usageLimit.checkUsageLimit()) {
+      console.log('🚫 Usage limit reached');
       return;
     }
     
+    console.log('✅ Usage limit check passed, proceeding...');
     setSubmitting(true);
 
     try {
@@ -276,7 +280,24 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
             ))}
           </div>
           <div className="mt-3">
-            <Button onClick={handleSubmit} disabled={!value.trim() || submitting} size="xl" shape="pill" className="w-full">
+            <Button 
+              onClick={(e) => {
+                console.log('🔥 PAUSE BUTTON CLICKED in PillQuickPauseBar!', e);
+                e.preventDefault();
+                e.stopPropagation();
+                handleSubmit();
+              }} 
+              disabled={!value.trim() || submitting} 
+              size="xl" 
+              shape="pill" 
+              className="w-full"
+              style={{ 
+                position: 'relative',
+                zIndex: 9999,
+                pointerEvents: 'auto',
+                touchAction: 'manipulation'
+              }}
+            >
               {submitting ? 'Pausing…' : 'Pause'}
             </Button>
           </div>
