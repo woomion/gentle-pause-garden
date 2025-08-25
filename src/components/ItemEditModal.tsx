@@ -66,8 +66,8 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
     console.log('🖼️ ItemEditModal: Saving with imageFile:', imageFile);
     const updatedItem: Partial<PausedItem | LocalPausedItem> = {
       itemName: formData.itemName.trim(),
-      storeName: formData.storeName.trim() || '', // Ensure empty string if blank
-      price: formData.price,
+      storeName: formData.storeName.trim(), // Remove fallback to empty string
+      price: formData.price.trim(),
     };
 
     if (imageFile) {
@@ -110,6 +110,7 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
               value={formData.itemName}
               onChange={(e) => handleInputChange('itemName', e.target.value)}
               placeholder="Enter item name"
+              autoComplete="off"
             />
           </div>
 
@@ -133,6 +134,7 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
               value={formData.price}
               onChange={(e) => handleInputChange('price', e.target.value)}
               placeholder="Enter price"
+              autoComplete="off"
             />
           </div>
 
