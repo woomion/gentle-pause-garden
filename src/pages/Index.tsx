@@ -186,22 +186,14 @@ console.log('Rendering main Index content');
         <div 
           ref={scrollContainerRef}
           onScroll={(e) => {
-            const element = e.currentTarget;
-            const scrollTop = element.scrollTop;
-            console.log('Scroll detected:', scrollTop);
-            
-            // Simple: hide after scrolling down 50px
-            if (scrollTop > 50) {
-              console.log('Setting hideBottomArea to true');
+            const scrollTop = e.currentTarget.scrollTop;
+            if (scrollTop > 30) {
               setHideBottomArea(true);
-              setCompactQuickBar(true);
             } else {
-              console.log('Setting hideBottomArea to false');
               setHideBottomArea(false);
-              setCompactQuickBar(false);
             }
           }}
-          className="flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 pb-40"
+          className="flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 pb-80"
           style={{ scrollBehavior: 'auto' }}
         >
           {/* Wisdom Orb Remnant - Hidden for now */}
