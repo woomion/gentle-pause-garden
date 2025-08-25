@@ -215,11 +215,15 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const shouldBeCompact = isMobile ? isCompact : (isCompact || isScrolled);
 
   return (
-    <div className={`relative w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6 transition-all duration-300 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg rounded-2xl ${
-      shouldBeCompact 
-        ? 'py-4 sm:py-3' 
-        : 'py-6 sm:py-8'
-    }`}>
+    <div 
+      className={`relative w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6 transition-all duration-300 overflow-hidden transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg rounded-2xl ${
+        shouldBeCompact 
+          ? 'py-4 sm:py-3' 
+          : 'py-6 sm:py-8'
+      }`}
+      style={{ zIndex: 9999, position: 'relative' }}
+      onClick={() => console.log('🔥 CONTAINER CLICKED')}
+    >
       {/* URL Input Field with action buttons */}
       <div className="mb-4 relative">
         <FirstUseTooltip 
@@ -285,14 +289,23 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
 
       {/* Add to Pause Button */}
       <button
-        onClick={handleClick}
+        onClick={(e) => {
+          console.log('🔥 BUTTON CLICKED!', e);
+          e.preventDefault();
+          e.stopPropagation();
+          handleClick();
+        }}
+        onPointerDown={(e) => console.log('🔥 POINTER DOWN', e)}
+        onTouchStart={(e) => console.log('🔥 TOUCH START', e)}
         disabled={false}
-        className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-4 rounded-xl transition-colors cursor-pointer z-50"
+        className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-4 rounded-xl transition-colors cursor-pointer"
         style={{ 
           position: 'relative',
-          zIndex: 50,
+          zIndex: 9999,
           pointerEvents: 'auto',
-          touchAction: 'manipulation'
+          touchAction: 'manipulation',
+          WebkitUserSelect: 'none',
+          userSelect: 'none'
         }}
       >
         {/* Ripple effect */}
