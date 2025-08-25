@@ -64,10 +64,10 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
             itemName: productName,
             storeName: data.product.brands || data.product.brand_owner || 'Unknown Brand',
             price: '',
-            imageUrl: imageUrl
+            imageUrl: imageUrl || '', // Empty string will trigger placeholder in app
+            usePlaceholder: !imageUrl // Tell app to use placeholder if no image
           };
           console.log('✅ SUCCESS! Found product:', JSON.stringify(result));
-          console.log('🖼️ Image URL found:', imageUrl);
           return result;
         }
       }
@@ -100,7 +100,8 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
             itemName: productName,
             storeName: data.product.brands || 'Unknown Brand',
             price: '',
-            imageUrl: imageUrl
+            imageUrl: imageUrl || '',
+            usePlaceholder: !imageUrl
           };
         }
       }
