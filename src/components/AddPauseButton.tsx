@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { parseProductUrl } from '../utils/urlParser';
 import { useIsMobile } from '../hooks/use-mobile';
-import { X, Edit, Scan } from 'lucide-react';
+import { X, Edit, Scan, ExternalLink } from 'lucide-react';
 import FirstUseTooltip from './FirstUseTooltip';
 import ClipboardButton from './ClipboardButton';
 import ShareButton from './ShareButton';
@@ -186,7 +186,8 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         storeName: productInfo.storeName || '',
         price: productInfo.price || '',
         imageUrl: productInfo.imageUrl || '',
-        link: '' // No link for scanned items
+        link: '', // No direct link for scanned items
+        isScannedItem: true // Flag to show search option
       };
       
       console.log('Product lookup result:', barcodeData);
@@ -200,8 +201,19 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         storeName: '',
         price: '',
         imageUrl: '',
-        link: ''
+        link: '',
+        isScannedItem: true
       });
+    }
+  };
+
+  const handleViewItem = () => {
+    if (parsedData?.itemName) {
+      const searchQuery = encodeURIComponent(
+        `${parsedData.itemName}${parsedData.storeName ? ` ${parsedData.storeName}` : ''}`
+      );
+      const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
+      window.open(googleSearchUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -276,13 +288,24 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
             <div className="text-sm text-primary-foreground/70">
               Found: {parsedData.itemName || 'Product'}{parsedData.storeName ? ` from ${parsedData.storeName}` : ''}
             </div>
-            <button
-              onClick={() => setShowFeedbackModal(true)}
-              className="p-1 hover:bg-white/20 rounded-md transition-colors text-primary-foreground/60 hover:text-primary-foreground"
-              title="Fix Details"
-            >
-              <Edit size={14} />
-            </button>
+            <div className="flex items-center gap-1">
+              {(parsedData as any)?.isScannedItem && (
+                <button
+                  onClick={handleViewItem}
+                  className="p-1 hover:bg-white/20 rounded-md transition-colors text-primary-foreground/60 hover:text-primary-foreground"
+                  title="Search for this item"
+                >
+                  <ExternalLink size={14} />
+                </button>
+              )}
+              <button
+                onClick={() => setShowFeedbackModal(true)}
+                className="p-1 hover:bg-white/20 rounded-md transition-colors text-primary-foreground/60 hover:text-primary-foreground"
+                title="Fix Details"
+              >
+                <Edit size={14} />
+              </button>
+            </div>
           </div>
         )}
       </div>
