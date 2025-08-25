@@ -281,6 +281,143 @@
     --brand-yellow-foreground: 35 47% 15%;
   }
 
+  /* Minimal black and white theme */
+  :root[data-color-theme="minimal"] {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+
+    --popover: 0 0% 98%;
+    --popover-foreground: 0 0% 15%;
+
+    --primary: 0 0% 20%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 15%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 88%;
+    --accent-foreground: 0 0% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 0 0% 20%;
+
+    /* App-specific colors */
+    --cream: 0 0% 98%;
+    --lavender: 0 0% 88%;
+    --lavender-hover: 0 0% 80%;
+    --dark-gray: 0 0% 15%;
+    --light-gray: 0 0% 45%;
+    --placeholder: 0 0% 70%;
+
+    --invite-button: 0 0% 88%;
+    --invite-button-foreground: 0 0% 15%;
+
+    --shared-review: 152 57% 88%;
+    --shared-review-foreground: 152 70% 25%;
+    --shared-review-muted: 152 30% 45%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 15%;
+    --sidebar-primary: 0 0% 25%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 90%;
+    --sidebar-accent-foreground: 0 0% 15%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 0 0% 25%;
+
+    --decision-buy: 0 0% 88%;
+    --decision-buy-foreground: 0 0% 15%;
+    --decision-let-go: 0 0% 88%;
+    --decision-let-go-foreground: 0 0% 15%;
+    --decide-now: 0 0% 88%;
+    --decide-now-foreground: 0 0% 15%;
+    --section-header: 0 0% 90%;
+    --section-header-foreground: 0 0% 15%;
+    --whisper-lavender: 0 0% 25%;
+
+    /* Miro-style accent */
+    --brand-yellow: 48 100% 60%;
+    --brand-yellow-foreground: 0 0% 15%;
+  }
+
+  /* Minimal black and white theme - dark mode */
+  .dark[data-color-theme="minimal"] {
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 0 0% 80%;
+    --primary-foreground: 0 0% 8%;
+
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 0 0% 22%;
+    --accent-foreground: 0 0% 95%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 95%;
+
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 0 0% 80%;
+
+    /* App-specific dark colors */
+    --cream: 0 0% 12%;
+    --lavender: 0 0% 70%;
+    --lavender-hover: 0 0% 60%;
+    --dark-gray: 0 0% 95%;
+    --light-gray: 0 0% 70%;
+    --placeholder: 0 0% 50%;
+
+    --invite-button: 0 0% 70%;
+    --invite-button-foreground: 0 0% 8%;
+
+    --shared-review: 152 57% 40%;
+    --shared-review-foreground: 152 70% 80%;
+    --shared-review-muted: 152 30% 60%;
+
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 0% 95%;
+    --sidebar-primary-foreground: 0 0% 8%;
+    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 25%;
+    --sidebar-ring: 0 0% 95%;
+
+    --decision-buy: 0 0% 70%;
+    --decision-buy-foreground: 0 0% 8%;
+    --decision-let-go: 0 0% 70%;
+    --decision-let-go-foreground: 0 0% 8%;
+    --decide-now: 0 0% 70%;
+    --decide-now-foreground: 0 0% 8%;
+    --section-header: 0 0% 60%;
+    --section-header-foreground: 0 0% 95%;
+
+    /* Miro-style accent (dark) */
+    --brand-yellow: 48 95% 55%;
+    --brand-yellow-foreground: 0 0% 8%;
+  }
+
 }
 
 @layer base {

@@ -20,6 +20,12 @@ export function ThemeSelector() {
       description: 'Energetic orange for an active mindset',
       preview: 'linear-gradient(135deg, hsl(35, 100%, 55%), hsl(35, 60%, 85%))',
     },
+    {
+      id: 'minimal' as const,
+      name: 'Minimal',
+      description: 'Clean black and white for focused simplicity',
+      preview: 'linear-gradient(135deg, hsl(0, 0%, 20%), hsl(0, 0%, 90%))',
+    },
   ];
 
   return (

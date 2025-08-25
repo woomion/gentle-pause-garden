@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 type Theme = 'light' | 'dark' | 'system';
-type ColorTheme = 'lavender' | 'sporty';
+type ColorTheme = 'lavender' | 'sporty' | 'minimal';
 
 type ThemeProviderState = {
   theme: Theme;
@@ -114,7 +114,8 @@ export function ThemeProvider({
       // Update PWA theme color dynamically
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) {
-        const themeColor = colorTheme === 'sporty' ? '#FF9E1B' : '#CAB6F7';
+        const themeColor = colorTheme === 'sporty' ? '#FF9E1B' : 
+                           colorTheme === 'minimal' ? '#333333' : '#CAB6F7';
         metaThemeColor.setAttribute('content', themeColor);
       }
       
