@@ -188,23 +188,20 @@ console.log('Rendering main Index content');
           onScroll={(e) => {
             const element = e.currentTarget;
             const scrollTop = element.scrollTop;
-            const scrollingDown = scrollTop > lastScrollY;
+            console.log('Scroll detected:', scrollTop);
             
-            // Make compact when scrolling even a little
-            setCompactQuickBar(scrollTop > 20);
-            
-            // Hide bottom area when scrolling down significantly
-            if (scrollingDown && scrollTop > 80) {
+            // Simple: hide after scrolling down 50px
+            if (scrollTop > 50) {
+              console.log('Setting hideBottomArea to true');
               setHideBottomArea(true);
-            } else if (scrollTop < 40) {
+              setCompactQuickBar(true);
+            } else {
+              console.log('Setting hideBottomArea to false');
               setHideBottomArea(false);
+              setCompactQuickBar(false);
             }
-            
-            setLastScrollY(scrollTop);
           }}
-          className={`flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${
-            hideBottomArea ? 'pb-4' : sectionsExpanded ? 'pb-60 sm:pb-48 md:pb-56 lg:pb-64' : 'pb-36 sm:pb-48 md:pb-56 lg:pb-64'
-          }`}
+          className="flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 pb-40"
           style={{ scrollBehavior: 'auto' }}
         >
           {/* Wisdom Orb Remnant - Hidden for now */}
