@@ -13,12 +13,12 @@ import { lookupProductByBarcode } from '@/utils/productLookup';
 import { useSubscription } from '@/hooks/useSubscription';
 
 // Quick add bar for Pill Mode only. Keeps UI minimal and fast.
-const DURATION_PRESETS: { key: string; label: string; isPremium?: boolean }[] = [
+const DURATION_PRESETS: { key: string; label: string; isPremium?: boolean; disabled?: boolean }[] = [
   { key: '24 hours', label: '1 day', isPremium: false },
-  { key: '3 days', label: '3 days', isPremium: true },
-  { key: '1 week', label: '1 week', isPremium: true },
-  { key: '2 weeks', label: '2 weeks', isPremium: true },
-  { key: '1 month', label: '1 month', isPremium: true },
+  { key: '3 days', label: '3 days', isPremium: false, disabled: true },
+  { key: '1 week', label: '1 week', isPremium: false, disabled: true },
+  { key: '2 weeks', label: '2 weeks', isPremium: false, disabled: true },
+  { key: '1 month', label: '1 month', isPremium: false, disabled: true },
 ];
 
 const isProbablyUrl = (text: string) => {
@@ -293,8 +293,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
         <>
           <div className="mt-3 grid grid-cols-5 gap-2">
             {DURATION_PRESETS.map((d) => {
-              const isLocked = d.isPremium && !isPremiumUser();
-              const isDisabled = isLocked && duration !== d.key;
+              const isDisabled = d.disabled || false;
               
               return (
                 <button
@@ -313,7 +312,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 }
               >
                 {d.label}
-                {d.isPremium && !isPremiumUser() && !isDisabled && ' 🔒'}
               </button>
               );
             })}
