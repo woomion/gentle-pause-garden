@@ -120,6 +120,7 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
               value={formData.storeName}
               onChange={(e) => handleInputChange('storeName', e.target.value)}
               placeholder="Enter store name"
+              autoComplete="off"
             />
           </div>
 
