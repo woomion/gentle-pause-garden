@@ -14,110 +14,100 @@ interface ProductInfo {
 }
 
 async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
-  // Only keep test barcodes that are clearly fake/demo
-  const testProducts: Record<string, ProductInfo> = {
-    '123456789012': {
-      itemName: 'Demo Test Product',
-      storeName: 'Test Brand',
-      price: '9.99',
-      imageUrl: '',
-      usePlaceholder: false
-    }
-  };
-
-  // Check test products first (only fake barcodes)
-  if (testProducts[barcode]) {
-    return testProducts[barcode];
-  }
-
-  // Try Open Food Facts - most comprehensive food database
+  // Try OpenFoodFacts first - works well for food products
   try {
-    const offResponse = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`, {
+    const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    const data = await response.json();
+    
+    if (data.status === 1 && data.product && data.product.product_name) {
+      const product = data.product;
+      return {
+        itemName: product.product_name,
+        storeName: product.brands || 'Food Product',
+        price: '',
+        imageUrl: product.image_url || product.image_front_url || '',
+        usePlaceholder: false
+      };
+    }
+  } catch {}
+
+  // Try Barcode Lookup API
+  try {
+    const response = await fetch(`https://api.barcodelookup.com/v3/products?barcode=${barcode}&formatted=y&key=demo`);
+    const data = await response.json();
+    
+    if (data.products && data.products.length > 0) {
+      const product = data.products[0];
+      return {
+        itemName: product.product_name || product.title,
+        storeName: product.brand || product.manufacturer || 'Product',
+        price: '',
+        imageUrl: product.images && product.images.length > 0 ? product.images[0] : '',
+        usePlaceholder: false
+      };
+    }
+  } catch {}
+
+  // Try UPC Database
+  try {
+    const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+    const data = await response.json();
+    
+    if (data.code === "OK" && data.items && data.items.length > 0) {
+      const item = data.items[0];
+      return {
+        itemName: item.title,
+        storeName: item.brand || 'Product',
+        price: '',
+        imageUrl: item.images && item.images.length > 0 ? item.images[0] : '',
+        usePlaceholder: false
+      };
+    }
+  } catch {}
+
+  // Try Nutritionix API
+  try {
+    const response = await fetch(`https://trackapi.nutritionix.com/v2/search/item?upc=${barcode}`, {
       headers: {
-        'User-Agent': 'PauseApp/1.0'
+        'x-app-id': 'demo',
+        'x-app-key': 'demo'
       }
     });
+    const data = await response.json();
     
-    if (offResponse.ok) {
-      const data = await offResponse.json();
-      if (data.status === 1 && data.product) {
-        const product = data.product;
-        const name = product.product_name || product.product_name_en || product.generic_name;
-        
-        if (name && name.trim() && name.length > 2) {
-          let imageUrl = '';
-          if (product.image_url && product.image_url.includes('openfoodfacts.org')) {
-            imageUrl = product.image_url;
-          } else if (product.image_front_url) {
-            imageUrl = product.image_front_url;
-          }
-          
-          return {
-            itemName: name.trim(),
-            storeName: product.brands || product.brand_owner || 'Food Product',
-            price: '',
-            imageUrl: imageUrl,
-            usePlaceholder: false
-          };
-        }
-      }
+    if (data.foods && data.foods.length > 0) {
+      const food = data.foods[0];
+      return {
+        itemName: food.food_name,
+        storeName: food.brand_name || 'Food Product',
+        price: '',
+        imageUrl: food.photo?.thumb || '',
+        usePlaceholder: false
+      };
     }
-  } catch (error) {
-    // Continue to next API
-  }
+  } catch {}
 
-  // Try UPC Item Database 
+  // Try Edamam Food Database
   try {
-    const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`, {
-      headers: {
-        'User-Agent': 'PauseApp/1.0'
-      }
-    });
+    const response = await fetch(`https://api.edamam.com/api/food-database/v2/parser?upc=${barcode}&app_id=demo&app_key=demo`);
+    const data = await response.json();
     
-    if (upcResponse.ok) {
-      const data = await upcResponse.json();
-      if (data.code === "OK" && data.items && data.items.length > 0) {
-        const item = data.items[0];
-        if (item.title && item.title.trim() && item.title.length > 2) {
-          return {
-            itemName: item.title.trim(),
-            storeName: item.brand || 'Product Brand',
-            price: '',
-            imageUrl: (item.images && item.images.length > 0) ? item.images[0] : '',
-            usePlaceholder: false
-          };
-        }
-      }
+    if (data.hints && data.hints.length > 0) {
+      const hint = data.hints[0];
+      return {
+        itemName: hint.food.label,
+        storeName: hint.food.brand || 'Food Product',
+        price: '',
+        imageUrl: hint.food.image || '',
+        usePlaceholder: false
+      };
     }
-  } catch (error) {
-    // Continue to fallback
-  }
+  } catch {}
 
-  // Smart fallback based on barcode format
-  let productName = `Product ${barcode.slice(-4)}`;
-  let storeName = 'Edit details';
-  
-  // Give hints based on barcode structure
-  if (barcode.length === 12) {
-    productName = `US Product ${barcode.slice(-4)}`;
-    storeName = 'North American Brand';
-  } else if (barcode.startsWith('0') || barcode.startsWith('1')) {
-    productName = `US/Canada Product ${barcode.slice(-4)}`;
-    storeName = 'North American Brand';
-  } else if (barcode.startsWith('2')) {
-    productName = `Store Item ${barcode.slice(-4)}`;
-    storeName = 'Private Label';
-  } else if (barcode.startsWith('69')) {
-    productName = `Chinese Product ${barcode.slice(-4)}`;
-    storeName = 'Chinese Brand';
-  } else if (barcode.startsWith('8')) {
-    productName = `European Product ${barcode.slice(-4)}`;
-    storeName = 'European Brand';
-  }
-
+  // If all APIs fail, return a descriptive fallback
   return {
-    itemName: productName,
-    storeName: storeName,
+    itemName: `Product ${barcode.slice(-4)}`,
+    storeName: 'Tap to edit details',
     price: '',
     imageUrl: '',
     usePlaceholder: true
@@ -130,40 +120,27 @@ serve(async (req) => {
   }
 
   try {
-    if (req.method !== 'POST') {
-      return new Response(
-        JSON.stringify({ error: 'Method not allowed' }),
-        { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const body = await req.text();
-    const { barcode } = JSON.parse(body);
-
+    const { barcode } = await req.json();
+    
     if (!barcode) {
-      return new Response(
-        JSON.stringify({ error: 'Barcode is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('No barcode provided');
     }
 
     const productInfo = await lookupProductByBarcode(barcode);
-
-    return new Response(
-      JSON.stringify(productInfo),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    
+    return new Response(JSON.stringify(productInfo), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 
   } catch (error) {
-    return new Response(
-      JSON.stringify({ 
-        itemName: `Scanned Item`,
-        storeName: 'Edit details',
-        price: '',
-        imageUrl: '',
-        usePlaceholder: true
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({
+      itemName: 'Scanned Product',
+      storeName: 'Tap to edit details',
+      price: '',
+      imageUrl: '',
+      usePlaceholder: true
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 });
