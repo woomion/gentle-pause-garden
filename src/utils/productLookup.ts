@@ -34,7 +34,12 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
     console.log('📦 Product info received:', productInfo);
     
     // If we got a real product name (not just a placeholder), return it
-    if (productInfo.itemName && !productInfo.itemName.startsWith('Product ') && productInfo.itemName !== 'Unknown Brand') {
+    if (productInfo.itemName && 
+        !productInfo.itemName.startsWith('Product ') && 
+        !productInfo.itemName.startsWith('Food Item ') &&
+        !productInfo.itemName.startsWith('Scanned Item ') &&
+        productInfo.itemName !== 'Unknown Brand' &&
+        productInfo.storeName !== 'Edit details') {
       console.log('✅ Found real product:', productInfo.itemName);
       return productInfo;
     }
