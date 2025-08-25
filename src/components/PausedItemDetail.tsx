@@ -179,7 +179,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
       <DialogContent 
         className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-card border-border max-h-[85vh] overflow-y-auto"
       >
-        <DialogHeader className="flex flex-row justify-between items-start mb-4">
+        <DialogHeader className="flex flex-row justify-between items-start mb-2">
           <button
             onClick={() => setShowEditModal(true)}
             className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
