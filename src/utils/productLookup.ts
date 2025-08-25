@@ -18,12 +18,19 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
     // - UPC Database
     // - Your own product database
     
-    // Mock implementation
+    // Mock implementation with better examples
     const mockProducts: Record<string, ProductInfo> = {
       '012345678905': {
         itemName: 'Sample Product',
-        storeName: '',
+        storeName: 'Demo Store',
         price: '19.99',
+        imageUrl: ''
+      },
+      // Add some common test barcodes
+      '123456789012': {
+        itemName: 'Test Product',
+        storeName: 'Sample Store',
+        price: '12.99',
         imageUrl: ''
       }
     };
@@ -33,10 +40,26 @@ export const lookupProductByBarcode = async (barcode: string): Promise<ProductIn
       return product;
     }
 
-    // Fallback: try to get basic info from a free API
-    // Note: This is a placeholder - you'd need to implement actual API calls
+    // Try to get basic info from Open Food Facts API (free service)
+    try {
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await response.json();
+      
+      if (data.status === 1 && data.product) {
+        return {
+          itemName: data.product.product_name || `Scanned Item (${barcode.slice(-4)})`,
+          storeName: data.product.brands || '',
+          price: '',
+          imageUrl: data.product.image_url || ''
+        };
+      }
+    } catch (apiError) {
+      console.log('API lookup failed, using fallback');
+    }
+
+    // Fallback: Create a more descriptive placeholder
     return {
-      itemName: `Product ${barcode.slice(-4)}`, // Use last 4 digits as placeholder
+      itemName: `Scanned Item (${barcode.slice(-4)})`,
       storeName: '',
       price: '',
       imageUrl: ''
