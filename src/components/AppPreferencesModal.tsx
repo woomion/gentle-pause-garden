@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Palette, Monitor } from 'lucide-react';
+import { X, Palette, Monitor, Sun, Moon, Laptop } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTheme } from '@/components/ThemeProvider';
@@ -16,8 +16,8 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[70] flex items-start justify-center px-4 pt-16">
-      <div className="bg-card rounded-2xl max-w-md w-full p-6 relative">
+    <div className="fixed inset-0 bg-black/50 z-[70] flex items-start justify-center px-6 pt-16">
+      <div className="bg-card rounded-2xl max-w-sm w-full p-6 relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-foreground">
             App Preferences
@@ -44,25 +44,28 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
                 variant={theme === 'light' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setTheme('light')}
-                className="flex-1"
+                className="flex-1 flex items-center gap-2"
               >
-                ☀️ Light
+                <Sun size={16} />
+                Light
               </Button>
               <Button
                 variant={theme === 'dark' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setTheme('dark')}
-                className="flex-1"
+                className="flex-1 flex items-center gap-2"
               >
-                🌙 Dark
+                <Moon size={16} />
+                Dark
               </Button>
               <Button
                 variant={theme === 'system' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setTheme('system')}
-                className="flex-1"
+                className="flex-1 flex items-center gap-2"
               >
-                💻 Auto
+                <Laptop size={16} />
+                Auto
               </Button>
             </div>
           </div>

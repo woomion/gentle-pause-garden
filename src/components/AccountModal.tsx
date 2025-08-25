@@ -16,6 +16,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
 
   if (!isOpen || !user) return null;
 
@@ -39,8 +40,8 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[70] flex items-start justify-center px-4 pt-16">
-      <div className="bg-card rounded-2xl max-w-md w-full p-6 relative">
+    <div className="fixed inset-0 bg-black/50 z-[70] flex items-start justify-center px-6 pt-16">
+      <div className="bg-card rounded-2xl max-w-sm w-full p-6 relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-foreground">
             Account Settings
@@ -70,32 +71,55 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Change Password */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label className="flex items-center gap-2">
               <Lock size={16} />
-              Change Password
+              Password
             </Label>
-            <div className="space-y-3">
-              <Input
-                type="password"
-                placeholder="New password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <Input
-                type="password"
-                placeholder="Confirm new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
+            {!showPasswordChange ? (
               <Button
-                onClick={handlePasswordChange}
-                disabled={!newPassword || !confirmPassword || isChangingPassword}
+                variant="outline"
+                onClick={() => setShowPasswordChange(true)}
                 className="w-full"
               >
-                {isChangingPassword ? 'Updating...' : 'Update Password'}
+                Change Password
               </Button>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                <Input
+                  type="password"
+                  placeholder="New password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <Input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowPasswordChange(false);
+                      setNewPassword('');
+                      setConfirmPassword('');
+                    }}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handlePasswordChange}
+                    disabled={!newPassword || !confirmPassword || isChangingPassword}
+                    className="flex-1"
+                  >
+                    {isChangingPassword ? 'Updating...' : 'Update Password'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Delete Account */}
