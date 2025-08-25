@@ -287,12 +287,13 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
       <button
         onClick={handleClick}
         disabled={false}
-        style={{ pointerEvents: 'auto', zIndex: 1 }}
-        className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-4 rounded-xl transition-colors cursor-pointer"
-        onMouseDown={() => console.log('🔘 Button mouse down')}
-        onMouseUp={() => console.log('🔘 Button mouse up')}
-        onTouchStart={() => console.log('🔘 Button touch start')}
-        onTouchEnd={() => console.log('🔘 Button touch end')}
+        className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-4 rounded-xl transition-colors cursor-pointer z-50"
+        style={{ 
+          position: 'relative',
+          zIndex: 50,
+          pointerEvents: 'auto',
+          touchAction: 'manipulation'
+        }}
       >
         {/* Ripple effect */}
         {showRipple && (

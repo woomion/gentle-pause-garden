@@ -272,7 +272,7 @@ console.log('Rendering main Index content');
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50">
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           {pillMode ? (
             <PillQuickPauseBar
