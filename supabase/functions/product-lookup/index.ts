@@ -21,12 +21,25 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     
     if (data.status === 1 && data.product && data.product.product_name) {
       const product = data.product;
+      
+      // Get the best available image
+      let imageUrl = '';
+      if (product.image_url && product.image_url.startsWith('http')) {
+        imageUrl = product.image_url;
+      } else if (product.image_front_url && product.image_front_url.startsWith('http')) {
+        imageUrl = product.image_front_url;
+      } else if (product.selected_images?.front?.display?.en) {
+        imageUrl = product.selected_images.front.display.en;
+      } else if (product.images?.front?.display) {
+        imageUrl = product.images.front.display;
+      }
+      
       return {
         itemName: product.product_name,
         storeName: product.brands || 'Food Product',
         price: '',
-        imageUrl: product.image_url || product.image_front_url || '',
-        usePlaceholder: false
+        imageUrl: imageUrl,
+        usePlaceholder: !imageUrl
       };
     }
   } catch {}
@@ -38,12 +51,17 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     
     if (data.products && data.products.length > 0) {
       const product = data.products[0];
+      let imageUrl = '';
+      if (product.images && product.images.length > 0 && product.images[0].startsWith('http')) {
+        imageUrl = product.images[0];
+      }
+      
       return {
         itemName: product.product_name || product.title,
         storeName: product.brand || product.manufacturer || 'Product',
         price: '',
-        imageUrl: product.images && product.images.length > 0 ? product.images[0] : '',
-        usePlaceholder: false
+        imageUrl: imageUrl,
+        usePlaceholder: !imageUrl
       };
     }
   } catch {}
@@ -55,12 +73,17 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     
     if (data.code === "OK" && data.items && data.items.length > 0) {
       const item = data.items[0];
+      let imageUrl = '';
+      if (item.images && item.images.length > 0 && item.images[0].startsWith('http')) {
+        imageUrl = item.images[0];
+      }
+      
       return {
         itemName: item.title,
         storeName: item.brand || 'Product',
         price: '',
-        imageUrl: item.images && item.images.length > 0 ? item.images[0] : '',
-        usePlaceholder: false
+        imageUrl: imageUrl,
+        usePlaceholder: !imageUrl
       };
     }
   } catch {}
