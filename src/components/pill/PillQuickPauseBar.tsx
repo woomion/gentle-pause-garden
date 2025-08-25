@@ -61,7 +61,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
   const usageLimit = useUsageLimit();
   const { isPremiumUser } = useSubscription();
   const [value, setValue] = useState('');
-  const [duration, setDuration] = useState<string>('1 week');
+  const [duration, setDuration] = useState<string>('24 hours');
   const [submitting, setSubmitting] = useState(false);
   const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
