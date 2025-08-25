@@ -288,9 +288,16 @@
     @apply border-border;
   }
 
+  /* Prevent FOUC by hiding body until theme is loaded */
   body {
     @apply bg-background text-foreground font-inter;
     transition: background-color 0.3s ease, color 0.3s ease;
+    visibility: hidden;
+  }
+
+  /* Show body once theme is applied */
+  body.theme-loaded {
+    visibility: visible;
   }
 
   body.reflective-mode {

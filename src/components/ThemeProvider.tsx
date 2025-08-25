@@ -119,7 +119,9 @@ export function ThemeProvider({
       }
       
       // Ensure body visibility is restored after theme application
-      document.body.classList.add('theme-loaded');
+      requestAnimationFrame(() => {
+        document.body.classList.add('theme-loaded');
+      });
     };
 
     updateTheme();
