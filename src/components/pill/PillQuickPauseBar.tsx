@@ -6,7 +6,7 @@ import { usePausedItems } from '@/hooks/usePausedItems';
 import { useUsageLimit } from '@/hooks/useUsageLimit';
 import { parseProductUrl } from '@/utils/urlParser';
 import { extractStoreName } from '@/utils/pausedItemsUtils';
-import { Clipboard, Check, Scan, ExternalLink } from 'lucide-react';
+import { Clipboard, Check, Scan } from 'lucide-react';
 import BarcodeScanner from '../BarcodeScanner';
 import { lookupProductByBarcode } from '@/utils/productLookup';
 
@@ -56,7 +56,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
   const [submitting, setSubmitting] = useState(false);
   const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
-  const [scannedProductInfo, setScannedProductInfo] = useState<{itemName: string, storeName?: string} | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastAppliedPrefill, setLastAppliedPrefill] = useState<string | undefined>(undefined);
 
@@ -198,12 +197,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
       console.log('✅ Setting value to:', displayName);
       setValue(displayName);
       
-      // Store scanned product info for search button
-      setScannedProductInfo({
-        itemName: productInfo.itemName,
-        storeName: productInfo.storeName
-      });
-      
       if (compact && onExpandRequest) {
         console.log('📏 Expanding from compact mode');
         onExpandRequest();
@@ -223,16 +216,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
     }
   };
 
-  const handleViewScannedItem = () => {
-    if (scannedProductInfo?.itemName) {
-      const searchQuery = encodeURIComponent(
-        `${scannedProductInfo.itemName}${scannedProductInfo.storeName ? ` ${scannedProductInfo.storeName}` : ''}`
-      );
-      const googleSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
-      window.open(googleSearchUrl, '_blank', 'noopener,noreferrer');
-    }
-  };
-
   return (
     <div className={`w-full rounded-xl bg-card/70 backdrop-blur px-3 ${compact ? 'py-2' : 'py-3'}`}>
         <div className="flex items-center gap-2">
@@ -243,10 +226,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
               onChange={(e) => {
                 const v = e.target.value;
                 setValue(v);
-                // Clear scanned product info if user manually changes the input
-                if (scannedProductInfo && v !== scannedProductInfo.itemName) {
-                  setScannedProductInfo(null);
-                }
                 if (compact && onExpandRequest && isProbablyUrl(v)) {
                   onExpandRequest();
                 }
@@ -277,16 +256,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
             <Scan size={20} className="text-primary" />
             {!compact && <span className="text-sm text-primary">Scan</span>}
           </button>
-          {scannedProductInfo && (
-            <button
-              onClick={handleViewScannedItem}
-              className="h-12 px-4 bg-primary/10 hover:bg-primary/20 rounded-full border border-primary/20 hover:border-primary/40 transition-colors flex items-center gap-2"
-              title="Search for this item"
-            >
-              <ExternalLink size={20} className="text-primary" />
-              {!compact && <span className="text-sm text-primary">Search</span>}
-            </button>
-          )}
         </div>
       {!compact && (
         <>
