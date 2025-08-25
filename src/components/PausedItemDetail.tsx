@@ -181,10 +181,10 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
       >
         <DialogHeader className="relative">
           <DialogTitle className="sr-only">Item Details</DialogTitle>
-          {/* Edit icon in upper left, opposite the close X */}
+          {/* Edit icon in upper left corner of entire dialog */}
           <button
             onClick={() => setShowEditModal(true)}
-            className="absolute left-4 top-6 z-10 p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+            className="absolute left-6 top-6 z-50 p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
             title="Edit item"
           >
             <Edit size={18} />

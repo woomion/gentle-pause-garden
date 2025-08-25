@@ -5,6 +5,6 @@ export const formatPrice = (price?: string): string => {
   const priceNum = parseFloat(price);
   if (isNaN(priceNum)) return '';
   
-  // Show two decimal places
-  return `$${priceNum.toFixed(2)}`;
+  // Only show decimals if the number has them
+  return priceNum % 1 === 0 ? `$${Math.round(priceNum)}` : `$${priceNum.toFixed(2)}`;
 };
