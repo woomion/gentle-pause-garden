@@ -34,27 +34,33 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   const [showDecisionButtons, setShowDecisionButtons] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState<'purchase' | 'let-go' | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [localItem, setLocalItem] = useState(item);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchEndRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Update local item when prop changes
+  useEffect(() => {
+    setLocalItem(item);
+  }, [item]);
 
   // Check if item is ready for review
   const isReadyForReview = useMemo(() => {
     const now = new Date();
-    return new Date(item.checkInDate) <= now;
-  }, [item.checkInDate]);
+    return new Date(localItem.checkInDate) <= now;
+  }, [localItem.checkInDate]);
 
   // Mark comments as read when opening the detail view and reset decision buttons only when item changes
   useEffect(() => {
     if (isOpen && currentUserId) {
-      markAsRead(item.id);
+      markAsRead(localItem.id);
     }
-  }, [isOpen, currentUserId, markAsRead]);
+  }, [isOpen, currentUserId, markAsRead, localItem.id]);
 
   // Reset decision buttons only when item changes, not when modal opens
   useEffect(() => {
     setShowDecisionButtons(false);
     setShowConfirmation(null);
-  }, [item.id]);
+  }, [localItem.id]);
 
   // Add keyboard navigation
   useEffect(() => {
@@ -125,16 +131,16 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     };
   }, [isOpen, items.length, currentIndex, onNavigateNext, onNavigatePrevious]);
 
-  const formattedPrice = useMemo(() => formatPrice(item.price), [item.price]);
-  const cleanNotes = useMemo(() => extractActualNotes(item.notes), [item.notes]);
+  const formattedPrice = useMemo(() => formatPrice(localItem.price), [localItem.price]);
+  const cleanNotes = useMemo(() => extractActualNotes(localItem.notes), [localItem.notes]);
 
   const handleDelete = () => {
-    onDelete(item.id);
+    onDelete(localItem.id);
     onClose();
   };
 
   const handleDecisionClick = () => {
-    console.log('🚨 DECIDE NOW BUTTON CLICKED in PausedItemDetail!', item.itemName);
+    console.log('🚨 DECIDE NOW BUTTON CLICKED in PausedItemDetail!', localItem.itemName);
     console.log('🚨 Current showDecisionButtons state:', showDecisionButtons);
     setShowDecisionButtons(prev => {
       const newValue = !prev;
@@ -151,12 +157,12 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     try {
       if (action === 'take-to-link') {
         // Open link and mark as purchased
-        await handleBought(item, onDelete, onClose);
+        await handleBought(localItem, onDelete, onClose);
       } else if (action === 'mark-purchased') {
         // Just mark as purchased without opening link
-        await handleBought(item, onDelete, onClose);
+        await handleBought(localItem, onDelete, onClose);
       } else if (action === 'let-go') {
-        await handleLetGo(item, onDelete, onClose);
+        await handleLetGo(localItem, onDelete, onClose);
       }
     } catch (error) {
       console.error('Error handling decision:', error);
@@ -175,24 +181,24 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
       >
         <DialogHeader className="relative">
           <DialogTitle className="sr-only">Item Details</DialogTitle>
-          {/* Edit icon positioned to match the X close button height */}
+          {/* Edit icon in upper left, opposite the close X */}
           <button
             onClick={() => setShowEditModal(true)}
-            className="absolute left-4 top-4 z-10 p-1 hover:bg-muted rounded-sm transition-opacity opacity-70 hover:opacity-100"
+            className="absolute left-4 top-6 z-10 p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
             title="Edit item"
           >
-            <Edit size={16} />
+            <Edit size={18} />
           </button>
         </DialogHeader>
         
         <div className="space-y-6">
           {/* Product image */}
           <div className="relative">
-            <ItemImage item={item} />
+            <ItemImage item={localItem} />
             {/* Pause Duration Banner - touching bottom of image */}
         <PauseDurationBanner 
-          checkInTime={item.checkInTime} 
-          pausedAt={typeof item.pausedAt === 'string' ? item.pausedAt : item.pausedAt.toISOString()}
+          checkInTime={localItem.checkInTime} 
+          pausedAt={typeof localItem.pausedAt === 'string' ? localItem.pausedAt : localItem.pausedAt.toISOString()}
           isReadyForReview={isReadyForReview}
         />
           </div>
@@ -200,13 +206,13 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           {/* Item details */}
           <div className="space-y-2">
             <div className="flex justify-between items-start">
-              <h3 className="text-xl font-bold text-foreground leading-tight flex-1 min-w-0 pr-2">{item.itemName}</h3>
+              <h3 className="text-xl font-bold text-foreground leading-tight flex-1 min-w-0 pr-2">{localItem.itemName}</h3>
               {formattedPrice && (
                 <span className="text-xl font-bold text-foreground">{formattedPrice}</span>
               )}
             </div>
             
-            <p className="text-muted-foreground text-base">{item.storeName}</p>
+            <p className="text-muted-foreground text-base">{localItem.storeName}</p>
             
             {/* Only show notes if they exist and aren't empty after cleaning */}
             {cleanNotes && cleanNotes.trim() && (
@@ -219,13 +225,13 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
 
             {/* Comments disabled since partner functionality removed */}
             {false && (
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
-                <ItemCommentsThread 
-                  itemId={item.id}
-                  currentUserId={currentUserId!}
-                  autoExpand={true}
-                />
-              </div>
+               <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
+                 <ItemCommentsThread 
+                   itemId={localItem.id}
+                   currentUserId={currentUserId!}
+                   autoExpand={true}
+                 />
+               </div>
             )}
           </div>
 
@@ -240,7 +246,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 }}
                 className="w-full py-3 px-4 font-medium rounded-xl transition-colors hover:opacity-90 bg-primary text-primary-foreground"
               >
-                {(item.link || (item as any).url) ? 'Decide now' : 'Make a decision'}
+                {(localItem.link || (localItem as any).url) ? 'Decide now' : 'Make a decision'}
               </button>
             </div>
           ) : showDecisionButtons && !showConfirmation ? (
@@ -249,13 +255,13 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 onClick={() => handleInitialDecision('purchase')}
                 className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
               >
-                {(item.link || (item as any).url) ? "I'm going to buy this" : "I'm interested in this"}
+                {(localItem.link || (localItem as any).url) ? "I'm going to buy this" : "I'm interested in this"}
               </button>
               <button
                 onClick={() => handleInitialDecision('let-go')}
                 className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
               >
-                {(item.link || (item as any).url) ? "I'm ready to let this go" : "I'm done thinking about this"}
+                {(localItem.link || (localItem as any).url) ? "I'm ready to let this go" : "I'm done thinking about this"}
               </button>
             </div>
           ) : showConfirmation === 'purchase' ? (
@@ -263,7 +269,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
               <div className="text-center text-sm text-muted-foreground mb-3">
                 You're ready to buy this item:
               </div>
-              {(item.link || (item as any).url) && (
+              {(localItem.link || (localItem as any).url) && (
                 <button
                   onClick={() => handleConfirmedDecision('take-to-link')}
                   className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
@@ -309,18 +315,18 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
 
           {/* Footer actions */}
           <div className="pt-2 flex items-center justify-between">
-            {item.link && item.link.trim() ? (
+            {localItem.link && localItem.link.trim() ? (
               <button 
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleViewItem(item);
+                  handleViewItem(localItem);
                 }}
                 className="text-muted-foreground text-sm hover:text-foreground transition-colors duration-200 flex items-center gap-1 bg-transparent border-none cursor-pointer"
                 type="button"
               >
                 <ExternalLink size={14} />
-                {item.isCart ? 'View cart' : 'View item'}
+                {localItem.isCart ? 'View cart' : 'View item'}
               </button>
             ) : (
               <div></div>
@@ -336,7 +342,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 <AlertDialogHeader>
                   <AlertDialogTitle className="text-foreground">Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription className="text-muted-foreground">
-                    This will permanently delete "{item.itemName}" from your paused items. This action cannot be undone.
+                    This will permanently delete "{localItem.itemName}" from your paused items. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -353,12 +359,14 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
           <ItemEditModal
             isOpen={showEditModal}
             onClose={() => setShowEditModal(false)}
-            item={item}
+            item={localItem}
             onSave={(updates) => {
               console.log('🖼️ PausedItemDetail: Saving updates:', updates);
               if (onEdit) {
                 onEdit(item, updates);
               }
+              // Update local item state immediately for UI responsiveness
+              setLocalItem(prevItem => ({ ...prevItem, ...updates }));
               setShowEditModal(false);
             }}
           />
