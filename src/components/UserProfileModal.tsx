@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import FeedbackModal from './FeedbackModal';
-
-import SettingsModal from './SettingsModal';
+import AccountModal from './AccountModal';
+import AppPreferencesModal from './AppPreferencesModal';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -19,7 +19,8 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [appPreferencesOpen, setAppPreferencesOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -109,7 +110,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                 <div className="mt-2 ml-6 space-y-1">
                   <div 
                     onClick={() => {
-                      setSettingsOpen(true);
+                      setAppPreferencesOpen(true);
                     }}
                     className="flex items-center gap-2 cursor-pointer hover:bg-muted/20 transition-colors rounded p-2 -m-1"
                   >
@@ -118,8 +119,7 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                   </div>
                   <div 
                     onClick={() => {
-                      // Future: Add account settings modal
-                      console.log('Account settings clicked - coming soon');
+                      setAccountOpen(true);
                     }}
                     className="flex items-center gap-2 cursor-pointer hover:bg-muted/20 transition-colors rounded p-2 -m-1"
                   >
@@ -176,7 +176,8 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
       </div>
       
       <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <AccountModal isOpen={accountOpen} onClose={() => setAccountOpen(false)} />
+      <AppPreferencesModal isOpen={appPreferencesOpen} onClose={() => setAppPreferencesOpen(false)} />
     </div>
   );
 };
