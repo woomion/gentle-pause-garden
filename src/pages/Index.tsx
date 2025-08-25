@@ -374,7 +374,7 @@ console.log('Rendering main Index content');
         isOpen={usageLimit.showUsageLimitModal}
         onClose={usageLimit.closeUsageLimitModal}
         onSignUp={modalStates.handleShowSignup}
-        freeItemsUsed={usageLimit.freeItemsUsed}
+        freeItemsUsed={usageLimit.monthlyItemsUsed}
         maxFreeItems={usageLimit.maxFreeItems}
       />
     </>

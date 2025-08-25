@@ -18,7 +18,7 @@ export const useModalStates = () => {
     console.log('🎯 handleAddPause called with data:', parsedData);
     console.log('🔍 Usage limit check - canAddItem:', usageLimit.canAddItem());
     console.log('🔍 Usage limit check - isAtLimit:', usageLimit.isAtLimit);
-    console.log('🔍 Usage limit check - freeItemsUsed:', usageLimit.freeItemsUsed);
+    console.log('🔍 Usage limit check - freeItemsUsed:', usageLimit.monthlyItemsUsed);
     
     // Check usage limit first
     if (!usageLimit.checkUsageLimit()) {

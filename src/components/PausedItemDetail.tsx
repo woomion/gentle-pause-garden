@@ -52,7 +52,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   // Mark comments as read when opening the detail view and reset decision buttons only when item changes
   useEffect(() => {
     if (isOpen && currentUserId) {
-      markAsRead(localItem.id);
+      markAsRead();
     }
   }, [isOpen, currentUserId, markAsRead, localItem.id]);
 
