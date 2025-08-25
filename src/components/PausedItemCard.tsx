@@ -139,10 +139,10 @@ const PausedItemCard = ({ item, onClick, onDelete, onDecideNow, onEdit, currentU
                 )}
                 <button
                   onClick={handleEditClick}
-                  className="p-1 hover:bg-muted rounded-sm transition-colors opacity-60 hover:opacity-100"
+                  className="p-1.5 hover:bg-muted rounded-md transition-colors text-muted-foreground hover:text-foreground"
                   title="Edit item"
                 >
-                  <Edit size={14} />
+                  <Edit size={16} />
                 </button>
               </div>
             </div>
