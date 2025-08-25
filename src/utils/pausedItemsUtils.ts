@@ -5,11 +5,27 @@ export type DbPausedItem = Database['public']['Tables']['paused_items']['Row'];
 export type DbPausedItemInsert = Database['public']['Tables']['paused_items']['Insert'];
 
 export const extractStoreName = (url: string): string => {
-  if (!url) return 'Unknown Store';
+  console.log('🔧 extractStoreName called with URL:', url);
+  
+  if (!url) {
+    console.log('🔧 extractStoreName: No URL provided, returning Unknown Store');
+    return 'Unknown Store';
+  }
+  
   try {
     const hostname = new URL(url).hostname;
-    return hostname.replace('www.', '').split('.')[0];
+    const result = hostname.replace('www.', '').split('.')[0];
+    console.log('🔧 extractStoreName: hostname:', hostname, 'result:', result);
+    
+    // If the result is the Supabase project ID, return Unknown Store instead
+    if (result === 'cnjznmbgxprsrovmdywe') {
+      console.log('🔧 extractStoreName: Detected Supabase project ID, returning Unknown Store');
+      return 'Unknown Store';
+    }
+    
+    return result;
   } catch {
+    console.log('🔧 extractStoreName: Error parsing URL, returning Unknown Store');
     return 'Unknown Store';
   }
 };

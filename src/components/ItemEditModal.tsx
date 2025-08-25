@@ -30,6 +30,14 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
   // Reset form when item changes or modal opens
   useEffect(() => {
     if (isOpen) {
+      console.log('🔧 ItemEditModal: Reset form with item:', {
+        itemName: item.itemName,
+        storeName: item.storeName,
+        price: item.price,
+        imageUrl: item.imageUrl,
+        notes: item.notes
+      });
+      
       setFormData({
         itemName: item.itemName || '',
         storeName: item.storeName || '',
@@ -63,24 +71,28 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
   };
 
   const handleSave = () => {
-    console.log('🖼️ ItemEditModal: Saving with imageFile:', imageFile);
+    console.log('🔧 ItemEditModal: handleSave called with formData:', formData);
+    console.log('🔧 ItemEditModal: Saving with imageFile:', imageFile);
+    
     const updatedItem: Partial<PausedItem | LocalPausedItem> = {
       itemName: formData.itemName.trim(),
-      storeName: formData.storeName.trim(), // Remove fallback to empty string
+      storeName: formData.storeName.trim(),
       price: formData.price.trim(),
     };
+
+    console.log('🔧 ItemEditModal: updatedItem before image logic:', updatedItem);
 
     if (imageFile) {
       // Store the file object in the photo field
       updatedItem.photo = imageFile;
-      console.log('🖼️ ItemEditModal: Added photo to updatedItem');
+      console.log('🔧 ItemEditModal: Added photo to updatedItem');
     } else if (imageDeleted) {
       // If image was deleted, clear the photo field
       updatedItem.photo = null;
       updatedItem.imageUrl = '';
     }
 
-    console.log('🖼️ ItemEditModal: Final updatedItem:', updatedItem);
+    console.log('🔧 ItemEditModal: Final updatedItem before onSave:', updatedItem);
     onSave(updatedItem);
     onClose();
   };

@@ -24,18 +24,28 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
   
   // Extract store name from notes or URL, but keep empty if not found
   let storeName = '';
+  console.log('🔧 convertDbToLocal: Processing store name extraction', {
+    notes: dbItem.notes,
+    url: dbItem.url,
+    store_name: dbItem.store_name
+  });
+  
   if (dbItem.notes) {
     const extractedFromNotes = extractStoreNameFromNotes(dbItem.notes);
+    console.log('🔧 convertDbToLocal: Extracted from notes:', extractedFromNotes);
     if (extractedFromNotes !== 'Unknown Store') {
       storeName = extractedFromNotes;
     }
   }
   if (!storeName && dbItem.url) {
     const extractedFromUrl = extractStoreName(dbItem.url);
+    console.log('🔧 convertDbToLocal: Extracted from URL:', extractedFromUrl);
     if (extractedFromUrl !== 'Unknown Store') {
       storeName = extractedFromUrl;
     }
   }
+  
+  console.log('🔧 convertDbToLocal: Final storeName:', storeName);
   
   // Extract actual notes (cleaned of metadata)
   const actualNotes = extractActualNotes(dbItem.notes);
