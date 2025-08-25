@@ -108,7 +108,9 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
               {settingsExpanded && (
                 <div className="mt-2 ml-6 space-y-1">
                   <div 
-                    onClick={() => setSettingsOpen(true)}
+                    onClick={() => {
+                      setSettingsOpen(true);
+                    }}
                     className="flex items-center gap-2 cursor-pointer hover:bg-muted/20 transition-colors rounded p-2 -m-1"
                   >
                     <Palette size={14} className="text-muted-foreground" />
@@ -116,16 +118,8 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                   </div>
                   <div 
                     onClick={() => {
-                      // Future: Add notification settings modal
-                    }}
-                    className="flex items-center gap-2 cursor-pointer hover:bg-muted/20 transition-colors rounded p-2 -m-1"
-                  >
-                    <Bell size={14} className="text-muted-foreground" />
-                    <span className="text-sm text-foreground">Notifications</span>
-                  </div>
-                  <div 
-                    onClick={() => {
                       // Future: Add account settings modal
+                      console.log('Account settings clicked - coming soon');
                     }}
                     className="flex items-center gap-2 cursor-pointer hover:bg-muted/20 transition-colors rounded p-2 -m-1"
                   >
