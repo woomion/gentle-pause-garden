@@ -109,7 +109,7 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-sm w-[calc(100vw-2rem)] mx-auto p-6 rounded-3xl bg-card border-border max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Item</DialogTitle>
         </DialogHeader>
