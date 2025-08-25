@@ -341,6 +341,13 @@ console.log('Rendering main Index content');
           }}
           onEdit={async (item, updates) => {
             await updateItem(item.id, updates);
+            // Update the selected item with the new data
+            setSelectedItem(currentItem => {
+              if (currentItem && currentItem.id === item.id) {
+                return { ...currentItem, ...updates };
+              }
+              return currentItem;
+            });
           }}
           currentUserId={user?.id}
         />
