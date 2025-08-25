@@ -8,7 +8,11 @@ import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
 
-const PauseHeader = () => {
+interface PauseHeaderProps {
+  onProfileModalChange?: (isOpen: boolean) => void;
+}
+
+const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const { user } = useAuth();
@@ -24,6 +28,10 @@ const PauseHeader = () => {
   const handleAccountClick = () => {
     if (user) {
       setProfileOpen(true);
+      // Notify parent that profile modal is opening
+      if (onProfileModalChange) {
+        onProfileModalChange(true);
+      }
     } else {
       setSignupOpen(true);
     }
@@ -77,7 +85,16 @@ const PauseHeader = () => {
         </div>
       </header>
 
-      <UserProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
+      <UserProfileModal 
+        isOpen={profileOpen} 
+        onClose={() => {
+          setProfileOpen(false);
+          // Notify parent that profile modal is closing  
+          if (onProfileModalChange) {
+            onProfileModalChange(false);
+          }
+        }} 
+      />
       <SignupModal isOpen={signupOpen} onClose={() => setSignupOpen(false)} />
     </>
   );

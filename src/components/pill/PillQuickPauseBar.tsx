@@ -47,7 +47,13 @@ const getFallbackTitleFromUrl = (rawUrl: string): string | undefined => {
   }
 };
 
-const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: { compact?: boolean; prefillValue?: string; onExpandRequest?: () => void }) => {
+const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onUrlEntry, onBarcodeScanned }: { 
+  compact?: boolean; 
+  prefillValue?: string; 
+  onExpandRequest?: () => void;
+  onUrlEntry?: () => void;
+  onBarcodeScanned?: () => void;
+}) => {
   const { addItem } = usePausedItems();
   const { toast } = useToast();
   const usageLimit = useUsageLimit();
@@ -132,6 +138,11 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
       // Increment usage count for non-authenticated users
       usageLimit.incrementUsage();
 
+      // Call callback if URL was entered
+      if (isProbablyUrl(raw) && onUrlEntry) {
+        onUrlEntry();
+      }
+
       toast({ title: 'Paused', description: 'Added to your pause list', duration: 2000 });
       setValue('');
     } catch (e) {
@@ -200,6 +211,11 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest }: {
       if (compact && onExpandRequest) {
         console.log('📏 Expanding from compact mode');
         onExpandRequest();
+      }
+      
+      // Call barcode scanned callback
+      if (onBarcodeScanned) {
+        onBarcodeScanned();
       }
       
       toast({
