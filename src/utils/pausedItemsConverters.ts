@@ -22,24 +22,13 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
     rawItem: dbItem
   });
   
-  // Extract store name from notes or URL, but preserve empty strings
-  let storeName = '';
-  
-  // First check if there's an explicit store_name in the database
-  if (dbItem.store_name) {
-    storeName = dbItem.store_name;
-  } else {
-    // Try to extract from notes
-    const notesStoreName = extractStoreNameFromNotes(dbItem.notes);
-    if (notesStoreName !== 'Unknown Store') {
-      storeName = notesStoreName;
-    } else if (dbItem.url) {
-      // As last resort, try to extract from URL
-      const urlStoreName = extractStoreName(dbItem.url);
-      if (urlStoreName !== 'Unknown Store') {
-        storeName = urlStoreName;
-      }
-    }
+  // Extract store name from notes or URL, but never default to placeholder
+  let storeName = extractStoreNameFromNotes(dbItem.notes);
+  if (storeName === 'Unknown Store' && dbItem.url) {
+    storeName = extractStoreName(dbItem.url);
+  }
+  if (storeName === 'Unknown Store') {
+    storeName = '';
   }
   
   // Extract actual notes (cleaned of metadata)
@@ -73,7 +62,7 @@ export const convertDbToLocal = (dbItem: DbPausedItem): PausedItem => {
   return {
     id: dbItem.id,
     itemName: dbItem.title,
-    storeName: storeName,
+    storeName: dbItem.store_name || storeName,
     price: dbItem.price?.toString() || '',
     imageUrl: dbItem.image_url || imageUrl,
     
