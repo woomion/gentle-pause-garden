@@ -117,6 +117,9 @@ export function ThemeProvider({
         const themeColor = colorTheme === 'sporty' ? '#FF9E1B' : '#CAB6F7';
         metaThemeColor.setAttribute('content', themeColor);
       }
+      
+      // Ensure body visibility is restored after theme application
+      document.body.classList.add('theme-loaded');
     };
 
     updateTheme();
