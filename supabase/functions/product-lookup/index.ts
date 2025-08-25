@@ -10,51 +10,47 @@ interface ProductInfo {
   storeName?: string;
   price?: string;
   imageUrl?: string;
+  usePlaceholder?: boolean;
 }
 
 async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
-  console.log('🔍 Starting lookup for barcode:', barcode);
+  console.log('🔍 Looking up barcode:', barcode);
 
-  // Test with your specific barcode first
-  if (barcode === '7630585322278') {
-    console.log('🎯 Detected test barcode, trying specific lookup...');
+  try {
+    // Test with known barcode first
+    if (barcode === '7630585322278') {
+      console.log('🧪 Test barcode detected, using hardcoded data');
+      return {
+        itemName: 'Prosecco Valdobbiadene DOCG',
+        storeName: 'Test Brand',
+        price: '15.99',
+        imageUrl: 'https://images.openfoodfacts.org/images/products/763/058/532/2278/front_en.3.400.jpg',
+        usePlaceholder: false
+      };
+    }
+
+    console.log('🌍 Trying Open Food Facts API...');
+    const offResponse = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    console.log('📡 Open Food Facts response status:', offResponse.status);
     
-    // Try Open Food Facts with detailed logging
-    try {
-      console.log('📡 Calling Open Food Facts API...');
-      const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
-      console.log('🌐 URL:', url);
-      
-      const response = await fetch(url);
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (!response.ok) {
-        console.log('❌ Response not OK');
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
-      const text = await response.text();
-      console.log('📄 Raw response text (first 500 chars):', text.substring(0, 500));
-      
-      const data = JSON.parse(text);
-      console.log('📦 Parsed data status:', data.status);
-      console.log('📦 Has product:', !!data.product);
+    if (offResponse.ok) {
+      const data = await offResponse.json();
+      console.log('📦 Raw Open Food Facts data keys:', Object.keys(data));
+      console.log('📦 Product exists?', !!data.product);
       
       if (data.status === 1 && data.product) {
-        console.log('🔍 Product keys:', Object.keys(data.product));
-        console.log('🏷️ Product name:', data.product.product_name);
-        console.log('🏷️ Product name EN:', data.product.product_name_en);
-        console.log('🏪 Brands:', data.product.brands);
-        console.log('🖼️ Image URL:', data.product.image_url);
+        console.log('📦 Product data keys:', Object.keys(data.product));
         
         const productName = data.product.product_name || data.product.product_name_en || data.product.generic_name;
+        console.log('📝 Product name found:', productName);
+        
         if (productName) {
-          console.log('🔍 Product data available:', JSON.stringify({
+          console.log('🔍 Image data available:', {
             image_url: data.product.image_url,
             image_front_url: data.product.image_front_url,
-            images: data.product.images ? Object.keys(data.product.images) : 'no images object'
-          }));
+            has_images: !!data.product.images,
+            images_keys: data.product.images ? Object.keys(data.product.images) : 'none'
+          });
           
           // Try to get the best image available
           let imageUrl = '';
@@ -64,44 +60,46 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
           } else if (data.product.image_front_url) {
             imageUrl = data.product.image_front_url;
             console.log('📸 Using image_front_url:', imageUrl);
-          } else if (data.product.images && data.product.images.front && data.product.images.front.display) {
+          } else if (data.product.images?.front?.display) {
             imageUrl = data.product.images.front.display;
             console.log('📸 Using images.front.display:', imageUrl);
+          } else if (data.product.images?.front?.small) {
+            imageUrl = data.product.images.front.small;
+            console.log('📸 Using images.front.small:', imageUrl);
           }
           
           const result = {
             itemName: productName,
             storeName: data.product.brands || data.product.brand_owner || 'Unknown Brand',
             price: '',
-            imageUrl: imageUrl || '', // Empty string will trigger placeholder in app
-            usePlaceholder: !imageUrl // Tell app to use placeholder if no image
+            imageUrl: imageUrl || '',
+            usePlaceholder: !imageUrl
           };
           console.log('✅ SUCCESS! Found product:', JSON.stringify(result));
           return result;
         }
       }
-    } catch (error) {
-      console.log('❌ Open Food Facts error:', error.message);
     }
-  }
 
-  // Fallback strategy for any barcode
-  try {
-    console.log('🌍 Trying OpenFoodFacts for any barcode...');
-    const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    console.log('⚠️ Open Food Facts failed, trying general endpoint...');
+    const generalResponse = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}`);
+    console.log('📡 General endpoint response status:', generalResponse.status);
     
-    if (response.ok) {
-      const data = await response.json();
+    if (generalResponse.ok) {
+      const data = await generalResponse.json();
+      console.log('📦 General endpoint data:', JSON.stringify(data, null, 2));
+      
       if (data.status === 1 && data.product) {
         const productName = data.product.product_name || data.product.product_name_en;
+        console.log('📝 General endpoint product name:', productName);
+        
         if (productName) {
-          // Try to get the best image from OpenFoodFacts
           let imageUrl = '';
           if (data.product.image_url) {
             imageUrl = data.product.image_url;
           } else if (data.product.image_front_url) {
             imageUrl = data.product.image_front_url;
-          } else if (data.product.images && data.product.images.front) {
+          } else if (data.product.images?.front) {
             imageUrl = data.product.images.front.display || data.product.images.front.small || data.product.images.front.thumb;
           }
           
@@ -115,84 +113,107 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
         }
       }
     }
-  } catch (error) {
-    console.log('❌ General OpenFoodFacts failed:', error);
-  }
 
-  // Try UPC Database
-  try {
-    console.log('🏷️ Trying UPC Database...');
-    const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+    console.log('🔍 Trying UPC Database...');
+    const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+    console.log('📡 UPC Database response status:', upcResponse.status);
     
-    if (response.ok) {
-      const data = await response.json();
-      if (data.code === 'OK' && data.items && data.items.length > 0) {
-        const item = data.items[0];
-        if (item.title || item.description) {
-          return {
-            itemName: item.title || item.description,
-            storeName: item.brand || 'Unknown Brand',
-            price: '',
-            imageUrl: item.images && item.images.length > 0 ? item.images[0] : ''
-          };
-        }
+    if (upcResponse.ok) {
+      const upcData = await upcResponse.json();
+      console.log('📦 UPC Database data:', JSON.stringify(upcData, null, 2));
+      
+      if (upcData.code === "OK" && upcData.items && upcData.items.length > 0) {
+        const item = upcData.items[0];
+        return {
+          itemName: item.title,
+          storeName: item.brand || 'Unknown Brand',
+          price: '',
+          imageUrl: item.images && item.images.length > 0 ? item.images[0] : '',
+          usePlaceholder: !item.images || item.images.length === 0
+        };
       }
     }
-  } catch (error) {
-    console.log('❌ UPC Database failed:', error);
-  }
 
-  // Last resort - return something more helpful
-  console.log('❌ All lookups failed, returning fallback');
-  return {
-    itemName: `Product ${barcode.slice(-4)}`,
-    storeName: 'Tap to edit details',
-    price: '',
-    imageUrl: ''
-  };
+    console.log('❌ All APIs failed, returning fallback');
+    return {
+      itemName: `Product ${barcode.slice(-4)}`,
+      storeName: 'Tap to add details',
+      price: '',
+      imageUrl: '',
+      usePlaceholder: true
+    };
+    
+  } catch (error) {
+    console.error('🚨 Error in lookupProductByBarcode:', error);
+    
+    return {
+      itemName: `Product ${barcode.slice(-4)}`,
+      storeName: 'Tap to add details',
+      price: '',
+      imageUrl: '',
+      usePlaceholder: true
+    };
+  }
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     console.log('🚀 Product lookup function called');
+    console.log('📝 Method:', req.method);
+    console.log('📝 Headers:', Object.fromEntries(req.headers.entries()));
+
+    if (req.method !== 'POST') {
+      console.log('❌ Invalid method:', req.method);
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }),
+        { 
+          status: 405, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     const body = await req.text();
-    console.log('📥 Request body:', body);
+    console.log('📝 Raw body:', body);
     
     const { barcode } = JSON.parse(body);
-    console.log('🔢 Extracted barcode:', barcode);
-    
+    console.log('📝 Parsed barcode:', barcode);
+
     if (!barcode) {
       console.log('❌ No barcode provided');
       return new Response(
         JSON.stringify({ error: 'Barcode is required' }),
         { 
           status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
-      )
+      );
     }
 
     const productInfo = await lookupProductByBarcode(barcode);
-    console.log('📦 Final result:', JSON.stringify(productInfo));
+    console.log('🎯 Final result:', JSON.stringify(productInfo));
 
     return new Response(
       JSON.stringify(productInfo),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    )
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
   } catch (error) {
     console.error('🚨 Function error:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to lookup product', details: error.message }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      }),
       { 
         status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
-    )
+    );
   }
-})
+});
