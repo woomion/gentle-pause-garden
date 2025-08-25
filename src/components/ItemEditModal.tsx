@@ -39,6 +39,7 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
   };
 
   const handleSave = () => {
+    console.log('🖼️ ItemEditModal: Saving with imageFile:', imageFile);
     const updatedItem: Partial<PausedItem | LocalPausedItem> = {
       itemName: formData.itemName,
       storeName: formData.storeName,
@@ -46,10 +47,12 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
     };
 
     if (imageFile) {
-      // For now, store the file object in the photo field
+      // Store the file object in the photo field
       updatedItem.photo = imageFile;
+      console.log('🖼️ ItemEditModal: Added photo to updatedItem');
     }
 
+    console.log('🖼️ ItemEditModal: Final updatedItem:', updatedItem);
     onSave(updatedItem);
     onClose();
   };

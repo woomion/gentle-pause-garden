@@ -340,11 +340,14 @@ console.log('Rendering main Index content');
             setShowItemDetail(false);
           }}
           onEdit={async (item, updates) => {
+            console.log('🖼️ Index: onEdit called with updates:', updates);
             await updateItem(item.id, updates);
             // Update the selected item with the new data
             setSelectedItem(currentItem => {
               if (currentItem && currentItem.id === item.id) {
-                return { ...currentItem, ...updates };
+                const updatedItem = { ...currentItem, ...updates };
+                console.log('🖼️ Index: Updated selectedItem:', updatedItem);
+                return updatedItem;
               }
               return currentItem;
             });

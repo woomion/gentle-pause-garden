@@ -175,13 +175,13 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
       >
         <DialogHeader className="relative">
           <DialogTitle className="sr-only">Item Details</DialogTitle>
-          {/* Edit icon in upper left, opposite the close X */}
+          {/* Edit icon positioned to match the X close button height */}
           <button
             onClick={() => setShowEditModal(true)}
-            className="absolute top-0 left-0 z-10 p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+            className="absolute left-4 top-4 z-10 p-1 hover:bg-muted rounded-sm transition-opacity opacity-70 hover:opacity-100"
             title="Edit item"
           >
-            <Edit size={18} />
+            <Edit size={16} />
           </button>
         </DialogHeader>
         
@@ -355,6 +355,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             onClose={() => setShowEditModal(false)}
             item={item}
             onSave={(updates) => {
+              console.log('🖼️ PausedItemDetail: Saving updates:', updates);
               if (onEdit) {
                 onEdit(item, updates);
               }
