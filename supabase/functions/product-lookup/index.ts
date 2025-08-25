@@ -17,7 +17,7 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
   console.log('🔍 Looking up barcode:', barcode);
 
   try {
-    // Enhanced test database with more known barcodes
+    // Only include test barcodes, not real product data
     const knownProducts: Record<string, ProductInfo> = {
       '7630585322278': {
         itemName: 'Prosecco Valdobbiadene DOCG',
@@ -26,32 +26,19 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
         imageUrl: 'https://images.openfoodfacts.org/images/products/763/058/532/2278/front_en.3.400.jpg',
         usePlaceholder: false
       },
-      '850042725061': {
-        itemName: 'Organic Energy Bar',
-        storeName: 'Health Foods Co.',
-        price: '3.99',
-        imageUrl: '',
-        usePlaceholder: false
-      },
-      '012345678905': {
-        itemName: 'Coca-Cola Classic',
-        storeName: 'Coca-Cola',
-        price: '1.99',
-        imageUrl: '',
-        usePlaceholder: false
-      },
-      '049000028058': {
-        itemName: "Lay's Classic Potato Chips",
-        storeName: "Frito-Lay",
-        price: '3.49',
+      // Only test/demo barcodes - never fake real product data
+      '123456789012': {
+        itemName: 'Demo Product for Testing',
+        storeName: 'Demo Brand',
+        price: '9.99',
         imageUrl: '',
         usePlaceholder: false
       }
     };
 
-    // Check our known products first
+    // Check our known products first (only test data)
     if (knownProducts[barcode]) {
-      console.log('🧪 Known product detected, using local database');
+      console.log('🧪 Test product detected, using local database');
       return knownProducts[barcode];
     }
 
