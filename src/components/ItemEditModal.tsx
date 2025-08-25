@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -22,8 +22,32 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [imageDeleted, setImageDeleted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Reset form when item changes or modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        itemName: item.itemName || '',
+        storeName: item.storeName || '',
+        price: item.price?.toString() || '',
+      });
+      setImageFile(null);
+      setPreviewUrl(null);
+      setImageDeleted(false);
+      
+      // Check for existing image
+      const existingImage = item.imageUrl || item.photo;
+      if (existingImage && typeof existingImage === 'string') {
+        setExistingImageUrl(existingImage);
+      } else {
+        setExistingImageUrl(null);
+      }
+    }
+  }, [item, isOpen]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -41,8 +65,8 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
   const handleSave = () => {
     console.log('🖼️ ItemEditModal: Saving with imageFile:', imageFile);
     const updatedItem: Partial<PausedItem | LocalPausedItem> = {
-      itemName: formData.itemName,
-      storeName: formData.storeName,
+      itemName: formData.itemName.trim(),
+      storeName: formData.storeName.trim() || '', // Ensure empty string if blank
       price: formData.price,
     };
 
@@ -50,6 +74,10 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
       // Store the file object in the photo field
       updatedItem.photo = imageFile;
       console.log('🖼️ ItemEditModal: Added photo to updatedItem');
+    } else if (imageDeleted) {
+      // If image was deleted, clear the photo field
+      updatedItem.photo = null;
+      updatedItem.imageUrl = '';
     }
 
     console.log('🖼️ ItemEditModal: Final updatedItem:', updatedItem);
@@ -60,6 +88,11 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
   const clearPreview = () => {
     setImageFile(null);
     setPreviewUrl(null);
+  };
+
+  const deleteExistingImage = () => {
+    setExistingImageUrl(null);
+    setImageDeleted(true);
   };
 
   return (
@@ -106,6 +139,7 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
             <Label>Product Image</Label>
             <div className="mt-2">
               {previewUrl ? (
+                // Show new image preview
                 <div className="relative inline-block">
                   <img
                     src={previewUrl}
@@ -119,7 +153,23 @@ const ItemEditModal = ({ isOpen, onClose, item, onSave }: ItemEditModalProps) =>
                     <X size={12} />
                   </button>
                 </div>
+              ) : existingImageUrl && !imageDeleted ? (
+                // Show existing image
+                <div className="relative inline-block">
+                  <img
+                    src={existingImageUrl}
+                    alt="Current item image"
+                    className="w-32 h-32 object-cover rounded-lg border"
+                  />
+                  <button
+                    onClick={deleteExistingImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
               ) : (
+                // Show upload options
                 <div className="flex gap-2">
                   {/* Upload from files */}
                   <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50">
