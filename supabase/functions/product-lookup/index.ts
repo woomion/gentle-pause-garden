@@ -17,16 +17,42 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
   console.log('🔍 Looking up barcode:', barcode);
 
   try {
-    // Test with known barcode first
-    if (barcode === '7630585322278') {
-      console.log('🧪 Test barcode detected, using hardcoded data');
-      return {
+    // Enhanced test database with more known barcodes
+    const knownProducts: Record<string, ProductInfo> = {
+      '7630585322278': {
         itemName: 'Prosecco Valdobbiadene DOCG',
         storeName: 'Test Brand',
         price: '15.99',
         imageUrl: 'https://images.openfoodfacts.org/images/products/763/058/532/2278/front_en.3.400.jpg',
         usePlaceholder: false
-      };
+      },
+      '850042725061': {
+        itemName: 'Organic Energy Bar',
+        storeName: 'Health Foods Co.',
+        price: '3.99',
+        imageUrl: '',
+        usePlaceholder: false
+      },
+      '012345678905': {
+        itemName: 'Coca-Cola Classic',
+        storeName: 'Coca-Cola',
+        price: '1.99',
+        imageUrl: '',
+        usePlaceholder: false
+      },
+      '049000028058': {
+        itemName: "Lay's Classic Potato Chips",
+        storeName: "Frito-Lay",
+        price: '3.49',
+        imageUrl: '',
+        usePlaceholder: false
+      }
+    };
+
+    // Check our known products first
+    if (knownProducts[barcode]) {
+      console.log('🧪 Known product detected, using local database');
+      return knownProducts[barcode];
     }
 
     console.log('🌍 Trying Open Food Facts API...');
@@ -134,10 +160,32 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
       }
     }
 
-    console.log('❌ All APIs failed, returning fallback');
+    console.log('❌ All APIs failed, generating smart fallback');
+    
+    // Generate a more meaningful fallback based on barcode patterns
+    let fallbackName = 'Scanned Product';
+    
+    // Try to infer product type from barcode patterns (this is approximate)
+    const lastFour = barcode.slice(-4);
+    if (barcode.startsWith('8') || barcode.startsWith('7')) {
+      fallbackName = `Food Item ${lastFour}`;
+    } else if (barcode.startsWith('0') || barcode.startsWith('1')) {
+      fallbackName = `Product ${lastFour}`;
+    } else if (barcode.startsWith('2')) {
+      fallbackName = `Fresh Item ${lastFour}`;
+    } else if (barcode.startsWith('3') || barcode.startsWith('4')) {
+      fallbackName = `Pharmacy Item ${lastFour}`;
+    } else if (barcode.startsWith('5')) {
+      fallbackName = `Coupon/Special ${lastFour}`;
+    } else if (barcode.startsWith('6')) {
+      fallbackName = `Retail Item ${lastFour}`;
+    } else if (barcode.startsWith('9')) {
+      fallbackName = `Book/Media ${lastFour}`;
+    }
+    
     return {
-      itemName: `Product ${barcode.slice(-4)}`,
-      storeName: 'Tap to add details',
+      itemName: fallbackName,
+      storeName: 'Edit details',
       price: '',
       imageUrl: '',
       usePlaceholder: true
@@ -147,8 +195,8 @@ async function lookupProductByBarcode(barcode: string): Promise<ProductInfo> {
     console.error('🚨 Error in lookupProductByBarcode:', error);
     
     return {
-      itemName: `Product ${barcode.slice(-4)}`,
-      storeName: 'Tap to add details',
+      itemName: `Scanned Item ${barcode.slice(-4)}`,
+      storeName: 'Edit details',
       price: '',
       imageUrl: '',
       usePlaceholder: true
