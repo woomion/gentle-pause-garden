@@ -270,26 +270,6 @@ console.log('Rendering main Index content');
         </div>
       </div>
 
-              {/* Ready Items Section */}
-              {readyItems.length > 0 && (
-                <div className="mb-4">
-                  <div className="text-xs font-medium text-muted-foreground mb-2 px-1">
-                    Ready to Review ({readyItems.length})
-                  </div>
-                  <div className="space-y-2">
-                    {readyItems.map((it) => (
-                      <PillItem
-                        key={it.id}
-                        item={it}
-                        onClick={() => {
-                          setSelectedItem(it);
-                          setShowItemDetail(true);
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Current Paused Items Section */}
               {currentPausedItems.length > 0 && (
