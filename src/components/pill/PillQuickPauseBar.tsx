@@ -322,11 +322,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 }
                 >
                   {d.label}
-                  {d.isPremium && !isPremiumUser() && (
-                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-4 h-4 flex items-center justify-center rounded-full">
-                      +
-                    </span>
-                  )}
                 </button>
                 );
             })}
