@@ -124,12 +124,32 @@ const handler = async (req: Request): Promise<Response> => {
     const now = new Date();
     const reviewDate = new Date(item.review_at);
     if (reviewDate > now) {
-      console.log(`Item ${itemId} is not yet ready for review`);
+      console.log(`Item ${itemId} is not yet ready for review (review at: ${item.review_at}, now: ${now.toISOString()})`);
       return new Response(JSON.stringify({ 
         success: false, 
         message: 'Item not yet ready for review' 
       }), {
         status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // CRITICAL: Mark reminder as sent BEFORE sending email to prevent race conditions
+    const timestamp = new Date().toISOString();
+    const { error: markError } = await supabase
+      .from('paused_items')
+      .update({ individual_reminder_sent_at: timestamp })
+      .eq('id', itemId)
+      .eq('user_id', userId)
+      .is('individual_reminder_sent_at', null); // Only update if not already set
+    
+    if (markError) {
+      console.log(`Failed to mark reminder as sent for item ${itemId}:`, markError);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: 'Failed to mark reminder as sent' 
+      }), {
+        status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
@@ -167,17 +187,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Mark that individual reminder was sent for this item
-    const { error: updateError } = await supabase
-      .from('paused_items')
-      .update({ individual_reminder_sent_at: new Date().toISOString() })
-      .eq('id', itemId)
-      .eq('user_id', userId);
-
-    if (updateError) {
-      console.log(`Failed to update reminder timestamp for item ${itemId}:`, updateError);
-      // Don't fail the request since email was sent successfully
-    }
 
     console.log(`Successfully sent individual reminder to ${authUser.user.email}`);
     

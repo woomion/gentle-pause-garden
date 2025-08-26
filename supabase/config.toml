@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.send-individual-reminder]
 verify_jwt = false
+
+[functions.check-ready-items]
+verify_jwt = false
