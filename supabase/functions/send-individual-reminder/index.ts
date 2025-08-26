@@ -157,7 +157,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending individual reminder to ${authUser.user.email} for item: ${item.title}`);
 
     // Generate email HTML using React Email
-    const appUrl = 'https://cnjznmbgxprsrovmdywe.lovable.dev';
+    const appUrl = 'https://pocketpause.app';
     
     const emailHtml = await renderAsync(
       React.createElement(ReviewReminderEmail, {
