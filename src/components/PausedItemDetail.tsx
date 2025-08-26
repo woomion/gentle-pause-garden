@@ -237,8 +237,8 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             )}
           </div>
 
-          {/* Decision buttons flow */}
-          {!showDecisionButtons && !showConfirmation ? (
+          {/* Decision buttons flow - show decision buttons immediately for ready items */}
+          {!showDecisionButtons && !showConfirmation && !isReadyForReview ? (
             <div className="pt-2">
               <button 
                 onClick={() => {
@@ -251,7 +251,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 Decide now
               </button>
             </div>
-          ) : showDecisionButtons && !showConfirmation ? (
+          ) : (showDecisionButtons || isReadyForReview) && !showConfirmation ? (
             <div className="space-y-3 pt-2">
               <button
                 onClick={() => handleInitialDecision('purchase')}
