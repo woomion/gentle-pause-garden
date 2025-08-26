@@ -3,7 +3,7 @@ import { Resend } from "npm:resend@4.0.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.10';
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
-import { ReviewReminderEmail } from '../send-review-reminders/_templates/review-reminder.tsx';
+import { ReviewReminderEmail } from './_templates/review-reminder.tsx';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
