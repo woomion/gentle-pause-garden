@@ -59,6 +59,7 @@ const Index = () => {
   );
   
   const now = Date.now();
+  // Ensure mutually exclusive filtering - ready items should not appear in paused items
   const readyItems = sortedItems.filter((i) => i.checkInDate.getTime() <= now);
   const currentPausedItems = sortedItems.filter((i) => i.checkInDate.getTime() > now);
   const readyCount = (getItemsForReview && getItemsForReview())?.length || 0;
