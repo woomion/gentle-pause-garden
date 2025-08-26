@@ -70,12 +70,15 @@ const Index = () => {
     readyItemsFromFilter: readyItems.length,
     readyCountFromStore: readyCount,
     now: new Date(now).toISOString(),
+    readyItemIds: readyItems.map(i => i.id),
+    pausedItemIds: currentPausedItems.map(i => i.id),
     itemsWithTimes: sortedItems.map(item => ({
       id: item.id,
       name: item.itemName,
       checkInDate: item.checkInDate.toISOString(),
+      checkInTime: item.checkInTime,
       isReady: item.checkInDate.getTime() <= now,
-      checkInTime: item.checkInTime
+      timeDiff: item.checkInDate.getTime() - now
     }))
   });
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
