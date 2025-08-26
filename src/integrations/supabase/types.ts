@@ -20,6 +20,7 @@ export type Database = {
           emotion: string | null
           id: string
           image_url: string | null
+          individual_reminder_sent_at: string | null
           is_cart: boolean | null
           item_type: string | null
           notes: string | null
@@ -41,6 +42,7 @@ export type Database = {
           emotion?: string | null
           id?: string
           image_url?: string | null
+          individual_reminder_sent_at?: string | null
           is_cart?: boolean | null
           item_type?: string | null
           notes?: string | null
@@ -62,6 +64,7 @@ export type Database = {
           emotion?: string | null
           id?: string
           image_url?: string | null
+          individual_reminder_sent_at?: string | null
           is_cart?: boolean | null
           item_type?: string | null
           notes?: string | null

@@ -91,7 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get the specific item that just became ready
     const { data: item, error: itemError } = await supabase
       .from('paused_items')
-      .select('id, title, store_name, review_at, price, created_at')
+      .select('id, title, store_name, review_at, price, created_at, individual_reminder_sent_at')
       .eq('id', itemId)
       .eq('user_id', userId)
       .eq('status', 'paused')
@@ -104,6 +104,18 @@ const handler = async (req: Request): Promise<Response> => {
         message: 'Item not found or not ready' 
       }), {
         status: 404,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Check if individual reminder has already been sent
+    if (item.individual_reminder_sent_at) {
+      console.log(`Individual reminder already sent for item ${itemId} at ${item.individual_reminder_sent_at}`);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: 'Individual reminder already sent' 
+      }), {
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
@@ -153,6 +165,18 @@ const handler = async (req: Request): Promise<Response> => {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
+    }
+
+    // Mark that individual reminder was sent for this item
+    const { error: updateError } = await supabase
+      .from('paused_items')
+      .update({ individual_reminder_sent_at: new Date().toISOString() })
+      .eq('id', itemId)
+      .eq('user_id', userId);
+
+    if (updateError) {
+      console.log(`Failed to update reminder timestamp for item ${itemId}:`, updateError);
+      // Don't fail the request since email was sent successfully
     }
 
     console.log(`Successfully sent individual reminder to ${authUser.user.email}`);

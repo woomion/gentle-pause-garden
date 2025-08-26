@@ -99,6 +99,7 @@ export const convertPauseLogItemToDb = (
     is_cart: false,
     item_type: 'item',
     store_name: item.storeName || '',
-    other_duration: ''
+    other_duration: '',
+    individual_reminder_sent_at: null
   };
 };
