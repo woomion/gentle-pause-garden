@@ -125,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Send email using Resend
         const emailResponse = await resend.emails.send({
-          from: "Pocket Pause <reminders@resend.dev>",
+          from: "Pocket Pause <hello@pocketpause.app>",
           to: [authUser.user.email],
           subject: "Your paused items are ready when you are ✦",
           html: emailHtml,

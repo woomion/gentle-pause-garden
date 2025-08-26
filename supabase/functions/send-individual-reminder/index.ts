@@ -137,7 +137,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email using Resend
     const emailResponse = await resend.emails.send({
-      from: "Pocket Pause <reminders@resend.dev>",
+      from: "Pocket Pause <hello@pocketpause.app>",
       to: [authUser.user.email],
       subject: `"${item.title}" is ready for your review ✦`,
       html: emailHtml,
