@@ -51,14 +51,14 @@ export function ThemeSelector() {
         return (
           <Card
             key={theme.id}
-            className={`transition-all ${
+            className={`transition-all border ${
               isDisabled 
                 ? 'opacity-60 cursor-not-allowed' 
                 : 'cursor-pointer hover:shadow-md'
             } ${
               colorTheme === theme.id
-                ? 'ring-2 ring-primary shadow-md'
-                : 'hover:ring-1 hover:ring-border'
+                ? 'border-primary border-2 shadow-md'
+                : 'border-border hover:border-primary/50'
             }`}
             onClick={() => !isDisabled && handleThemeSelect(theme.id)}
           >
