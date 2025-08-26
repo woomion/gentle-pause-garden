@@ -285,23 +285,60 @@ console.log('Rendering main Index content');
         </div>
       </div>
 
-              {/* Pill list */}
-              <div className="space-y-2">
-                {itemsLoading ? (
-                  <div className="text-sm text-muted-foreground">Loading…</div>
-                ) : (
-                  currentPausedItems.map((it) => (
-                    <PillItem
-                      key={it.id}
-                      item={it}
-                      onClick={() => {
-                        setSelectedItem(it);
-                        setShowItemDetail(true);
-                      }}
-                    />
-                  ))
-                )}
-              </div>
+              {/* Ready Items Section */}
+              {readyItems.length > 0 && (
+                <div className="mb-4">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 px-1">
+                    Ready to Review ({readyItems.length})
+                  </div>
+                  <div className="space-y-2">
+                    {readyItems.map((it) => (
+                      <PillItem
+                        key={it.id}
+                        item={it}
+                        onClick={() => {
+                          setSelectedItem(it);
+                          setShowItemDetail(true);
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Current Paused Items Section */}
+              {currentPausedItems.length > 0 && (
+                <div className="mb-4">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 px-1">
+                    Still Pausing ({currentPausedItems.length})
+                  </div>
+                  <div className="space-y-2">
+                    {itemsLoading ? (
+                      <div className="text-sm text-muted-foreground">Loading…</div>
+                    ) : (
+                      currentPausedItems.map((it) => (
+                        <PillItem
+                          key={it.id}
+                          item={it}
+                          onClick={() => {
+                            setSelectedItem(it);
+                            setShowItemDetail(true);
+                          }}
+                        />
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!itemsLoading && readyItems.length === 0 && currentPausedItems.length === 0 && (
+                <div className="text-center py-8">
+                  <div className="text-muted-foreground text-sm">No paused items yet</div>
+                  <div className="text-xs text-muted-foreground mt-1">Add something below to get started</div>
+                </div>
+              )}
+              
               <div aria-hidden className="h-16" />
             </>
           ) : (
