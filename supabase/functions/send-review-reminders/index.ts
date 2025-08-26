@@ -71,11 +71,10 @@ const handler = async (req: Request): Promise<Response> => {
             continue;
           }
         } else {
-          // Immediate mode: send as items become ready, but respect daily limit
-          if (alreadySentToday) {
-            console.log(`Skipping user ${userSetting.user_id} - immediate mode: already sent today`);
-            continue;
-          }
+          // Individual mode: This function is now only for batch mode
+          // Individual emails are handled by the send-individual-reminder function
+          console.log(`Skipping user ${userSetting.user_id} - individual mode should use send-individual-reminder function`);
+          continue;
         }
 
         // Get user's email from auth.users (using service role key)

@@ -6,6 +6,7 @@ import ReviewBanner from '../components/ReviewBanner';
 import AddPauseButton, { AddPauseButtonRef } from '../components/AddPauseButton';
 import MainTabs from '../components/MainTabs';
 import FooterLinks from '../components/FooterLinks';
+import { EmailDebugInfo } from '../components/EmailDebugInfo';
 
 import SignupModal from '../components/SignupModal';
 import ItemReviewModal from '../components/ItemReviewModal';
@@ -205,6 +206,7 @@ console.log('Rendering main Index content');
             }
           }} />
           <GuestModeIndicator show={!user} />
+          <EmailDebugInfo />
           <WelcomeWithValues />
         </div>
 

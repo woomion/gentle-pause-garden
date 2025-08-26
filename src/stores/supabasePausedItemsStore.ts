@@ -33,6 +33,7 @@ class SupabasePausedItemsStore {
   private items: PausedItem[] = [];
   private listeners: Set<Listener> = new Set();
   private isLoaded = false;
+  private previouslyReadyItemIds: Set<string> = new Set();
 
   constructor() {
     // Load items when store is created
@@ -43,6 +44,62 @@ class SupabasePausedItemsStore {
     this.items.forEach(item => {
       item.checkInTime = calculateCheckInTimeDisplay(item.checkInDate);
     });
+    
+    // Check for newly ready items and send individual emails
+    this.checkForNewlyReadyItems();
+  }
+
+  private async checkForNewlyReadyItems(): Promise<void> {
+    try {
+      const now = new Date();
+      const currentlyReadyItemIds = new Set<string>();
+      
+      // Find items that are currently ready
+      this.items.forEach(item => {
+        if (item.checkInDate <= now) {
+          currentlyReadyItemIds.add(item.id);
+        }
+      });
+      
+      // Find newly ready items (ready now but weren't ready before)
+      const newlyReadyItemIds = new Set<string>();
+      currentlyReadyItemIds.forEach(itemId => {
+        if (!this.previouslyReadyItemIds.has(itemId)) {
+          newlyReadyItemIds.add(itemId);
+        }
+      });
+      
+      // Update the previously ready items set
+      this.previouslyReadyItemIds = currentlyReadyItemIds;
+      
+      // Send individual emails for newly ready items
+      if (newlyReadyItemIds.size > 0) {
+        console.log('📧 Found newly ready items for individual emails:', Array.from(newlyReadyItemIds));
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Send individual emails for each newly ready item
+          for (const itemId of newlyReadyItemIds) {
+            try {
+              console.log(`📧 Sending individual email for item ${itemId}`);
+              const { data, error } = await supabase.functions.invoke('send-individual-reminder', {
+                body: { userId: user.id, itemId }
+              });
+              
+              if (error) {
+                console.log(`📧 Individual email failed for item ${itemId}:`, error);
+              } else {
+                console.log(`📧 Individual email sent for item ${itemId}:`, data);
+              }
+            } catch (error) {
+              console.log(`📧 Error sending individual email for item ${itemId}:`, error);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in checkForNewlyReadyItems:', error);
+    }
   }
 
   async loadItems(): Promise<void> {
