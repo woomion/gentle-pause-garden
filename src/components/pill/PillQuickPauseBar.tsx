@@ -11,14 +11,15 @@ import BarcodeScanner from '../BarcodeScanner';
 import { lookupProductByBarcode } from '@/utils/productLookup';
 
 import { useSubscription } from '@/hooks/useSubscription';
+import PremiumDurationModal from '../PremiumDurationModal';
 
 // Quick add bar for Pill Mode only. Keeps UI minimal and fast.
-const DURATION_PRESETS: { key: string; label: string; isPremium?: boolean; disabled?: boolean }[] = [
+const DURATION_PRESETS: { key: string; label: string; isPremium?: boolean }[] = [
   { key: '24 hours', label: '1 day', isPremium: false },
-  { key: '3 days', label: '3 days', isPremium: false, disabled: true },
-  { key: '1 week', label: '1 week', isPremium: false, disabled: true },
-  { key: '2 weeks', label: '2 weeks', isPremium: false, disabled: true },
-  { key: '1 month', label: '1 month', isPremium: false, disabled: true },
+  { key: '3 days', label: '3 days', isPremium: true },
+  { key: '1 week', label: '1 week', isPremium: true },
+  { key: '2 weeks', label: '2 weeks', isPremium: true },
+  { key: '1 month', label: '1 month', isPremium: true },
 ];
 
 const isProbablyUrl = (text: string) => {
@@ -65,6 +66,8 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
   const [submitting, setSubmitting] = useState(false);
   const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [showPremiumDurationModal, setShowPremiumDurationModal] = useState(false);
+  const [pendingPremiumDuration, setPendingPremiumDuration] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastAppliedPrefill, setLastAppliedPrefill] = useState<string | undefined>(undefined);
 
@@ -293,27 +296,39 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
         <>
           <div className="mt-3 grid grid-cols-5 gap-2">
             {DURATION_PRESETS.map((d) => {
-              const isDisabled = d.disabled || false;
+              const isPremiumDuration = d.isPremium && !isPremiumUser();
+              const isSelected = duration === d.key;
               
               return (
                 <button
                   key={d.key}
                   type="button"
-                  onClick={() => !isDisabled && setDuration(d.key)}
-                  aria-pressed={duration === d.key}
-                  disabled={isDisabled}
+                  onClick={() => {
+                    if (d.isPremium && !isPremiumUser()) {
+                      setPendingPremiumDuration(d.label);
+                      setShowPremiumDurationModal(true);
+                    } else {
+                      setDuration(d.key);
+                    }
+                  }}
+                  aria-pressed={isSelected}
                   className={
-                    `flex-1 h-10 rounded-full border text-sm transition-colors ${
-                      isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+                    `flex-1 h-10 rounded-full border text-sm transition-colors relative ${
+                      isPremiumDuration ? 'opacity-60' : ''
                     } ` +
-                    (duration === d.key
+                    (isSelected
                       ? 'bg-primary/15 text-primary border-primary/30'
                     : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted')
                 }
-              >
-                {d.label}
-              </button>
-              );
+                >
+                  {d.label}
+                  {d.isPremium && !isPremiumUser() && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs px-1 rounded-full">
+                      Pro
+                    </span>
+                  )}
+                </button>
+                );
             })}
           </div>
           <div className="mt-3">
@@ -346,6 +361,21 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
         isOpen={showBarcodeScanner}
         onClose={() => setShowBarcodeScanner(false)}
         onScan={handleBarcodeScanned}
+      />
+      
+      {/* Premium Duration Modal */}
+      <PremiumDurationModal
+        isOpen={showPremiumDurationModal}
+        onClose={() => setShowPremiumDurationModal(false)}
+        onSignUp={() => {
+          setShowPremiumDurationModal(false);
+          // You can add navigation to signup here
+          toast({
+            title: "Feature coming soon",
+            description: "Premium subscriptions will be available soon!",
+          });
+        }}
+        selectedDuration={pendingPremiumDuration}
       />
     </div>
   );
