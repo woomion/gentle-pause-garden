@@ -77,11 +77,13 @@ class SupabasePausedItemsStore {
         console.log('📧 Found newly ready items for individual emails:', Array.from(newlyReadyItemIds));
         
         const { data: { user } } = await supabase.auth.getUser();
+        console.log('📧 Current user for emails:', !!user, user?.email);
+        
         if (user) {
           // Send individual emails for each newly ready item
           for (const itemId of newlyReadyItemIds) {
             try {
-              console.log(`📧 Sending individual email for item ${itemId}`);
+              console.log(`📧 Attempting to send individual email for item ${itemId} to user ${user.id}`);
               const { data, error } = await supabase.functions.invoke('send-individual-reminder', {
                 body: { userId: user.id, itemId }
               });
@@ -95,6 +97,8 @@ class SupabasePausedItemsStore {
               console.log(`📧 Error sending individual email for item ${itemId}:`, error);
             }
           }
+        } else {
+          console.log('📧 No user found, cannot send individual emails');
         }
       }
     } catch (error) {

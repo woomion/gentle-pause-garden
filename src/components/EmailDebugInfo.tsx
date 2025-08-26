@@ -8,6 +8,10 @@ export function EmailDebugInfo() {
   const { user } = useAuth();
   const { notificationsEnabled, emailBatchingEnabled, loading } = useUserSettings();
 
+  // Add detailed debugging
+  console.log('🔍 EmailDebugInfo - User:', !!user, user?.email);
+  console.log('🔍 EmailDebugInfo - Settings:', { notificationsEnabled, emailBatchingEnabled, loading });
+
   if (loading) return null;
 
   const getEmailStatus = () => {
@@ -53,16 +57,27 @@ export function EmailDebugInfo() {
   const emailStatus = getEmailStatus();
   const IconComponent = emailStatus.icon;
 
-  // Only show for guest users or when there are issues
-  if (emailStatus.status === 'individual') {
-    return null;
-  }
-
   return (
-    <Alert variant={emailStatus.variant} className="mb-4">
-      <IconComponent className="h-4 w-4" />
-      <AlertTitle>{emailStatus.title}</AlertTitle>
-      <AlertDescription>{emailStatus.description}</AlertDescription>
-    </Alert>
+    <div className="mb-4 space-y-2">
+      {/* Auth Debug Info */}
+      <Alert variant="default" className="border-blue-200 bg-blue-50">
+        <Info className="h-4 w-4" />
+        <AlertTitle>Debug Info</AlertTitle>
+        <AlertDescription>
+          Auth: {user ? `✅ ${user.email}` : '❌ Not logged in'} | 
+          Notifications: {notificationsEnabled ? '✅' : '❌'} | 
+          Batching: {emailBatchingEnabled ? '✅' : '❌'}
+        </AlertDescription>
+      </Alert>
+
+      {/* Email Status Alert */}
+      {emailStatus.status !== 'individual' && (
+        <Alert variant={emailStatus.variant}>
+          <IconComponent className="h-4 w-4" />
+          <AlertTitle>{emailStatus.title}</AlertTitle>
+          <AlertDescription>{emailStatus.description}</AlertDescription>
+        </Alert>
+      )}
+    </div>
   );
 }
