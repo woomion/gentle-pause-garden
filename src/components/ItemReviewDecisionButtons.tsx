@@ -35,39 +35,18 @@ const ItemReviewDecisionButtons = ({ onDecision, onTakeToLink, hasUrl = true }: 
   if (!showConfirmation) {
     return (
       <div className="space-y-3 mt-6">
-        {hasUrl ? (
-          <>
-            <button
-              onClick={() => handleInitialDecision('purchase')}
-              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
-            >
-              I'm going to buy this
-            </button>
-            <button
-              onClick={() => handleInitialDecision('let-go')}
-              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
-            >
-              I'm ready to let this go
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => handleInitialDecision('purchase')}
-              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
-            >
-              <Check size={18} />
-              I'm interested in this
-            </button>
-            <button
-              onClick={() => handleInitialDecision('let-go')}
-              className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
-            >
-              <X size={18} />
-              I'm done thinking about this
-            </button>
-          </>
-        )}
+        <button
+          onClick={() => handleInitialDecision('purchase')}
+          className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
+        >
+          I'm going to buy this
+        </button>
+        <button
+          onClick={() => handleInitialDecision('let-go')}
+          className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-colors"
+        >
+          I'm ready to let this go
+        </button>
       </div>
     );
   }
