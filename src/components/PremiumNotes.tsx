@@ -9,13 +9,22 @@ interface PremiumNotesProps {
 }
 
 const PremiumNotes = ({ notes, onSave, className = "" }: PremiumNotesProps) => {
-  const { isPremiumUser } = useSubscription();
   const [isEditing, setIsEditing] = useState(false);
   const [currentNotes, setCurrentNotes] = useState(notes || '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Use try-catch to handle subscription hook safely
+  let isPremium = false;
+  try {
+    const { isPremiumUser } = useSubscription();
+    isPremium = isPremiumUser();
+  } catch (error) {
+    console.error('Error checking subscription:', error);
+    return null;
+  }
 
   // Don't show anything for non-premium users
-  if (!isPremiumUser()) {
+  if (!isPremium) {
     return null;
   }
 
@@ -44,7 +53,7 @@ const PremiumNotes = ({ notes, onSave, className = "" }: PremiumNotesProps) => {
     }
   };
 
-  const handleClickOutside = (e: React.FocusEvent) => {
+  const handleClickOutside = () => {
     // Save when clicking outside
     handleSave();
   };
