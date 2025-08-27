@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Check, MessageCircle } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PremiumNotesProps {
   notes?: string;
@@ -13,11 +14,15 @@ const PremiumNotes = ({ notes, onSave, className = "" }: PremiumNotesProps) => {
   const [currentNotes, setCurrentNotes] = useState(notes || '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  // Use subscription hook at top level
-  const { isPremiumUser, loading } = useSubscription();
+  // Get auth context first
+  const { user } = useAuth();
   
-  // Don't show anything while loading or for non-premium users
-  if (loading || !isPremiumUser()) {
+  // Only use subscription hook if user is available
+  const subscriptionResult = user ? useSubscription() : { loading: true, isPremiumUser: () => false };
+  const { isPremiumUser, loading } = subscriptionResult;
+  
+  // Don't show anything while loading, no user, or for non-premium users
+  if (!user || loading || !isPremiumUser()) {
     return null;
   }
 
