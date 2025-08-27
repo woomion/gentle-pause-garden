@@ -17,9 +17,8 @@ const PremiumNotes = ({ notes, onSave, className = "" }: PremiumNotesProps) => {
   // Get auth context first
   const { user } = useAuth();
   
-  // Only use subscription hook if user is available
-  const subscriptionResult = user ? useSubscription() : { loading: true, isPremiumUser: () => false };
-  const { isPremiumUser, loading } = subscriptionResult;
+  // Always call hooks in the same order - never conditionally
+  const { isPremiumUser, loading } = useSubscription();
   
   // Don't show anything while loading, no user, or for non-premium users
   if (!user || loading || !isPremiumUser()) {
