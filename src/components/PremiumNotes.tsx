@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Check, MessageCircle, Lock } from 'lucide-react';
+import { Check, MessageCircle } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 
 interface NotesProps {
@@ -13,6 +13,11 @@ const Notes = ({ notes, onSave, className = "" }: NotesProps) => {
   const [currentNotes, setCurrentNotes] = useState(notes || '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { isPremiumUser } = useSubscription();
+
+  // Don't render anything for non-premium users
+  if (!isPremiumUser()) {
+    return null;
+  }
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -45,15 +50,6 @@ const Notes = ({ notes, onSave, className = "" }: NotesProps) => {
   };
 
   if (!isEditing && !notes?.trim()) {
-    if (!isPremiumUser()) {
-      return (
-        <div className={`flex items-center gap-2 text-muted-foreground text-sm py-2 ${className}`}>
-          <Lock size={16} />
-          <span>Thoughts feature (Premium)</span>
-        </div>
-      );
-    }
-    
     return (
       <button
         onClick={() => setIsEditing(true)}
@@ -69,22 +65,12 @@ const Notes = ({ notes, onSave, className = "" }: NotesProps) => {
     return (
       <div className={`${className}`}>
         <button
-          onClick={() => isPremiumUser() && setIsEditing(true)}
-          className={`w-full text-left p-3 rounded-lg transition-colors ${
-            isPremiumUser() 
-              ? 'bg-muted/50 hover:bg-muted' 
-              : 'bg-muted/30 cursor-not-allowed'
-          }`}
+          onClick={() => setIsEditing(true)}
+          className="w-full text-left p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
         >
           <div className="flex items-start gap-2 mb-2">
-            {isPremiumUser() ? (
-              <MessageCircle size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
-            ) : (
-              <Lock size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
-            )}
-            <span className="text-sm font-medium text-foreground">
-              {isPremiumUser() ? 'Your thoughts:' : 'Your thoughts (Premium):'}
-            </span>
+            <MessageCircle size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+            <span className="text-sm font-medium text-foreground">Your thoughts:</span>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed pl-6">
             {notes}
