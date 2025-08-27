@@ -93,7 +93,7 @@ const Notes = ({ notes, onSave, className = "" }: NotesProps) => {
           />
           <button
             onClick={handleSave}
-            className="absolute bottom-2 right-2 p-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="absolute bottom-3 right-3 p-2 rounded-md bg-purple-100 text-purple-600 hover:bg-purple-200 hover:text-purple-700 transition-colors border border-purple-200"
             title="Save notes (⌘+Enter)"
           >
             <Check size={14} />
