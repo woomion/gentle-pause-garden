@@ -7,6 +7,7 @@ import ItemReviewDetails from './ItemReviewDetails';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { extractActualNotes } from '../utils/notesMetadataUtils';
 
 interface ItemReviewContentProps {
   item: PausedItem | LocalPausedItem;
@@ -71,9 +72,23 @@ const ItemReviewContent = ({
   // Remove resetState function since no feedback state to reset
 
 
+  const userNotes = extractActualNotes(item.notes);
+
   return (
     <div className="p-6">
       <ItemReviewDetails item={item} onViewItem={handleViewItem} />
+      
+      {/* Show user notes if they exist */}
+      {userNotes?.trim() && (
+        <div className="mt-4 p-3 rounded-lg bg-muted/30 border border-border">
+          <div className="flex items-start gap-2 mb-2">
+            <span className="text-sm font-medium text-foreground">Your thoughts:</span>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {userNotes}
+          </p>
+        </div>
+      )}
       
       {/* Decision buttons - only show when allowed */}
       {showDecisionButtons && (

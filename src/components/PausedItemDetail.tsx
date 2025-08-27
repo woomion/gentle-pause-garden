@@ -14,6 +14,7 @@ import PauseDurationBanner from './PauseDurationBanner';
 import { extractActualNotes } from '../utils/notesMetadataUtils';
 import { ItemCommentsThread } from './ItemCommentsThread';
 import { useItemComments } from '../hooks/useItemComments';
+import PremiumNotes from './PremiumNotes';
 
 interface PausedItemDetailProps {
   item: PausedItem | LocalPausedItem;
@@ -224,6 +225,18 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                 </p>
               </div>
             )}
+
+            {/* Premium Notes Section */}
+            <PremiumNotes
+              notes={cleanNotes}
+              onSave={(newNotes) => {
+                if (onEdit) {
+                  onEdit(item, { notes: newNotes });
+                }
+                setLocalItem(prev => ({ ...prev, notes: newNotes }));
+              }}
+              className="pt-2"
+            />
 
             {/* Comments disabled since partner functionality removed */}
             {false && (

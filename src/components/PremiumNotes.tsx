@@ -1,0 +1,117 @@
+import { useState, useRef, useEffect } from 'react';
+import { Check, MessageCircle } from 'lucide-react';
+import { useSubscription } from '@/hooks/useSubscription';
+
+interface PremiumNotesProps {
+  notes?: string;
+  onSave: (notes: string) => void;
+  className?: string;
+}
+
+const PremiumNotes = ({ notes, onSave, className = "" }: PremiumNotesProps) => {
+  const { isPremiumUser } = useSubscription();
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentNotes, setCurrentNotes] = useState(notes || '');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Don't show anything for non-premium users
+  if (!isPremiumUser()) {
+    return null;
+  }
+
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleSave = () => {
+    onSave(currentNotes.trim());
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setCurrentNotes(notes || '');
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && e.metaKey) {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      handleCancel();
+    }
+  };
+
+  const handleClickOutside = (e: React.FocusEvent) => {
+    // Save when clicking outside
+    handleSave();
+  };
+
+  if (!isEditing && !notes?.trim()) {
+    return (
+      <button
+        onClick={() => setIsEditing(true)}
+        className={`flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm py-2 ${className}`}
+      >
+        <MessageCircle size={16} />
+        Add thoughts...
+      </button>
+    );
+  }
+
+  if (!isEditing && notes?.trim()) {
+    return (
+      <div className={`${className}`}>
+        <button
+          onClick={() => setIsEditing(true)}
+          className="w-full text-left p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+        >
+          <div className="flex items-start gap-2 mb-2">
+            <MessageCircle size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+            <span className="text-sm font-medium text-foreground">Your thoughts:</span>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed pl-6">
+            {notes}
+          </p>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${className}`}>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <MessageCircle size={16} className="text-muted-foreground" />
+          <span className="text-sm font-medium text-foreground">Your thoughts:</span>
+        </div>
+        <div className="relative">
+          <textarea
+            ref={textareaRef}
+            value={currentNotes}
+            onChange={(e) => setCurrentNotes(e.target.value)}
+            onBlur={handleClickOutside}
+            onKeyDown={handleKeyDown}
+            placeholder="What are you thinking about this item? Any reflections or considerations..."
+            className="w-full p-3 rounded-lg bg-background border border-border resize-none min-h-[80px] text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            rows={3}
+          />
+          <button
+            onClick={handleSave}
+            className="absolute bottom-2 right-2 p-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            title="Save notes (⌘+Enter)"
+          >
+            <Check size={14} />
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Press ⌘+Enter to save, Escape to cancel
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default PremiumNotes;

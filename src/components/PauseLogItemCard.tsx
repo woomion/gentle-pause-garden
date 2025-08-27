@@ -1,7 +1,8 @@
 
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, MessageCircle } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PauseLogItem } from '../stores/pauseLogStore';
+import { extractActualNotes } from '../utils/notesMetadataUtils';
 
 interface PauseLogItemCardProps {
   item: PauseLogItem;
@@ -17,6 +18,9 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
     item.originalPausedItem?.link || 
     item.originalPausedItem?.url
   );
+
+  // Extract user notes from the original paused item
+  const userNotes = extractActualNotes(item.originalPausedItem?.notes);
 
   return (
     <div className="p-4 relative">
@@ -42,6 +46,20 @@ const PauseLogItemCard = ({ item, onDelete, onViewLink, onClick }: PauseLogItemC
             <p className="text-gray-600 dark:text-gray-400 text-sm italic">
               "{item.notes}"
             </p>
+          </div>
+        )}
+
+        {userNotes?.trim() && (
+          <div className="mb-2 p-2 rounded-md bg-muted/30 border border-border">
+            <div className="flex items-start gap-2">
+              <MessageCircle size={14} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-foreground mb-1">Your thoughts:</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {userNotes}
+                </p>
+              </div>
+            </div>
           </div>
         )}
         
