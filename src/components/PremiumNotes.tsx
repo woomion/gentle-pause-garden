@@ -11,20 +11,29 @@ interface PremiumNotesProps {
 const PremiumNotes = ({ notes, onSave, className = "" }: PremiumNotesProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentNotes, setCurrentNotes] = useState(notes || '');
+  const [isPremium, setIsPremium] = useState(false);
+  const [loading, setLoading] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  // Use try-catch to handle subscription hook safely
-  let isPremium = false;
-  try {
-    const { isPremiumUser } = useSubscription();
-    isPremium = isPremiumUser();
-  } catch (error) {
-    console.error('Error checking subscription:', error);
-    return null;
-  }
+  // Check subscription status safely
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const { isPremiumUser } = useSubscription();
+        setIsPremium(isPremiumUser());
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+        setIsPremium(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkSubscription();
+  }, []);
 
-  // Don't show anything for non-premium users
-  if (!isPremium) {
+  // Don't show anything while loading or for non-premium users
+  if (loading || !isPremium) {
     return null;
   }
 
