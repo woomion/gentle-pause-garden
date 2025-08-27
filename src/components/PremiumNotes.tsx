@@ -1,29 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { Check, MessageCircle } from 'lucide-react';
-import { useSubscription } from '@/hooks/useSubscription';
-import { useAuth } from '@/contexts/AuthContext';
 
-interface PremiumNotesProps {
+interface NotesProps {
   notes?: string;
   onSave: (notes: string) => void;
   className?: string;
 }
 
-const PremiumNotes = ({ notes, onSave, className = "" }: PremiumNotesProps) => {
+const Notes = ({ notes, onSave, className = "" }: NotesProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentNotes, setCurrentNotes] = useState(notes || '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  // Get auth context first
-  const { user } = useAuth();
-  
-  // Always call hooks in the same order - never conditionally
-  const { isPremiumUser, loading } = useSubscription();
-  
-  // Don't show anything while loading, no user, or for non-premium users
-  if (!user || loading || !isPremiumUser()) {
-    return null;
-  }
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -120,4 +107,4 @@ const PremiumNotes = ({ notes, onSave, className = "" }: PremiumNotesProps) => {
   );
 };
 
-export default PremiumNotes;
+export default Notes;
