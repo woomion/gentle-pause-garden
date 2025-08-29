@@ -300,9 +300,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
               {feedbackOpen && (
                 <form onSubmit={handleSubmitFeedback} className="space-y-4 mb-4">
                   <div>
-                    <Label htmlFor="feedback" className="text-sm text-foreground">
-                      What would you like to tell us about Pocket Pause?
-                    </Label>
                     <Textarea
                       id="feedback"
                       value={feedback}
