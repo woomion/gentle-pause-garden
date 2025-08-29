@@ -228,12 +228,12 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             {/* Notes Section */}
             <div className="pt-2">
               {!isNotesExpanded ? (
-                <button
+                <div
                   onClick={() => setIsNotesExpanded(true)}
-                  className="w-full text-left p-3 border border-input rounded-md text-muted-foreground hover:border-ring transition-colors"
+                  className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {notesValue ? notesValue : "Add thoughts..."}
-                </button>
+                  {notesValue || "Add thoughts..."}
+                </div>
               ) : (
                 <div className="relative">
                   <Textarea
@@ -263,9 +263,9 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                         setIsNotesExpanded(false);
                       }
                     }}
-                    className="absolute bottom-2 right-2 p-1 rounded-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                    className="absolute bottom-2 right-2 p-1.5 rounded-sm bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-border/50"
                   >
-                    <Check size={14} />
+                    <Check size={16} />
                   </button>
                 </div>
               )}
