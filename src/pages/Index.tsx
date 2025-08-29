@@ -69,6 +69,7 @@ const Index = () => {
   const [hideBottomArea, setHideBottomArea] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [sharedPrefill, setSharedPrefill] = useState<string | undefined>(undefined);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const installed = useInstalledApp();
   
   // Handle redirects for invitations
@@ -184,7 +185,8 @@ console.log('Rendering main Index content');
         {/* Header area - fixed height */}
         <div className={`flex-shrink-0 max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
           <PauseHeader onProfileModalChange={(isOpen) => {
-            // When profile modal is open, collapse footer to smallest form
+            setProfileModalOpen(isOpen);
+            // When profile modal is open on desktop, collapse pause area to smallest form
             if (isOpen) {
               setCompactQuickBar(true);
               setHideBottomArea(false); // Keep footer visible but compact
@@ -325,18 +327,24 @@ console.log('Rendering main Index content');
         <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
           {pillMode ? (
             <PillQuickPauseBar
-              compact={compactQuickBar && !sharedPrefill}
+              compact={(compactQuickBar && !sharedPrefill) || (profileModalOpen && !sharedPrefill)}
               prefillValue={sharedPrefill}
               onExpandRequest={() => {
                 setCompactQuickBar(false);
                 setHideBottomArea(false);
               }}
               onUrlEntry={() => {
-                // When URL is entered while profile modal might be open, expand footer
+                // When URL is entered while profile modal is open, allow expansion
+                if (profileModalOpen) {
+                  setCompactQuickBar(false);
+                }
                 setHideBottomArea(false);
               }}
               onBarcodeScanned={() => {
-                // When barcode is scanned while profile modal might be open, expand footer  
+                // When barcode is scanned while profile modal is open, allow expansion  
+                if (profileModalOpen) {
+                  setCompactQuickBar(false);
+                }
                 setHideBottomArea(false);
               }}
             />
