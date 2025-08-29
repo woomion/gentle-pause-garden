@@ -4,7 +4,12 @@ import { X, Timer, MessageSquare, ChevronRight, ChevronDown, Settings, Palette, 
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useUserSettings } from '@/hooks/useUserSettings';
+import { notificationService } from '@/services/notificationService';
 import FeedbackModal from './FeedbackModal';
 import AccountModal from './AccountModal';
 import AppPreferencesModal from './AppPreferencesModal';
@@ -16,12 +21,16 @@ interface UserProfileModalProps {
 
 const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const { user, signOut } = useAuth();
+  const { toast } = useToast();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [appPreferencesOpen, setAppPreferencesOpen] = useState(false);
   const navigate = useNavigate();
+  
+  const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
+  const { testNotification } = useNotifications(notificationsEnabled);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -47,6 +56,66 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const handleDecisionLogClick = () => {
     navigate('/pause-log');
     onClose();
+  };
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    if (checked) {
+      if (!('Notification' in window)) {
+        toast({
+          title: "Not supported",
+          description: "Your browser doesn't support notifications.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      try {
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+          notificationService.setEnabled(true);
+          const success = await updateNotificationSetting(true);
+          if (success) {
+            toast({
+              title: "Notifications enabled",
+              description: "We'll gently remind you when items are ready for review.",
+            });
+          }
+        } else {
+          toast({
+            title: "Permission denied",
+            description: "Please enable notifications in your browser settings.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Permission error",
+          description: "There was an error requesting notification permission.",
+          variant: "destructive"
+        });
+      }
+    } else {
+      const success = await updateNotificationSetting(false);
+      if (success) {
+        notificationService.setEnabled(false);
+        toast({
+          title: "Notifications disabled",
+          description: "You won't receive review reminders anymore.",
+        });
+      }
+    }
+  };
+
+  const handleTestNotification = () => {
+    if (Notification.permission === 'granted') {
+      notificationService.setEnabled(true);
+    }
+    testNotification();
+    toast({
+      title: "Test notification sent",
+      description: "If notifications are working, you should see a test notification now.",
+    });
   };
 
 
@@ -126,6 +195,41 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                     <User size={14} className="text-muted-foreground" />
                     <span className="text-sm text-foreground">Account</span>
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* Notifications Section */}
+            <div className="border-t border-border pt-4">
+              <div className="flex items-center justify-between p-2 -m-2">
+                <div className="flex items-center gap-2">
+                  <Bell size={16} className="text-muted-foreground" />
+                  <div>
+                    <span className="text-sm font-medium text-foreground block">
+                      Notifications
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Gentle review reminders
+                    </span>
+                  </div>
+                </div>
+                <Switch 
+                  checked={notificationsEnabled} 
+                  onCheckedChange={handleNotificationToggle}
+                  disabled={loading}
+                />
+              </div>
+              
+              {notificationsEnabled && (
+                <div className="mt-2 ml-6">
+                  <Button
+                    onClick={handleTestNotification}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs py-1 px-2 h-6"
+                  >
+                    Test Notification
+                  </Button>
                 </div>
               )}
             </div>
