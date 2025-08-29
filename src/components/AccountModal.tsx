@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, Trash2 } from 'lucide-react';
+import { X, Mail, Lock, Trash2, Crown, ExternalLink, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface AccountModalProps {
@@ -13,10 +16,14 @@ interface AccountModalProps {
 
 const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
+  const { subscription, loading: subscriptionLoading, reload: reloadSubscription } = useSubscription();
+  const { toast } = useToast();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
 
   if (!isOpen || !user) return null;
 
@@ -39,6 +46,74 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
     console.log('Account deletion requested');
   };
 
+  const handleUpgrade = async (planType: 'monthly' | 'quarterly' | 'yearly') => {
+    if (!user) return;
+    
+    setIsUpgrading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planType }
+      });
+
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+        toast({
+          title: "Redirecting to checkout",
+          description: "Opening Stripe checkout in a new tab...",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      toast({
+        title: "Checkout Error",
+        description: "Failed to start checkout process. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    if (!user) return;
+    
+    setIsManagingSubscription(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+        toast({
+          title: "Opening billing portal",
+          description: "Redirecting to Stripe customer portal...",
+        });
+      }
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      toast({
+        title: "Portal Error", 
+        description: "Failed to open billing portal. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsManagingSubscription(false);
+    }
+  };
+
+  const isPremiumUser = subscription?.tier === 'premium' || subscription?.tier === 'pause_partner';
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return null;
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long', 
+      day: 'numeric'
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-[70] flex items-start justify-center px-6 pt-16">
       <div className="bg-card rounded-2xl max-w-sm w-full p-6 relative">
@@ -57,6 +132,95 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
         </div>
         
         <div className="space-y-6">
+          {/* Subscription Plan */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2">
+              <Crown size={16} />
+              Current Plan
+            </Label>
+            <div className="bg-muted rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">
+                  {isPremiumUser ? 'Pause Plus' : 'Free Plan'}
+                </span>
+                {isPremiumUser && (
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                    Premium
+                  </span>
+                )}
+              </div>
+              
+              {isPremiumUser && subscription?.expires_at && (
+                <p className="text-sm text-muted-foreground">
+                  Next billing: {formatDate(subscription.expires_at)}
+                </p>
+              )}
+              
+              <div className="text-sm text-muted-foreground">
+                {isPremiumUser ? (
+                  <ul className="space-y-1">
+                    <li>• Unlimited pauses</li>
+                    <li>• Partner sharing</li>
+                    <li>• Priority support</li>
+                  </ul>
+                ) : (
+                  <ul className="space-y-1">
+                    <li>• Unlimited pauses</li>
+                    <li>• Basic features</li>
+                  </ul>
+                )}
+              </div>
+              
+              {isPremiumUser ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleManageSubscription}
+                  disabled={isManagingSubscription}
+                  className="w-full"
+                >
+                  <ExternalLink size={14} className="mr-2" />
+                  {isManagingSubscription ? 'Opening...' : 'Manage Subscription'}
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Upgrade to Pause Plus</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleUpgrade('monthly')}
+                      disabled={isUpgrading}
+                      className="justify-between"
+                    >
+                      <span>Monthly</span>
+                      <span>$2.99</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleUpgrade('quarterly')}
+                      disabled={isUpgrading}
+                      className="justify-between"
+                    >
+                      <span>Quarterly</span>
+                      <span>$6.00</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleUpgrade('yearly')}
+                      disabled={isUpgrading}
+                      className="justify-between"
+                    >
+                      <span>Yearly</span>
+                      <span>$20.00</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Email Display */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
