@@ -244,8 +244,8 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
               </div>
               
               {notificationsEnabled && (
-                <div className="mt-2 ml-6">
-                  <p className="text-xs text-muted-foreground mb-2">
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
                     Gentle review reminders
                   </p>
                   <Button
