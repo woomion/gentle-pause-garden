@@ -185,9 +185,11 @@ console.log('Rendering main Index content');
         {/* Header area - fixed height */}
         <div className={`flex-shrink-0 max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
           <PauseHeader onProfileModalChange={(isOpen) => {
+            console.log('Profile modal changed:', isOpen);
             setProfileModalOpen(isOpen);
             // When profile modal is open on desktop, collapse pause area to smallest form
             if (isOpen) {
+              console.log('Collapsing pause area - setting compact=true');
               setCompactQuickBar(true);
               setHideBottomArea(false); // Keep footer visible but compact
             }

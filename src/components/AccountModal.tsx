@@ -115,7 +115,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[70] flex items-start justify-center px-6 pt-16">
+    <div className="fixed inset-0 bg-black/50 z-[100] flex items-start justify-center px-6 pt-16">
       <div className="bg-card rounded-2xl max-w-sm w-full p-6 relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-foreground">
