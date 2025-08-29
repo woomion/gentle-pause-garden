@@ -1,16 +1,17 @@
 
 import { useState } from 'react';
-import { X, Timer, MessageSquare, ChevronRight, ChevronDown, Settings, Palette, Bell, User } from 'lucide-react';
+import { X, Timer, ChevronRight, ChevronDown, Settings, Palette, Bell, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { notificationService } from '@/services/notificationService';
-import FeedbackModal from './FeedbackModal';
 import AccountModal from './AccountModal';
 import AppPreferencesModal from './AppPreferencesModal';
 
@@ -24,6 +25,8 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   const { toast } = useToast();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [appPreferencesOpen, setAppPreferencesOpen] = useState(false);
@@ -45,7 +48,32 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
   };
 
   const handleFeedbackClick = () => {
-    setFeedbackOpen(true);
+    setFeedbackOpen(!feedbackOpen);
+  };
+
+  const handleSubmitFeedback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!feedback.trim()) {
+      toast({
+        title: "Please enter your feedback",
+        description: "We'd love to hear what you think!",
+      });
+      return;
+    }
+
+    setIsSubmittingFeedback(true);
+    
+    // Simulate submission (in a real app, this would send to a backend)
+    setTimeout(() => {
+      toast({
+        title: "Thank you for your feedback!",
+        description: "We appreciate you taking the time to help us improve Pocket Pause.",
+      });
+      setFeedback('');
+      setIsSubmittingFeedback(false);
+      setFeedbackOpen(false);
+    }, 1000);
   };
 
   const handleSettingsClick = () => {
@@ -250,14 +278,58 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
 
 
             {/* Feedback and Sign Out Section */}
-            <div className="border-t border-border pt-4 space-y-3">
-              <Button
+            <div className="border-t border-border pt-4">
+              <div 
                 onClick={handleFeedbackClick}
-                variant="outline"
-                className="w-full rounded-xl py-3"
+                className="flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors rounded p-2 -m-2 mb-3"
               >
-                Send Feedback
-              </Button>
+                <span className="text-sm font-medium text-foreground">
+                  Send Feedback
+                </span>
+                {feedbackOpen ? (
+                  <ChevronDown size={16} className="text-muted-foreground" />
+                ) : (
+                  <ChevronRight size={16} className="text-muted-foreground" />
+                )}
+              </div>
+              
+              {/* Expanded Feedback Form */}
+              {feedbackOpen && (
+                <form onSubmit={handleSubmitFeedback} className="space-y-4 mb-4">
+                  <div>
+                    <Label htmlFor="feedback" className="text-sm text-foreground">
+                      What would you like to tell us about Pocket Pause?
+                    </Label>
+                    <Textarea
+                      id="feedback"
+                      value={feedback}
+                      onChange={(e) => setFeedback(e.target.value)}
+                      placeholder="Share your thoughts, suggestions, or report any issues..."
+                      className="mt-2 min-h-[120px]"
+                      disabled={isSubmittingFeedback}
+                    />
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setFeedbackOpen(false)}
+                      className="flex-1"
+                      disabled={isSubmittingFeedback}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="flex-1"
+                      disabled={isSubmittingFeedback}
+                    >
+                      {isSubmittingFeedback ? 'Sending...' : 'Send Feedback'}
+                    </Button>
+                  </div>
+                </form>
+              )}
               
               <Button
                 onClick={handleSignOut}
@@ -273,7 +345,6 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
         </div>
       </div>
       
-      <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <AccountModal isOpen={accountOpen} onClose={() => setAccountOpen(false)} />
       <AppPreferencesModal isOpen={appPreferencesOpen} onClose={() => setAppPreferencesOpen(false)} />
     </div>
