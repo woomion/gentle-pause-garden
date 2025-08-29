@@ -1,4 +1,4 @@
-import { ExternalLink, ArrowLeft, Edit } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Edit, Check } from 'lucide-react';
 import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -45,11 +45,14 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   const cleanNotes = useMemo(() => extractActualNotes(localItem.notes), [localItem.notes]);
   
   const [notesValue, setNotesValue] = useState(cleanNotes || '');
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
 
   // Update local item when prop changes
   useEffect(() => {
     setLocalItem(item);
-    setNotesValue(extractActualNotes(item.notes) || '');
+    const notes = extractActualNotes(item.notes) || '';
+    setNotesValue(notes);
+    setIsNotesExpanded(notes.length > 0);
   }, [item]);
 
   // Check if item is ready for review
@@ -224,22 +227,48 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             
             {/* Notes Section */}
             <div className="pt-2">
-              <label htmlFor="notes" className="text-sm font-medium text-foreground block mb-2">
-                Thoughts:
-              </label>
-              <Textarea
-                id="notes"
-                placeholder="Add your thoughts about this item..."
-                value={notesValue}
-                onChange={(e) => setNotesValue(e.target.value)}
-                onBlur={() => {
-                  if (onEdit && notesValue !== cleanNotes) {
-                    onEdit(item, { notes: notesValue });
-                  }
-                  setLocalItem(prev => ({ ...prev, notes: notesValue }));
-                }}
-                className="min-h-[80px] resize-none"
-              />
+              {!isNotesExpanded ? (
+                <button
+                  onClick={() => setIsNotesExpanded(true)}
+                  className="w-full text-left p-3 border border-input rounded-md text-muted-foreground hover:border-ring transition-colors"
+                >
+                  {notesValue ? notesValue : "Add thoughts..."}
+                </button>
+              ) : (
+                <div className="relative">
+                  <Textarea
+                    id="notes"
+                    placeholder="Add your thoughts about this item..."
+                    value={notesValue}
+                    onChange={(e) => setNotesValue(e.target.value)}
+                    onBlur={() => {
+                      if (onEdit && notesValue !== cleanNotes) {
+                        onEdit(item, { notes: notesValue });
+                      }
+                      setLocalItem(prev => ({ ...prev, notes: notesValue }));
+                      if (!notesValue.trim()) {
+                        setIsNotesExpanded(false);
+                      }
+                    }}
+                    className="min-h-[80px] resize-none pr-10"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => {
+                      if (onEdit && notesValue !== cleanNotes) {
+                        onEdit(item, { notes: notesValue });
+                      }
+                      setLocalItem(prev => ({ ...prev, notes: notesValue }));
+                      if (!notesValue.trim()) {
+                        setIsNotesExpanded(false);
+                      }
+                    }}
+                    className="absolute bottom-2 right-2 p-1 rounded-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    <Check size={14} />
+                  </button>
+                </div>
+              )}
             </div>
 
 
