@@ -204,14 +204,9 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
               <div className="flex items-center justify-between p-2 -m-2">
                 <div className="flex items-center gap-2">
                   <Bell size={16} className="text-muted-foreground" />
-                  <div>
-                    <span className="text-sm font-medium text-foreground block">
-                      Notifications
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Gentle review reminders
-                    </span>
-                  </div>
+                  <span className="text-sm font-medium text-foreground">
+                    Notifications
+                  </span>
                 </div>
                 <Switch 
                   checked={notificationsEnabled} 
@@ -222,6 +217,9 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
               
               {notificationsEnabled && (
                 <div className="mt-2 ml-6">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Gentle review reminders
+                  </p>
                   <Button
                     onClick={handleTestNotification}
                     variant="outline"
