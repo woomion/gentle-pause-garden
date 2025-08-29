@@ -4,6 +4,7 @@ import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { useMemo, useEffect, useState, useRef } from 'react';
 import { formatPrice } from '../utils/priceFormatter';
 import { useItemActions } from '../hooks/useItemActions';
@@ -39,9 +40,16 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchEndRef = useRef<{ x: number; y: number } | null>(null);
 
+  // Calculate clean notes first
+  const formattedPrice = useMemo(() => formatPrice(localItem.price), [localItem.price]);
+  const cleanNotes = useMemo(() => extractActualNotes(localItem.notes), [localItem.notes]);
+  
+  const [notesValue, setNotesValue] = useState(cleanNotes || '');
+
   // Update local item when prop changes
   useEffect(() => {
     setLocalItem(item);
+    setNotesValue(extractActualNotes(item.notes) || '');
   }, [item]);
 
   // Check if item is ready for review
@@ -132,9 +140,6 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     };
   }, [isOpen, items.length, currentIndex, onNavigateNext, onNavigatePrevious]);
 
-  const formattedPrice = useMemo(() => formatPrice(localItem.price), [localItem.price]);
-  const cleanNotes = useMemo(() => extractActualNotes(localItem.notes), [localItem.notes]);
-
   const handleDelete = () => {
     onDelete(localItem.id);
     onClose();
@@ -217,14 +222,25 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             
             <p className="text-muted-foreground text-base">{localItem.storeName}</p>
             
-            {/* Only show notes if they exist and aren't empty after cleaning */}
-            {cleanNotes && cleanNotes.trim() && (
-              <div className="pt-2">
-                <p className="text-muted-foreground text-sm break-words">
-                  <strong>Note:</strong> {cleanNotes}
-                </p>
-              </div>
-            )}
+            {/* Notes Section */}
+            <div className="pt-2">
+              <label htmlFor="notes" className="text-sm font-medium text-foreground block mb-2">
+                Thoughts:
+              </label>
+              <Textarea
+                id="notes"
+                placeholder="Add your thoughts about this item..."
+                value={notesValue}
+                onChange={(e) => setNotesValue(e.target.value)}
+                onBlur={() => {
+                  if (onEdit && notesValue !== cleanNotes) {
+                    onEdit(item, { notes: notesValue });
+                  }
+                  setLocalItem(prev => ({ ...prev, notes: notesValue }));
+                }}
+                className="min-h-[80px] resize-none"
+              />
+            </div>
 
 
             {/* Comments disabled since partner functionality removed */}
