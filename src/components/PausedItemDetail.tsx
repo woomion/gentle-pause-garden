@@ -259,11 +259,10 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                         onEdit(item, { notes: notesValue });
                       }
                       setLocalItem(prev => ({ ...prev, notes: notesValue }));
-                      if (!notesValue.trim()) {
-                        setIsNotesExpanded(false);
-                      }
+                      // Always collapse the input area after saving
+                      setIsNotesExpanded(false);
                     }}
-                    className="absolute bottom-2 right-2 p-1.5 rounded-sm bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-border/50"
+                    className="absolute bottom-2 right-2 p-1.5 rounded-sm bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground active:bg-primary active:text-primary-foreground transition-colors border border-border/50"
                   >
                     <Check size={16} />
                   </button>
