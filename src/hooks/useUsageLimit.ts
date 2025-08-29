@@ -8,107 +8,24 @@ export const useUsageLimit = () => {
   const { user } = useAuth();
   const [monthlyItemsUsed, setMonthlyItemsUsed] = useState(0);
   const [showUsageLimitModal, setShowUsageLimitModal] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // No need to load usage data anymore
 
-  // Load monthly usage from database for authenticated users or localStorage for guest users
+  // No usage tracking needed - unlimited pauses for everyone
   useEffect(() => {
-    loadUsageData();
-  }, [user]);
-
-  const loadUsageData = async () => {
-    if (!user) {
-      // For guest users, use localStorage with monthly tracking
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
-      const stored = localStorage.getItem('monthlyUsage');
-      
-      if (stored) {
-        const { month, year, count } = JSON.parse(stored);
-        if (month === currentMonth && year === currentYear) {
-          setMonthlyItemsUsed(count);
-        } else {
-          // Reset for new month
-          setMonthlyItemsUsed(0);
-          localStorage.setItem('monthlyUsage', JSON.stringify({
-            month: currentMonth,
-            year: currentYear,
-            count: 0
-          }));
-        }
-      } else {
-        setMonthlyItemsUsed(0);
-      }
-      setLoading(false);
-    } else {
-      // For authenticated users, check database
-      try {
-        // First reset monthly usage if month has changed
-        await supabase.rpc('reset_monthly_usage');
-        
-        const { data, error } = await supabase
-          .from('user_settings')
-          .select('monthly_usage_count')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching usage data:', error);
-          setMonthlyItemsUsed(0);
-        } else {
-          setMonthlyItemsUsed(data?.monthly_usage_count || 0);
-        }
-      } catch (error) {
-        console.error('Error in loadUsageData:', error);
-        setMonthlyItemsUsed(0);
-      }
-      setLoading(false);
-    }
-  };
+    setLoading(false);
+  }, []);
 
   const canAddItem = () => {
-    // Free users get 10 items per month, paid users get unlimited
-    return monthlyItemsUsed < MAX_FREE_ITEMS_MONTHLY;
+    // Unlimited pauses for everyone
+    return true;
   };
 
   const incrementUsage = async () => {
-    const newCount = monthlyItemsUsed + 1;
-    setMonthlyItemsUsed(newCount);
-    
-    if (!user) {
-      // Update localStorage for guest users
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
-      localStorage.setItem('monthlyUsage', JSON.stringify({
-        month: currentMonth,
-        year: currentYear,
-        count: newCount
-      }));
-    } else {
-      // Update database for authenticated users
-      try {
-        await supabase
-          .from('user_settings')
-          .update({ 
-            monthly_usage_count: newCount,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id);
-      } catch (error) {
-        console.error('Error updating usage count:', error);
-      }
-    }
-    
-    // Show modal when at limit
-    if (newCount >= MAX_FREE_ITEMS_MONTHLY) {
-      setShowUsageLimitModal(true);
-    }
+    // No usage tracking needed
   };
 
   const checkUsageLimit = () => {
-    if (!canAddItem()) {
-      setShowUsageLimitModal(true);
-      return false;
-    }
+    // Always allow adding items
     return true;
   };
 
@@ -137,15 +54,15 @@ export const useUsageLimit = () => {
   };
 
   return {
-    monthlyItemsUsed,
-    maxFreeItems: MAX_FREE_ITEMS_MONTHLY,
+    monthlyItemsUsed: 0, // Always 0 since we don't track usage
+    maxFreeItems: Infinity, // Unlimited
     canAddItem,
     incrementUsage,
     checkUsageLimit,
-    showUsageLimitModal,
+    showUsageLimitModal: false, // Never show modal
     closeUsageLimitModal,
     resetUsage,
-    isAtLimit: monthlyItemsUsed >= MAX_FREE_ITEMS_MONTHLY,
+    isAtLimit: false, // Never at limit
     loading,
   };
 };
