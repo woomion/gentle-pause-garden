@@ -52,7 +52,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     setLocalItem(item);
     const notes = extractActualNotes(item.notes) || '';
     setNotesValue(notes);
-    setIsNotesExpanded(notes.length > 0);
+    setIsNotesExpanded(false); // Always start collapsed
   }, [item]);
 
   // Check if item is ready for review
