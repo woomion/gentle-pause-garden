@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { X, Timer, ChevronRight, ChevronDown, Settings, Palette, Bell, User } from 'lucide-react';
+import { X, Timer, ChevronRight, ChevronDown, Settings, Palette, Bell, User, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -283,9 +283,12 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                 onClick={handleFeedbackClick}
                 className="flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors rounded p-2 -m-2 mb-3"
               >
-                <span className="text-sm font-medium text-foreground">
-                  Send Feedback
-                </span>
+                <div className="flex items-center gap-2">
+                  <MessageSquare size={16} className="text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">
+                    Send Feedback
+                  </span>
+                </div>
                 {feedbackOpen ? (
                   <ChevronDown size={16} className="text-muted-foreground" />
                 ) : (
