@@ -274,7 +274,7 @@ console.log('Rendering main Index content');
               {currentPausedItems.length > 0 && (
                 <div className="mb-4">
                   <div className="text-xs font-medium text-muted-foreground mb-2 px-1">
-                    Still Pausing ({currentPausedItems.length})
+                    Paused Items ({currentPausedItems.length})
                   </div>
                   <div className="space-y-2">
                     {itemsLoading ? (
