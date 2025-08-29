@@ -249,8 +249,8 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
             </div>
 
 
-            {/* Feedback and Sign Out Section */}
-            <div className="border-t border-border pt-4 space-y-3">
+            {/* Feedback Section */}
+            <div className="border-t border-border pt-4">
               <Button
                 onClick={handleFeedbackClick}
                 variant="outline"
@@ -259,7 +259,10 @@ const UserProfileModal = ({ isOpen, onClose }: UserProfileModalProps) => {
                 <MessageSquare size={16} className="mr-2" />
                 Send Feedback
               </Button>
-              
+            </div>
+
+            {/* Sign Out */}
+            <div className="pt-4">
               <Button
                 onClick={handleSignOut}
                 disabled={isSigningOut}
