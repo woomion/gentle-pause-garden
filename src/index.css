@@ -284,8 +284,7 @@
     --brand-yellow-foreground: 35 47% 15%;
   */
 
-  /* Minimal black and white theme - COMMENTED OUT */
-  /*
+  /* Minimal black and white theme - COMMENTED OUT
   :root[data-color-theme="minimal"] {
     --background: 0 0% 98%;
     --foreground: 0 0% 15%;
