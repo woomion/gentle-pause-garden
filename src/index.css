@@ -314,7 +314,7 @@
     --input: 0 0% 88%;
     --ring: 0 0% 20%;
 
-    /* App-specific colors */
+     /* App-specific colors */
     --cream: 0 0% 98%;
     --lavender: 0 0% 88%;
     --lavender-hover: 0 0% 80%;
@@ -348,7 +348,7 @@
     --section-header-foreground: 0 0% 15%;
     --whisper-lavender: 0 0% 25%;
 
-    /* Miro-style accent */
+     /* Miro-style accent */
     --brand-yellow: 48 100% 60%;
     --brand-yellow-foreground: 0 0% 15%;
   }
