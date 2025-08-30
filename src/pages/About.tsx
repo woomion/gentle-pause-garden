@@ -19,13 +19,13 @@ const About = () => {
             <ArrowLeft size={20} />
             Back to Home
           </Link>
-          <h1 className="text-3xl font-bold text-black dark:text-[#F9F5EB] mb-2">The Pocket Pause Manifesto</h1>
+          <h1 className="text-3xl font-bold text-black dark:text-[#F9F5EB] mb-2 text-center">The Pocket Pause Manifesto</h1>
         </div>
 
         {/* Content */}
         <div className="space-y-6 text-dark-gray dark:text-cream">
-          <div className="p-6">
-            <div className="prose max-w-none text-lg leading-relaxed space-y-4">
+          <div className="p-6 text-center">
+            <div className="prose max-w-none text-xl leading-relaxed space-y-6">
               <p>We live in a world designed for speed.<br />
               One-click checkouts. Next-day shipping. Endless scrolling.</p>
               
@@ -54,7 +54,7 @@ const About = () => {
               <p>Because every pause matters.<br />
               And small pauses ripple into big change.</p>
               
-              <p className="text-2xl">✨</p>
+              <p className="text-3xl">✨</p>
             </div>
           </div>
         </div>
