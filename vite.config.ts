@@ -15,6 +15,8 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png'],
+      manifest: false, // Use the static manifest.json file
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
         runtimeCaching: [
@@ -27,6 +29,9 @@ export default defineConfig(({ mode }) => ({
             },
           },
         ],
+        // Enable background sync for better offline support
+        skipWaiting: true,
+        clientsClaim: true,
       },
     }),
   ].filter(Boolean),

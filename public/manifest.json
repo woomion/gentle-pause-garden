@@ -45,5 +45,6 @@
       "url": "/?url=%s"
     }
   ],
-  "categories": ["shopping", "lifestyle", "productivity"]
+  "categories": ["shopping", "lifestyle", "productivity"],
+  "gcm_sender_id": "103953800507"
 }
