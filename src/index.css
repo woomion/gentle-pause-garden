@@ -77,7 +77,8 @@
     --brand-yellow-foreground: 220 13% 18%;
   }
 
-  /* Sporty orange theme */
+  /* Sporty orange theme - COMMENTED OUT */
+  /*
   :root[data-color-theme="sporty"] {
     --background: 39 100% 95%;
     --foreground: 220 13% 18%;
@@ -145,6 +146,7 @@
     --brand-yellow: 48 100% 60%;
     --brand-yellow-foreground: 220 13% 18%;
   }
+  */
 
   .dark {
     --background: 260 47% 15%;
@@ -213,7 +215,8 @@
     --brand-yellow-foreground: 260 47% 15%;
   }
 
-  /* Sporty orange theme - dark mode */
+  /* Sporty orange theme - dark mode - COMMENTED OUT */
+  /*
   .dark[data-color-theme="sporty"] {
     --background: 35 47% 15%;
     --foreground: 39 100% 95%;
@@ -280,8 +283,10 @@
     --brand-yellow: 48 95% 55%;
     --brand-yellow-foreground: 35 47% 15%;
   }
+  */
 
-  /* Minimal black and white theme */
+  /* Minimal black and white theme - COMMENTED OUT */
+  /*
   :root[data-color-theme="minimal"] {
     --background: 0 0% 98%;
     --foreground: 0 0% 15%;
@@ -349,8 +354,10 @@
     --brand-yellow: 48 100% 60%;
     --brand-yellow-foreground: 0 0% 15%;
   }
+  */
 
-  /* Minimal black and white theme - dark mode */
+  /* Minimal black and white theme - dark mode - COMMENTED OUT */
+  /*
   .dark[data-color-theme="minimal"] {
     --background: 0 0% 8%;
     --foreground: 0 0% 95%;
@@ -417,6 +424,7 @@
     --brand-yellow: 48 95% 55%;
     --brand-yellow-foreground: 0 0% 8%;
   }
+  */
 
 }
 
