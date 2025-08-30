@@ -50,15 +50,18 @@ export class WebNotificationService {
   showNotification(title: string, options: NotificationOptions = {}): void {
     if (Notification.permission === 'granted') {
       console.log('🔔 Showing notification:', title, options.body);
-      const notification = new Notification(title, {
+      
+      // Clean options to only include valid Notification constructor properties
+      const notificationOptions: NotificationOptions = {
         body: options.body || '',
         icon: options.icon || '/icons/app-icon-512.png',
         badge: options.badge || '/icons/app-icon-512.png',
         tag: options.tag || 'pocket-pause-review',
         requireInteraction: options.requireInteraction || false,
-        silent: false,
-        ...options
-      });
+        silent: false
+      };
+      
+      const notification = new Notification(title, notificationOptions);
       
       // Add click handler to open the app
       notification.onclick = () => {
