@@ -78,8 +78,8 @@ const ItemReviewContent = ({
     <div className="p-6">
       <ItemReviewDetails item={item} onViewItem={handleViewItem} />
       
-      {/* Show user notes if they exist */}
-      {userNotes?.trim() && (
+      {/* Temporarily commented out user notes in review */}
+      {/* {userNotes?.trim() && (
         <div className="mt-4 p-3 rounded-lg bg-muted/30 border border-border">
           <div className="flex items-start gap-2 mb-2">
             <span className="text-sm font-medium text-foreground">Your thoughts:</span>
@@ -88,7 +88,7 @@ const ItemReviewContent = ({
             {userNotes}
           </p>
         </div>
-      )}
+      )} */}
       
       {/* Decision buttons - only show when allowed */}
       {showDecisionButtons && (
