@@ -55,9 +55,7 @@ const PrivacyPolicy = () => {
               <ul className="list-disc pl-6 mb-4 space-y-1">
                 <li>Paused item names, descriptions, prices, store names</li>
                 <li>Links or images (if you choose to include them)</li>
-                <li>Optional emotional tags you assign to items (e.g., "curious" or "overwhelmed")</li>
-                <li>Optional personal notes and reflections</li>
-                <li>Pause durations and decision history</li>
+                <li>Decision history</li>
               </ul>
 
               <h3 className="text-lg font-medium mb-2">If you use the app generally:</h3>
