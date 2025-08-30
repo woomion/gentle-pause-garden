@@ -49,16 +49,24 @@ export class WebNotificationService {
 
   showNotification(title: string, options: NotificationOptions = {}): void {
     if (Notification.permission === 'granted') {
-      new Notification(title, {
+      console.log('🔔 Showing notification:', title, options.body);
+      const notification = new Notification(title, {
         body: options.body || '',
         icon: options.icon || '/icons/app-icon-512.png',
         badge: options.badge || '/icons/app-icon-512.png',
-        tag: options.tag || 'pocket-pause',
+        tag: options.tag || 'pocket-pause-review',
         requireInteraction: options.requireInteraction || false,
+        silent: false,
         ...options
       });
+      
+      // Add click handler to open the app
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
     } else {
-      console.log('🔔 Web notification permission not granted');
+      console.log('🔔 Web notification permission not granted, current permission:', Notification.permission);
     }
   }
 }
