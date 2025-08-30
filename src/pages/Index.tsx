@@ -386,6 +386,7 @@ console.log('Rendering main Index content');
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />
           )}
+          {/* Only show FooterLinks when bottom area is not hidden */}
           {!hideBottomArea && <FooterLinks />}
         </div>
       </div>
