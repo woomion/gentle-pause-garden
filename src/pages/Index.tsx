@@ -62,7 +62,9 @@ const Index = () => {
   // Ensure mutually exclusive filtering - ready items should not appear in paused items
   const readyItems = sortedItems.filter((i) => i.checkInDate.getTime() <= now);
   const currentPausedItems = sortedItems.filter((i) => i.checkInDate.getTime() > now);
-  const readyCount = (getItemsForReview && getItemsForReview())?.length || 0;
+  
+  // State for ready count with automatic updates
+  const [readyCount, setReadyCount] = useState(0);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [compactQuickBar, setCompactQuickBar] = useState(false);
@@ -71,6 +73,25 @@ const Index = () => {
   const [sharedPrefill, setSharedPrefill] = useState<string | undefined>(undefined);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const installed = useInstalledApp();
+  
+  // Update ready count automatically every minute and when items change
+  useEffect(() => {
+    const updateReadyCount = () => {
+      if (getItemsForReview) {
+        const count = getItemsForReview().length;
+        console.log('🔄 Updating ready count:', count);
+        setReadyCount(count);
+      }
+    };
+
+    // Update immediately
+    updateReadyCount();
+    
+    // Set up interval to update every minute
+    const interval = setInterval(updateReadyCount, 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [getItemsForReview, items]); // Re-run when items change
   
   // Handle redirects for invitations
   useIndexRedirects();

@@ -70,10 +70,17 @@ export const useNotifications = (enabled: boolean) => {
       
       console.log('📋 Items for review found:', itemsForReview.length);
       
-      // Only send notification if there are items AND (the count has changed OR it's been more than 2 hours since last notification)
       const timeSinceLastCheck = now - lastCheckTimeRef.current;
       const shouldNotifyForNewItems = itemsForReview.length > 0 && itemsForReview.length !== lastNotificationCountRef.current;
-      const shouldRemindAfterDelay = itemsForReview.length > 0 && timeSinceLastCheck > 2 * 60 * 60 * 1000; // 2 hours
+      const shouldRemindAfterDelay = itemsForReview.length > 0 && lastNotificationCountRef.current > 0 && timeSinceLastCheck > 2 * 60 * 60 * 1000; // Only remind if we've sent notifications before
+      
+      console.log('📊 Notification decision factors:', {
+        itemsCount: itemsForReview.length,
+        lastCount: lastNotificationCountRef.current,
+        timeSinceLastCheck: Math.round(timeSinceLastCheck / 1000 / 60), // minutes
+        shouldNotifyForNewItems,
+        shouldRemindAfterDelay
+      });
       
       if (shouldNotifyForNewItems || shouldRemindAfterDelay) {
         const title = itemsForReview.length === 1 
@@ -130,15 +137,15 @@ export const useNotifications = (enabled: boolean) => {
         checkForReadyItems();
       }, 1000);
 
-      // Set up interval to check every 5 minutes for better responsiveness on mobile
+      // Set up interval to check every minute for more frequent updates
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
       
       intervalRef.current = setInterval(() => {
-        console.log('⏰ 5-minute interval check triggered');
+        console.log('⏰ 1-minute interval check triggered');
         checkForReadyItems();
-      }, 5 * 60 * 1000);
+      }, 60 * 1000); // Check every minute instead of 5 minutes
 
       // Also check when page becomes visible again (helps with mobile)
       const handleVisibilityChange = () => {
