@@ -46,22 +46,8 @@ class PausedItemsStore {
         this.updateCheckInTimes();
         console.log('🔍 Final loaded items:', this.items);
       } else {
-        console.log('🔍 No items in localStorage, creating test item for debugging');
-        // Create a test item that's already ready for review for debugging
-        const testItem = {
-          id: 'test-ready-item',
-          itemName: 'Test Item Ready for Review',
-          storeName: 'Test Store',
-          price: '99.99',
-          
-          duration: '24 hours',
-          pausedAt: new Date(Date.now() - 25 * 60 * 60 * 1000), // 25 hours ago
-          checkInDate: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago (past due)
-          checkInTime: 'Ready to review'
-        };
-        this.items = [testItem];
-        this.saveToStorage();
-        console.log('🔍 Created test item:', testItem);
+        console.log('🔍 No items in localStorage, starting with empty list');
+        this.items = [];
       }
     } catch (error) {
       console.error('Failed to load paused items from storage:', error);
