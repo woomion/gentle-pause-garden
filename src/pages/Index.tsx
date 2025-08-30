@@ -59,9 +59,19 @@ const Index = () => {
   );
   
   const now = Date.now();
-  // Ensure mutually exclusive filtering - ready items should not appear in paused items
-  const readyItems = sortedItems.filter((i) => i.checkInDate.getTime() <= now);
-  const currentPausedItems = sortedItems.filter((i) => i.checkInDate.getTime() > now);
+  // First get ready items from the store function (authoritative source)
+  const storeReadyItems = getItemsForReview ? getItemsForReview() : [];
+  const readyItemIds = new Set(storeReadyItems.map(item => item.id));
+  
+  // Filter sorted items to exclude ready items (prevent duplicates)
+  const currentPausedItems = sortedItems.filter((i) => !readyItemIds.has(i.id));
+  
+  console.log('🔍 Filtering debug:', {
+    totalSortedItems: sortedItems.length,
+    readyItemIds: Array.from(readyItemIds),
+    currentPausedItemsCount: currentPausedItems.length,
+    storeReadyItemsCount: storeReadyItems.length
+  });
   
   // State for ready count with automatic updates
   const [readyCount, setReadyCount] = useState(0);
@@ -320,7 +330,7 @@ console.log('Rendering main Index content');
               )}
 
               {/* Empty state */}
-              {!itemsLoading && readyItems.length === 0 && currentPausedItems.length === 0 && (
+              {!itemsLoading && storeReadyItems.length === 0 && currentPausedItems.length === 0 && (
                 <div className="text-center py-8">
                   <div className="text-muted-foreground text-sm">No paused items yet</div>
                   <div className="text-xs text-muted-foreground mt-1">Add something below to get started</div>
