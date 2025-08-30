@@ -77,7 +77,7 @@
     --brand-yellow-foreground: 220 13% 18%;
   }
 
-  /* Sporty orange theme */
+  /* Sporty orange theme - COMMENTED OUT
   :root[data-color-theme="sporty"] {
     --background: 39 100% 95%;
     --foreground: 220 13% 18%;
@@ -107,7 +107,6 @@
     --input: 35 20% 88%;
     --ring: 33 100% 55%;
 
-    /* App-specific colors */
     --cream: 39 100% 95%;
     --lavender: 35 60% 85%;
     --lavender-hover: 35 50% 75%;
@@ -141,10 +140,10 @@
     --section-header-foreground: 220 13% 18%;
     --whisper-lavender: 35 47% 25%;
 
-    /* Miro-style accent */
     --brand-yellow: 48 100% 60%;
     --brand-yellow-foreground: 220 13% 18%;
   }
+  */
 
   .dark {
     --background: 260 47% 15%;
@@ -213,7 +212,7 @@
     --brand-yellow-foreground: 260 47% 15%;
   }
 
-  /* Sporty orange theme - dark mode */
+  /* Sporty orange theme - dark mode - COMMENTED OUT
   .dark[data-color-theme="sporty"] {
     --background: 35 47% 15%;
     --foreground: 39 100% 95%;
@@ -243,7 +242,6 @@
     --input: 35 20% 35%;
     --ring: 33 100% 60%;
 
-    /* App-specific dark colors */
     --cream: 35 47% 20%;
     --lavender: 35 50% 65%;
     --lavender-hover: 35 40% 55%;
@@ -276,12 +274,12 @@
     --section-header: 35 40% 60%;
     --section-header-foreground: 39 100% 95%;
 
-    /* Miro-style accent (dark) */
     --brand-yellow: 48 95% 55%;
     --brand-yellow-foreground: 35 47% 15%;
   }
+  */
 
-  /* Minimal black and white theme */
+  /* Minimal black and white theme - COMMENTED OUT
   :root[data-color-theme="minimal"] {
     --background: 0 0% 98%;
     --foreground: 0 0% 15%;
@@ -311,7 +309,6 @@
     --input: 0 0% 88%;
     --ring: 0 0% 20%;
 
-    /* App-specific colors */
     --cream: 0 0% 98%;
     --lavender: 0 0% 88%;
     --lavender-hover: 0 0% 80%;
@@ -345,12 +342,12 @@
     --section-header-foreground: 0 0% 15%;
     --whisper-lavender: 0 0% 25%;
 
-    /* Miro-style accent */
     --brand-yellow: 48 100% 60%;
     --brand-yellow-foreground: 0 0% 15%;
   }
+  */
 
-  /* Minimal black and white theme - dark mode */
+  /* Minimal black and white theme - dark mode - COMMENTED OUT
   .dark[data-color-theme="minimal"] {
     --background: 0 0% 8%;
     --foreground: 0 0% 95%;
@@ -380,7 +377,6 @@
     --input: 0 0% 25%;
     --ring: 0 0% 80%;
 
-    /* App-specific dark colors */
     --cream: 0 0% 12%;
     --lavender: 0 0% 70%;
     --lavender-hover: 0 0% 60%;
@@ -413,10 +409,10 @@
     --section-header: 0 0% 60%;
     --section-header-foreground: 0 0% 95%;
 
-    /* Miro-style accent (dark) */
     --brand-yellow: 48 95% 55%;
     --brand-yellow-foreground: 0 0% 8%;
   }
+  */
 
 }
 
