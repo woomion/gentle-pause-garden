@@ -111,10 +111,10 @@ export const useNotifications = (enabled: boolean) => {
         if (shouldNotifyForNewItems && itemsForReview.length > lastNotificationCountRef.current) {
           // New item(s) became ready - show specific details for the newest item
           const newestItem = itemsForReview[0]; // Assuming items are sorted by readiness
-          const storeName = newestItem.storeName || 'Unknown Store';
+          const storeName = newestItem.storeName?.trim();
           const itemName = newestItem.itemName || 'Item';
           
-          title = `${storeName}: ${itemName}`;
+          title = storeName ? `${storeName}: ${itemName}` : itemName;
           body = itemsForReview.length === 1 
             ? 'Ready for your thoughtful decision'
             : `Ready for review • ${itemsForReview.length} total items waiting`;
