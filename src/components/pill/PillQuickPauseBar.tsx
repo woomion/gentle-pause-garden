@@ -14,12 +14,14 @@ import { useSubscription } from '@/hooks/useSubscription';
 import PremiumDurationModal from '../PremiumDurationModal';
 
 // Quick add bar for Pill Mode only. Keeps UI minimal and fast.
+// Temporarily only showing 24 hours option for launch
 const DURATION_PRESETS: { key: string; label: string; isPremium?: boolean }[] = [
   { key: '24 hours', label: '1 day', isPremium: false },
-  { key: '3 days', label: '3 days', isPremium: true },
-  { key: '1 week', label: '1 week', isPremium: true },
-  { key: '2 weeks', label: '2 weeks', isPremium: true },
-  { key: '1 month', label: '1 month', isPremium: true },
+  // Temporarily commented out for launch
+  // { key: '3 days', label: '3 days', isPremium: true },
+  // { key: '1 week', label: '1 week', isPremium: true },
+  // { key: '2 weeks', label: '2 weeks', isPremium: true },
+  // { key: '1 month', label: '1 month', isPremium: true },
 ];
 
 const isProbablyUrl = (text: string) => {
@@ -345,7 +347,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 touchAction: 'manipulation'
               }}
             >
-              {submitting ? 'Pausing…' : 'Pause'}
+              {submitting ? 'Pausing…' : 'Pause for 24 hours'}
             </Button>
           </div>
         </>
