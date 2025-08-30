@@ -132,8 +132,8 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
         </div>
         
         <div className="space-y-6">
-          {/* Subscription Plan */}
-          <div className="space-y-3">
+          {/* Temporarily commented out subscription plan section */}
+          {/* <div className="space-y-3">
             <Label className="flex items-center gap-2">
               <Crown size={16} />
               Current Plan
@@ -219,7 +219,7 @@ const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
 
           {/* Email Display */}
           <div className="space-y-2">

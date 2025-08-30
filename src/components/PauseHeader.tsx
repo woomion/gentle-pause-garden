@@ -57,7 +57,7 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
           </Link>
         </div>
 
-        <div className={`absolute ${installed ? 'top-6 sm:top-8' : 'top-12 sm:top-16'} right-0 flex items-center gap-3`}>
+        <div className={`absolute ${installed ? 'top-6 sm:top-8' : 'top-12 sm:top-16'} right-0 flex items-center justify-end gap-3`}>
           {showCourses && (
             <button
               className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
@@ -69,7 +69,7 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
           )}
 
           <button
-            className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
+            className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center ml-auto"
             onClick={handleAccountClick}
           >
             {user ? (
