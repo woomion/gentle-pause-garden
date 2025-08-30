@@ -6,37 +6,29 @@ const getTimeBasedMessage = (): string => {
   const hour = new Date().getHours();
   
   const morningMessages = [
-    "What's calling for your attention this morning?",
-    "What would you like to mindfully pause on today?",
-    "What's on your mind to explore this morning?"
+    "Start the day with clarity. Every pause is a fresh choice."
+  ];
+  
+  const middayMessages = [
+    "A breath before you buy. Even small pauses ripple outward."
   ];
   
   const afternoonMessages = [
-    "What are you feeling called to pause on today?",
-    "What deserves your mindful attention right now?",
-    "What would you like to reflect on this afternoon?"
-  ];
-  
-  const eveningMessages = [
-    "What would you like to reflect on this evening?",
-    "What's worth pausing to consider tonight?",
-    "What's been on your mind today?"
+    "Presence belongs in your pocket — right when you need it most."
   ];
   
   const nightMessages = [
-    "What's on your mind tonight?",
-    "What would you like to pause and reflect on?",
-    "What deserves your quiet attention right now?"
+    "Slow down. Reflect. Tomorrow's choices begin here."
   ];
   
   // Select message array based on time of day
   let messages: string[];
   if (hour >= 6 && hour < 12) {
     messages = morningMessages;
-  } else if (hour >= 12 && hour < 18) {
+  } else if (hour >= 12 && hour < 15) {
+    messages = middayMessages;
+  } else if (hour >= 15 && hour < 20) {
     messages = afternoonMessages;
-  } else if (hour >= 18 && hour < 24) {
-    messages = eveningMessages;
   } else {
     messages = nightMessages;
   }
