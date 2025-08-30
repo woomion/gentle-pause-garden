@@ -11,39 +11,3 @@ verify_jwt = false
 
 [functions.check-ready-items]
 verify_jwt = false
-
-[functions.notification-scheduler]
-verify_jwt = false
-
-[functions.send-push-notifications]
-verify_jwt = false
-
-[functions.send-review-reminders]
-verify_jwt = false
-
-[functions.send-test-reminder]
-verify_jwt = false
-
-[functions.store-push-token]
-verify_jwt = false
-
-[functions.test-image-api]
-verify_jwt = false
-
-[functions.check-subscription]
-verify_jwt = false
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.create-donation]
-verify_jwt = false
-
-[functions.customer-portal]
-verify_jwt = false
-
-[functions.send-invitation-email]
-verify_jwt = false
-
-[functions.preview-email]
-verify_jwt = false

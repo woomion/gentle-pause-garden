@@ -26,9 +26,7 @@ export const useNotifications = (enabled: boolean) => {
     if (!user) return; // Only send push notifications to authenticated users
     
     try {
-      console.log('📤 Sending push notification:', { title, body, userId: user.id });
-      
-      const { data: result, error } = await supabase.functions.invoke('send-push-notifications', {
+      const { error } = await supabase.functions.invoke('send-push-notifications', {
         body: { 
           userIds: [user.id], 
           title, 
@@ -38,12 +36,12 @@ export const useNotifications = (enabled: boolean) => {
       });
 
       if (error) {
-        console.error('❌ Error sending push notification:', error);
+        console.error('Error sending push notification:', error);
       } else {
-        console.log('✅ Push notification sent successfully:', result);
+        console.log('Push notification sent successfully');
       }
     } catch (error) {
-      console.error('❌ Error calling send-push-notifications function:', error);
+      console.error('Error calling send-push-notifications function:', error);
     }
   }, [user]);
 
@@ -95,8 +93,7 @@ export const useNotifications = (enabled: boolean) => {
 
         console.log('🚀 Sending notification via platform service...');
         
-        // Send notification via platform service (browser notification)
-        console.log('🖥️ Sending browser notification...');
+        // Send notification via platform service
         await platformNotificationService.showNotification(title, {
           body,
           tag: 'pocket-pause-review',
@@ -104,26 +101,10 @@ export const useNotifications = (enabled: boolean) => {
         });
 
         // Send push notification to user's devices (for authenticated users)
-        console.log('📱 Sending push notification...');
         await sendPushNotification(title, body, {
           action: 'review_items',
           count: itemsForReview.length
         });
-
-        // Also trigger the notification scheduler for comprehensive coverage
-        if (user) {
-          console.log('⚙️ Triggering notification scheduler...');
-          try {
-            const { data: schedulerResult, error: schedulerError } = await supabase.functions.invoke('notification-scheduler');
-            if (schedulerError) {
-              console.error('❌ Error calling notification scheduler:', schedulerError);
-            } else {
-              console.log('✅ Notification scheduler triggered:', schedulerResult);
-            }
-          } catch (error) {
-            console.error('❌ Error triggering notification scheduler:', error);
-          }
-        }
 
         lastNotificationCountRef.current = itemsForReview.length;
         lastCheckTimeRef.current = now;
