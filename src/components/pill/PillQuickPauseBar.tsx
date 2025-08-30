@@ -317,7 +317,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
             {!compact && <span className="text-sm text-primary">Scan</span>}
           </button>
         </div>
-      {!compact && !isCollapsed && (
+      {!compact && (
         <>
           {/* Temporarily commented out duration selector for launch */}
           {/* <div className="mt-3 grid grid-cols-5 gap-2">
@@ -352,55 +352,33 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 );
             })}
           </div> */}
-          <div className="mt-3">
-            <Button 
-              onClick={(e) => {
-                console.log('🔥 PAUSE BUTTON CLICKED in PillQuickPauseBar!', e);
-                e.preventDefault();
-                e.stopPropagation();
-                handleSubmit();
-              }} 
-              disabled={!value.trim() || submitting} 
-              size="xl" 
-              shape="pill" 
-              className="w-full"
-              style={{ 
-                position: 'relative',
-                zIndex: 9999,
-                pointerEvents: 'auto',
-                touchAction: 'manipulation'
-              }}
-            >
-              {submitting ? 'Pausing…' : 'Pause for 24 hours'}
-            </Button>
-          </div>
+          
+          {/* Always show pause button when not collapsed, or when collapsed but there's input */}
+          {(!isCollapsed || value.trim()) && (
+            <div className="mt-3">
+              <Button 
+                onClick={(e) => {
+                  console.log('🔥 PAUSE BUTTON CLICKED in PillQuickPauseBar!', e);
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit();
+                }} 
+                disabled={!value.trim() || submitting} 
+                size="xl" 
+                shape="pill" 
+                className="w-full"
+                style={{ 
+                  position: 'relative',
+                  zIndex: 9999,
+                  pointerEvents: 'auto',
+                  touchAction: 'manipulation'
+                }}
+              >
+                {submitting ? 'Pausing…' : 'Pause for 24 hours'}
+              </Button>
+            </div>
+          )}
         </>
-      )}
-      
-      {/* Show pause button when there's input but footer is collapsed */}
-      {!compact && isCollapsed && value.trim() && (
-        <div className="mt-3">
-          <Button 
-            onClick={(e) => {
-              console.log('🔥 PAUSE BUTTON CLICKED in PillQuickPauseBar!', e);
-              e.preventDefault();
-              e.stopPropagation();
-              handleSubmit();
-            }} 
-            disabled={!value.trim() || submitting} 
-            size="xl" 
-            shape="pill" 
-            className="w-full"
-            style={{ 
-              position: 'relative',
-              zIndex: 9999,
-              pointerEvents: 'auto',
-              touchAction: 'manipulation'
-            }}
-          >
-            {submitting ? 'Pausing…' : 'Pause for 24 hours'}
-          </Button>
-        </div>
       )}
       
       {/* Barcode Scanner */}
