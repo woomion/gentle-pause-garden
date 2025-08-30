@@ -48,8 +48,15 @@ export class PlatformNotificationService {
   }
 
   async showNotification(title: string, options: NotificationOptions = {}): Promise<void> {
-    // On web, show browser notification
-    notificationService.showNotification(title, options);
+    if (!this.getEnabled()) {
+      console.log('🔔 Platform notification service disabled, skipping notification');
+      return;
+    }
+
+    console.log('🔔 Showing notification via web service:', { title, options });
+    
+    // Use web notification service directly
+    webNotificationService.showNotification(title, options);
   }
 
   setEnabled(enabled: boolean): void {

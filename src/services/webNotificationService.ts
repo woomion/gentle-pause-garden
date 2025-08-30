@@ -47,13 +47,18 @@ export class WebNotificationService {
     }, delayMs);
   }
 
-  showNotification(title: string, body: string): void {
+  showNotification(title: string, options: NotificationOptions = {}): void {
     if (Notification.permission === 'granted') {
       new Notification(title, {
-        body,
-        icon: '/icons/app-icon-512.png',
-        badge: '/icons/app-icon-512.png',
+        body: options.body || '',
+        icon: options.icon || '/icons/app-icon-512.png',
+        badge: options.badge || '/icons/app-icon-512.png',
+        tag: options.tag || 'pocket-pause',
+        requireInteraction: options.requireInteraction || false,
+        ...options
       });
+    } else {
+      console.log('🔔 Web notification permission not granted');
     }
   }
 }
