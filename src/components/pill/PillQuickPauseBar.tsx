@@ -72,6 +72,8 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
   const [pendingPremiumDuration, setPendingPremiumDuration] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastAppliedPrefill, setLastAppliedPrefill] = useState<string | undefined>(undefined);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   // When a prefill value comes from share target, populate and focus the input once per unique value
   useEffect(() => {
@@ -82,6 +84,27 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
       setTimeout(() => inputRef.current?.focus(), 0);
     }
   }, [prefillValue, lastAppliedPrefill]);
+
+  // Handle scroll to collapse/expand footer
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Collapse when scrolling up and no input value
+      if (currentScrollY < lastScrollY && !value.trim()) {
+        setIsCollapsed(true);
+      } 
+      // Expand when scrolling down or when there's input
+      else if (currentScrollY > lastScrollY || value.trim()) {
+        setIsCollapsed(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, value]);
 
   const handleSubmit = async () => {
     const raw = value.trim();
@@ -294,7 +317,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
             {!compact && <span className="text-sm text-primary">Scan</span>}
           </button>
         </div>
-      {!compact && (
+      {!compact && !isCollapsed && (
         <>
           {/* Temporarily commented out duration selector for launch */}
           {/* <div className="mt-3 grid grid-cols-5 gap-2">
@@ -352,6 +375,32 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
             </Button>
           </div>
         </>
+      )}
+      
+      {/* Show pause button when there's input but footer is collapsed */}
+      {!compact && isCollapsed && value.trim() && (
+        <div className="mt-3">
+          <Button 
+            onClick={(e) => {
+              console.log('🔥 PAUSE BUTTON CLICKED in PillQuickPauseBar!', e);
+              e.preventDefault();
+              e.stopPropagation();
+              handleSubmit();
+            }} 
+            disabled={!value.trim() || submitting} 
+            size="xl" 
+            shape="pill" 
+            className="w-full"
+            style={{ 
+              position: 'relative',
+              zIndex: 9999,
+              pointerEvents: 'auto',
+              touchAction: 'manipulation'
+            }}
+          >
+            {submitting ? 'Pausing…' : 'Pause for 24 hours'}
+          </Button>
+        </div>
       )}
       
       {/* Barcode Scanner */}
