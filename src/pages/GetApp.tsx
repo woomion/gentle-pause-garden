@@ -54,8 +54,11 @@ const GetApp = () => {
             
             <div className="space-y-3 sm:space-y-4">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-purple-900 dark:text-purple-100 leading-tight font-inter px-2">
-                A pause button before you shop—bringing mindfulness into your money and clarity into your choices.
+                A pause button before you shop
               </h1>
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-purple-700 dark:text-purple-200 leading-relaxed font-inter italic max-w-3xl mx-auto px-4">
+                Bringing mindfulness into your money and clarity into your choices.
+              </p>
             </div>
             
             <div className="pt-4">
