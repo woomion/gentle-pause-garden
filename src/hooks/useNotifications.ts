@@ -83,13 +83,26 @@ export const useNotifications = (enabled: boolean) => {
       });
       
       if (shouldNotifyForNewItems || shouldRemindAfterDelay) {
-        const title = itemsForReview.length === 1 
-          ? 'Time to review your paused item!'
-          : `Time to review ${itemsForReview.length} paused items!`;
+        let title: string;
+        let body: string;
         
-        const body = itemsForReview.length === 1
-          ? `"${itemsForReview[0].itemName}" is ready for a thoughtful decision.`
-          : 'Some of your paused items are ready for thoughtful decisions.';
+        if (shouldNotifyForNewItems && itemsForReview.length > lastNotificationCountRef.current) {
+          // New item(s) became ready - show specific details for the newest item
+          const newestItem = itemsForReview[0]; // Assuming items are sorted by readiness
+          const storeName = newestItem.storeName || 'Unknown Store';
+          const itemName = newestItem.itemName || 'Item';
+          
+          title = `${storeName}: ${itemName}`;
+          body = itemsForReview.length === 1 
+            ? 'Ready for your thoughtful decision'
+            : `Ready for review • ${itemsForReview.length} total items waiting`;
+        } else {
+          // Reminder for existing items
+          title = itemsForReview.length === 1 
+            ? 'Time to review your paused item'
+            : `${itemsForReview.length} items ready for review`;
+          body = 'Your paused items are waiting for thoughtful decisions';
+        }
 
         console.log('🚀 Sending notification via platform service...');
         
