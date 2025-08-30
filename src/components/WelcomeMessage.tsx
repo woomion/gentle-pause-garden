@@ -6,7 +6,7 @@ const getTimeBasedMessage = (): string => {
   const hour = new Date().getHours();
   
   const morningMessages = [
-    "Start the day with clarity. Every pause is a fresh choice."
+    "Start the day with clarity.\nEvery pause is a fresh choice."
   ];
   
   const middayMessages = [
