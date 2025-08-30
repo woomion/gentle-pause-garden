@@ -296,7 +296,8 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
         </div>
       {!compact && (
         <>
-          <div className="mt-3 grid grid-cols-5 gap-2">
+          {/* Temporarily commented out duration selector for launch */}
+          {/* <div className="mt-3 grid grid-cols-5 gap-2">
             {DURATION_PRESETS.map((d) => {
               const isPremiumDuration = d.isPremium && !isPremiumUser();
               const isSelected = duration === d.key;
@@ -327,7 +328,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 </button>
                 );
             })}
-          </div>
+          </div> */}
           <div className="mt-3">
             <Button 
               onClick={(e) => {
