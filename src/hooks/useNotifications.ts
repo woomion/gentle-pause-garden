@@ -72,7 +72,29 @@ export const useNotifications = (enabled: boolean) => {
       
       const timeSinceLastCheck = now - lastCheckTimeRef.current;
       const shouldNotifyForNewItems = itemsForReview.length > 0 && itemsForReview.length !== lastNotificationCountRef.current;
-      const shouldRemindAfterDelay = itemsForReview.length > 0 && lastNotificationCountRef.current > 0 && timeSinceLastCheck > 2 * 60 * 60 * 1000; // Only remind if we've sent notifications before
+      
+      // Check if any items will become ready later today
+      const endOfToday = new Date();
+      endOfToday.setHours(23, 59, 59, 999);
+      
+      const allItems = user 
+        ? supabasePausedItemsStore.getItems()
+        : pausedItemsStore.getItems();
+      
+      const itemsReadyLaterToday = allItems.filter(item => {
+        const reviewDate = new Date(item.checkInDate);
+        return reviewDate > new Date() && reviewDate <= endOfToday;
+      });
+      
+      // Only send reminder if: 
+      // 1. Items are ready for review
+      // 2. We've sent notifications before (not first time)
+      // 3. It's been more than 4 hours since last check
+      // 4. No more items will be ready today (so this is the final batch)
+      const shouldRemindAfterDelay = itemsForReview.length > 0 
+        && lastNotificationCountRef.current > 0 
+        && timeSinceLastCheck > 4 * 60 * 60 * 1000 // 4 hours instead of 2
+        && itemsReadyLaterToday.length === 0; // No more items coming today
       
       console.log('📊 Notification decision factors:', {
         itemsCount: itemsForReview.length,
