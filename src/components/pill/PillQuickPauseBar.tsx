@@ -90,12 +90,12 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Collapse when scrolling up and no input value
-      if (currentScrollY < lastScrollY && !value.trim()) {
+      // Collapse when scrolling down beyond threshold and no input value
+      if (currentScrollY > lastScrollY && currentScrollY > 100 && !value.trim()) {
         setIsCollapsed(true);
       } 
-      // Expand when scrolling down or when there's input
-      else if (currentScrollY > lastScrollY || value.trim()) {
+      // Expand when scrolling up, near top, or when there's input
+      else if (currentScrollY < lastScrollY || currentScrollY < 50 || value.trim()) {
         setIsCollapsed(false);
       }
       
