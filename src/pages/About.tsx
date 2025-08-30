@@ -19,35 +19,43 @@ const About = () => {
             <ArrowLeft size={20} />
             Back to Home
           </Link>
-          <h1 className="text-3xl font-bold text-black dark:text-[#F9F5EB] mb-2">About Pocket Pause</h1>
+          <h1 className="text-3xl font-bold text-black dark:text-[#F9F5EB] mb-2">The Pocket Pause Manifesto</h1>
         </div>
 
         {/* Content */}
         <div className="space-y-6 text-dark-gray dark:text-cream">
           <div className="p-6">
-            <p className="mb-4 text-lg">
-              Pocket Pause is your shopping clarity companion.
-            </p>
-            <p className="mb-4">
-              Instead of clicking "buy now" in the moment, drop the link into Pocket Pause. Choose how long you want to wait — a day, a week, or more. The item will quietly rest on your Pause List, then return when the time is up.
-            </p>
-            <p className="mb-4">
-              No judgment. No hard rules. Just a pause.
-            </p>
-            <p className="mb-6">
-              Because sometimes the difference between a purchase that feels good and one that feels empty is a little space in between.
-            </p>
-            
-            <h2 className="text-xl font-semibold mb-4 text-black dark:text-cream">Pocket Pause helps you:</h2>
-            <ul className="space-y-2 mb-6">
-              <li>• Create breathing room before you buy</li>
-              <li>• Separate impulse from intention</li>
-              <li>• Build a list of what truly matters to you</li>
-            </ul>
-            
-            <p className="text-lg font-medium text-black dark:text-cream">
-              It's not about saying no — it's about saying yes with clarity.
-            </p>
+            <div className="prose max-w-none text-lg leading-relaxed space-y-4">
+              <p>We live in a world designed for speed.<br />
+              One-click checkouts. Next-day shipping. Endless scrolling.</p>
+              
+              <p>But speed isn't always clarity.<br />
+              And more isn't always better.</p>
+              
+              <p>Pocket Pause was created to bring back something small but powerful: a pause.</p>
+              
+              <p>A pause before you buy.<br />
+              A pause before you let another thing, another expense, another distraction into your life.<br />
+              A pause to ask: Do I really want this? Does this align with my values?</p>
+              
+              <p>We believe presence belongs in your pocket.<br />
+              That money decisions are emotional as much as rational.<br />
+              That what you choose to buy — or not buy — shapes the life you live.</p>
+              
+              <p>Pocket Pause isn't about guilt or control.<br />
+              It's about freedom, clarity, and enoughness.<br />
+              It's about remembering that every "yes" is precious.</p>
+              
+              <p>We're not building another finance app.<br />
+              We're building a practice.<br />
+              A movement.<br />
+              A gentler way of being with money, time, and attention.</p>
+              
+              <p>Because every pause matters.<br />
+              And small pauses ripple into big change.</p>
+              
+              <p className="text-2xl">✨</p>
+            </div>
           </div>
         </div>
       </div>
