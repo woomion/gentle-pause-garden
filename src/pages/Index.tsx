@@ -379,6 +379,9 @@ console.log('Rendering main Index content');
                 }
                 setHideBottomArea(false);
               }}
+              onCollapseChange={(collapsed) => {
+                setHideBottomArea(collapsed);
+              }}
             />
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />

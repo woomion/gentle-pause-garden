@@ -52,12 +52,13 @@ const getFallbackTitleFromUrl = (rawUrl: string): string | undefined => {
   }
 };
 
-const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onUrlEntry, onBarcodeScanned }: { 
+const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onUrlEntry, onBarcodeScanned, onCollapseChange }: { 
   compact?: boolean; 
   prefillValue?: string; 
   onExpandRequest?: () => void;
   onUrlEntry?: () => void;
   onBarcodeScanned?: () => void;
+  onCollapseChange?: (collapsed: boolean) => void;
 }) => {
   const { addItem } = usePausedItems();
   const { toast } = useToast();
@@ -93,10 +94,12 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
       // Collapse when scrolling down beyond threshold and no input value
       if (currentScrollY > lastScrollY && currentScrollY > 100 && !value.trim()) {
         setIsCollapsed(true);
+        onCollapseChange?.(true);
       } 
       // Expand when scrolling up, near top, or when there's input
       else if (currentScrollY < lastScrollY || currentScrollY < 50 || value.trim()) {
         setIsCollapsed(false);
+        onCollapseChange?.(false);
       }
       
       setLastScrollY(currentScrollY);
