@@ -78,7 +78,7 @@ const Index = () => {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [compactQuickBar, setCompactQuickBar] = useState(false);
-  const [hideBottomArea, setHideBottomArea] = useState(false);
+  const [hideBottomArea, setHideBottomArea] = useState(true); // Start collapsed by default
   const [lastScrollY, setLastScrollY] = useState(0);
   const [sharedPrefill, setSharedPrefill] = useState<string | undefined>(undefined);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
