@@ -225,8 +225,8 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
             
             <p className="text-muted-foreground text-base">{localItem.storeName}</p>
             
-            {/* Notes Section */}
-            <div className="pt-2">
+            {/* Temporarily commented out notes/thoughts section */}
+            {/* <div className="pt-2">
               {!isNotesExpanded ? (
                 <div
                   onClick={() => setIsNotesExpanded(true)}
@@ -268,7 +268,7 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
                   </button>
                 </div>
               )}
-            </div>
+            </div> */}
 
 
             {/* Comments disabled since partner functionality removed */}

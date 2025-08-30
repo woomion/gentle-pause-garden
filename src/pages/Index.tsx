@@ -208,8 +208,7 @@ console.log('Rendering main Index content');
               setHideBottomArea(false);
             }
           }}
-          className="flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 pb-80"
-          style={{ scrollBehavior: 'auto' }}
+          className="flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 pb-40"
         >
           {/* Wisdom Orb Remnant - Hidden for now */}
           {/* 
@@ -246,11 +245,12 @@ console.log('Rendering main Index content');
           */}
           {pillMode ? (
             <>
-              {readyCount > 0 && (
+              {/* Temporarily commented out ready to review functionality */}
+              {/* {readyCount > 0 && (
                 <div className="mb-3">
                   <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
                 </div>
-              )}
+              )} */}
               <div className="mb-4 flex items-center justify-end gap-2">
                 <div className="flex items-center gap-2 text-xs" aria-label="Sort items">
                   <span className="text-muted-foreground">Sort:</span>
