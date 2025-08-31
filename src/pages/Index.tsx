@@ -368,9 +368,7 @@ console.log('Rendering main Index content');
             <>
               {readyCount > 0 && (
                 <div className="mb-3 md:mb-6">
-                  <div className="md:bg-gradient-to-r md:from-primary/10 md:to-primary/5 md:border md:border-primary/20 md:rounded-xl md:p-4 md:shadow-lg">
-                    <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
-                  </div>
+                  <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
                 </div>
               )}
               <div className="mb-4 flex items-center justify-end gap-2">
