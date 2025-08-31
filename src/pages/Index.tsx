@@ -195,26 +195,36 @@ const Index = () => {
     clearSharedContent();
   }, [sharedContent, pillMode]);
 
-  // Enhanced scroll handling for both container and window scrolling
+  // Enhanced scroll handling for mobile-first intelligent collapsing
   useEffect(() => {
     const handleScroll = (scrollTop: number) => {
       const scrollingDown = scrollTop > lastScrollY;
       const scrollDelta = Math.abs(scrollTop - lastScrollY);
       
-      // More responsive on mobile - smaller thresholds
+      // Mobile-specific behavior (under 768px)
       const isMobile = window.innerWidth < 768;
-      const compactThreshold = isMobile ? 5 : 8;
-      const hideThreshold = isMobile ? 50 : 100;
-      const showThreshold = isMobile ? 15 : 30;
       
-      // Compact mode when scrolling just a bit
-      setCompactQuickBar(scrollTop > compactThreshold);
-      
-      // Hide completely when scrolling down more (with momentum consideration)
-      if (scrollingDown && scrollTop > hideThreshold && scrollDelta > 2) {
-        setHideBottomArea(true);
-      } else if (!scrollingDown && (scrollTop < showThreshold || scrollDelta > 5)) {
-        setHideBottomArea(false);
+      if (isMobile) {
+        // More aggressive collapsing on mobile
+        if (scrollingDown && scrollTop > 30 && scrollDelta > 3) {
+          setCompactQuickBar(true);
+          setHideBottomArea(true);
+        } else if (!scrollingDown && scrollDelta > 5) {
+          setCompactQuickBar(false);
+          setHideBottomArea(false);
+        } else if (scrollTop < 10) {
+          setCompactQuickBar(false);
+          setHideBottomArea(false);
+        }
+      } else {
+        // Desktop behavior
+        setCompactQuickBar(scrollTop > 8);
+        
+        if (scrollingDown && scrollTop > 100) {
+          setHideBottomArea(true);
+        } else if (!scrollingDown || scrollTop < 30) {
+          setHideBottomArea(false);
+        }
       }
       
       setLastScrollY(scrollTop);
@@ -226,22 +236,16 @@ const Index = () => {
       handleScroll(target.scrollTop);
     };
 
-    // Fallback: window scroll handler
-    const onWinScroll = () => handleScroll(window.scrollY);
-
     // Add container scroll listener if ref exists
     const container = scrollContainerRef.current;
     if (container) {
       container.addEventListener('scroll', onContainerScroll, { passive: true });
     }
     
-    window.addEventListener('scroll', onWinScroll, { passive: true });
-    
     return () => {
       if (container) {
         container.removeEventListener('scroll', onContainerScroll);
       }
-      window.removeEventListener('scroll', onWinScroll);
     };
   }, [lastScrollY]);
 
@@ -329,14 +333,25 @@ console.log('Rendering main Index content');
           ref={scrollContainerRef}
           onScroll={(e) => {
             const scrollTop = e.currentTarget.scrollTop;
-            // This handles container scrolling on mobile - more aggressive hiding
+            // Direct scroll handling for immediate responsiveness on mobile
             const isMobile = window.innerWidth < 768;
-            const threshold = isMobile ? 20 : 30;
             
-            if (scrollTop > threshold) {
-              setHideBottomArea(true);
+            if (isMobile) {
+              // Mobile: more immediate collapsing
+              if (scrollTop > 20) {
+                setCompactQuickBar(true);
+                setHideBottomArea(true);
+              } else {
+                setCompactQuickBar(false);
+                setHideBottomArea(false);
+              }
             } else {
-              setHideBottomArea(false);
+              // Desktop: original behavior
+              if (scrollTop > 30) {
+                setHideBottomArea(true);
+              } else {
+                setHideBottomArea(false);
+              }
             }
           }}
           className="flex-1 overflow-y-auto max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pb-40"

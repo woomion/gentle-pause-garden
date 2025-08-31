@@ -86,28 +86,28 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
     }
   }, [prefillValue, lastAppliedPrefill]);
 
-  // Handle scroll to collapse/expand footer
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Collapse when scrolling down beyond threshold and no input value
-      if (currentScrollY > lastScrollY && currentScrollY > 100 && !value.trim()) {
-        setIsCollapsed(true);
-        onCollapseChange?.(true);
-      } 
-      // Expand when scrolling up, near top, or when there's input
-      else if (currentScrollY < lastScrollY || currentScrollY < 50 || value.trim()) {
-        setIsCollapsed(false);
-        onCollapseChange?.(false);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
+  // Handle scroll to collapse/expand footer - disabled since parent handles this
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     const currentScrollY = window.scrollY;
+  //     
+  //     // Collapse when scrolling down beyond threshold and no input value
+  //     if (currentScrollY > lastScrollY && currentScrollY > 100 && !value.trim()) {
+  //       setIsCollapsed(true);
+  //       onCollapseChange?.(true);
+  //     } 
+  //     // Expand when scrolling up, near top, or when there's input
+  //     else if (currentScrollY < lastScrollY || currentScrollY < 50 || value.trim()) {
+  //       setIsCollapsed(false);
+  //       onCollapseChange?.(false);
+  //     }
+  //     
+  //     setLastScrollY(currentScrollY);
+  //   };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, value]);
+  //   window.addEventListener('scroll', handleScroll, { passive: true });
+  //   return () => window.removeEventListener('scroll', handleScroll);
+  // }, [lastScrollY, value]);
 
   const handleSubmit = async () => {
     const raw = value.trim();
