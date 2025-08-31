@@ -63,42 +63,56 @@ const Index = () => {
   const storeReadyItems = getItemsForReview ? getItemsForReview() : [];
   const readyItemIds = new Set(storeReadyItems.map(item => item.id));
   
-  console.log('🔍 Pre-filter debug:', {
-    sortedItemIds: sortedItems.slice(0, 5).map(item => ({ id: item.id, name: item.itemName })),
-    readyItemIds: Array.from(readyItemIds).slice(0, 5),
+  console.log('🔍 DEBUGGING FILTER ISSUE - Pre-filter debug:', {
+    sortedItemsCount: sortedItems.length,
     storeReadyItemsCount: storeReadyItems.length,
-    sortedItemsCount: sortedItems.length
+    readyItemIds: Array.from(readyItemIds),
+    firstFewSortedItems: sortedItems.slice(0, 3).map(item => ({
+      id: item.id,
+      name: item.itemName,
+      checkInDate: item.checkInDate?.toISOString(),
+      isReady: item.checkInDate ? item.checkInDate.getTime() <= now : false
+    })),
+    firstFewReadyItems: storeReadyItems.slice(0, 3).map(item => ({
+      id: item.id,
+      name: item.itemName,
+      checkInDate: item.checkInDate?.toISOString()
+    }))
   });
   
   // Filter sorted items to exclude ready items (prevent duplicates)
-  // Check if items are actually ready by checking their individual check-in times
   const currentPausedItems = sortedItems.filter((item) => {
-    // Double-check readiness using the individual item's check-in time
-    const itemCheckInTime = item.checkInDate ? item.checkInDate.getTime() : 0;
-    const isActuallyReady = itemCheckInTime <= now;
+    // First check if item is in the ready list from store
     const isInReadyList = readyItemIds.has(item.id);
     
-    // An item should be filtered out if it's either in the ready list OR actually ready
-    const shouldFilter = isInReadyList || isActuallyReady;
+    // Then double-check by examining the item's actual check-in time
+    const itemCheckInTime = item.checkInDate ? item.checkInDate.getTime() : Infinity;
+    const isActuallyReady = itemCheckInTime <= now;
     
-    if (shouldFilter) {
-      console.log('🔍 Filtering out ready item:', {
-        id: item.id, 
+    // Item should be filtered out if EITHER condition is true
+    const shouldRemoveFromPausedList = isInReadyList || isActuallyReady;
+    
+    if (shouldRemoveFromPausedList) {
+      console.log('🔍 REMOVING FROM PAUSED LIST:', {
+        id: item.id,
         name: item.itemName,
-        checkInTime: item.checkInDate ? item.checkInDate.toISOString() : 'N/A',
+        checkInTime: item.checkInDate ? item.checkInDate.toISOString() : 'No date',
         isInReadyList,
-        isActuallyReady
+        isActuallyReady,
+        timeDiff: itemCheckInTime === Infinity ? 'N/A' : `${Math.round((now - itemCheckInTime) / 1000 / 60)} minutes ago`
       });
     }
     
-    return !shouldFilter;
+    // Return true to KEEP in paused list, false to REMOVE from paused list
+    return !shouldRemoveFromPausedList;
   });
   
-  console.log('🔍 Filtering debug:', {
+  console.log('🔍 FINAL FILTERING RESULT:', {
     totalSortedItems: sortedItems.length,
     readyItemIds: Array.from(readyItemIds),
     currentPausedItemsCount: currentPausedItems.length,
     storeReadyItemsCount: storeReadyItems.length,
+    itemsFilteredOut: sortedItems.length - currentPausedItems.length,
     readyItemNames: storeReadyItems.map(item => item.itemName)
   });
   
