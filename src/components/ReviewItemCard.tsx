@@ -53,10 +53,6 @@ const ReviewItemCard = ({ item, onViewItem }: ReviewItemCardProps) => {
           </div>
         )}
 
-        {/* Ready indicator */}
-        {isReadyForReview && (
-          <div className="absolute top-3 left-3 w-3 h-3 bg-primary rounded-full animate-pulse shadow-lg" />
-        )}
       </div>
 
       {/* Item details */}
