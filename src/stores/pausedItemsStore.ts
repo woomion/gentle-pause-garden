@@ -105,10 +105,10 @@ class PausedItemsStore {
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffHours <= 0) return 'Ready to review';
-    if (diffHours <= 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} left`;
-    if (diffDays === 1) return '1 day left';
+    if (diffHours <= 24) return `Reviewing in ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
+    if (diffDays === 1) return 'Reviewing in 1 day';
     
-    return `${diffDays} days left`;
+    return `Reviewing in ${diffDays} days`;
   }
 
   private updateCheckInTimes(): void {
