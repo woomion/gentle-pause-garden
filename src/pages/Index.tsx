@@ -58,67 +58,24 @@ const Index = () => {
       : b.pausedAt.getTime() - a.pausedAt.getTime()
   );
   
+  
   const now = Date.now();
   // First get ready items from the store function (authoritative source)
   const storeReadyItems = getItemsForReview ? getItemsForReview() : [];
   const readyItemIds = new Set(storeReadyItems.map(item => item.id));
   
-  console.log('🔍 AUTH USER DEBUGGING - User:', user?.email);
-  console.log('🔍 AUTH USER DEBUGGING - Store type:', user ? 'Supabase' : 'Local');
-  console.log('🔍 AUTH USER DEBUGGING - Items loading:', itemsLoading);
-  console.log('🔍 AUTH USER DEBUGGING - Pre-filter debug:', {
-    sortedItemsCount: sortedItems.length,
-    storeReadyItemsCount: storeReadyItems.length,
-    readyItemIds: Array.from(readyItemIds),
-    sortedItemsWithDetails: sortedItems.map(item => ({
-      id: item.id,
-      name: item.itemName,
-      checkInDate: item.checkInDate?.toISOString(),
-      isReady: item.checkInDate ? item.checkInDate.getTime() <= now : false,
-      source: 'sortedItems'
-    })),
-    storeReadyItemsWithDetails: storeReadyItems.map(item => ({
-      id: item.id,
-      name: item.itemName,
-      checkInDate: item.checkInDate?.toISOString(),
-      source: 'storeReadyItems'
-    }))
-  });
-  
   // Filter sorted items to exclude ready items (prevent duplicates)
   const currentPausedItems = sortedItems.filter((item) => {
-    // First check if item is in the ready list from store
-    const isInReadyList = readyItemIds.has(item.id);
-    
-    // Then double-check by examining the item's actual check-in time
+    // Use the exact same timing logic as the stores for consistency
     const itemCheckInTime = item.checkInDate ? item.checkInDate.getTime() : Infinity;
     const isActuallyReady = itemCheckInTime <= now;
+    const isInReadyList = readyItemIds.has(item.id);
     
     // Item should be filtered out if EITHER condition is true
     const shouldRemoveFromPausedList = isInReadyList || isActuallyReady;
     
-    if (shouldRemoveFromPausedList) {
-      console.log('🔍 REMOVING FROM PAUSED LIST:', {
-        id: item.id,
-        name: item.itemName,
-        checkInTime: item.checkInDate ? item.checkInDate.toISOString() : 'No date',
-        isInReadyList,
-        isActuallyReady,
-        timeDiff: itemCheckInTime === Infinity ? 'N/A' : `${Math.round((now - itemCheckInTime) / 1000 / 60)} minutes ago`
-      });
-    }
-    
     // Return true to KEEP in paused list, false to REMOVE from paused list
     return !shouldRemoveFromPausedList;
-  });
-  
-  console.log('🔍 FINAL FILTERING RESULT:', {
-    totalSortedItems: sortedItems.length,
-    readyItemIds: Array.from(readyItemIds),
-    currentPausedItemsCount: currentPausedItems.length,
-    storeReadyItemsCount: storeReadyItems.length,
-    itemsFilteredOut: sortedItems.length - currentPausedItems.length,
-    readyItemNames: storeReadyItems.map(item => item.itemName)
   });
   
   // State for ready count with automatic updates
@@ -353,13 +310,7 @@ console.log('Rendering main Index content');
 
 
               {/* Current Paused Items Section */}
-              {(() => {
-                console.log('🔍 RENDER DEBUG - currentPausedItems:', {
-                  length: currentPausedItems.length,
-                  items: currentPausedItems.map(item => ({ id: item.id, name: item.itemName, checkInTime: item.checkInTime }))
-                });
-                return currentPausedItems.length > 0;
-              })() && (
+              {currentPausedItems.length > 0 && (
                 <div className="mb-4">
                   <div className="text-xs font-medium text-muted-foreground mb-2 px-1">
                     Paused Items ({currentPausedItems.length})

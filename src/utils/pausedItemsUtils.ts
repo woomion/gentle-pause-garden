@@ -50,10 +50,10 @@ export const calculateCheckInTimeDisplay = (checkInDate: Date): string => {
   const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffHours <= 0) return 'Ready to review';
-  if (diffHours <= 24) return `Checking-in in ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
-  if (diffDays === 1) return 'Checking-in in 1 day';
+  if (diffHours <= 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} left`;
+  if (diffDays === 1) return '1 day left';
   
-  return `Checking-in in ${diffDays} days`;
+  return `${diffDays} days left`;
 };
 
 // Legacy functions for backward compatibility with pause log converters
