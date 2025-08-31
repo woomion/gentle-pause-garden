@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowRight } from 'lucide-react';
 
 interface ReadyToReviewPillProps {
   count: number;
@@ -18,7 +19,10 @@ const ReadyToReviewPill: React.FC<ReadyToReviewPillProps> = ({ count, onClick })
       aria-label={`Ready to review ${count} item${count === 1 ? '' : 's'}`}
     >
       <div className="relative z-10 flex items-center justify-between gap-3">
-        <span className="truncate font-medium">Ready to review</span>
+        <div className="flex items-center gap-2">
+          <span className="truncate font-medium">Ready to review</span>
+          <ArrowRight size={16} />
+        </div>
         <span className="shrink-0 text-xs opacity-80">{count}</span>
       </div>
     </button>
