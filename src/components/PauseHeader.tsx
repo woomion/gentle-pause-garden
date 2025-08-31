@@ -46,21 +46,19 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
 
   return (
     <>
-      <header className="relative mb-8 sm:mb-12">
-        <div className={`text-center md:text-left ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
-          {/* Desktop header - match exact positioning of content below */}
-          <div className="hidden md:flex md:items-center md:justify-between">
-            <div className="flex items-center">
-              <Link
-                to={{ pathname: '/', search: location.search }}
-                className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors px-4"
-              >
-                POCKET || PAUSE
-              </Link>
-            </div>
+      <header className="relative mb-6 sm:mb-8">
+        <div className={`text-center md:text-left ${installed ? 'pt-0' : 'pt-1'}`}>
+          {/* Desktop header - position to match content below exactly */}
+          <div className="hidden md:block relative">
+            <Link
+              to={{ pathname: '/', search: location.search }}
+              className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors inline-block"
+            >
+              POCKET || PAUSE
+            </Link>
             
-            <div className="relative">
-              <div className="flex items-center gap-3 px-4">
+            <div className="absolute top-0 right-0">
+              <div className="flex items-center gap-3">
                 {showCourses && (
                   <button
                     className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
@@ -89,7 +87,7 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
               
               {/* Guest mode indicator positioned beneath account icon */}
               {!user && (
-                <div className="absolute top-full right-4 mt-2 text-xs text-muted-foreground bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-2 py-1 whitespace-nowrap">
+                <div className="absolute top-full right-0 mt-2 text-xs text-muted-foreground bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-2 py-1 whitespace-nowrap">
                   Guest Mode: Items stored locally only
                 </div>
               )}
