@@ -315,6 +315,15 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
           </div>
         )}
         
+        {/* Processing ripple effect */}
+        {isParsingUrl && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-16 h-16 bg-white/20 rounded-full animate-processing-ripple"></div>
+            <div className="absolute w-12 h-12 bg-white/10 rounded-full animate-processing-ripple" style={{ animationDelay: '0.5s' }}></div>
+            <div className="absolute w-8 h-8 bg-white/05 rounded-full animate-processing-ripple" style={{ animationDelay: '1s' }}></div>
+          </div>
+        )}
+        
         + Add to Pause
       </button>
 
