@@ -27,6 +27,7 @@ import PausedItemDetail from '../components/PausedItemDetail';
 import PillQuickPauseBar from '../components/pill/PillQuickPauseBar';
 import PillItem from '../components/pill/PillItem';
 import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
+import DesktopItemCard from '../components/DesktopItemCard';
 import { useInstalledApp } from '../hooks/useInstalledApp';
 import { Button } from '../components/ui/button';
 import { platformNotificationService } from '../services/platformNotificationService';
@@ -390,24 +391,37 @@ console.log('Rendering main Index content');
                     Paused Items ({currentPausedItems.length})
                   </div>
                   
-                  {/* Desktop Grid Layout */}
+                  {/* Desktop Grid Layout - 3 columns */}
                   <div className="hidden md:block">
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
                       {itemsLoading ? (
-                        Array.from({ length: 3 }, (_, i) => (
-                          <div key={i} className="bg-card/30 backdrop-blur-sm border border-border/30 rounded-xl p-4 shadow-sm animate-pulse h-24" />
+                        Array.from({ length: 6 }, (_, i) => (
+                          <div key={i} className="bg-card/30 backdrop-blur-sm border border-border/30 rounded-xl shadow-sm animate-pulse">
+                            <div className="h-1 w-full bg-muted/30 mb-4" />
+                            <div className="p-4">
+                              <div className="flex gap-3 mb-3">
+                                <div className="w-16 h-16 bg-muted/40 rounded-lg" />
+                                <div className="flex-1">
+                                  <div className="h-4 bg-muted/40 rounded mb-2" />
+                                  <div className="h-3 bg-muted/30 rounded mb-1" />
+                                  <div className="h-3 bg-muted/30 rounded w-1/2" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         ))
                       ) : (
                         currentPausedItems.map((it) => (
-                          <div key={it.id} className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl p-3 shadow-sm hover:shadow-md hover:bg-card/60 transition-all duration-200 group cursor-pointer">
-                            <PillItem
-                              item={it}
-                              onClick={() => {
-                                setSelectedItem(it);
-                                setShowItemDetail(true);
-                              }}
-                            />
-                          </div>
+                          <DesktopItemCard
+                            key={it.id}
+                            item={it}
+                            onClick={() => {
+                              setSelectedItem(it);
+                              setShowItemDetail(true);
+                            }}
+                            onEdit={(item, updates) => updateItem(item.id, updates)}
+                            onDelete={removeItem}
+                          />
                         ))
                       )}
                     </div>
