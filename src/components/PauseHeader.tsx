@@ -47,7 +47,7 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
 
   return (
     <>
-      <header className="relative mb-8 sm:mb-12 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+      <header className="relative mb-8 sm:mb-12">
         <div className={`text-center md:text-left md:flex md:items-center md:justify-between ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
           <Link
             to={{ pathname: '/', search: location.search }}
@@ -84,7 +84,7 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
           </div>
         </div>
 
-        <div className={`absolute ${installed ? 'top-6 sm:top-8' : 'top-12 sm:top-16'} right-4 sm:right-6 flex md:hidden items-center justify-end gap-3`}>
+        <div className={`absolute ${installed ? 'top-6 sm:top-8' : 'top-12 sm:top-16'} right-0 flex md:hidden items-center justify-end gap-3`}>
           {showCourses && (
             <button
               className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
