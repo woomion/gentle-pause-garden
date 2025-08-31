@@ -47,7 +47,7 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
 
   return (
     <>
-      <header className="relative mb-8 sm:mb-12 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto">
+      <header className="relative mb-8 sm:mb-12 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
         <div className={`text-center md:text-left md:flex md:items-center md:justify-between ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
           <Link
             to={{ pathname: '/', search: location.search }}
