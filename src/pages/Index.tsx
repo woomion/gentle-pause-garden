@@ -63,20 +63,25 @@ const Index = () => {
   const storeReadyItems = getItemsForReview ? getItemsForReview() : [];
   const readyItemIds = new Set(storeReadyItems.map(item => item.id));
   
-  console.log('🔍 DEBUGGING FILTER ISSUE - Pre-filter debug:', {
+  console.log('🔍 AUTH USER DEBUGGING - User:', user?.email);
+  console.log('🔍 AUTH USER DEBUGGING - Store type:', user ? 'Supabase' : 'Local');
+  console.log('🔍 AUTH USER DEBUGGING - Items loading:', itemsLoading);
+  console.log('🔍 AUTH USER DEBUGGING - Pre-filter debug:', {
     sortedItemsCount: sortedItems.length,
     storeReadyItemsCount: storeReadyItems.length,
     readyItemIds: Array.from(readyItemIds),
-    firstFewSortedItems: sortedItems.slice(0, 3).map(item => ({
+    sortedItemsWithDetails: sortedItems.map(item => ({
       id: item.id,
       name: item.itemName,
       checkInDate: item.checkInDate?.toISOString(),
-      isReady: item.checkInDate ? item.checkInDate.getTime() <= now : false
+      isReady: item.checkInDate ? item.checkInDate.getTime() <= now : false,
+      source: 'sortedItems'
     })),
-    firstFewReadyItems: storeReadyItems.slice(0, 3).map(item => ({
+    storeReadyItemsWithDetails: storeReadyItems.map(item => ({
       id: item.id,
       name: item.itemName,
-      checkInDate: item.checkInDate?.toISOString()
+      checkInDate: item.checkInDate?.toISOString(),
+      source: 'storeReadyItems'
     }))
   });
   
