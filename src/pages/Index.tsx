@@ -75,6 +75,18 @@ const Index = () => {
     const isActuallyReady = itemCheckInTime <= now;
     const isInReadyList = readyItemIds.has(item.id);
     
+    // Debug logging to see what's happening
+    if (isActuallyReady || isInReadyList) {
+      console.log('🔍 Filtering out item from paused list:', {
+        itemId: item.id,
+        itemName: item.itemName,
+        isActuallyReady,
+        isInReadyList,
+        checkInTime: item.checkInTime,
+        checkInDate: item.checkInDate
+      });
+    }
+    
     // Item should be filtered out if EITHER condition is true
     const shouldRemoveFromPausedList = isInReadyList || isActuallyReady;
     
