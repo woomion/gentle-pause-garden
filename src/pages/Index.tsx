@@ -258,9 +258,9 @@ console.log('Rendering main Index content');
 
   return (
     <>
-      <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 flex flex-col">
+      <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 flex flex-col md:bg-gradient-to-br md:from-background md:via-background/95 md:to-accent/10">
         {/* Header area - fixed height */}
-        <div className={`flex-shrink-0 max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 ${installed ? 'pt-6 sm:pt-8' : 'pt-12 sm:pt-16'}`}>
+        <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 ${installed ? 'pt-6 sm:pt-8 md:pt-12 lg:pt-16' : 'pt-12 sm:pt-16 md:pt-20 lg:pt-24'}`}>
           <PauseHeader onProfileModalChange={(isOpen) => {
             console.log('Profile modal changed:', isOpen);
             setProfileModalOpen(isOpen);
@@ -316,7 +316,7 @@ console.log('Rendering main Index content');
               setHideBottomArea(false);
             }
           }}
-          className="flex-1 overflow-y-auto max-w-sm md:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 pb-40"
+          className="flex-1 overflow-y-auto max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pb-40"
         >
           {/* Wisdom Orb Remnant - Hidden for now */}
           {/* 
@@ -354,15 +354,17 @@ console.log('Rendering main Index content');
           {pillMode ? (
             <>
               {readyCount > 0 && (
-                <div className="mb-3">
-                  <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
+                <div className="mb-3 md:mb-6">
+                  <div className="md:bg-gradient-to-r md:from-primary/10 md:to-primary/5 md:border md:border-primary/20 md:rounded-xl md:p-4 md:shadow-lg">
+                    <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
+                  </div>
                 </div>
               )}
-              <div className="mb-4 flex items-center justify-end gap-2">
-                <div className="flex items-center gap-2 text-xs" aria-label="Sort items">
+              <div className="mb-4 flex items-center justify-end gap-2 md:bg-card/30 md:backdrop-blur-sm md:rounded-lg md:p-3 md:border md:border-border/30">
+                <div className="flex items-center gap-2 text-xs md:text-sm" aria-label="Sort items">
                   <span className="text-muted-foreground">Sort:</span>
                   <button
-                    className={`px-2 py-1 rounded-full border ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
+                    className={`px-2 py-1 rounded-full border transition-all duration-200 md:px-3 md:py-2 ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30 md:bg-primary/20 md:shadow-sm' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted md:hover:bg-muted/60'}`}
                     onClick={() => setSortMode('soonest')}
                     aria-label="Sort by ending soon"
                     title="Sort by ending soon"
@@ -370,24 +372,49 @@ console.log('Rendering main Index content');
                     Ending soon
                   </button>
                   <button
-                    className={`px-2 py-1 rounded-full border ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted'}`}
+                    className={`px-2 py-1 rounded-full border transition-all duration-200 md:px-3 md:py-2 ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30 md:bg-primary/20 md:shadow-sm' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted md:hover:bg-muted/60'}`}
                     onClick={() => setSortMode('newest')}
                     aria-label="Sort by recently paused"
                     title="Sort by recently paused"
                   >
                     Recently paused
                   </button>
-        </div>
-      </div>
+                </div>
+              </div>
 
 
               {/* Current Paused Items Section */}
               {currentPausedItems.length > 0 && (
                 <div className="mb-4">
-                  <div className="text-xs font-medium text-muted-foreground mb-2 px-1">
+                  <div className="text-xs font-medium text-muted-foreground mb-2 px-1 md:text-sm md:mb-4">
                     Paused Items ({currentPausedItems.length})
                   </div>
-                  <div className="space-y-2">
+                  
+                  {/* Desktop Grid Layout */}
+                  <div className="hidden md:block">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                      {itemsLoading ? (
+                        Array.from({ length: 3 }, (_, i) => (
+                          <div key={i} className="bg-card/30 backdrop-blur-sm border border-border/30 rounded-xl p-4 shadow-sm animate-pulse h-24" />
+                        ))
+                      ) : (
+                        currentPausedItems.map((it) => (
+                          <div key={it.id} className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl p-3 shadow-sm hover:shadow-md hover:bg-card/60 transition-all duration-200 group cursor-pointer">
+                            <PillItem
+                              item={it}
+                              onClick={() => {
+                                setSelectedItem(it);
+                                setShowItemDetail(true);
+                              }}
+                            />
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mobile List Layout */}
+                  <div className="md:hidden space-y-2">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground">Loading…</div>
                     ) : (
@@ -408,9 +435,9 @@ console.log('Rendering main Index content');
 
               {/* Empty state */}
               {!itemsLoading && storeReadyItems.length === 0 && currentPausedItems.length === 0 && (
-                <div className="text-center py-8">
-                  <div className="text-muted-foreground text-sm">No paused items yet</div>
-                  <div className="text-xs text-muted-foreground mt-1">Add something below to get started</div>
+                <div className="text-center py-8 md:py-16 md:bg-card/20 md:backdrop-blur-sm md:rounded-2xl md:border md:border-border/30">
+                  <div className="text-muted-foreground text-sm md:text-base">No paused items yet</div>
+                  <div className="text-xs text-muted-foreground mt-1 md:text-sm md:mt-2">Add something below to get started</div>
                 </div>
               )}
               
@@ -430,10 +457,10 @@ console.log('Rendering main Index content');
       </div>
       
       {/* Sticky Footer with Add Pause Button and Footer Links */}
-      <div className={`fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50 transition-all duration-300 ${
-        hideBottomArea ? 'pb-2 pt-2' : 'pb-6 sm:pb-4 pt-4'
+      <div className={`fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50 transition-all duration-300 md:bg-card/90 md:backdrop-blur-sm md:border-t-primary/20 md:shadow-2xl ${
+        hideBottomArea ? 'pb-2 pt-2' : 'pb-6 sm:pb-4 pt-4 md:pt-6 md:pb-8'
       }`}>
-        <div className="max-w-sm md:max-w-lg lg:max-w-2xl mx-auto">
+        <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto md:px-8 lg:px-12">
           {pillMode ? (
             <PillQuickPauseBar
               compact={(compactQuickBar && !sharedPrefill) || (profileModalOpen && !sharedPrefill)}
