@@ -474,7 +474,7 @@ console.log('Rendering main Index content');
       <div className={`fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50 transition-all duration-300 md:bg-card/90 md:backdrop-blur-sm md:border-t-primary/20 md:shadow-2xl ${
         hideBottomArea ? 'pb-2 pt-2' : 'pb-6 sm:pb-4 pt-4 md:pt-6 md:pb-8'
       }`}>
-        <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto md:px-8 lg:px-12">
+        <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
           {pillMode ? (
             <PillQuickPauseBar
               compact={(compactQuickBar && !sharedPrefill) || (profileModalOpen && !sharedPrefill)}

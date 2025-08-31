@@ -240,7 +240,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
               value={url}
               onChange={(e) => handleUrlChange(e.target.value)}
               placeholder="Paste a product URL"
-              className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/60 focus:outline-none focus:border-white/40 transition-colors"
+              className="w-full px-4 py-4 pr-12 rounded-xl border-2 border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/60 focus:outline-none focus:border-white/40 transition-colors"
             />
             {url && (
               <button
@@ -298,7 +298,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         onPointerDown={(e) => console.log('🔥 POINTER DOWN', e)}
         onTouchStart={(e) => console.log('🔥 TOUCH START', e)}
         disabled={false}
-        className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-4 rounded-xl transition-colors cursor-pointer"
+        className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-5 rounded-xl transition-colors cursor-pointer"
         style={{ 
           position: 'relative',
           zIndex: 9999,

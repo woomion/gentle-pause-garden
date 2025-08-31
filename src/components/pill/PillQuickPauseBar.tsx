@@ -294,7 +294,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 }
               }}
               placeholder="Paste a link..."
-              className="h-12 rounded-full text-base pr-12"
+              className="h-14 rounded-full text-base pr-12"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSubmit();
               }}
@@ -313,7 +313,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
           </div>
           <button
             onClick={() => setShowBarcodeScanner(true)}
-            className="h-12 px-4 bg-primary/10 hover:bg-primary/20 rounded-full border border-primary/20 hover:border-primary/40 transition-colors flex items-center gap-2"
+            className="h-14 px-4 bg-primary/10 hover:bg-primary/20 rounded-full border border-primary/20 hover:border-primary/40 transition-colors flex items-center gap-2"
             title="Scan Barcode"
           >
             <Scan size={20} className="text-primary" />
