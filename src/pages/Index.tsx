@@ -348,7 +348,13 @@ console.log('Rendering main Index content');
 
 
               {/* Current Paused Items Section */}
-              {currentPausedItems.length > 0 && (
+              {(() => {
+                console.log('🔍 RENDER DEBUG - currentPausedItems:', {
+                  length: currentPausedItems.length,
+                  items: currentPausedItems.map(item => ({ id: item.id, name: item.itemName, checkInTime: item.checkInTime }))
+                });
+                return currentPausedItems.length > 0;
+              })() && (
                 <div className="mb-4">
                   <div className="text-xs font-medium text-muted-foreground mb-2 px-1">
                     Paused Items ({currentPausedItems.length})
