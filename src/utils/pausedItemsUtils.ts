@@ -8,8 +8,8 @@ export const extractStoreName = (url: string): string => {
   console.log('🔧 extractStoreName called with URL:', url);
   
   if (!url) {
-    console.log('🔧 extractStoreName: No URL provided, returning Unknown Store');
-    return 'Unknown Store';
+    console.log('🔧 extractStoreName: No URL provided, returning empty string');
+    return '';
   }
   
   try {
@@ -17,16 +17,16 @@ export const extractStoreName = (url: string): string => {
     const result = hostname.replace('www.', '').split('.')[0];
     console.log('🔧 extractStoreName: hostname:', hostname, 'result:', result);
     
-    // If the result is the Supabase project ID, return Unknown Store instead
+    // If the result is the Supabase project ID, return empty string instead
     if (result === 'cnjznmbgxprsrovmdywe') {
-      console.log('🔧 extractStoreName: Detected Supabase project ID, returning Unknown Store');
-      return 'Unknown Store';
+      console.log('🔧 extractStoreName: Detected Supabase project ID, returning empty string');
+      return '';
     }
     
     return result;
   } catch {
-    console.log('🔧 extractStoreName: Error parsing URL, returning Unknown Store');
-    return 'Unknown Store';
+    console.log('🔧 extractStoreName: Error parsing URL, returning empty string');
+    return '';
   }
 };
 
@@ -58,7 +58,7 @@ export const calculateCheckInTimeDisplay = (checkInDate: Date): string => {
 
 // Legacy functions for backward compatibility with pause log converters
 export const extractStoreNameFromNotes = (notes: string | null): string => {
-  if (!notes) return 'Unknown Store';
+  if (!notes) return '';
   
   if (notes.includes('STORE:')) {
     const storeMatch = notes.match(/STORE:([^|]*)/);
@@ -67,7 +67,7 @@ export const extractStoreNameFromNotes = (notes: string | null): string => {
     }
   }
   
-  return 'Unknown Store';
+  return '';
 };
 
 export const extractActualNotes = (notes: string | null): string | undefined => {
@@ -89,7 +89,7 @@ export const extractActualNotes = (notes: string | null): string | undefined => 
 export const formatNotesWithStore = (storeName: string, notes?: string): string | null => {
   let notesWithStore = '';
   
-  if (storeName && storeName !== 'Unknown Store') {
+  if (storeName && storeName.trim()) {
     notesWithStore = `STORE:${storeName}`;
     if (notes && notes.trim()) {
       notesWithStore += `|${notes}`;

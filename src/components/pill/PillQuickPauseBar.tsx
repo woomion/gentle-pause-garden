@@ -67,6 +67,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
   const [value, setValue] = useState('');
   const [duration, setDuration] = useState<string>('24 hours');
   const [submitting, setSubmitting] = useState(false);
+  const [showRipple, setShowRipple] = useState(false);
   const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [showPremiumDurationModal, setShowPremiumDurationModal] = useState(false);
@@ -363,12 +364,17 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 console.log('🔥 PAUSE BUTTON CLICKED in PillQuickPauseBar!', e);
                 e.preventDefault();
                 e.stopPropagation();
+                
+                // Trigger ripple animation
+                setShowRipple(true);
+                setTimeout(() => setShowRipple(false), 600);
+                
                 handleSubmit();
               }} 
               disabled={!value.trim() || submitting} 
               size="xl" 
               shape="pill" 
-              className="w-full"
+              className="relative w-full overflow-hidden"
               style={{ 
                 position: 'relative',
                 zIndex: 9999,
@@ -376,6 +382,14 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 touchAction: 'manipulation'
               }}
             >
+              {/* Ripple effect */}
+              {showRipple && (
+                <div className="absolute inset-0 overflow-hidden rounded-full pointer-events-none">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 bg-white/40 rounded-full animate-ripple"></div>
+                  </div>
+                </div>
+              )}
               {submitting ? 'Pausing…' : 'Pause for 24 hours'}
             </Button>
           )}

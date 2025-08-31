@@ -1,6 +1,6 @@
 
 export const extractStoreNameFromNotes = (notes: string | null): string => {
-  if (!notes) return 'Unknown Store';
+  if (!notes) return '';
   
   if (notes.includes('STORE:')) {
     const storeMatch = notes.match(/STORE:([^|]*)/);
@@ -9,7 +9,7 @@ export const extractStoreNameFromNotes = (notes: string | null): string => {
     }
   }
   
-  return 'Unknown Store';
+  return '';
 };
 
 export const extractProductLinkFromNotes = (notes: string | null): string | undefined => {
@@ -48,7 +48,7 @@ export const formatNotesWithMetadata = (
 ): string | null => {
   let notesWithMetadata = '';
   
-  if (storeName && storeName !== 'Unknown Store') {
+  if (storeName && storeName.trim()) {
     notesWithMetadata = `STORE:${storeName}`;
   }
   
