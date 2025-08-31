@@ -380,13 +380,13 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
               {submitting && (
                 <div className="absolute inset-0 overflow-hidden rounded-full pointer-events-none">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-6 h-6 bg-white/30 rounded-full animate-processing-ripple"></div>
+                    <div className="w-8 h-8 bg-white/40 rounded-full animate-processing-ripple"></div>
                   </div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-4 h-4 bg-white/20 rounded-full animate-processing-ripple" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="w-8 h-8 bg-white/30 rounded-full animate-processing-ripple" style={{ animationDelay: '0.5s' }}></div>
                   </div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-2 h-2 bg-white/15 rounded-full animate-processing-ripple" style={{ animationDelay: '1s' }}></div>
+                    <div className="w-8 h-8 bg-white/20 rounded-full animate-processing-ripple" style={{ animationDelay: '1s' }}></div>
                   </div>
                 </div>
               )}

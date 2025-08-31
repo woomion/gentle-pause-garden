@@ -178,16 +178,16 @@ export default {
 				},
 				'processing-ripple': {
 					'0%': {
-						transform: 'scale(0.8)',
+						transform: 'scale(0)',
 						opacity: '0.6'
 					},
 					'50%': {
-						transform: 'scale(1.2)',
+						transform: 'scale(2)',
 						opacity: '0.3'
 					},
 					'100%': {
-						transform: 'scale(0.8)',
-						opacity: '0.6'
+						transform: 'scale(4)',
+						opacity: '0'
 					}
 				}
 			},
@@ -199,7 +199,7 @@ export default {
 				'slide-in-left': 'slide-in-left 0.8s ease-out',
 				'slide-in-right': 'slide-in-right 0.8s ease-out',
 				'ripple': 'ripple 0.6s ease-out',
-				'processing-ripple': 'processing-ripple 2s ease-in-out infinite'
+				'processing-ripple': 'processing-ripple 1.5s ease-out infinite'
 			}
 		}
 	},
