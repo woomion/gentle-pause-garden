@@ -1,5 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
 import ReviewBanner from '../components/ReviewBanner';
@@ -50,6 +51,10 @@ const Index = () => {
 
   // Pill mode state (sorting and items)
   const { items, loading: itemsLoading, getItemsForReview, removeItem, updateItem } = usePausedItems();
+  const [showImages, setShowImages] = useState(() => {
+    const saved = localStorage.getItem('pocketpause-show-images');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
   const [sortMode, setSortMode] = useState<'soonest' | 'newest'>(
     (localStorage.getItem('pill_sort') as 'soonest' | 'newest') || 'soonest'
   );
@@ -346,7 +351,25 @@ console.log('Rendering main Index content');
                   <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
                 </div>
               )}
-              <div className="mb-4 flex items-center justify-end gap-2">
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const newValue = !showImages;
+                      setShowImages(newValue);
+                      localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
+                    }}
+                    className="p-2 hover:bg-muted/60 rounded-full transition-colors"
+                    title={showImages ? 'Hide images' : 'Show images'}
+                    aria-label={showImages ? 'Hide images' : 'Show images'}
+                  >
+                    {showImages ? (
+                      <Eye size={16} className="text-muted-foreground" />
+                    ) : (
+                      <EyeOff size={16} className="text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
                 <div className="flex items-center gap-2 text-xs md:text-sm" aria-label="Sort items">
                   <span className="text-muted-foreground">Sort:</span>
                   <button
@@ -400,6 +423,7 @@ console.log('Rendering main Index content');
                           <DesktopItemCard
                             key={it.id}
                             item={it}
+                            showImages={showImages}
                             onClick={() => {
                               setSelectedItem(it);
                               setShowItemDetail(true);
