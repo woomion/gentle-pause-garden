@@ -374,7 +374,7 @@ console.log('Rendering main Index content');
                     )}
                   </button>
                 </div>
-                <div className="flex items-center gap-2 text-xs md:text-sm" aria-label="Sort items">
+                <div className="flex items-center justify-end gap-2 text-xs md:text-sm md:justify-start" aria-label="Sort items">
                   <span className="text-muted-foreground">Sort:</span>
                   <button
                     className={`px-2 py-1 rounded-full border transition-all duration-200 md:px-3 md:py-2 ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30 md:bg-primary/20 md:shadow-sm' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted md:hover:bg-muted/60'}`}
