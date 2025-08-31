@@ -55,94 +55,91 @@ const DesktopItemCard = ({ item, onClick, onEdit, onDelete }: DesktopItemCardPro
       </div>
 
       {/* Card content */}
-      <div className="p-4 cursor-pointer" onClick={onClick}>
-        <div className="flex gap-3 mb-3">
-          {/* Item image */}
-          <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-muted/30">
-            <ItemImage
-              item={item}
-            />
-          </div>
-
-          {/* Item details */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="font-semibold text-sm text-foreground truncate">{itemName}</h3>
-              
-              {/* Actions dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <MoreHorizontal className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32">
-                  {item.link && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewItem(item);
-                      }}
-                      className="text-xs"
-                    >
-                      <ExternalLink className="h-3 w-3 mr-2" />
-                      View
-                    </DropdownMenuItem>
-                  )}
+      <div className="cursor-pointer" onClick={onClick}>
+        {/* Main image */}
+        <div className="relative w-full h-48 bg-muted/30 overflow-hidden">
+          <ItemImage item={item} />
+          
+          {/* Actions dropdown overlay */}
+          <div className="absolute top-3 right-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-background/90"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                {item.link && (
                   <DropdownMenuItem
                     onClick={(e) => {
                       e.stopPropagation();
-                      setShowEditModal(true);
+                      handleViewItem(item);
                     }}
-                    className="text-xs"
+                    className="text-sm"
                   >
-                    <Edit className="h-3 w-3 mr-2" />
-                    Edit
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View
                   </DropdownMenuItem>
-                  {onDelete && (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(item.id);
-                      }}
-                      className="text-xs text-destructive"
-                    >
-                      Delete
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            
-            {storeName && (
-              <p className="text-xs text-muted-foreground mb-1 truncate">{storeName}</p>
-            )}
-            
-            <div className="flex items-center justify-between">
-              {formattedPrice && (
-                <span className="text-sm font-medium text-foreground">{formattedPrice}</span>
-              )}
-              <span className="text-xs text-muted-foreground">{item.checkInTime}</span>
-            </div>
+                )}
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEditModal(true);
+                  }}
+                  className="text-sm"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                {onDelete && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(item.id);
+                    }}
+                    className="text-sm text-destructive"
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+
+          {/* Ready indicator */}
+          {isReadyForReview && (
+            <div className="absolute top-3 left-3 w-3 h-3 bg-primary rounded-full animate-pulse shadow-lg" />
+          )}
         </div>
 
-        {/* Notes preview if available */}
-        {item.notes && (
-          <div className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-            {item.notes}
+        {/* Item details */}
+        <div className="p-4">
+          <div className="mb-2">
+            <h3 className="font-semibold text-lg text-foreground mb-1 line-clamp-1">{itemName}</h3>
+            {storeName && (
+              <p className="text-sm text-muted-foreground mb-2 line-clamp-1">{storeName}</p>
+            )}
           </div>
-        )}
-      </div>
+          
+          <div className="flex items-center justify-between mb-3">
+            {formattedPrice && (
+              <span className="text-lg font-semibold text-foreground">{formattedPrice}</span>
+            )}
+            <span className="text-sm text-muted-foreground">{item.checkInTime}</span>
+          </div>
 
-      {/* Ready indicator */}
-      {isReadyForReview && (
-        <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse" />
-      )}
+          {/* Notes preview if available */}
+          {item.notes && (
+            <div className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+              {item.notes}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
