@@ -109,8 +109,8 @@ const DesktopItemCard = ({ item, onClick, onEdit, onDelete }: DesktopItemCardPro
             <div
               className={`h-full transition-all duration-300 ${
                 isReadyForReview 
-                  ? 'bg-gradient-to-r from-primary to-primary/80' 
-                  : 'bg-gradient-to-r from-muted-foreground/40 to-muted-foreground/20'
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-400' 
+                  : 'bg-gradient-to-r from-purple-500/60 to-purple-400/40'
               }`}
               style={{ width: `${progress}%` }}
             />
