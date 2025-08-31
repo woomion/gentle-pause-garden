@@ -199,24 +199,50 @@ const Index = () => {
   useEffect(() => {
     const handleScroll = (scrollTop: number) => {
       const scrollingDown = scrollTop > lastScrollY;
+      const scrollDelta = Math.abs(scrollTop - lastScrollY);
+      
+      // More responsive on mobile - smaller thresholds
+      const isMobile = window.innerWidth < 768;
+      const compactThreshold = isMobile ? 5 : 8;
+      const hideThreshold = isMobile ? 50 : 100;
+      const showThreshold = isMobile ? 15 : 30;
       
       // Compact mode when scrolling just a bit
-      setCompactQuickBar(scrollTop > 8);
+      setCompactQuickBar(scrollTop > compactThreshold);
       
-      // Hide completely when scrolling down more
-      if (scrollingDown && scrollTop > 100) {
+      // Hide completely when scrolling down more (with momentum consideration)
+      if (scrollingDown && scrollTop > hideThreshold && scrollDelta > 2) {
         setHideBottomArea(true);
-      } else if (!scrollingDown || scrollTop < 30) {
+      } else if (!scrollingDown && (scrollTop < showThreshold || scrollDelta > 5)) {
         setHideBottomArea(false);
       }
       
       setLastScrollY(scrollTop);
     };
 
+    // Container scroll handler (primary for mobile)
+    const onContainerScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      handleScroll(target.scrollTop);
+    };
+
     // Fallback: window scroll handler
     const onWinScroll = () => handleScroll(window.scrollY);
+
+    // Add container scroll listener if ref exists
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', onContainerScroll, { passive: true });
+    }
+    
     window.addEventListener('scroll', onWinScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onWinScroll);
+    
+    return () => {
+      if (container) {
+        container.removeEventListener('scroll', onContainerScroll);
+      }
+      window.removeEventListener('scroll', onWinScroll);
+    };
   }, [lastScrollY]);
 
   // Debug scroll container dimensions
@@ -303,7 +329,11 @@ console.log('Rendering main Index content');
           ref={scrollContainerRef}
           onScroll={(e) => {
             const scrollTop = e.currentTarget.scrollTop;
-            if (scrollTop > 30) {
+            // This handles container scrolling on mobile - more aggressive hiding
+            const isMobile = window.innerWidth < 768;
+            const threshold = isMobile ? 20 : 30;
+            
+            if (scrollTop > threshold) {
               setHideBottomArea(true);
             } else {
               setHideBottomArea(false);
@@ -352,7 +382,7 @@ console.log('Rendering main Index content');
                 </div>
               )}
               <div className="mb-4 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="hidden md:flex items-center gap-2">
                   <button
                     onClick={() => {
                       const newValue = !showImages;
