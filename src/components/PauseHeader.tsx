@@ -46,51 +46,53 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
 
   return (
     <>
-      <header className="relative mb-6 sm:mb-8">
-        <div className={`text-center md:text-left ${installed ? 'pt-0' : 'pt-1'}`}>
-          {/* Desktop header - position to match content below exactly */}
-          <div className="hidden md:block relative">
-            <Link
-              to={{ pathname: '/', search: location.search }}
-              className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors inline-block"
-            >
-              POCKET || PAUSE
-            </Link>
-            
-            <div className="absolute top-0 right-0">
-              <div className="flex items-center gap-3">
-                {showCourses && (
+      <header className="relative mb-3 sm:mb-4">
+        <div className={`text-center md:text-left ${installed ? '' : 'pt-1'}`}>
+          {/* Desktop header - match exact content positioning */}
+          <div className="hidden md:block relative -mx-4">
+            <div className="px-4 flex items-center justify-between">
+              <Link
+                to={{ pathname: '/', search: location.search }}
+                className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors"
+              >
+                POCKET || PAUSE
+              </Link>
+              
+              <div className="relative">
+                <div className="flex items-center gap-3">
+                  {showCourses && (
+                    <button
+                      className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
+                      onClick={handleCourseClick}
+                      title="Course section"
+                    >
+                      <BookOpen size={24} />
+                    </button>
+                  )}
+
                   <button
                     className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
-                    onClick={handleCourseClick}
-                    title="Course section"
+                    onClick={handleAccountClick}
                   >
-                    <BookOpen size={24} />
+                    {user ? (
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <User size={24} />
+                    )}
                   </button>
-                )}
-
-                <button
-                  className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
-                  onClick={handleAccountClick}
-                >
-                  {user ? (
-                    <Avatar className="w-6 h-6">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <User size={24} />
-                  )}
-                </button>
-              </div>
-              
-              {/* Guest mode indicator positioned beneath account icon */}
-              {!user && (
-                <div className="absolute top-full right-0 mt-2 text-xs text-muted-foreground bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-2 py-1 whitespace-nowrap">
-                  Guest Mode: Items stored locally only
                 </div>
-              )}
+                
+                {/* Guest mode indicator positioned beneath account icon */}
+                {!user && (
+                  <div className="absolute top-full right-0 mt-2 text-xs text-muted-foreground bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-2 py-1 whitespace-nowrap">
+                    Guest Mode: Items stored locally only
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           

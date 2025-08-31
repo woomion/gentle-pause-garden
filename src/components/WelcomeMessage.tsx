@@ -43,7 +43,7 @@ const WelcomeMessage = ({ firstName }: WelcomeMessageProps) => {
   const timeBasedMessage = getTimeBasedMessage();
   
   return (
-    <div className="mb-6 mt-6 sm:mt-8 text-center">
+    <div className="mb-4 mt-2 text-center">
       <h1 className="text-2xl md:text-3xl font-bold font-inter text-foreground leading-tight">
         Hi {displayName}
       </h1>
