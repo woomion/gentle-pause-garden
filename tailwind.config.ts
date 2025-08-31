@@ -182,11 +182,11 @@ export default {
 						opacity: '0.6'
 					},
 					'50%': {
-						transform: 'scale(5)',
+						transform: 'scale(10)',
 						opacity: '0.3'
 					},
 					'100%': {
-						transform: 'scale(10)',
+						transform: 'scale(20)',
 						opacity: '0'
 					}
 				}
@@ -199,7 +199,7 @@ export default {
 				'slide-in-left': 'slide-in-left 0.8s ease-out',
 				'slide-in-right': 'slide-in-right 0.8s ease-out',
 				'ripple': 'ripple 0.6s ease-out',
-				'processing-ripple': 'processing-ripple 1.5s ease-out infinite'
+				'processing-ripple': 'processing-ripple 2s ease-in-out infinite'
 			}
 		}
 	},
