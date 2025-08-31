@@ -308,19 +308,27 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
           userSelect: 'none'
         }}
       >
-        {/* Ripple effect */}
+        {/* Click ripple effect */}
         {showRipple && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-2 h-2 bg-primary/30 rounded-full animate-ripple"></div>
+          <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 bg-white/40 rounded-full animate-ripple"></div>
+            </div>
           </div>
         )}
         
         {/* Processing ripple effect */}
         {isParsingUrl && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-16 h-16 bg-white/20 rounded-full animate-processing-ripple"></div>
-            <div className="absolute w-12 h-12 bg-white/10 rounded-full animate-processing-ripple" style={{ animationDelay: '0.5s' }}></div>
-            <div className="absolute w-8 h-8 bg-white/05 rounded-full animate-processing-ripple" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="w-20 h-20 bg-white/20 rounded-full animate-processing-ripple"></div>
+            </div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="w-16 h-16 bg-white/15 rounded-full animate-processing-ripple" style={{ animationDelay: '0.3s' }}></div>
+            </div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="w-12 h-12 bg-white/10 rounded-full animate-processing-ripple" style={{ animationDelay: '0.6s' }}></div>
+            </div>
           </div>
         )}
         
