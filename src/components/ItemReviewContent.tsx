@@ -3,7 +3,7 @@ import { PausedItem } from '../stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '../stores/pausedItemsStore';
 import { useItemNavigation } from '../hooks/useItemNavigation';
 import { useItemActions } from '../hooks/useItemActions';
-import ItemReviewDetails from './ItemReviewDetails';
+import ReviewItemCard from './ReviewItemCard';
 import ItemReviewDecisionButtons from './ItemReviewDecisionButtons';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -76,7 +76,7 @@ const ItemReviewContent = ({
 
   return (
     <div className="p-6">
-      <ItemReviewDetails item={item} onViewItem={handleViewItem} />
+      <ReviewItemCard item={item} onViewItem={handleViewItem} />
       
       {/* Temporarily commented out user notes in review */}
       {/* {userNotes?.trim() && (
