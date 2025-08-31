@@ -393,7 +393,7 @@ console.log('Rendering main Index content');
                   
                   {/* Desktop Grid Layout - 3 columns */}
                   <div className="hidden md:block">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 auto-rows-fr">
                       {itemsLoading ? (
                         Array.from({ length: 6 }, (_, i) => (
                           <div key={i} className="bg-card/30 backdrop-blur-sm border border-border/30 rounded-xl shadow-sm animate-pulse">
