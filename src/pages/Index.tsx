@@ -261,7 +261,7 @@ console.log('Rendering main Index content');
     <>
       <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 flex flex-col md:bg-gradient-to-br md:from-background md:via-background/95 md:to-accent/10">
         {/* Header area - fixed height */}
-        <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 ${installed ? 'pt-6 sm:pt-8 md:pt-12 lg:pt-16' : 'pt-12 sm:pt-16 md:pt-20 lg:pt-24'}`}>
+        <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 ${installed ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-10' : 'pt-8 sm:pt-12 md:pt-14 lg:pt-16'}`}>
           <PauseHeader onProfileModalChange={(isOpen) => {
             console.log('Profile modal changed:', isOpen);
             setProfileModalOpen(isOpen);
@@ -361,7 +361,7 @@ console.log('Rendering main Index content');
                   </div>
                 </div>
               )}
-              <div className="mb-4 flex items-center justify-end gap-2 md:bg-card/30 md:backdrop-blur-sm md:rounded-lg md:p-3 md:border md:border-border/30">
+              <div className="mb-4 flex items-center justify-end gap-2">
                 <div className="flex items-center gap-2 text-xs md:text-sm" aria-label="Sort items">
                   <span className="text-muted-foreground">Sort:</span>
                   <button
