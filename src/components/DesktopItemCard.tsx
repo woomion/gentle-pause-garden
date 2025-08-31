@@ -42,17 +42,6 @@ const DesktopItemCard = ({ item, onClick, onEdit, onDelete }: DesktopItemCardPro
 
   return (
     <div className="group relative bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl shadow-sm hover:shadow-lg hover:bg-card/60 transition-all duration-300 overflow-hidden">
-      {/* Progress bar at top */}
-      <div className="h-1 w-full bg-muted/30">
-        <div
-          className={`h-full transition-all duration-300 ${
-            isReadyForReview 
-              ? 'bg-gradient-to-r from-primary to-primary/80' 
-              : 'bg-gradient-to-r from-muted-foreground/40 to-muted-foreground/20'
-          }`}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
 
       {/* Card content */}
       <div className="cursor-pointer" onClick={onClick}>
@@ -114,6 +103,18 @@ const DesktopItemCard = ({ item, onClick, onEdit, onDelete }: DesktopItemCardPro
           {isReadyForReview && (
             <div className="absolute top-3 left-3 w-3 h-3 bg-primary rounded-full animate-pulse shadow-lg" />
           )}
+          
+          {/* Progress bar at bottom of image */}
+          <div className="absolute bottom-0 left-0 right-0 h-2 bg-muted/30">
+            <div
+              className={`h-full transition-all duration-300 ${
+                isReadyForReview 
+                  ? 'bg-gradient-to-r from-primary to-primary/80' 
+                  : 'bg-gradient-to-r from-muted-foreground/40 to-muted-foreground/20'
+              }`}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
 
         {/* Item details */}
