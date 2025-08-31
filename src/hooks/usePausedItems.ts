@@ -43,30 +43,49 @@ export const usePausedItems = () => {
   }, [user]);
 
   const addItem = async (item: Omit<PausedItem | LocalPausedItem, 'id' | 'pausedAt' | 'checkInTime' | 'checkInDate'>) => {
+    console.log('🔄 usePausedItems.addItem called with:', item);
+    console.log('🔄 User authenticated:', !!user);
+    console.log('🔄 Network status - isOnline:', isOnline);
+    
     if (!user) {
       // Guest mode - local only
+      console.log('👤 Guest mode: Adding to local storage only');
       await pausedItemsStore.addItem(item);
+      console.log('✅ Guest mode: Item added to local storage');
       return;
     }
 
     // Authenticated mode - offline-first approach
     if (isOnline) {
       try {
+        console.log('🌐 Online mode: Attempting to add directly to Supabase');
         // Try to add directly to Supabase
         await supabasePausedItemsStore.addItem(item);
         console.log('✅ Item added directly to Supabase');
       } catch (error) {
         console.error('❌ Failed to add item to Supabase, queuing for offline sync:', error);
+        console.error('❌ Supabase error details:', {
+          name: error?.name,
+          message: error?.message,
+          status: error?.status,
+          statusText: error?.statusText
+        });
+        
         // Add to offline queue if direct add fails
+        console.log('📝 Adding to offline queue...');
         offlineQueueStore.addOperation('ADD_ITEM', item);
+        
         // Also add to local store for immediate UI feedback
+        console.log('📱 Adding to local store for immediate feedback...');
         await pausedItemsStore.addItem(item);
+        console.log('✅ Item added to local store and queued for sync');
       }
     } else {
       // Offline - add to queue and local store
       console.log('📵 Offline: Adding item to queue and local store');
       offlineQueueStore.addOperation('ADD_ITEM', item);
       await pausedItemsStore.addItem(item);
+      console.log('✅ Offline: Item added to queue and local store');
     }
   };
 

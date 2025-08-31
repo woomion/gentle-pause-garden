@@ -30,11 +30,12 @@ export const useModalStates = () => {
     if (parsedData && (parsedData.itemName || parsedData.link)) {
       try {
         console.log('✅ Adding item directly to paused items:', parsedData);
+        console.log('📊 Before addItem - current items count:', usageLimit.monthlyItemsUsed);
+        
         await addItem({
           itemName: parsedData.itemName || 'Product',
           storeName: parsedData.storeName || '',
           price: parsedData.price || '',
-          
           notes: undefined,
           duration: '1 week',
           link: parsedData.link,
@@ -46,8 +47,11 @@ export const useModalStates = () => {
           usePlaceholder: false,
         });
         
+        console.log('🎉 addItem completed successfully');
+        
         // Increment usage count for non-authenticated users
         usageLimit.incrementUsage();
+        console.log('📊 After incrementUsage - new count:', usageLimit.monthlyItemsUsed);
         
         toast({ 
           title: 'Paused', 
@@ -57,10 +61,14 @@ export const useModalStates = () => {
         
         console.log('✅ Item successfully added to pause list');
       } catch (error) {
-        console.error('❌ Failed to add item:', error);
+        console.error('❌ Failed to add item - Full error:', error);
+        console.error('❌ Error name:', error?.name);
+        console.error('❌ Error message:', error?.message);
+        console.error('❌ Error stack:', error?.stack);
+        
         toast({ 
           title: 'Error', 
-          description: 'Could not add item to pause list', 
+          description: `Could not add item: ${error?.message || 'Unknown error'}`, 
           variant: 'destructive' 
         });
       }
