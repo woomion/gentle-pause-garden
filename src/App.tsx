@@ -22,7 +22,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import AuthGuard from "./components/AuthGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
-import MobileDebugger from "./components/MobileDebugger";
+
 
 import { offlineSyncService } from "./services/offlineSyncService";
 
@@ -142,7 +142,7 @@ const App = () => {
         <AuthProvider>
           <ThemeProvider defaultTheme="light">
             <TooltipProvider>
-              <MobileDebugger />
+              
               <OfflineIndicator />
               <PWAInstallBanner />
               <Toaster />

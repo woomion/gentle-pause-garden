@@ -292,36 +292,6 @@ console.log('Rendering main Index content');
         <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12`}>
           <WelcomeWithValues />
           
-          {/* Notification Debug Banner */}
-          {user && (
-            <div className="mt-4 p-3 bg-accent/50 rounded-lg border border-border md:bg-gradient-to-r md:from-primary/5 md:to-accent/30 md:border-primary/20 md:p-4 md:rounded-xl md:shadow-sm">
-              <div className="text-xs text-muted-foreground mb-2 md:text-sm md:font-medium md:text-foreground md:mb-3">
-                <span className="md:hidden">Notification Status: {notificationStatus}</span>
-                <span className="hidden md:inline">🔔 Notification Center</span>
-              </div>
-              <div className="hidden md:block text-xs text-muted-foreground mb-3 bg-card/50 rounded-lg p-2 border border-border/50">
-                Status: {notificationStatus}
-              </div>
-              <div className="flex gap-2 md:gap-3">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={handleRequestNotificationPermission}
-                  className="text-xs md:text-sm md:px-4 md:py-2 md:h-auto md:bg-primary/10 md:border-primary/30 md:hover:bg-primary/20 md:transition-all md:duration-200"
-                >
-                  Enable Notifications
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={testNotification}
-                  className="text-xs md:text-sm md:px-4 md:py-2 md:h-auto md:bg-secondary/50 md:border-secondary md:hover:bg-secondary/70 md:transition-all md:duration-200"
-                >
-                  Test Notification
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
 
         <div 
