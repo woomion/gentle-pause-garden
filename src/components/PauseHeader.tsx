@@ -51,12 +51,12 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
         <div className={`text-center md:text-left md:flex md:items-center md:justify-between ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
           <Link
             to={{ pathname: '/', search: location.search }}
-            className={`text-foreground font-medium text-lg tracking-wide ${installed ? 'mb-4 sm:mb-6 md:mb-0' : 'mb-6 sm:mb-8 md:mb-0'} hover:text-muted-foreground transition-colors inline-block md:-ml-2 lg:-ml-2 xl:-ml-2`}
+            className={`text-foreground font-medium text-lg tracking-wide ${installed ? 'mb-4 sm:mb-6 md:mb-0' : 'mb-6 sm:mb-8 md:mb-0'} hover:text-muted-foreground transition-colors inline-block`}
           >
             POCKET || PAUSE
           </Link>
           
-          <div className="hidden md:flex items-center gap-3 md:-mr-2 lg:-mr-2 xl:-mr-2">
+          <div className="hidden md:flex items-center gap-3">
             {showCourses && (
               <button
                 className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
