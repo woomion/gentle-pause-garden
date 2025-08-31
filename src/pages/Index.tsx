@@ -195,67 +195,7 @@ const Index = () => {
     clearSharedContent();
   }, [sharedContent, pillMode]);
 
-  // Simplified mobile-first intelligent collapsing with debugging
-  useEffect(() => {
-    const isMobile = () => window.innerWidth < 768;
-    
-    const handleScroll = (scrollTop: number) => {
-      const scrollingDown = scrollTop > lastScrollY;
-      const currentIsMobile = isMobile();
-      
-      // Debug logging for mobile
-      if (currentIsMobile && scrollTop > 0) {
-        console.log('📱 Mobile scroll:', { scrollTop, scrollingDown, lastScrollY, compactQuickBar, hideBottomArea });
-      }
-      
-      if (currentIsMobile) {
-        // Mobile: Simple and aggressive collapsing
-        if (scrollingDown && scrollTop > 25) {
-          console.log('📱 Setting compact=true');
-          setCompactQuickBar(true);
-          if (scrollTop > 40) {
-            console.log('📱 Setting hideBottomArea=true');
-            setHideBottomArea(true);
-          }
-        } else if (!scrollingDown || scrollTop < 15) {
-          console.log('📱 Expanding - compact=false, hideBottomArea=false');
-          setCompactQuickBar(false);
-          setHideBottomArea(false);
-        }
-      } else {
-        // Desktop: Original behavior
-        setCompactQuickBar(scrollTop > 8);
-        if (scrollingDown && scrollTop > 100) {
-          setHideBottomArea(true);
-        } else if (!scrollingDown || scrollTop < 30) {
-          setHideBottomArea(false);
-        }
-      }
-      
-      setLastScrollY(scrollTop);
-    };
-
-    // Container scroll handler (primary for mobile)
-    const onContainerScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      handleScroll(target.scrollTop);
-    };
-
-    // Add container scroll listener if ref exists
-    const container = scrollContainerRef.current;
-    if (container) {
-      console.log('📱 Adding scroll listener to container');
-      container.addEventListener('scroll', onContainerScroll, { passive: true });
-    } else {
-      console.log('❌ No scroll container found');
-    }
-    
-    return () => {
-      if (container) {
-        container.removeEventListener('scroll', onContainerScroll);
-      }
-    };
-  }, [lastScrollY, compactQuickBar, hideBottomArea]);
+  // No additional useEffect needed - scroll handling is done inline
 
   // Debug scroll container dimensions
   useEffect(() => {
@@ -340,8 +280,32 @@ console.log('Rendering main Index content');
         <div 
           ref={scrollContainerRef}
           onScroll={(e) => {
-            // Simplified mobile scroll handler - no complex logic here
-            // The main scroll handling is done in useEffect above
+            const scrollTop = e.currentTarget.scrollTop;
+            const scrollingDown = scrollTop > lastScrollY;
+            const isMobile = window.innerWidth < 768;
+            
+            if (isMobile) {
+              // Mobile: Immediate and aggressive collapsing
+              if (scrollingDown && scrollTop > 25) {
+                setCompactQuickBar(true);
+                if (scrollTop > 50) {
+                  setHideBottomArea(true);
+                }
+              } else if (!scrollingDown || scrollTop < 20) {
+                setCompactQuickBar(false);
+                setHideBottomArea(false);
+              }
+            } else {
+              // Desktop: Original behavior
+              setCompactQuickBar(scrollTop > 50);
+              if (scrollingDown && scrollTop > 100) {
+                setHideBottomArea(true);
+              } else if (!scrollingDown || scrollTop < 50) {
+                setHideBottomArea(false);
+              }
+            }
+            
+            setLastScrollY(scrollTop);
           }}
           className="flex-1 overflow-y-auto max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pb-40"
         >
@@ -519,42 +483,33 @@ console.log('Rendering main Index content');
         </div>
       </div>
       
-      {/* Sticky Footer with Add Pause Button and Footer Links */}
-      <div className={`fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 pt-4 pb-6 sm:pb-4 pb-safe z-50 transition-all duration-300 md:bg-card/90 md:backdrop-blur-sm md:border-t-primary/20 md:shadow-2xl ${
-        hideBottomArea ? 'pb-2 pt-2' : 'pb-6 sm:pb-4 pt-4 md:pt-6 md:pb-8'
-      }`}>
-        <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
-          {pillMode ? (
-            <PillQuickPauseBar
-              compact={(compactQuickBar && !sharedPrefill) || (profileModalOpen && !sharedPrefill)}
-              prefillValue={sharedPrefill}
-              onExpandRequest={() => {
-                setCompactQuickBar(false);
-                setHideBottomArea(false);
-              }}
-              onUrlEntry={() => {
-                // When URL is entered while profile modal is open, allow expansion
-                if (profileModalOpen) {
-                  setCompactQuickBar(false);
-                }
-                setHideBottomArea(false);
-              }}
-              onBarcodeScanned={() => {
-                // When barcode is scanned while profile modal is open, allow expansion  
-                if (profileModalOpen) {
-                  setCompactQuickBar(false);
-                }
-                setHideBottomArea(false);
-              }}
-              onCollapseChange={(collapsed) => {
-                setHideBottomArea(collapsed);
-              }}
-            />
-          ) : (
-            <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />
-          )}
-          {/* Only show FooterLinks when bottom area is not hidden */}
-          {!hideBottomArea && <FooterLinks />}
+      {/* Fixed bottom area */}
+      <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 ${hideBottomArea ? 'translate-y-full' : 'translate-y-0'}`}>
+        <div className="bg-background/95 backdrop-blur-sm border-t"
+             style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+          {/* Container matches the main content exactly */}
+          <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-4">
+            {pillMode ? (
+              <PillQuickPauseBar
+                compact={compactQuickBar}
+                prefillValue={sharedPrefill || ''}
+                onExpandRequest={() => setCompactQuickBar(false)}
+                onUrlEntry={() => {
+                  setHideBottomArea(false);
+                }}
+                onBarcodeScanned={() => {
+                  setHideBottomArea(false);
+                }}
+                onCollapseChange={(collapsed) => {
+                  setHideBottomArea(collapsed);
+                }}
+              />
+            ) : (
+              <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />
+            )}
+            {/* Only show FooterLinks when bottom area is not hidden */}
+            {!hideBottomArea && <FooterLinks />}
+          </div>
         </div>
       </div>
       
