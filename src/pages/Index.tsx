@@ -342,7 +342,7 @@ console.log('Rendering main Index content');
           {pillMode ? (
             <>
               {readyCount > 0 && (
-                <div className="mb-3 md:mb-6">
+                <div className="mb-3 md:mb-6 w-full md:w-auto">
                   <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
                 </div>
               )}
