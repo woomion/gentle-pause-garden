@@ -57,18 +57,6 @@ const ReviewItemCard = ({ item, onViewItem }: ReviewItemCardProps) => {
         {isReadyForReview && (
           <div className="absolute top-3 left-3 w-3 h-3 bg-primary rounded-full animate-pulse shadow-lg" />
         )}
-        
-        {/* Progress bar at bottom of image */}
-        <div className="absolute bottom-0 left-0 right-0 h-2 bg-muted/30">
-          <div
-            className={`h-full transition-all duration-300 ${
-              isReadyForReview 
-                ? 'bg-gradient-to-r from-purple-500 to-purple-400' 
-                : 'bg-gradient-to-r from-purple-500/60 to-purple-400/40'
-            }`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
       </div>
 
       {/* Item details */}
