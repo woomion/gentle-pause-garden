@@ -195,31 +195,36 @@ const Index = () => {
     clearSharedContent();
   }, [sharedContent, pillMode]);
 
-  // Enhanced scroll handling for mobile-first intelligent collapsing
+  // Simplified mobile-first intelligent collapsing with debugging
   useEffect(() => {
+    const isMobile = () => window.innerWidth < 768;
+    
     const handleScroll = (scrollTop: number) => {
       const scrollingDown = scrollTop > lastScrollY;
-      const scrollDelta = Math.abs(scrollTop - lastScrollY);
+      const currentIsMobile = isMobile();
       
-      // Mobile-specific behavior (under 768px)
-      const isMobile = window.innerWidth < 768;
+      // Debug logging for mobile
+      if (currentIsMobile && scrollTop > 0) {
+        console.log('📱 Mobile scroll:', { scrollTop, scrollingDown, lastScrollY, compactQuickBar, hideBottomArea });
+      }
       
-      if (isMobile) {
-        // More aggressive collapsing on mobile
-        if (scrollingDown && scrollTop > 30 && scrollDelta > 3) {
+      if (currentIsMobile) {
+        // Mobile: Simple and aggressive collapsing
+        if (scrollingDown && scrollTop > 25) {
+          console.log('📱 Setting compact=true');
           setCompactQuickBar(true);
-          setHideBottomArea(true);
-        } else if (!scrollingDown && scrollDelta > 5) {
-          setCompactQuickBar(false);
-          setHideBottomArea(false);
-        } else if (scrollTop < 10) {
+          if (scrollTop > 40) {
+            console.log('📱 Setting hideBottomArea=true');
+            setHideBottomArea(true);
+          }
+        } else if (!scrollingDown || scrollTop < 15) {
+          console.log('📱 Expanding - compact=false, hideBottomArea=false');
           setCompactQuickBar(false);
           setHideBottomArea(false);
         }
       } else {
-        // Desktop behavior
+        // Desktop: Original behavior
         setCompactQuickBar(scrollTop > 8);
-        
         if (scrollingDown && scrollTop > 100) {
           setHideBottomArea(true);
         } else if (!scrollingDown || scrollTop < 30) {
@@ -239,7 +244,10 @@ const Index = () => {
     // Add container scroll listener if ref exists
     const container = scrollContainerRef.current;
     if (container) {
+      console.log('📱 Adding scroll listener to container');
       container.addEventListener('scroll', onContainerScroll, { passive: true });
+    } else {
+      console.log('❌ No scroll container found');
     }
     
     return () => {
@@ -247,7 +255,7 @@ const Index = () => {
         container.removeEventListener('scroll', onContainerScroll);
       }
     };
-  }, [lastScrollY]);
+  }, [lastScrollY, compactQuickBar, hideBottomArea]);
 
   // Debug scroll container dimensions
   useEffect(() => {
@@ -332,27 +340,8 @@ console.log('Rendering main Index content');
         <div 
           ref={scrollContainerRef}
           onScroll={(e) => {
-            const scrollTop = e.currentTarget.scrollTop;
-            // Direct scroll handling for immediate responsiveness on mobile
-            const isMobile = window.innerWidth < 768;
-            
-            if (isMobile) {
-              // Mobile: more immediate collapsing
-              if (scrollTop > 20) {
-                setCompactQuickBar(true);
-                setHideBottomArea(true);
-              } else {
-                setCompactQuickBar(false);
-                setHideBottomArea(false);
-              }
-            } else {
-              // Desktop: original behavior
-              if (scrollTop > 30) {
-                setHideBottomArea(true);
-              } else {
-                setHideBottomArea(false);
-              }
-            }
+            // Simplified mobile scroll handler - no complex logic here
+            // The main scroll handling is done in useEffect above
           }}
           className="flex-1 overflow-y-auto max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pb-40"
         >
