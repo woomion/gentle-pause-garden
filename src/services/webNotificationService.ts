@@ -48,7 +48,17 @@ export class WebNotificationService {
   }
 
   showNotification(title: string, options: NotificationOptions = {}): void {
-    if (Notification.permission === 'granted') {
+    if (!('Notification' in window)) {
+      console.log('🔔 Web notifications not supported');
+      return;
+    }
+
+    if (Notification.permission !== 'granted') {
+      console.log('🔔 Web notification permission not granted, current permission:', Notification.permission);
+      return;
+    }
+
+    try {
       console.log('🔔 Showing notification:', title, options.body);
       
       // Clean options to only include valid Notification constructor properties
@@ -68,8 +78,14 @@ export class WebNotificationService {
         window.focus();
         notification.close();
       };
-    } else {
-      console.log('🔔 Web notification permission not granted, current permission:', Notification.permission);
+      
+      // Auto-close after 10 seconds
+      setTimeout(() => {
+        notification.close();
+      }, 10000);
+      
+    } catch (error) {
+      console.error('🔔 Error creating notification:', error);
     }
   }
 }

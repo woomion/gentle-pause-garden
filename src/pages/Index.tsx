@@ -63,14 +63,43 @@ const Index = () => {
   const storeReadyItems = getItemsForReview ? getItemsForReview() : [];
   const readyItemIds = new Set(storeReadyItems.map(item => item.id));
   
+  console.log('🔍 Pre-filter debug:', {
+    sortedItemIds: sortedItems.slice(0, 5).map(item => ({ id: item.id, name: item.itemName })),
+    readyItemIds: Array.from(readyItemIds).slice(0, 5),
+    storeReadyItemsCount: storeReadyItems.length,
+    sortedItemsCount: sortedItems.length
+  });
+  
   // Filter sorted items to exclude ready items (prevent duplicates)
-  const currentPausedItems = sortedItems.filter((i) => !readyItemIds.has(i.id));
+  // Check if items are actually ready by checking their individual check-in times
+  const currentPausedItems = sortedItems.filter((item) => {
+    // Double-check readiness using the individual item's check-in time
+    const itemCheckInTime = item.checkInDate ? item.checkInDate.getTime() : 0;
+    const isActuallyReady = itemCheckInTime <= now;
+    const isInReadyList = readyItemIds.has(item.id);
+    
+    // An item should be filtered out if it's either in the ready list OR actually ready
+    const shouldFilter = isInReadyList || isActuallyReady;
+    
+    if (shouldFilter) {
+      console.log('🔍 Filtering out ready item:', {
+        id: item.id, 
+        name: item.itemName,
+        checkInTime: item.checkInDate ? item.checkInDate.toISOString() : 'N/A',
+        isInReadyList,
+        isActuallyReady
+      });
+    }
+    
+    return !shouldFilter;
+  });
   
   console.log('🔍 Filtering debug:', {
     totalSortedItems: sortedItems.length,
     readyItemIds: Array.from(readyItemIds),
     currentPausedItemsCount: currentPausedItems.length,
-    storeReadyItemsCount: storeReadyItems.length
+    storeReadyItemsCount: storeReadyItems.length,
+    readyItemNames: storeReadyItems.map(item => item.itemName)
   });
   
   // State for ready count with automatic updates
