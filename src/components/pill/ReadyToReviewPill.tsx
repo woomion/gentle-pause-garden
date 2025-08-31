@@ -16,9 +16,14 @@ const ReadyToReviewPill: React.FC<ReadyToReviewPillProps> = ({ count, onClick })
       <div className="relative z-10 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium">Ready to review</span>
-          <ArrowRight size={16} />
+          {/* Arrow on desktop only */}
+          <ArrowRight size={16} className="hidden md:block" />
         </div>
-        <span className="shrink-0 text-xs opacity-80">{count}</span>
+        <div className="flex items-center gap-1">
+          {/* Arrow on mobile only, right before the count */}
+          <ArrowRight size={16} className="block md:hidden" />
+          <span className="shrink-0 text-xs opacity-80">{count}</span>
+        </div>
       </div>
     </button>
   );
