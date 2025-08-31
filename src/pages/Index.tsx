@@ -284,23 +284,27 @@ console.log('Rendering main Index content');
             const scrollingDown = scrollTop > lastScrollY;
             const isMobile = window.innerWidth < 768;
             
+            // Simplified and more reliable logic
             if (isMobile) {
-              // Mobile: Immediate and aggressive collapsing
-              if (scrollingDown && scrollTop > 25) {
+              // Mobile: More responsive collapsing
+              if (scrollingDown && scrollTop > 20) {
                 setCompactQuickBar(true);
-                if (scrollTop > 50) {
+                if (scrollTop > 40) {
                   setHideBottomArea(true);
                 }
-              } else if (!scrollingDown || scrollTop < 20) {
+              } else if (!scrollingDown || scrollTop < 15) {
                 setCompactQuickBar(false);
                 setHideBottomArea(false);
               }
             } else {
-              // Desktop: Original behavior
-              setCompactQuickBar(scrollTop > 50);
-              if (scrollingDown && scrollTop > 100) {
-                setHideBottomArea(true);
-              } else if (!scrollingDown || scrollTop < 50) {
+              // Desktop: Less aggressive collapsing
+              if (scrollingDown && scrollTop > 30) {
+                setCompactQuickBar(true);
+                if (scrollTop > 80) {
+                  setHideBottomArea(true);
+                }
+              } else if (!scrollingDown || scrollTop < 25) {
+                setCompactQuickBar(false);
                 setHideBottomArea(false);
               }
             }
