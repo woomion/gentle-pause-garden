@@ -28,6 +28,9 @@ import PillQuickPauseBar from '../components/pill/PillQuickPauseBar';
 import PillItem from '../components/pill/PillItem';
 import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
 import { useInstalledApp } from '../hooks/useInstalledApp';
+import { Button } from '../components/ui/button';
+import { platformNotificationService } from '../services/platformNotificationService';
+
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
@@ -116,7 +119,45 @@ const Index = () => {
   console.log('Mobile check - Screen size:', window.innerWidth, 'x', window.innerHeight);
 
   // Initialize notifications
-  useNotifications(notificationsEnabled);
+  const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
+  
+  // Debug notification status
+  const [notificationStatus, setNotificationStatus] = useState<string>('checking...');
+  
+  useEffect(() => {
+    const checkNotificationStatus = () => {
+      if (!('Notification' in window)) {
+        setNotificationStatus('Browser does not support notifications');
+        return;
+      }
+      
+      const permission = Notification.permission;
+      const serviceEnabled = platformNotificationService.getEnabled();
+      const settingsEnabled = notificationsEnabled;
+      
+      setNotificationStatus(`Permission: ${permission}, Service: ${serviceEnabled}, Settings: ${settingsEnabled}`);
+    };
+    
+    checkNotificationStatus();
+    const interval = setInterval(checkNotificationStatus, 2000);
+    return () => clearInterval(interval);
+  }, [notificationsEnabled]);
+  
+  const handleRequestNotificationPermission = async () => {
+    try {
+      console.log('🔔 Requesting notification permission...');
+      const success = await platformNotificationService.requestPermission();
+      console.log('🔔 Permission request result:', success);
+      
+      if (success) {
+        testNotification();
+      } else {
+        alert('Please allow notifications in your browser settings');
+      }
+    } catch (error) {
+      console.error('Error requesting permission:', error);
+    }
+  };
 
   // Handle shared content from other apps or PWA share target
   useEffect(() => {
@@ -232,6 +273,33 @@ console.log('Rendering main Index content');
           }} />
           <GuestModeIndicator show={!user} />
           <WelcomeWithValues />
+          
+          {/* Notification Debug Banner */}
+          {user && (
+            <div className="mt-4 p-3 bg-accent/50 rounded-lg border border-border">
+              <div className="text-xs text-muted-foreground mb-2">
+                Notification Status: {notificationStatus}
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleRequestNotificationPermission}
+                  className="text-xs"
+                >
+                  Enable Notifications
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={testNotification}
+                  className="text-xs"
+                >
+                  Test Notification
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div 
