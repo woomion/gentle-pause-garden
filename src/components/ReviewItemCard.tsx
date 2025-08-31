@@ -68,7 +68,6 @@ const ReviewItemCard = ({ item, onViewItem }: ReviewItemCardProps) => {
           {formattedPrice && (
             <span className="text-lg font-semibold text-foreground">{formattedPrice}</span>
           )}
-          <span className="text-sm text-muted-foreground">{item.checkInTime}</span>
         </div>
 
         {/* Notes preview if available */}
