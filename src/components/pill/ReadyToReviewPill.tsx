@@ -10,12 +10,7 @@ const ReadyToReviewPill: React.FC<ReadyToReviewPillProps> = ({ count, onClick })
   return (
     <button
       onClick={onClick}
-      className="relative w-full rounded-full overflow-hidden border px-4 py-3 text-left transition-colors"
-      style={{
-        backgroundColor: 'hsl(var(--shared-review))',
-        borderColor: 'hsl(var(--shared-review-muted))',
-        color: 'hsl(var(--shared-review-foreground))',
-      }}
+      className="relative rounded-full overflow-hidden border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/50 text-foreground"
       aria-label={`Ready to review ${count} item${count === 1 ? '' : 's'}`}
     >
       <div className="relative z-10 flex items-center justify-between gap-3">
