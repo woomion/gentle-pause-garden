@@ -359,14 +359,20 @@ console.log('Rendering main Index content');
                       setShowImages(newValue);
                       localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
                     }}
-                    className="p-2 hover:bg-muted/60 rounded-full transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
                     title={showImages ? 'Hide images' : 'Show images'}
                     aria-label={showImages ? 'Hide images' : 'Show images'}
                   >
                     {showImages ? (
-                      <Eye size={16} className="text-muted-foreground" />
+                      <>
+                        <Eye size={16} className="text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Images on</span>
+                      </>
                     ) : (
-                      <EyeOff size={16} className="text-muted-foreground" />
+                      <>
+                        <EyeOff size={16} className="text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Images off</span>
+                      </>
                     )}
                   </button>
                 </div>
