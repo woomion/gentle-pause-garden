@@ -48,60 +48,49 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
     <>
       <header className="relative mb-8 sm:mb-12">
         <div className={`text-center md:text-left ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
-          {/* Desktop header - exact same grid as paused items content */}
-          <div className="hidden md:block">
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-              {/* First column - Logo */}
-              <div className="flex items-center">
-                <Link
-                  to={{ pathname: '/', search: location.search }}
-                  className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors"
-                >
-                  POCKET || PAUSE
-                </Link>
-              </div>
-              
-              {/* Second column - empty spacer for lg screens, hidden on xl+ */}
-              <div className="hidden lg:block xl:hidden"></div>
-              
-              {/* Third column (or second on lg) - Account icon */}
-              <div className="flex justify-end">
-                <div className="relative">
-                  <div className="flex items-center gap-3">
-                    {showCourses && (
-                      <button
-                        className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
-                        onClick={handleCourseClick}
-                        title="Course section"
-                      >
-                        <BookOpen size={24} />
-                      </button>
-                    )}
+          {/* Desktop header - simple flex to align with content edges */}
+          <div className="hidden md:flex md:items-center md:justify-between">
+            <Link
+              to={{ pathname: '/', search: location.search }}
+              className="text-foreground font-medium text-lg tracking-wide hover:text-muted-foreground transition-colors"
+            >
+              POCKET || PAUSE
+            </Link>
+            
+            <div className="relative">
+              <div className="flex items-center gap-3">
+                {showCourses && (
+                  <button
+                    className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
+                    onClick={handleCourseClick}
+                    title="Course section"
+                  >
+                    <BookOpen size={24} />
+                  </button>
+                )}
 
-                    <button
-                      className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
-                      onClick={handleAccountClick}
-                    >
-                      {user ? (
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                            {initials}
-                          </AvatarFallback>
-                        </Avatar>
-                      ) : (
-                        <User size={24} />
-                      )}
-                    </button>
-                  </div>
-                  
-                  {/* Guest mode indicator positioned beneath account icon */}
-                  {!user && (
-                    <div className="absolute top-full right-0 mt-2 text-xs text-muted-foreground bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-2 py-1 whitespace-nowrap">
-                      Guest Mode: Items stored locally only
-                    </div>
+                <button
+                  className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
+                  onClick={handleAccountClick}
+                >
+                  {user ? (
+                    <Avatar className="w-6 h-6">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <User size={24} />
                   )}
-                </div>
+                </button>
               </div>
+              
+              {/* Guest mode indicator positioned beneath account icon */}
+              {!user && (
+                <div className="absolute top-full right-0 mt-2 text-xs text-muted-foreground bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-2 py-1 whitespace-nowrap">
+                  Guest Mode: Items stored locally only
+                </div>
+              )}
             </div>
           </div>
           
