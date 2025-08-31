@@ -48,9 +48,10 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
     <>
       <header className="relative mb-8 sm:mb-12">
         <div className={`text-center md:text-left ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
-          {/* Desktop header - uses same grid as paused items */}
+          {/* Desktop header - exact same grid as paused items content */}
           <div className="hidden md:block">
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+              {/* First column - Logo */}
               <div className="flex items-center">
                 <Link
                   to={{ pathname: '/', search: location.search }}
@@ -60,8 +61,10 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
                 </Link>
               </div>
               
-              <div className="hidden xl:block"></div>
+              {/* Second column - empty spacer for lg screens, hidden on xl+ */}
+              <div className="hidden lg:block xl:hidden"></div>
               
+              {/* Third column (or second on lg) - Account icon */}
               <div className="flex justify-end">
                 <div className="relative">
                   <div className="flex items-center gap-3">

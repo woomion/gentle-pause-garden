@@ -272,18 +272,24 @@ console.log('Rendering main Index content');
   return (
     <>
       <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 flex flex-col md:bg-gradient-to-br md:from-background md:via-background/95 md:to-accent/10">
-        {/* Header area - fixed height */}
-        <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 ${installed ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-10' : 'pt-8 sm:pt-12 md:pt-14 lg:pt-16'}`}>
-          <PauseHeader onProfileModalChange={(isOpen) => {
-            console.log('Profile modal changed:', isOpen);
-            setProfileModalOpen(isOpen);
-            // When profile modal is open on desktop, collapse pause area to smallest form
-            if (isOpen) {
-              console.log('Collapsing pause area - setting compact=true');
-              setCompactQuickBar(true);
-              setHideBottomArea(false); // Keep footer visible but compact
-            }
-          }} />
+        {/* Header area - moved outside container for precise alignment */}
+        <div className={`flex-shrink-0 ${installed ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-10' : 'pt-8 sm:pt-12 md:pt-14 lg:pt-16'}`}>
+          <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+            <PauseHeader onProfileModalChange={(isOpen) => {
+              console.log('Profile modal changed:', isOpen);
+              setProfileModalOpen(isOpen);
+              // When profile modal is open on desktop, collapse pause area to smallest form
+              if (isOpen) {
+                console.log('Collapsing pause area - setting compact=true');
+                setCompactQuickBar(true);
+                setHideBottomArea(false); // Keep footer visible but compact
+              }
+            }} />
+          </div>
+        </div>
+        
+        {/* Content area with exact same container */}
+        <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12`}>
           <WelcomeWithValues />
           
           {/* Notification Debug Banner */}
