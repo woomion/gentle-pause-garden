@@ -48,39 +48,61 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
   return (
     <>
       <header className="relative mb-8 sm:mb-12">
-        <div className={`text-center md:text-left md:flex md:items-center md:justify-between ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
-          <Link
-            to={{ pathname: '/', search: location.search }}
-            className={`text-foreground font-medium text-lg tracking-wide ${installed ? 'mb-4 sm:mb-6 md:mb-0' : 'mb-6 sm:mb-8 md:mb-0'} hover:text-muted-foreground transition-colors inline-block`}
-          >
-            POCKET || PAUSE
-          </Link>
-          
-          <div className="hidden md:flex items-center gap-3">
-            {showCourses && (
-              <button
-                className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
-                onClick={handleCourseClick}
-                title="Course section"
-              >
-                <BookOpen size={24} />
-              </button>
-            )}
-
-            <button
-              className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
-              onClick={handleAccountClick}
+        <div className={`text-center md:text-left ${installed ? 'pt-0 sm:pt-1' : 'pt-2 sm:pt-4'}`}>
+          {/* Desktop header - constrained width to match content grid */}
+          <div className="hidden md:flex md:items-center md:justify-between md:max-w-none lg:max-w-none xl:max-w-6xl xl:mx-auto">
+            <Link
+              to={{ pathname: '/', search: location.search }}
+              className={`text-foreground font-medium text-lg tracking-wide ${installed ? 'mb-4 sm:mb-6 md:mb-0' : 'mb-6 sm:mb-8 md:mb-0'} hover:text-muted-foreground transition-colors inline-block`}
             >
-              {user ? (
-                <Avatar className="w-6 h-6">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-              ) : (
-                <User size={24} />
+              POCKET || PAUSE
+            </Link>
+            
+            <div className="relative">
+              <div className="flex items-center gap-3">
+                {showCourses && (
+                  <button
+                    className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
+                    onClick={handleCourseClick}
+                    title="Course section"
+                  >
+                    <BookOpen size={24} />
+                  </button>
+                )}
+
+                <button
+                  className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
+                  onClick={handleAccountClick}
+                >
+                  {user ? (
+                    <Avatar className="w-6 h-6">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <User size={24} />
+                  )}
+                </button>
+              </div>
+              
+              {/* Guest mode indicator positioned beneath account icon */}
+              {!user && (
+                <div className="absolute top-full right-0 mt-2 text-xs text-muted-foreground bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-2 py-1 whitespace-nowrap">
+                  Guest Mode: Items stored locally only
+                </div>
               )}
-            </button>
+            </div>
+          </div>
+          
+          {/* Mobile header - unchanged */}
+          <div className="md:hidden">
+            <Link
+              to={{ pathname: '/', search: location.search }}
+              className={`text-foreground font-medium text-lg tracking-wide ${installed ? 'mb-4 sm:mb-6 md:mb-0' : 'mb-6 sm:mb-8 md:mb-0'} hover:text-muted-foreground transition-colors inline-block`}
+            >
+              POCKET || PAUSE
+            </Link>
           </div>
         </div>
 

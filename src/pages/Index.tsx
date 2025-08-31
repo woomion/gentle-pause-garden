@@ -284,7 +284,6 @@ console.log('Rendering main Index content');
               setHideBottomArea(false); // Keep footer visible but compact
             }
           }} />
-          <GuestModeIndicator show={!user} />
           <WelcomeWithValues />
           
           {/* Notification Debug Banner */}
