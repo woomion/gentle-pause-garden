@@ -111,7 +111,10 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
             Want to keep this pause?
           </h2>
           <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
-            Create an account to save your items and reflections.
+            {isSignUp 
+              ? "Create an account to save your items and reflections." 
+              : "Sign in to your account to save your items and reflections."
+            }
           </p>
         </div>
 
