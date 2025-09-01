@@ -357,7 +357,7 @@ console.log('Rendering main Index content');
           */}
           {pillMode ? (
             <>
-              {/* Mobile container - separated containers */}
+              {/* Mobile controls container - fixed and stable */}
               <div className="md:hidden">
                 {/* Ready to review pill container */}
                 {readyCount > 0 && (
