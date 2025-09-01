@@ -315,7 +315,71 @@ console.log('Rendering main Index content');
         {/* Content area with exact same container */}
         <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12`}>
           <WelcomeWithValues />
+        </div>
+
+        {/* Mobile controls - completely independent and stable - OUTSIDE scroll container */}
+        <div className="md:hidden flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto">
+          {/* Ready to review pill container */}
+          {readyCount > 0 && (
+            <div className="w-full px-4 mb-3">
+              <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
+            </div>
+          )}
           
+          {/* Controls container */}
+          <div className="w-full px-4 mb-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 -ml-3">
+                <button
+                  onClick={() => {
+                    const newValue = !showImages;
+                    setShowImages(newValue);
+                    localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                  title={showImages ? 'Hide images' : 'Show images'}
+                  aria-label={showImages ? 'Hide images' : 'Show images'}
+                >
+                  {showImages ? (
+                    <Eye size={16} className="text-muted-foreground" />
+                  ) : (
+                    <EyeOff size={16} className="text-muted-foreground" />
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    const newValue = mobileViewMode === 'list' ? 'carousel' : 'list';
+                    setMobileViewMode(newValue);
+                    localStorage.setItem('pocketpause-mobile-view', JSON.stringify(newValue));
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                  title={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
+                  aria-label={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
+                >
+                  {mobileViewMode === 'list' ? (
+                    <List size={16} className="text-muted-foreground" />
+                  ) : (
+                    <Columns size={16} className="text-muted-foreground" />
+                  )}
+                </button>
+              </div>
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
+                  className="flex items-center justify-center w-8 h-8 hover:bg-muted/60 rounded-full transition-colors"
+                  title={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                  aria-label={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                >
+                  {sortMode === 'soonest' ? (
+                    <ArrowUp size={16} className="text-muted-foreground" />
+                  ) : (
+                    <ArrowDown size={16} className="text-muted-foreground" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div 
@@ -355,70 +419,6 @@ console.log('Rendering main Index content');
             </div>
           </div>
           */}
-          {/* Mobile controls - completely independent and stable */}
-          <div className="md:hidden">
-            {/* Ready to review pill container */}
-            {readyCount > 0 && (
-              <div className="w-full px-4 mb-3">
-                <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
-              </div>
-            )}
-            
-            {/* Controls container */}
-            <div className="w-full px-4 mb-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 -ml-3">
-                  <button
-                    onClick={() => {
-                      const newValue = !showImages;
-                      setShowImages(newValue);
-                      localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
-                    title={showImages ? 'Hide images' : 'Show images'}
-                    aria-label={showImages ? 'Hide images' : 'Show images'}
-                  >
-                    {showImages ? (
-                      <Eye size={16} className="text-muted-foreground" />
-                    ) : (
-                      <EyeOff size={16} className="text-muted-foreground" />
-                    )}
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      const newValue = mobileViewMode === 'list' ? 'carousel' : 'list';
-                      setMobileViewMode(newValue);
-                      localStorage.setItem('pocketpause-mobile-view', JSON.stringify(newValue));
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
-                    title={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
-                    aria-label={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
-                  >
-                    {mobileViewMode === 'list' ? (
-                      <List size={16} className="text-muted-foreground" />
-                    ) : (
-                      <Columns size={16} className="text-muted-foreground" />
-                    )}
-                  </button>
-                </div>
-                <div className="flex items-center justify-end">
-                  <button
-                    onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
-                    className="flex items-center justify-center w-8 h-8 hover:bg-muted/60 rounded-full transition-colors"
-                    title={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
-                    aria-label={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
-                  >
-                    {sortMode === 'soonest' ? (
-                      <ArrowUp size={16} className="text-muted-foreground" />
-                    ) : (
-                      <ArrowDown size={16} className="text-muted-foreground" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {pillMode ? (
             <>

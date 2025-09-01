@@ -10,7 +10,7 @@ const getTimeBasedMessage = (): string => {
   ];
   
   const middayMessages = [
-    "A breath before you buy. Even small pauses ripple outward."
+    "A breath before you buy.\nEven small pauses ripple outward."
   ];
   
   const afternoonMessages = [
