@@ -359,7 +359,7 @@ console.log('Rendering main Index content');
             <>
               {/* Mobile container - absolutely stable width */}
               <div className="md:hidden">
-                <div className="w-full">
+                <div className="w-full px-4">
                   {readyCount > 0 && (
                     <div className="mb-3">
                       <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
@@ -489,7 +489,7 @@ console.log('Rendering main Index content');
                     Paused Items ({currentPausedItems.length})
                   </div>
                   <div className="md:hidden w-full">
-                    <div className="text-xs font-medium text-muted-foreground mb-2 text-left px-4">
+                    <div className="text-xs font-medium text-muted-foreground mb-2 text-left">
                       Paused Items ({currentPausedItems.length})
                     </div>
                   </div>
@@ -537,7 +537,7 @@ console.log('Rendering main Index content');
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
                       <div className="w-full overflow-hidden">
-                        <div className="space-y-3 px-4">
+                        <div className="space-y-3">
                           {currentPausedItems.map((it) => (
                             <DesktopItemCard
                               key={it.id}
@@ -556,7 +556,7 @@ console.log('Rendering main Index content');
                     ) : (
                       <div className="w-full overflow-hidden">
                         <Carousel className="w-full">
-                          <CarouselContent className="pl-4 -ml-4">
+                          <CarouselContent className="pl-0">
                             {currentPausedItems.map((it) => (
                               <CarouselItem key={it.id} className="pl-4 basis-[240px]">
                                 <DesktopItemCard
