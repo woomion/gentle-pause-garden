@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff, List, Navigation } from 'lucide-react';
+import { Eye, EyeOff, List, Navigation, ArrowUpDown } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
@@ -413,23 +413,17 @@ console.log('Rendering main Index content');
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center justify-end gap-2 text-xs md:text-sm w-full" aria-label="Sort items">
-                  <span className="text-muted-foreground">Sort:</span>
+                <div className="flex items-center justify-end">
                   <button
-                    className={`px-2 py-1 rounded-full border transition-all duration-200 md:px-3 md:py-2 ${sortMode === 'soonest' ? 'bg-primary/15 text-primary border-primary/30 md:bg-primary/20 md:shadow-sm' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted md:hover:bg-muted/60'}`}
-                    onClick={() => setSortMode('soonest')}
-                    aria-label="Sort by ending soon"
-                    title="Sort by ending soon"
+                    onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                    title={`Currently: ${sortMode === 'soonest' ? 'Ending soon' : 'Recently paused'}. Click to toggle.`}
+                    aria-label={`Currently sorting by ${sortMode === 'soonest' ? 'ending soon' : 'recently paused'}. Click to toggle.`}
                   >
-                    Ending soon
-                  </button>
-                  <button
-                    className={`px-2 py-1 rounded-full border transition-all duration-200 md:px-3 md:py-2 ${sortMode === 'newest' ? 'bg-primary/15 text-primary border-primary/30 md:bg-primary/20 md:shadow-sm' : 'bg-muted/40 text-muted-foreground border-border hover:bg-muted md:hover:bg-muted/60'}`}
-                    onClick={() => setSortMode('newest')}
-                    aria-label="Sort by recently paused"
-                    title="Sort by recently paused"
-                  >
-                    Recently paused
+                    <ArrowUpDown size={16} className="text-muted-foreground" />
+                    <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">
+                      {sortMode === 'soonest' ? 'Ending soon' : 'Recently paused'}
+                    </span>
                   </button>
                 </div>
               </div>
