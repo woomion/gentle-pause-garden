@@ -493,8 +493,8 @@ console.log('Rendering main Index content');
       {/* Fixed bottom area */}
       <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 bg-white border-t w-full ${hideBottomArea ? 'translate-y-full' : 'translate-y-0'}`}
            style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-        {/* Container: full width on mobile, constrained on desktop */}
-        <div className="w-full md:max-w-4xl lg:max-w-6xl md:mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-4">
+        {/* Container: match main content exactly */}
+        <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-4">
           {pillMode ? (
             <PillQuickPauseBar
               compact={compactQuickBar}
