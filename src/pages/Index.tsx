@@ -358,13 +358,13 @@ console.log('Rendering main Index content');
           {pillMode ? (
             <>
               {/* Mobile container with consistent width */}
-              <div className="md:hidden w-[calc(100vw-2rem)] max-w-none overflow-hidden">
+              <div className="md:hidden px-4">
                 {readyCount > 0 && (
-                  <div className="mb-3 px-2">
+                  <div className="mb-3">
                     <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
                   </div>
                 )}
-                <div className="mb-4 px-2 flex items-center justify-between gap-2">
+                <div className="mb-4 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => {
@@ -529,12 +529,12 @@ console.log('Rendering main Index content');
                     </div>
                   </div>
 
-                  {/* Mobile Layout - Constrained stable container */}
-                  <div className="md:hidden w-full max-w-full overflow-hidden">
+                  {/* Mobile Layout - Fixed width matching controls */}
+                  <div className="md:hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground px-4">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
-                      <div className="w-full px-4">
+                      <div className="px-4">
                         <div className="space-y-3 max-w-md mx-auto">
                           {currentPausedItems.map((it) => (
                             <DesktopItemCard
@@ -552,25 +552,27 @@ console.log('Rendering main Index content');
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full overflow-hidden">
-                        <Carousel className="w-full max-w-full">
-                          <CarouselContent className="pl-4 -ml-0">
-                            {currentPausedItems.map((it) => (
-                              <CarouselItem key={it.id} className="pl-2 basis-[280px] min-w-0">
-                                <DesktopItemCard
-                                  item={it}
-                                  showImages={showImages}
-                                  onClick={() => {
-                                    setSelectedItem(it);
-                                    setShowItemDetail(true);
-                                  }}
-                                  onEdit={(item, updates) => updateItem(item.id, updates)}
-                                  onDelete={removeItem}
-                                />
-                              </CarouselItem>
-                            ))}
-                          </CarouselContent>
-                        </Carousel>
+                      <div className="px-4">
+                        <div className="max-w-md mx-auto overflow-hidden">
+                          <Carousel className="w-full">
+                            <CarouselContent className="ml-4">
+                              {currentPausedItems.map((it) => (
+                                <CarouselItem key={it.id} className="pl-2 basis-[280px]">
+                                  <DesktopItemCard
+                                    item={it}
+                                    showImages={showImages}
+                                    onClick={() => {
+                                      setSelectedItem(it);
+                                      setShowItemDetail(true);
+                                    }}
+                                    onEdit={(item, updates) => updateItem(item.id, updates)}
+                                    onDelete={removeItem}
+                                  />
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                          </Carousel>
+                        </div>
                       </div>
                     )}
                   </div>
