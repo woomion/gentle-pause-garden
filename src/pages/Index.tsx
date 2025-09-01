@@ -497,7 +497,7 @@ console.log('Rendering main Index content');
       
       {/* Fixed bottom area */}
       <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 ${hideBottomArea ? 'translate-y-full' : 'translate-y-0'}`}>
-        <div className="bg-background/95 backdrop-blur-sm border-t"
+        <div className="bg-background border-t"
              style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
           {/* Container: full width on mobile, constrained on desktop */}
           <div className="w-full md:max-w-4xl lg:max-w-6xl md:mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-4">
