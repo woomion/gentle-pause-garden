@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff, List, Navigation, ArrowUp, ArrowDown } from 'lucide-react';
+import { Eye, EyeOff, List, SlidersHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
@@ -381,15 +381,9 @@ console.log('Rendering main Index content');
                         aria-label={showImages ? 'Hide images' : 'Show images'}
                       >
                         {showImages ? (
-                          <>
-                            <Eye size={16} className="text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">Images on</span>
-                          </>
+                          <Eye size={16} className="text-muted-foreground" />
                         ) : (
-                          <>
-                            <EyeOff size={16} className="text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">Images off</span>
-                          </>
+                          <EyeOff size={16} className="text-muted-foreground" />
                         )}
                       </button>
                       
@@ -404,15 +398,9 @@ console.log('Rendering main Index content');
                         aria-label={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
                       >
                         {mobileViewMode === 'list' ? (
-                          <>
-                            <List size={16} className="text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">List</span>
-                          </>
+                          <List size={16} className="text-muted-foreground" />
                         ) : (
-                          <>
-                            <Navigation size={16} className="text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">Carousel</span>
-                          </>
+                          <SlidersHorizontal size={16} className="text-muted-foreground" />
                         )}
                       </button>
                     </div>
