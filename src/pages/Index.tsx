@@ -357,15 +357,18 @@ console.log('Rendering main Index content');
           */}
           {pillMode ? (
             <>
-              {/* Mobile container - absolutely stable width */}
+              {/* Mobile container - separated containers */}
               <div className="md:hidden">
-                <div className="w-full px-4">
-                  {readyCount > 0 && (
-                    <div className="mb-3">
-                      <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
-                    </div>
-                  )}
-                  <div className="mb-4 flex items-center justify-between gap-2">
+                {/* Ready to review pill container */}
+                {readyCount > 0 && (
+                  <div className="w-full px-4 mb-3">
+                    <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
+                  </div>
+                )}
+                
+                {/* Controls container */}
+                <div className="w-full px-4 mb-4">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
@@ -488,8 +491,9 @@ console.log('Rendering main Index content');
                   <div className="hidden md:block text-xs font-medium text-muted-foreground mb-2 px-1 md:text-sm md:mb-4">
                     Paused Items ({currentPausedItems.length})
                   </div>
-                  <div className="md:hidden w-full">
-                    <div className="text-xs font-medium text-muted-foreground mb-2 text-left">
+                  {/* Mobile paused items title container */}
+                  <div className="md:hidden w-full px-4 mb-2">
+                    <div className="text-xs font-medium text-muted-foreground text-left">
                       Paused Items ({currentPausedItems.length})
                     </div>
                   </div>
@@ -531,12 +535,12 @@ console.log('Rendering main Index content');
                     </div>
                   </div>
 
-                  {/* Mobile Layout - Fixed stable container */}
+                  {/* Mobile carousel/list content container */}
                   <div className="md:hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
-                      <div className="w-full overflow-hidden">
+                      <div className="w-full overflow-hidden px-4">
                         <div className="space-y-3">
                           {currentPausedItems.map((it) => (
                             <DesktopItemCard
@@ -554,7 +558,7 @@ console.log('Rendering main Index content');
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full overflow-hidden">
+                      <div className="w-full overflow-hidden px-4">
                         <Carousel className="w-full">
                           <CarouselContent className="pl-0">
                             {currentPausedItems.map((it) => (
