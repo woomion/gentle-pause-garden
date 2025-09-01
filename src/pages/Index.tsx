@@ -529,8 +529,8 @@ console.log('Rendering main Index content');
                     </div>
                   </div>
 
-                  {/* Mobile Layout - Fixed stable container */}
-                  <div className="md:hidden w-full">
+                  {/* Mobile Layout - Constrained stable container */}
+                  <div className="md:hidden w-full max-w-full overflow-hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground px-4">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
@@ -552,27 +552,25 @@ console.log('Rendering main Index content');
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full">
-                        <div className="w-screen relative left-1/2 -ml-[50vw]">
-                          <Carousel className="w-full">
-                            <CarouselContent className="pl-4">
-                              {currentPausedItems.map((it) => (
-                                <CarouselItem key={it.id} className="pl-2 basis-[280px]">
-                                  <DesktopItemCard
-                                    item={it}
-                                    showImages={showImages}
-                                    onClick={() => {
-                                      setSelectedItem(it);
-                                      setShowItemDetail(true);
-                                    }}
-                                    onEdit={(item, updates) => updateItem(item.id, updates)}
-                                    onDelete={removeItem}
-                                  />
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                          </Carousel>
-                        </div>
+                      <div className="w-full overflow-hidden">
+                        <Carousel className="w-full max-w-full">
+                          <CarouselContent className="pl-4 -ml-0">
+                            {currentPausedItems.map((it) => (
+                              <CarouselItem key={it.id} className="pl-2 basis-[280px] min-w-0">
+                                <DesktopItemCard
+                                  item={it}
+                                  showImages={showImages}
+                                  onClick={() => {
+                                    setSelectedItem(it);
+                                    setShowItemDetail(true);
+                                  }}
+                                  onEdit={(item, updates) => updateItem(item.id, updates)}
+                                  onDelete={removeItem}
+                                />
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                        </Carousel>
                       </div>
                     )}
                   </div>
