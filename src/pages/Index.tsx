@@ -284,26 +284,34 @@ console.log('Rendering main Index content');
             const scrollingDown = scrollTop > lastScrollY;
             const isMobile = window.innerWidth < 768;
             
-            // Simplified and more reliable logic
+            // Enhanced intelligent collapse logic for both mobile and desktop
             if (isMobile) {
-              // Mobile: More responsive collapsing
-              if (scrollingDown && scrollTop > 20) {
+              // Mobile: More responsive collapsing for better UX on small screens
+              if (scrollingDown && scrollTop > 15) {
                 setCompactQuickBar(true);
-                if (scrollTop > 40) {
+                if (scrollTop > 35) {
                   setHideBottomArea(true);
                 }
-              } else if (!scrollingDown || scrollTop < 15) {
+              } else if (!scrollingDown && scrollTop < 10) {
+                setCompactQuickBar(false);
+                setHideBottomArea(false);
+              } else if (scrollTop === 0) {
+                // Always expand when at top
                 setCompactQuickBar(false);
                 setHideBottomArea(false);
               }
             } else {
-              // Desktop: Less aggressive collapsing
-              if (scrollingDown && scrollTop > 30) {
+              // Desktop: Gentler collapsing with larger thresholds
+              if (scrollingDown && scrollTop > 40) {
                 setCompactQuickBar(true);
-                if (scrollTop > 80) {
+                if (scrollTop > 100) {
                   setHideBottomArea(true);
                 }
-              } else if (!scrollingDown || scrollTop < 25) {
+              } else if (!scrollingDown && scrollTop < 30) {
+                setCompactQuickBar(false);
+                setHideBottomArea(false);
+              } else if (scrollTop === 0) {
+                // Always expand when at top
                 setCompactQuickBar(false);
                 setHideBottomArea(false);
               }
