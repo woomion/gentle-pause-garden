@@ -536,7 +536,7 @@ console.log('Rendering main Index content');
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
-                      <div className="w-full max-w-sm mx-auto overflow-hidden">
+                      <div className="w-full overflow-hidden">
                         <div className="space-y-3 px-4">
                           {currentPausedItems.map((it) => (
                             <DesktopItemCard
@@ -554,7 +554,7 @@ console.log('Rendering main Index content');
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full max-w-sm mx-auto overflow-hidden">
+                      <div className="w-full overflow-hidden">
                         <Carousel className="w-full">
                           <CarouselContent className="pl-4">
                             {currentPausedItems.map((it) => (
