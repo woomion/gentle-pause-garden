@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff, List, Album, ArrowUp, ArrowDown } from 'lucide-react';
+import { Eye, EyeOff, List, Columns, ArrowUp, ArrowDown } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
@@ -400,7 +400,7 @@ console.log('Rendering main Index content');
                         {mobileViewMode === 'list' ? (
                           <List size={16} className="text-muted-foreground" />
                         ) : (
-                          <Album size={16} className="text-muted-foreground" />
+                          <Columns size={16} className="text-muted-foreground" />
                         )}
                       </button>
                     </div>
