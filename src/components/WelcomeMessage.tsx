@@ -2,40 +2,25 @@ interface WelcomeMessageProps {
   firstName?: string;
 }
 
-const getTimeBasedMessage = (): string => {
+const getTimeBasedMessage = () => {
   const hour = new Date().getHours();
   
-  const morningMessages = [
-    "Start the day with clarity.\nEvery pause is a fresh choice."
-  ];
-  
-  const middayMessages = [
-    "A breath before you buy.\nEven small pauses ripple outward."
-  ];
-  
-  const afternoonMessages = [
-    "Presence belongs in your pocket — right when you need it most."
-  ];
-  
-  const nightMessages = [
-    "Slow down. Reflect. Tomorrow's choices begin here."
-  ];
-  
-  // Select message array based on time of day
-  let messages: string[];
+  // Select message based on time of day
   if (hour >= 6 && hour < 12) {
-    messages = morningMessages;
+    return "Start the day with clarity.\nEvery pause is a fresh choice.";
   } else if (hour >= 12 && hour < 15) {
-    messages = middayMessages;
+    return (
+      <>
+        A breath before you buy.
+        <br />
+        Even small pauses ripple outward.
+      </>
+    );
   } else if (hour >= 15 && hour < 20) {
-    messages = afternoonMessages;
+    return "Presence belongs in your pocket — right when you need it most.";
   } else {
-    messages = nightMessages;
+    return "Slow down. Reflect. Tomorrow's choices begin here.";
   }
-  
-  // Select a consistent message for the current hour to avoid rapid changes
-  const messageIndex = hour % messages.length;
-  return messages[messageIndex];
 };
 
 const WelcomeMessage = ({ firstName }: WelcomeMessageProps) => {
