@@ -357,7 +357,7 @@ console.log('Rendering main Index content');
           */}
           {pillMode ? (
             <>
-              {/* Mobile controls container - fixed and stable */}
+              {/* Mobile controls container - completely separate and stable */}
               <div className="md:hidden">
                 {/* Ready to review pill container */}
                 {readyCount > 0 && (
@@ -472,10 +472,10 @@ console.log('Rendering main Index content');
               </div>
 
 
-              {/* Current Paused Items Section */}
+              {/* Current Paused Items Section - completely separate */}
               {currentPausedItems.length > 0 && (
                 <div className="mb-4">
-                  {/* Section title - mobile uses same container width */}
+                  {/* Section title - desktop */}
                   <div className="hidden md:block text-xs font-medium text-muted-foreground mb-2 px-1 md:text-sm md:mb-4">
                     Paused Items ({currentPausedItems.length})
                   </div>
