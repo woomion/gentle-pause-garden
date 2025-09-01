@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Settings, User, Moon, Sun, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { EmailBatchingSettings } from './EmailBatchingSettings';
+
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -114,8 +114,6 @@ const SettingsSection = () => {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Email Batching Settings */}
-      <EmailBatchingSettings />
     </div>
   );
 };

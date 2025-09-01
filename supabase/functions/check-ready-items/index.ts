@@ -93,34 +93,9 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        // Skip if batch emails enabled (individual emails should only be for non-batch users)
-        if (userSettings.email_batching_enabled) {
-          console.log(`📦 Batch emails enabled for user ${userId}, skipping individual reminders`);
-          skipCount += userItems.length;
-          continue;
-        }
-
-        // Send individual reminder for each item
-        for (const item of userItems) {
-          try {
-            console.log(`📧 Sending individual reminder for item ${item.id}`);
-            
-            const { data, error } = await supabase.functions.invoke('send-individual-reminder', {
-              body: { userId, itemId: item.id }
-            });
-
-            if (error) {
-              console.log(`❌ Failed to send reminder for item ${item.id}:`, error);
-            } else {
-              console.log(`✅ Sent reminder for item ${item.id}:`, data);
-              successCount++;
-            }
-            processedCount++;
-          } catch (error) {
-            console.error(`❌ Error processing item ${item.id}:`, error);
-            processedCount++;
-          }
-        }
+        // Email functionality removed - no longer sending email reminders
+        console.log(`📱 Push notifications only for user ${userId}`);
+        skipCount += userItems.length;
       } catch (error) {
         console.error(`❌ Error processing user ${userId}:`, error);
         skipCount += userItems.length;

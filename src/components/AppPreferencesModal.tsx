@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from '@/components/ThemeProvider';
 import { ThemeSelector } from '@/components/ThemeSelector';
-import { EmailBatchingSettings } from '@/components/EmailBatchingSettings';
+
 
 interface AppPreferencesModalProps {
   isOpen: boolean;
@@ -82,8 +82,6 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
               <ThemeSelector />
             </div>
 
-            {/* Email Batching Settings */}
-            <EmailBatchingSettings />
           </div>
         </ScrollArea>
       </div>
