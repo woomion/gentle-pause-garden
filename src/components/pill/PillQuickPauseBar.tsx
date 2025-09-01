@@ -268,7 +268,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
 
   return (
     <div className={`w-full rounded-xl bg-card/70 backdrop-blur px-3 ${compact ? 'py-2' : 'py-3'}`}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
           <div className="flex-1 relative">
             <Input
               ref={inputRef}
