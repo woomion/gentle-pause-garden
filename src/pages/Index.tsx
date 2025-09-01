@@ -195,7 +195,52 @@ const Index = () => {
     clearSharedContent();
   }, [sharedContent, pillMode]);
 
-  // No additional useEffect needed - scroll handling is done inline
+  // Enhanced intelligent collapse - window scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const scrollingDown = scrollTop > lastScrollY;
+      const isMobile = window.innerWidth < 768;
+      
+      // Enhanced intelligent collapse logic for both mobile and desktop
+      if (isMobile) {
+        // Mobile: More responsive collapsing for better UX on small screens
+        if (scrollingDown && scrollTop > 15) {
+          setCompactQuickBar(true);
+          if (scrollTop > 35) {
+            setHideBottomArea(true);
+          }
+        } else if (!scrollingDown && scrollTop < 10) {
+          setCompactQuickBar(false);
+          setHideBottomArea(false);
+        } else if (scrollTop === 0) {
+          // Always expand when at top
+          setCompactQuickBar(false);
+          setHideBottomArea(false);
+        }
+      } else {
+        // Desktop: Gentler collapsing with larger thresholds
+        if (scrollingDown && scrollTop > 40) {
+          setCompactQuickBar(true);
+          if (scrollTop > 100) {
+            setHideBottomArea(true);
+          }
+        } else if (!scrollingDown && scrollTop < 30) {
+          setCompactQuickBar(false);
+          setHideBottomArea(false);
+        } else if (scrollTop === 0) {
+          // Always expand when at top
+          setCompactQuickBar(false);
+          setHideBottomArea(false);
+        }
+      }
+      
+      setLastScrollY(scrollTop);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Debug scroll container dimensions
   useEffect(() => {
@@ -279,46 +324,6 @@ console.log('Rendering main Index content');
 
         <div 
           ref={scrollContainerRef}
-          onScroll={(e) => {
-            const scrollTop = e.currentTarget.scrollTop;
-            const scrollingDown = scrollTop > lastScrollY;
-            const isMobile = window.innerWidth < 768;
-            
-            // Enhanced intelligent collapse logic for both mobile and desktop
-            if (isMobile) {
-              // Mobile: More responsive collapsing for better UX on small screens
-              if (scrollingDown && scrollTop > 15) {
-                setCompactQuickBar(true);
-                if (scrollTop > 35) {
-                  setHideBottomArea(true);
-                }
-              } else if (!scrollingDown && scrollTop < 10) {
-                setCompactQuickBar(false);
-                setHideBottomArea(false);
-              } else if (scrollTop === 0) {
-                // Always expand when at top
-                setCompactQuickBar(false);
-                setHideBottomArea(false);
-              }
-            } else {
-              // Desktop: Gentler collapsing with larger thresholds
-              if (scrollingDown && scrollTop > 40) {
-                setCompactQuickBar(true);
-                if (scrollTop > 100) {
-                  setHideBottomArea(true);
-                }
-              } else if (!scrollingDown && scrollTop < 30) {
-                setCompactQuickBar(false);
-                setHideBottomArea(false);
-              } else if (scrollTop === 0) {
-                // Always expand when at top
-                setCompactQuickBar(false);
-                setHideBottomArea(false);
-              }
-            }
-            
-            setLastScrollY(scrollTop);
-          }}
           className="flex-1 overflow-y-auto max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pb-40"
         >
           {/* Wisdom Orb Remnant - Hidden for now */}
@@ -496,32 +501,30 @@ console.log('Rendering main Index content');
       </div>
       
       {/* Fixed bottom area */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 ${hideBottomArea ? 'translate-y-full' : 'translate-y-0'}`}>
-        <div className="bg-background border-t"
-             style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-          {/* Container: full width on mobile, constrained on desktop */}
-          <div className="w-full md:max-w-4xl lg:max-w-6xl md:mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-4">
-            {pillMode ? (
-              <PillQuickPauseBar
-                compact={compactQuickBar}
-                prefillValue={sharedPrefill || ''}
-                onExpandRequest={() => setCompactQuickBar(false)}
-                onUrlEntry={() => {
-                  setHideBottomArea(false);
-                }}
-                onBarcodeScanned={() => {
-                  setHideBottomArea(false);
-                }}
-                onCollapseChange={(collapsed) => {
-                  setHideBottomArea(collapsed);
-                }}
-              />
-            ) : (
-              <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />
-            )}
-            {/* Only show FooterLinks when bottom area is not hidden */}
-            {!hideBottomArea && <FooterLinks />}
-          </div>
+      <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 bg-background border-t ${hideBottomArea ? 'translate-y-full' : 'translate-y-0'}`}
+           style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+        {/* Container: full width on mobile, constrained on desktop */}
+        <div className="w-full md:max-w-4xl lg:max-w-6xl md:mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-4">
+          {pillMode ? (
+            <PillQuickPauseBar
+              compact={compactQuickBar}
+              prefillValue={sharedPrefill || ''}
+              onExpandRequest={() => setCompactQuickBar(false)}
+              onUrlEntry={() => {
+                setHideBottomArea(false);
+              }}
+              onBarcodeScanned={() => {
+                setHideBottomArea(false);
+              }}
+              onCollapseChange={(collapsed) => {
+                setHideBottomArea(collapsed);
+              }}
+            />
+          ) : (
+            <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />
+          )}
+          {/* Only show FooterLinks when bottom area is not hidden */}
+          {!hideBottomArea && <FooterLinks />}
         </div>
       </div>
       
