@@ -214,16 +214,12 @@ export const useNotifications = (enabled: boolean) => {
     }
   };
 
-  const testNotification = () => {
+  const testNotification = async () => {
     try {
-      console.log('🧪 Test notification triggered via platform service');
+      console.log('🧪 Test notification triggered via Progressier');
       
       if (platformNotificationService.getEnabled()) {
-        platformNotificationService.showNotification('Test Notification', {
-          body: 'This is a test to make sure notifications are working on your device!',
-          tag: 'pocket-pause-test',
-          requireInteraction: false
-        });
+        await platformNotificationService.testNotification();
         
         // Also trigger a check for real items
         setTimeout(checkForReadyItems, 1000);

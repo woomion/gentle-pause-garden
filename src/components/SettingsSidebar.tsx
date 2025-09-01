@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
-import { notificationService } from '../services/notificationService';
+import { platformNotificationService } from '../services/platformNotificationService';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
@@ -27,51 +27,31 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
 
   const handleNotificationToggle = async (checked: boolean) => {
-    console.log('🔔 Settings toggle clicked - checked:', checked);
-    console.log('🔔 Current permission:', Notification.permission);
+    console.log('🔔 Progressier toggle clicked - checked:', checked);
     
     if (checked) {
-      console.log('🔔 User wants to enable notifications');
+      console.log('🔔 User wants to enable push notifications');
       
-      // Check if notifications are supported first
-      if (!('Notification' in window)) {
-        console.log('❌ Notifications not supported');
-        toast({
-          title: "Not supported",
-          description: "Your browser doesn't support notifications.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Always try to get permission, regardless of current state
-      console.log('🔔 Requesting permission...');
       try {
-        const permission = await Notification.requestPermission();
-        console.log('🔔 Permission result:', permission);
+        // Request permission via Progressier
+        const permission = await platformNotificationService.requestPermission();
+        console.log('🔔 Progressier permission result:', permission);
         
-        if (permission === 'granted') {
-          notificationService.setEnabled(true);
+        if (permission) {
+          platformNotificationService.setEnabled(true);
           const success = await updateNotificationSetting(true);
           if (success) {
-            console.log('✅ Successfully enabled notifications');
+            console.log('✅ Successfully enabled push notifications');
             toast({
-              title: "Notifications enabled",
-              description: "We'll gently remind you when items are ready for review.",
+              title: "Push notifications enabled",
+              description: "You'll receive push notifications when items are ready for review.",
             });
           }
-        } else if (permission === 'denied') {
+        } else {
           console.log('❌ Permission denied by user');
           toast({
             title: "Permission denied",
-            description: "Please enable notifications in your browser settings to receive reminders.",
-            variant: "destructive"
-          });
-        } else {
-          console.log('❌ Permission not granted:', permission);
-          toast({
-            title: "Permission required",
-            description: "Notifications need browser permission to work.",
+            description: "Please allow notifications when prompted to receive push alerts.",
             variant: "destructive"
           });
         }
@@ -84,71 +64,43 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
         });
       }
     } else {
-      console.log('🔔 Disabling notifications...');
-      const success = await updateNotificationSetting(false);
-      if (success) {
-        notificationService.setEnabled(false);
-        console.log('✅ Successfully disabled notifications');
-        toast({
-          title: "Notifications disabled",
-          description: "You won't receive review reminders anymore.",
-        });
+      console.log('🔔 Disabling push notifications...');
+      try {
+        await platformNotificationService.unsubscribe();
+        platformNotificationService.setEnabled(false);
+        const success = await updateNotificationSetting(false);
+        if (success) {
+          console.log('✅ Successfully disabled push notifications');
+          toast({
+            title: "Push notifications disabled",
+            description: "You won't receive push notifications anymore.",
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error disabling notifications:', error);
       }
     }
   };
 
-  const handleTestNotification = () => {
-    console.log('🧪 Test notification button clicked');
-    console.log('🧪 Current state:', {
-      notificationsEnabled,
-      browserPermission: Notification.permission,
-      serviceEnabled: notificationService.getEnabled(),
-      userAgent: navigator.userAgent,
-      isVisible: document.visibilityState
-    });
+  const handleTestNotification = async () => {
+    console.log('🧪 Progressier test notification button clicked');
     
-    // Force enable the service if permissions are correct
-    if (Notification.permission === 'granted') {
-      notificationService.setEnabled(true);
-      console.log('🧪 Force enabled notification service');
-    }
-    
-    testNotification();
-    
-    // Also manually test the notification check
-    console.log('🧪 Manually triggering item check...');
-    setTimeout(() => {
-      // Force a check regardless of timing
-      const now = Date.now();
-      const items = user 
-        ? supabasePausedItemsStore.getItemsForReview()
-        : pausedItemsStore.getItemsForReview();
+    try {
+      // Test Progressier notification directly
+      await platformNotificationService.testNotification();
       
-      console.log('🧪 Manual check results:', {
-        itemCount: items.length,
-        items: items.map(item => ({
-          name: item.itemName,
-          checkInDate: item.checkInDate,
-          isReady: item.checkInDate <= new Date()
-        }))
+      toast({
+        title: "Test notification sent",
+        description: "If push notifications are working, you should see a test notification now.",
       });
-      
-      if (items.length > 0 && notificationService.getEnabled()) {
-        console.log('🧪 Showing notification for ready items...');
-        notificationService.showNotification(
-          `🧪 Test: ${items.length} item${items.length === 1 ? '' : 's'} ready!`,
-          {
-            body: 'This is a test notification for your ready items.',
-            tag: 'pocket-pause-test-ready'
-          }
-        );
-      }
-    }, 2000);
-    
-    toast({
-      title: "Test notification sent",
-      description: "If notifications are working, you should see a test notification now.",
-    });
+    } catch (error) {
+      console.error('❌ Error sending test notification:', error);
+      toast({
+        title: "Test failed",
+        description: "There was an error sending the test notification.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleFeedbackClick = () => {

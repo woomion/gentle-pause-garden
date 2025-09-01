@@ -1,5 +1,6 @@
 import { notificationService } from './notificationService';
 import { webNotificationService } from './webNotificationService';
+import { progressierNotificationService } from './progressierNotificationService';
 
 export class PlatformNotificationService {
   private static instance: PlatformNotificationService;
@@ -19,8 +20,8 @@ export class PlatformNotificationService {
   }
 
   async initialize(): Promise<boolean> {
-    console.log('🔔 PlatformNotificationService: Initializing web notifications...');
-    return await webNotificationService.requestPermission();
+    console.log('🔔 PlatformNotificationService: Initializing Progressier push notifications...');
+    return await progressierNotificationService.initialize();
   }
 
   async scheduleNotification(
@@ -43,8 +44,8 @@ export class PlatformNotificationService {
   }
 
   async requestPermission(): Promise<boolean> {
-    console.log('🔔 Platform service: Requesting browser notification permission');
-    return await webNotificationService.requestPermission();
+    console.log('🔔 Platform service: Requesting Progressier push notification permission');
+    return await progressierNotificationService.requestPermission();
   }
 
   async showNotification(title: string, options: NotificationOptions = {}): Promise<void> {
@@ -53,10 +54,26 @@ export class PlatformNotificationService {
       return;
     }
 
-    console.log('🔔 Showing notification via web service:', { title, options });
+    console.log('🔔 Showing notification via Progressier:', { title, options });
     
-    // Use web notification service directly
-    webNotificationService.showNotification(title, options);
+    // Use Progressier for push notifications
+    await progressierNotificationService.sendNotification(title, options.body || '', {
+      icon: options.icon,
+      badge: options.badge,
+      tag: options.tag
+    });
+  }
+
+  async isSubscribed(): Promise<boolean> {
+    return await progressierNotificationService.isSubscribed();
+  }
+
+  async unsubscribe(): Promise<boolean> {
+    return await progressierNotificationService.unsubscribe();
+  }
+
+  async testNotification(): Promise<void> {
+    await progressierNotificationService.testNotification();
   }
 
   setEnabled(enabled: boolean): void {
