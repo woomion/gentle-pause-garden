@@ -530,11 +530,11 @@ console.log('Rendering main Index content');
                   </div>
 
                   {/* Mobile Layout - Fixed width container that matches carousel */}
-                  <div className="md:hidden w-[calc(100vw-2rem)] max-w-none overflow-hidden">
+                  <div className="md:hidden w-full max-w-none overflow-hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground px-2">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
-                      <div className="px-2 space-y-3">
+                      <div className="px-2 space-y-3 max-w-md mx-auto">
                         {currentPausedItems.map((it) => (
                           <DesktopItemCard
                             key={it.id}
