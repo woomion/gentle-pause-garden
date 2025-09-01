@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff, List, Navigation, ArrowUpDown } from 'lucide-react';
+import { Eye, EyeOff, List, Navigation, ArrowUp, ArrowDown } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
@@ -416,14 +416,15 @@ console.log('Rendering main Index content');
                 <div className="flex items-center justify-end">
                   <button
                     onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
-                    title={`Currently: ${sortMode === 'soonest' ? 'Ending soon' : 'Recently paused'}. Click to toggle.`}
-                    aria-label={`Currently sorting by ${sortMode === 'soonest' ? 'ending soon' : 'recently paused'}. Click to toggle.`}
+                    className="flex items-center justify-center w-8 h-8 hover:bg-muted/60 rounded-full transition-colors"
+                    title={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                    aria-label={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
                   >
-                    <ArrowUpDown size={16} className="text-muted-foreground" />
-                    <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">
-                      {sortMode === 'soonest' ? 'Ending soon' : 'Recently paused'}
-                    </span>
+                    {sortMode === 'soonest' ? (
+                      <ArrowUp size={16} className="text-muted-foreground" />
+                    ) : (
+                      <ArrowDown size={16} className="text-muted-foreground" />
+                    )}
                   </button>
                 </div>
               </div>
