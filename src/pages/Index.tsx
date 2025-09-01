@@ -357,7 +357,7 @@ console.log('Rendering main Index content');
                 </div>
               )}
               <div className="mb-4 flex items-center justify-between gap-2">
-                <div className="hidden md:flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
                       const newValue = !showImages;
@@ -448,18 +448,21 @@ console.log('Rendering main Index content');
                   </div>
 
                   {/* Mobile List Layout */}
-                  <div className="md:hidden space-y-2">
+                  <div className="md:hidden space-y-3">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground">Loading…</div>
                     ) : (
                       currentPausedItems.map((it) => (
-                        <PillItem
+                        <DesktopItemCard
                           key={it.id}
                           item={it}
+                          showImages={showImages}
                           onClick={() => {
                             setSelectedItem(it);
                             setShowItemDetail(true);
                           }}
+                          onEdit={(item, updates) => updateItem(item.id, updates)}
+                          onDelete={removeItem}
                         />
                       ))
                     )}
