@@ -376,12 +376,12 @@ console.log('Rendering main Index content');
                     {showImages ? (
                       <>
                         <Eye size={16} className="text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Images on</span>
+                        <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">Images on</span>
                       </>
                     ) : (
                       <>
                         <EyeOff size={16} className="text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Images off</span>
+                        <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">Images off</span>
                       </>
                     )}
                   </button>
