@@ -357,38 +357,38 @@ console.log('Rendering main Index content');
           */}
           {pillMode ? (
             <>
-              {readyCount > 0 && (
-                <div className="mb-3 md:mb-6 w-full md:w-auto">
-                  <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
-                </div>
-              )}
-              <div className="mb-4 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      const newValue = !showImages;
-                      setShowImages(newValue);
-                      localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
-                    title={showImages ? 'Hide images' : 'Show images'}
-                    aria-label={showImages ? 'Hide images' : 'Show images'}
-                  >
-                    {showImages ? (
-                      <>
-                        <Eye size={16} className="text-muted-foreground" />
-                        <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">Images on</span>
-                      </>
-                    ) : (
-                      <>
-                        <EyeOff size={16} className="text-muted-foreground" />
-                        <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">Images off</span>
-                      </>
-                    )}
-                  </button>
-                  
-                  {/* Mobile View Toggle */}
-                  <div className="md:hidden">
+              {/* Mobile container with consistent width */}
+              <div className="md:hidden -mx-2">
+                {readyCount > 0 && (
+                  <div className="mb-3 px-2">
+                    <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
+                  </div>
+                )}
+                <div className="mb-4 px-2 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const newValue = !showImages;
+                        setShowImages(newValue);
+                        localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                      title={showImages ? 'Hide images' : 'Show images'}
+                      aria-label={showImages ? 'Hide images' : 'Show images'}
+                    >
+                      {showImages ? (
+                        <>
+                          <Eye size={16} className="text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">Images on</span>
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff size={16} className="text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">Images off</span>
+                        </>
+                      )}
+                    </button>
+                    
                     <button
                       onClick={() => {
                         const newValue = mobileViewMode === 'list' ? 'carousel' : 'list';
@@ -412,20 +412,69 @@ console.log('Rendering main Index content');
                       )}
                     </button>
                   </div>
+                  <div className="flex items-center justify-end">
+                    <button
+                      onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
+                      className="flex items-center justify-center w-8 h-8 hover:bg-muted/60 rounded-full transition-colors"
+                      title={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                      aria-label={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                    >
+                      {sortMode === 'soonest' ? (
+                        <ArrowUp size={16} className="text-muted-foreground" />
+                      ) : (
+                        <ArrowDown size={16} className="text-muted-foreground" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center justify-end">
-                  <button
-                    onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
-                    className="flex items-center justify-center w-8 h-8 hover:bg-muted/60 rounded-full transition-colors"
-                    title={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
-                    aria-label={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
-                  >
-                    {sortMode === 'soonest' ? (
-                      <ArrowUp size={16} className="text-muted-foreground" />
-                    ) : (
-                      <ArrowDown size={16} className="text-muted-foreground" />
-                    )}
-                  </button>
+              </div>
+
+              {/* Desktop controls - unchanged */}
+              <div className="hidden md:block">
+                {readyCount > 0 && (
+                  <div className="mb-3 md:mb-6 w-full md:w-auto">
+                    <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
+                  </div>
+                )}
+                <div className="mb-4 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const newValue = !showImages;
+                        setShowImages(newValue);
+                        localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                      title={showImages ? 'Hide images' : 'Show images'}
+                      aria-label={showImages ? 'Hide images' : 'Show images'}
+                    >
+                      {showImages ? (
+                        <>
+                          <Eye size={16} className="text-muted-foreground" />
+                          <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">Images on</span>
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff size={16} className="text-muted-foreground" />
+                          <span className="text-xs md:text-sm text-muted-foreground whitespace-nowrap">Images off</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-end">
+                    <button
+                      onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
+                      className="flex items-center justify-center w-8 h-8 hover:bg-muted/60 rounded-full transition-colors"
+                      title={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                      aria-label={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                    >
+                      {sortMode === 'soonest' ? (
+                        <ArrowUp size={16} className="text-muted-foreground" />
+                      ) : (
+                        <ArrowDown size={16} className="text-muted-foreground" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
