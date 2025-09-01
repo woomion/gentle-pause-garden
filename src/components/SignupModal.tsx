@@ -183,7 +183,7 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
         </form>
 
 
-        <div className="mt-4 text-center">
+        <div className="mt-4 text-center space-y-2">
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
@@ -194,6 +194,22 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
               : "Don't have an account? Sign up"
             }
           </button>
+          
+          {!isSignUp && (
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  // Navigate to the full auth page with forgot password
+                  window.location.href = '/auth';
+                }}
+                className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors text-sm underline"
+              >
+                Forgot your password?
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
