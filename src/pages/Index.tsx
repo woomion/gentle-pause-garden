@@ -489,7 +489,7 @@ console.log('Rendering main Index content');
                     Paused Items ({currentPausedItems.length})
                   </div>
                   <div className="md:hidden w-full">
-                    <div className="text-xs font-medium text-muted-foreground mb-2 text-left">
+                    <div className="text-xs font-medium text-muted-foreground mb-2 text-left px-4">
                       Paused Items ({currentPausedItems.length})
                     </div>
                   </div>
@@ -556,9 +556,9 @@ console.log('Rendering main Index content');
                     ) : (
                       <div className="w-full overflow-hidden">
                         <Carousel className="w-full">
-                          <CarouselContent className="pl-4">
+                          <CarouselContent className="pl-4 -ml-4">
                             {currentPausedItems.map((it) => (
-                              <CarouselItem key={it.id} className="pl-2 basis-[240px]">
+                              <CarouselItem key={it.id} className="pl-4 basis-[240px]">
                                 <DesktopItemCard
                                   item={it}
                                   showImages={showImages}
