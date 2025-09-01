@@ -359,7 +359,7 @@ console.log('Rendering main Index content');
             <>
               {/* Mobile container - absolutely stable width */}
               <div className="md:hidden">
-                <div className="w-full px-4 max-w-sm mx-auto">
+                <div className="w-full">
                   {readyCount > 0 && (
                     <div className="mb-3">
                       <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
@@ -488,8 +488,8 @@ console.log('Rendering main Index content');
                   <div className="hidden md:block text-xs font-medium text-muted-foreground mb-2 px-1 md:text-sm md:mb-4">
                     Paused Items ({currentPausedItems.length})
                   </div>
-                  <div className="md:hidden w-[calc(100vw-2rem)] max-w-none overflow-hidden">
-                    <div className="px-2 text-xs font-medium text-muted-foreground mb-2">
+                  <div className="md:hidden w-full">
+                    <div className="text-xs font-medium text-muted-foreground mb-2 text-left">
                       Paused Items ({currentPausedItems.length})
                     </div>
                   </div>
