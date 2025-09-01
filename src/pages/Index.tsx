@@ -1,6 +1,7 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Grid3X3, Navigation } from 'lucide-react';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
 import ReviewBanner from '../components/ReviewBanner';
@@ -54,6 +55,11 @@ const Index = () => {
   const [showImages, setShowImages] = useState(() => {
     const saved = localStorage.getItem('pocketpause-show-images');
     return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  const [mobileViewMode, setMobileViewMode] = useState<'grid' | 'carousel'>(() => {
+    const stored = localStorage.getItem('pocketpause-mobile-view');
+    return stored ? JSON.parse(stored) : 'grid';
   });
   const [sortMode, setSortMode] = useState<'soonest' | 'newest'>(
     (localStorage.getItem('pill_sort') as 'soonest' | 'newest') || 'soonest'
@@ -380,6 +386,32 @@ console.log('Rendering main Index content');
                       </>
                     )}
                   </button>
+                  
+                  {/* Mobile View Toggle */}
+                  <div className="md:hidden">
+                    <button
+                      onClick={() => {
+                        const newValue = mobileViewMode === 'grid' ? 'carousel' : 'grid';
+                        setMobileViewMode(newValue);
+                        localStorage.setItem('pocketpause-mobile-view', JSON.stringify(newValue));
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                      title={mobileViewMode === 'grid' ? 'Switch to carousel' : 'Switch to grid'}
+                      aria-label={mobileViewMode === 'grid' ? 'Switch to carousel' : 'Switch to grid'}
+                    >
+                      {mobileViewMode === 'grid' ? (
+                        <>
+                          <Grid3X3 size={16} className="text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">Grid</span>
+                        </>
+                      ) : (
+                        <>
+                          <Navigation size={16} className="text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">Carousel</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center justify-end gap-2 text-xs md:text-sm w-full" aria-label="Sort items">
                   <span className="text-muted-foreground">Sort:</span>
@@ -447,24 +479,47 @@ console.log('Rendering main Index content');
                     </div>
                   </div>
 
-                  {/* Mobile List Layout */}
-                  <div className="md:hidden space-y-3">
+                  {/* Mobile Layout */}
+                  <div className="md:hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground">Loading…</div>
+                    ) : mobileViewMode === 'grid' ? (
+                      <div className="space-y-3">
+                        {currentPausedItems.map((it) => (
+                          <DesktopItemCard
+                            key={it.id}
+                            item={it}
+                            showImages={showImages}
+                            onClick={() => {
+                              setSelectedItem(it);
+                              setShowItemDetail(true);
+                            }}
+                            onEdit={(item, updates) => updateItem(item.id, updates)}
+                            onDelete={removeItem}
+                          />
+                        ))}
+                      </div>
                     ) : (
-                      currentPausedItems.map((it) => (
-                        <DesktopItemCard
-                          key={it.id}
-                          item={it}
-                          showImages={showImages}
-                          onClick={() => {
-                            setSelectedItem(it);
-                            setShowItemDetail(true);
-                          }}
-                          onEdit={(item, updates) => updateItem(item.id, updates)}
-                          onDelete={removeItem}
-                        />
-                      ))
+                      <Carousel className="w-full">
+                        <CarouselContent className="-ml-2 md:-ml-4">
+                          {currentPausedItems.map((it) => (
+                            <CarouselItem key={it.id} className="pl-2 md:pl-4 basis-[280px]">
+                              <DesktopItemCard
+                                item={it}
+                                showImages={showImages}
+                                onClick={() => {
+                                  setSelectedItem(it);
+                                  setShowItemDetail(true);
+                                }}
+                                onEdit={(item, updates) => updateItem(item.id, updates)}
+                                onDelete={removeItem}
+                              />
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="left-2" />
+                        <CarouselNext className="right-2" />
+                      </Carousel>
                     )}
                   </div>
                 </div>
