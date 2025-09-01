@@ -16,8 +16,7 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png'],
-      injectRegister: false, // Disable automatic service worker registration
-      manifest: false, // Disable manifest generation
+      manifest: false, // Disable manifest generation - using Progressier
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
         runtimeCaching: [
@@ -30,7 +29,6 @@ export default defineConfig(({ mode }) => ({
             },
           },
         ],
-        // Enable background sync for better offline support
         skipWaiting: true,
         clientsClaim: true,
       },
