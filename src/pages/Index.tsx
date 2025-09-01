@@ -357,74 +357,76 @@ console.log('Rendering main Index content');
           */}
           {pillMode ? (
             <>
-              {/* Mobile container with consistent width */}
-              <div className="md:hidden px-4">
-                {readyCount > 0 && (
-                  <div className="mb-3">
-                    <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
-                  </div>
-                )}
-                <div className="mb-4 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        const newValue = !showImages;
-                        setShowImages(newValue);
-                        localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
-                      title={showImages ? 'Hide images' : 'Show images'}
-                      aria-label={showImages ? 'Hide images' : 'Show images'}
-                    >
-                      {showImages ? (
-                        <>
-                          <Eye size={16} className="text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">Images on</span>
-                        </>
-                      ) : (
-                        <>
-                          <EyeOff size={16} className="text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">Images off</span>
-                        </>
-                      )}
-                    </button>
-                    
-                    <button
-                      onClick={() => {
-                        const newValue = mobileViewMode === 'list' ? 'carousel' : 'list';
-                        setMobileViewMode(newValue);
-                        localStorage.setItem('pocketpause-mobile-view', JSON.stringify(newValue));
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
-                      title={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
-                      aria-label={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
-                    >
-                      {mobileViewMode === 'list' ? (
-                        <>
-                          <List size={16} className="text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">List</span>
-                        </>
-                      ) : (
-                        <>
-                          <Navigation size={16} className="text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">Carousel</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-end">
-                    <button
-                      onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
-                      className="flex items-center justify-center w-8 h-8 hover:bg-muted/60 rounded-full transition-colors"
-                      title={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
-                      aria-label={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
-                    >
-                      {sortMode === 'soonest' ? (
-                        <ArrowUp size={16} className="text-muted-foreground" />
-                      ) : (
-                        <ArrowDown size={16} className="text-muted-foreground" />
-                      )}
-                    </button>
+              {/* Mobile container - absolutely stable width */}
+              <div className="md:hidden">
+                <div className="w-full px-4 max-w-sm mx-auto">
+                  {readyCount > 0 && (
+                    <div className="mb-3">
+                      <ReadyToReviewPill count={readyCount} onClick={handleStartReview} />
+                    </div>
+                  )}
+                  <div className="mb-4 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          const newValue = !showImages;
+                          setShowImages(newValue);
+                          localStorage.setItem('pocketpause-show-images', JSON.stringify(newValue));
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                        title={showImages ? 'Hide images' : 'Show images'}
+                        aria-label={showImages ? 'Hide images' : 'Show images'}
+                      >
+                        {showImages ? (
+                          <>
+                            <Eye size={16} className="text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">Images on</span>
+                          </>
+                        ) : (
+                          <>
+                            <EyeOff size={16} className="text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">Images off</span>
+                          </>
+                        )}
+                      </button>
+                      
+                      <button
+                        onClick={() => {
+                          const newValue = mobileViewMode === 'list' ? 'carousel' : 'list';
+                          setMobileViewMode(newValue);
+                          localStorage.setItem('pocketpause-mobile-view', JSON.stringify(newValue));
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                        title={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
+                        aria-label={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
+                      >
+                        {mobileViewMode === 'list' ? (
+                          <>
+                            <List size={16} className="text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">List</span>
+                          </>
+                        ) : (
+                          <>
+                            <Navigation size={16} className="text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">Carousel</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-end">
+                      <button
+                        onClick={() => setSortMode(sortMode === 'soonest' ? 'newest' : 'soonest')}
+                        className="flex items-center justify-center w-8 h-8 hover:bg-muted/60 rounded-full transition-colors"
+                        title={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                        aria-label={sortMode === 'soonest' ? 'Sort by recently paused' : 'Sort by ending soon'}
+                      >
+                        {sortMode === 'soonest' ? (
+                          <ArrowUp size={16} className="text-muted-foreground" />
+                        ) : (
+                          <ArrowDown size={16} className="text-muted-foreground" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -529,13 +531,13 @@ console.log('Rendering main Index content');
                     </div>
                   </div>
 
-                  {/* Mobile Layout - Fixed width matching controls */}
+                  {/* Mobile Layout - Fixed stable container */}
                   <div className="md:hidden">
                     {itemsLoading ? (
-                      <div className="text-sm text-muted-foreground px-4">Loading…</div>
+                      <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
-                      <div className="px-4">
-                        <div className="space-y-3 max-w-md mx-auto">
+                      <div className="w-full px-4 max-w-sm mx-auto">
+                        <div className="space-y-3">
                           {currentPausedItems.map((it) => (
                             <DesktopItemCard
                               key={it.id}
@@ -552,27 +554,25 @@ console.log('Rendering main Index content');
                         </div>
                       </div>
                     ) : (
-                      <div className="px-4">
-                        <div className="max-w-md mx-auto overflow-hidden">
-                          <Carousel className="w-full">
-                            <CarouselContent className="ml-4">
-                              {currentPausedItems.map((it) => (
-                                <CarouselItem key={it.id} className="pl-2 basis-[280px]">
-                                  <DesktopItemCard
-                                    item={it}
-                                    showImages={showImages}
-                                    onClick={() => {
-                                      setSelectedItem(it);
-                                      setShowItemDetail(true);
-                                    }}
-                                    onEdit={(item, updates) => updateItem(item.id, updates)}
-                                    onDelete={removeItem}
-                                  />
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                          </Carousel>
-                        </div>
+                      <div className="w-full max-w-sm mx-auto overflow-hidden">
+                        <Carousel className="w-full">
+                          <CarouselContent className="pl-4">
+                            {currentPausedItems.map((it) => (
+                              <CarouselItem key={it.id} className="pl-2 basis-[240px]">
+                                <DesktopItemCard
+                                  item={it}
+                                  showImages={showImages}
+                                  onClick={() => {
+                                    setSelectedItem(it);
+                                    setShowItemDetail(true);
+                                  }}
+                                  onEdit={(item, updates) => updateItem(item.id, updates)}
+                                  onDelete={removeItem}
+                                />
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                        </Carousel>
                       </div>
                     )}
                   </div>
