@@ -475,24 +475,26 @@ console.log('Rendering main Index content');
                   </div>
 
                   {/* Mobile Layout */}
-                  <div className="md:hidden">
+                  <div className="md:hidden w-full">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
-                      <div className="space-y-3">
-                        {currentPausedItems.map((it) => (
-                          <DesktopItemCard
-                            key={it.id}
-                            item={it}
-                            showImages={showImages}
-                            onClick={() => {
-                              setSelectedItem(it);
-                              setShowItemDetail(true);
-                            }}
-                            onEdit={(item, updates) => updateItem(item.id, updates)}
-                            onDelete={removeItem}
-                          />
-                        ))}
+                      <div className="w-full -mx-2">
+                        <div className="px-2 space-y-3">
+                          {currentPausedItems.map((it) => (
+                            <DesktopItemCard
+                              key={it.id}
+                              item={it}
+                              showImages={showImages}
+                              onClick={() => {
+                                setSelectedItem(it);
+                                setShowItemDetail(true);
+                              }}
+                              onEdit={(item, updates) => updateItem(item.id, updates)}
+                              onDelete={removeItem}
+                            />
+                          ))}
+                        </div>
                       </div>
                     ) : (
                       <Carousel className="w-full">
