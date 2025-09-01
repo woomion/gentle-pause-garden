@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff, Grid3X3, Navigation } from 'lucide-react';
+import { Eye, EyeOff, List, Navigation } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
@@ -57,9 +57,9 @@ const Index = () => {
     return saved !== null ? JSON.parse(saved) : true;
   });
 
-  const [mobileViewMode, setMobileViewMode] = useState<'grid' | 'carousel'>(() => {
+  const [mobileViewMode, setMobileViewMode] = useState<'list' | 'carousel'>(() => {
     const stored = localStorage.getItem('pocketpause-mobile-view');
-    return stored ? JSON.parse(stored) : 'grid';
+    return stored ? JSON.parse(stored) : 'list';
   });
   const [sortMode, setSortMode] = useState<'soonest' | 'newest'>(
     (localStorage.getItem('pill_sort') as 'soonest' | 'newest') || 'soonest'
@@ -391,18 +391,18 @@ console.log('Rendering main Index content');
                   <div className="md:hidden">
                     <button
                       onClick={() => {
-                        const newValue = mobileViewMode === 'grid' ? 'carousel' : 'grid';
+                        const newValue = mobileViewMode === 'list' ? 'carousel' : 'list';
                         setMobileViewMode(newValue);
                         localStorage.setItem('pocketpause-mobile-view', JSON.stringify(newValue));
                       }}
                       className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
-                      title={mobileViewMode === 'grid' ? 'Switch to carousel' : 'Switch to grid'}
-                      aria-label={mobileViewMode === 'grid' ? 'Switch to carousel' : 'Switch to grid'}
+                      title={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
+                      aria-label={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
                     >
-                      {mobileViewMode === 'grid' ? (
+                      {mobileViewMode === 'list' ? (
                         <>
-                          <Grid3X3 size={16} className="text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">Grid</span>
+                          <List size={16} className="text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">List</span>
                         </>
                       ) : (
                         <>
@@ -483,7 +483,7 @@ console.log('Rendering main Index content');
                   <div className="md:hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground">Loading…</div>
-                    ) : mobileViewMode === 'grid' ? (
+                    ) : mobileViewMode === 'list' ? (
                       <div className="space-y-3">
                         {currentPausedItems.map((it) => (
                           <DesktopItemCard
