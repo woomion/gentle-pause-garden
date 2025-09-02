@@ -608,7 +608,7 @@ console.log('Rendering main Index content');
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
-                       <div className="w-full overflow-hidden px-1 max-w-3xl mx-auto">
+                        <div className="w-full max-w-3xl mx-auto">
                           <div className="space-y-4">
                             {currentPausedItems.map((it) => (
                               <div key={it.id} className="basis-full">
