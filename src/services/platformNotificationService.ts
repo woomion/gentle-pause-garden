@@ -44,8 +44,21 @@ export class PlatformNotificationService {
   }
 
   async requestPermission(): Promise<boolean> {
-    console.log('🔔 Platform service: Requesting Progressier push notification permission');
-    return await progressierNotificationService.requestPermission();
+    console.log('🔔 Platform service: Requesting push notification permission...');
+    
+    // Try Progressier first
+    const progressierResult = await progressierNotificationService.requestPermission();
+    if (progressierResult) {
+      console.log('✅ Progressier permission granted');
+      return true;
+    }
+    
+    // Fallback to regular browser notifications
+    console.log('⚠️ Progressier failed, falling back to browser notifications');
+    const browserResult = await notificationService.requestPermission();
+    console.log('🔔 Browser notification permission result:', browserResult);
+    
+    return browserResult;
   }
 
   async showNotification(title: string, options: NotificationOptions = {}): Promise<void> {
@@ -54,14 +67,22 @@ export class PlatformNotificationService {
       return;
     }
 
-    console.log('🔔 Showing notification via Progressier:', { title, options });
+    console.log('🔔 Showing notification:', { title, options });
     
-    // Use Progressier for push notifications
-    await progressierNotificationService.sendNotification(title, options.body || '', {
-      icon: options.icon,
-      badge: options.badge,
-      tag: options.tag
-    });
+    // Try Progressier first
+    const isProgressierSubscribed = await progressierNotificationService.isSubscribed();
+    if (isProgressierSubscribed) {
+      console.log('🔔 Using Progressier for notification');
+      await progressierNotificationService.sendNotification(title, options.body || '', {
+        icon: options.icon,
+        badge: options.badge,
+        tag: options.tag
+      });
+    } else {
+      // Fallback to browser notifications
+      console.log('🔔 Using browser notifications as fallback');
+      notificationService.showNotification(title, options);
+    }
   }
 
   async isSubscribed(): Promise<boolean> {
@@ -73,7 +94,33 @@ export class PlatformNotificationService {
   }
 
   async testNotification(): Promise<void> {
-    await progressierNotificationService.testNotification();
+    console.log('🔔 Testing notifications...');
+    
+    // Log full notification status for debugging
+    const progressierSubscribed = await progressierNotificationService.isSubscribed();
+    const browserPermission = Notification.permission;
+    const serviceEnabled = this.getEnabled();
+    
+    console.log('🔔 Full notification status:', {
+      permission: browserPermission,
+      serviceEnabled,
+      settingsEnabled: notificationService.getEnabled(),
+      progressierSubscribed,
+      user: !!document.querySelector('meta[name="user-authenticated"]')
+    });
+    
+    // Try Progressier test first
+    if (progressierSubscribed) {
+      console.log('🔔 Sending test via Progressier');
+      await progressierNotificationService.testNotification();
+    } else {
+      // Fallback to browser notification
+      console.log('🔔 Sending test via browser notifications');
+      notificationService.showNotification('Test Notification', {
+        body: 'This is a test from Pocket Pause! Your notifications are working.',
+        icon: '/icons/app-icon-512.png'
+      });
+    }
   }
 
   setEnabled(enabled: boolean): void {

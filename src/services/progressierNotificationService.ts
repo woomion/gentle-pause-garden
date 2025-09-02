@@ -39,33 +39,44 @@ export class ProgressierNotificationService {
     try {
       console.log('🔔 Progressier: Initializing...');
       
-      // Wait for Progressier to be ready
-      if (window.progressierRegistration) {
-        await window.progressierRegistration.ready;
-        console.log('✅ Progressier: Ready');
-        return true;
-      } else {
-        console.log('⚠️ Progressier: Not loaded yet, waiting...');
-        // Wait a bit longer for the script to load
-        return new Promise((resolve) => {
-          let attempts = 0;
-          const checkProgressier = () => {
-            attempts++;
-            if (window.progressierRegistration) {
-              window.progressierRegistration.ready.then(() => {
-                console.log('✅ Progressier: Ready after retry');
+      // Wait for both DOM and Progressier script to be ready
+      return new Promise((resolve) => {
+        let attempts = 0;
+        const maxAttempts = 100; // Try for 10 seconds
+        
+        const checkProgressier = () => {
+          attempts++;
+          console.log(`🔔 Progressier check attempt ${attempts}/${maxAttempts}`);
+          
+          if (window.progressierRegistration) {
+            console.log('🔔 Progressier registration object found, waiting for ready...');
+            window.progressierRegistration.ready
+              .then(() => {
+                console.log('✅ Progressier: Ready and initialized');
                 resolve(true);
+              })
+              .catch((error) => {
+                console.error('❌ Progressier ready promise failed:', error);
+                resolve(false);
               });
-            } else if (attempts < 50) { // Try for 5 seconds
-              setTimeout(checkProgressier, 100);
-            } else {
-              console.log('❌ Progressier: Failed to initialize');
-              resolve(false);
-            }
-          };
+          } else if (attempts < maxAttempts) {
+            setTimeout(checkProgressier, 100);
+          } else {
+            console.log('❌ Progressier: Failed to initialize after', maxAttempts, 'attempts');
+            console.log('❌ Window object keys:', Object.keys(window).filter(k => k.includes('progress')));
+            resolve(false);
+          }
+        };
+        
+        // Start checking immediately, but also wait for DOM ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(checkProgressier, 100); // Give script a moment to load
+          });
+        } else {
           setTimeout(checkProgressier, 100);
-        });
-      }
+        }
+      });
     } catch (error) {
       console.error('❌ Progressier: Initialization error:', error);
       return false;
