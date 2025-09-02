@@ -677,7 +677,7 @@ console.log('Rendering main Index content');
               )}
 
               {/* Show notification setup prominently for all users */}
-              {Notification.permission !== 'granted' && (storeReadyItems.length > 0 || currentPausedItems.length > 0) && (
+              {Notification.permission !== 'granted' && (
                 <div className="mt-4 mb-4 p-4 border border-orange-200 rounded-lg bg-orange-50/50">
                   <div className="text-sm text-orange-700 mb-2">🔔 Enable notifications to get alerted when items are ready</div>
                   <div className="text-xs text-orange-600 mb-3">
