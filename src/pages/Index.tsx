@@ -276,13 +276,13 @@ const Index = () => {
       
       // Enhanced intelligent collapse logic for both mobile and desktop
       if (isMobile) {
-        // Mobile: Always carousel mode now
+        // Mobile: Only compact, never fully hide
         if (scrollingDown && scrollTop > 15) {
-          setHideBottomArea(true);
+          setCompactQuickBar(true);
         } else if (!scrollingDown && scrollTop < 10) {
-          setHideBottomArea(false);
+          setCompactQuickBar(false);
         } else if (scrollTop === 0) {
-          setHideBottomArea(false);
+          setCompactQuickBar(false);
         }
       } else {
         // Desktop: Only compact, never hide completely
@@ -678,9 +678,9 @@ console.log('Rendering main Index content');
                 setHideBottomArea(false);
               }}
               onCollapseChange={(collapsed) => {
-                // Mobile carousel mode allows hiding
+                // Mobile only compacts, never hides
                 if (isMobile) {
-                  setHideBottomArea(collapsed);
+                  setCompactQuickBar(collapsed);
                 }
               }}
             />
