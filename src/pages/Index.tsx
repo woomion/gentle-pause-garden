@@ -568,7 +568,7 @@ console.log('Rendering main Index content');
                   
                   {/* Desktop Grid Layout - 3 columns */}
                   <div className="hidden md:block">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 auto-rows-fr max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 auto-rows-fr max-w-7xl mx-auto">
                       {itemsLoading ? (
                         Array.from({ length: 6 }, (_, i) => (
                           <div key={i} className="bg-card/30 backdrop-blur-sm border border-border/30 rounded-xl shadow-sm animate-pulse">
@@ -609,7 +609,7 @@ console.log('Rendering main Index content');
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
                        <div className="w-full overflow-hidden px-4">
-                          <div className="space-y-4 max-w-lg mx-auto">
+                          <div className="space-y-4 max-w-xl mx-auto">
                             {currentPausedItems.map((it) => (
                               <div key={it.id} className="w-full">
                                <DesktopItemCard
@@ -627,7 +627,7 @@ console.log('Rendering main Index content');
                          </div>
                        </div>
                     ) : (
-                       <div className="w-full overflow-hidden px-4 max-w-lg mx-auto">
+                       <div className="w-full overflow-hidden px-4 max-w-xl mx-auto">
                          <Carousel className="w-full">
                            <CarouselContent className="pl-0">
                              {currentPausedItems.map((it) => (
