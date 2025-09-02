@@ -7,19 +7,13 @@ const getTimeBasedMessage = () => {
   
   // Select message based on time of day
   if (hour >= 6 && hour < 12) {
-    return "Start the day with clarity.\nEvery pause is a fresh choice.";
+    return "Start the day with clarity.";
   } else if (hour >= 12 && hour < 15) {
-    return (
-      <>
-        A breath before you buy.
-        <br />
-        Even small pauses ripple outward.
-      </>
-    );
+    return "Even small pauses ripple outward.";
   } else if (hour >= 15 && hour < 20) {
-    return "Presence belongs in your pocket — right when you need it most.";
+    return "Pause for presence.";
   } else {
-    return "Slow down. Reflect. Tomorrow's choices begin here.";
+    return "Tomorrow's choices begin here.";
   }
 };
 
