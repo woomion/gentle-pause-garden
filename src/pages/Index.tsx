@@ -219,10 +219,10 @@ const Index = () => {
             setHideBottomArea(true);
           }
         } else if (!scrollingDown) {
-          // Scrolling up: always collapse (hide) at least once, even if there's nothing under it
-          if (!hideBottomArea && scrollTop > 10) {
+          // Scrolling up: always collapse at least once, immediately
+          if (!hideBottomArea) {
             setHideBottomArea(true);
-          } else if (hideBottomArea && scrollTop < 10) {
+          } else if (scrollTop < 10) {
             // Show footer again when near top
             setHideBottomArea(false);
             setCompactQuickBar(false);
