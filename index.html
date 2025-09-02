@@ -72,13 +72,38 @@
     <script>
       // Web Content Shared event listener
       window.addEventListener("webcontentshared", function(e){
+        console.log('📤 Web content shared:', e.detail);
+        
+        // Create URL parameters from shared content
+        const url = new URL(window.location.href);
+        
         if (e.detail.file) {
-           //doSomethingWithTheFile(e.detail.file);
-        } else if (e.detail.url){
-           //doSomethingWithTheLink(e.detail.url, e.detail.title, e.detail.text);
+          // Handle file sharing (if needed in the future)
+          console.log('📎 File shared:', e.detail.file);
+        } else if (e.detail.url) {
+          // Handle URL sharing
+          url.searchParams.set('shared_url', e.detail.url);
+          if (e.detail.title) {
+            url.searchParams.set('shared_title', e.detail.title);
+          }
+          if (e.detail.text) {
+            url.searchParams.set('shared_text', e.detail.text);
+          }
         } else {
-           //doSomethingWithTheText(e.detail.title, e.detail.text);
+          // Handle text sharing
+          if (e.detail.title) {
+            url.searchParams.set('shared_title', e.detail.title);
+          }
+          if (e.detail.text) {
+            url.searchParams.set('shared_text', e.detail.text);
+          }
         }
+        
+        // Update the URL to trigger the React app's shared content handling
+        window.history.replaceState({}, '', url.toString());
+        
+        // Trigger a popstate event to notify React of the URL change
+        window.dispatchEvent(new PopStateEvent('popstate'));
       });
     </script>
     <!-- Progressier PWA Push Notifications -->
