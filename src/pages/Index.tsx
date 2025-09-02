@@ -611,8 +611,8 @@ console.log('Rendering main Index content');
                        <div className="w-full overflow-hidden px-1 max-w-3xl mx-auto">
                           <div className="space-y-4">
                             {currentPausedItems.map((it) => (
-                              <div key={it.id} className="w-full">
                                <DesktopItemCard
+                                 key={it.id}
                                  item={it}
                                  showImages={showImages}
                                  onClick={() => {
@@ -622,7 +622,6 @@ console.log('Rendering main Index content');
                                  onEdit={(item, updates) => updateItem(item.id, updates)}
                                  onDelete={removeItem}
                                />
-                             </div>
                            ))}
                          </div>
                        </div>
