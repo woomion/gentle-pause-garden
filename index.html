@@ -69,6 +69,18 @@
         });
       })();
     </script>
+    <script>
+      // Web Content Shared event listener
+      window.addEventListener("webcontentshared", function(e){
+        if (e.detail.file) {
+           //doSomethingWithTheFile(e.detail.file);
+        } else if (e.detail.url){
+           //doSomethingWithTheLink(e.detail.url, e.detail.title, e.detail.text);
+        } else {
+           //doSomethingWithTheText(e.detail.title, e.detail.text);
+        }
+      });
+    </script>
     <!-- Progressier PWA Push Notifications -->
     <script defer src="https://progressier.app/9LL6P8U26R3MyH8El0RL/script.js"></script>
   </head>
