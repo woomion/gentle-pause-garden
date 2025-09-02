@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 type Theme = 'light' | 'dark' | 'system';
-type ColorTheme = 'lavender' | 'sporty' | 'minimal';
+type ColorTheme = 'lavender';
 
 type ThemeProviderState = {
   theme: Theme;
@@ -26,7 +26,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  defaultColorTheme = 'sporty',
+  defaultColorTheme = 'lavender',
   storageKey = 'pocket-pause-theme',
   colorStorageKey = 'pocket-pause-color-theme',
   ...props
@@ -114,8 +114,7 @@ export function ThemeProvider({
       // Update PWA theme color dynamically
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) {
-        const themeColor = colorTheme === 'sporty' ? '#FF9E1B' : 
-                           colorTheme === 'minimal' ? '#333333' : '#CAB6F7';
+        const themeColor = '#CAB6F7';
         metaThemeColor.setAttribute('content', themeColor);
       }
       

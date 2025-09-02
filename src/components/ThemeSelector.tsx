@@ -17,21 +17,6 @@ export function ThemeSelector() {
       preview: 'linear-gradient(135deg, hsl(262, 83%, 58%), hsl(270, 60%, 85%))',
       isPremium: false,
     },
-    // Temporarily commented out for launch
-    // {
-    //   id: 'sporty' as const,
-    //   name: 'Sporty Orange',
-    //   description: 'Active mindset',
-    //   preview: 'linear-gradient(135deg, hsl(35, 100%, 55%), hsl(35, 60%, 85%))',
-    //   isPremium: true,
-    // },
-    // {
-    //   id: 'minimal' as const,
-    //   name: 'Minimal',
-    //   description: 'Focused simplicity',
-    //   preview: 'linear-gradient(135deg, hsl(0, 0%, 20%), hsl(0, 0%, 90%))',
-    //   isPremium: true,
-    // },
   ];
 
   const handleThemeSelect = (themeId: string) => {
