@@ -81,29 +81,36 @@
           // Handle file sharing (if needed in the future)
           console.log('📎 File shared:', e.detail.file);
         } else if (e.detail.url) {
-          // Handle URL sharing
-          url.searchParams.set('shared_url', e.detail.url);
+          // Handle URL sharing - use the same parameter names as the PWA manifest
+          url.searchParams.set('url', e.detail.url);
           if (e.detail.title) {
-            url.searchParams.set('shared_title', e.detail.title);
+            url.searchParams.set('title', e.detail.title);
           }
           if (e.detail.text) {
-            url.searchParams.set('shared_text', e.detail.text);
+            url.searchParams.set('text', e.detail.text);
           }
         } else {
-          // Handle text sharing
+          // Handle text sharing - use the same parameter names as the PWA manifest
           if (e.detail.title) {
-            url.searchParams.set('shared_title', e.detail.title);
+            url.searchParams.set('title', e.detail.title);
           }
           if (e.detail.text) {
-            url.searchParams.set('shared_text', e.detail.text);
+            url.searchParams.set('text', e.detail.text);
           }
         }
+        
+        console.log('📤 Updated URL:', url.toString());
         
         // Update the URL to trigger the React app's shared content handling
         window.history.replaceState({}, '', url.toString());
         
         // Trigger a popstate event to notify React of the URL change
         window.dispatchEvent(new PopStateEvent('popstate'));
+        
+        // Also trigger a custom event that React can listen to
+        window.dispatchEvent(new CustomEvent('sharedContentReceived', { 
+          detail: { url: url.toString() } 
+        }));
       });
     </script>
     <!-- Progressier PWA Push Notifications -->

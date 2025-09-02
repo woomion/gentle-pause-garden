@@ -187,14 +187,19 @@ const Index = () => {
 
   // Handle shared content from other apps or PWA share target
   useEffect(() => {
+    console.log('📤 Index - Checking for shared content:', sharedContent);
     if (!sharedContent) return;
     const incoming = sharedContent.url || sharedContent.text || '';
     if (!incoming && !sharedContent.title) return;
 
+    console.log('📤 Index - Processing shared content:', { incoming, title: sharedContent.title, pillMode });
+
     if (pillMode) {
       setSharedPrefill(incoming || sharedContent.title);
       setCompactQuickBar(false); // ensure Pause button is visible
+      console.log('📤 Index - Set pill prefill:', incoming || sharedContent.title);
     } else if (addPauseButtonRef.current) {
+      console.log('📤 Index - Opening add pause modal');
       modalStates.handleAddPause({
         link: sharedContent.url,
         itemName: sharedContent.title || sharedContent.text,
