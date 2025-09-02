@@ -356,8 +356,14 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
             })}
           </div> */}
           
-          {/* Show pause button when expanded OR when collapsed but there's input */}
-          {(!isCollapsed || value.trim()) && (
+          {/* Show pause button when expanded OR when collapsed but there's input - also expand automatically when input is present */}
+          {(() => {
+            const hasInput = value.trim();
+            if (hasInput && compact && onExpandRequest) {
+              setTimeout(() => onExpandRequest(), 0); // Auto-expand when input is present
+            }
+            return (!isCollapsed || hasInput);
+          })() && (
             <Button 
               onClick={(e) => {
                 console.log('🔥 PAUSE BUTTON CLICKED in PillQuickPauseBar!', e);
