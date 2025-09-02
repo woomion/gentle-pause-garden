@@ -125,13 +125,81 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
                       onChange={(e) => updateNotificationSettings({ deliveryStyle: e.target.value as any })}
                       className="mt-1"
                     />
-                    <div>
+                    <div className="flex-1">
                       <Label htmlFor="daily-batch" className="text-sm font-medium cursor-pointer">
                         Daily batch
                       </Label>
                       <p className="text-xs text-muted-foreground">
                         One notification per day with all items that are ready.
                       </p>
+                      
+                      {/* Timing options nested under daily batch */}
+                      {notificationSettings?.deliveryStyle === 'daily_batch' && (
+                        <div className="mt-3 ml-4 pl-3 border-l-2 border-muted space-y-2">
+                          <Label className="text-xs font-medium text-muted-foreground">Timing</Label>
+                          <div className="space-y-2">
+                            <div className="flex items-start gap-2">
+                              <input
+                                type="radio"
+                                id="morning"
+                                name="timing"
+                                value="morning"
+                                checked={notificationSettings?.timing === 'morning'}
+                                onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 8 })}
+                                className="mt-1"
+                              />
+                              <div>
+                                <Label htmlFor="morning" className="text-xs font-medium cursor-pointer">
+                                  Morning (8 AM)
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                  Start the day with clarity.
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-start gap-2">
+                              <input
+                                type="radio"
+                                id="afternoon"
+                                name="timing"
+                                value="afternoon"
+                                checked={notificationSettings?.timing === 'afternoon'}
+                                onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 12 })}
+                                className="mt-1"
+                              />
+                              <div>
+                                <Label htmlFor="afternoon" className="text-xs font-medium cursor-pointer">
+                                  Afternoon (12 PM)
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                  Check in at midday.
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-start gap-2">
+                              <input
+                                type="radio"
+                                id="evening"
+                                name="timing"
+                                value="evening"
+                                checked={notificationSettings?.timing === 'evening'}
+                                onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 18 })}
+                                className="mt-1"
+                              />
+                              <div>
+                                <Label htmlFor="evening" className="text-xs font-medium cursor-pointer">
+                                  Evening (6 PM)
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                  Pause and review before the day ends.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -157,73 +225,6 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
                 </div>
               </div>
 
-              {/* Timing (only show if daily batch is selected) */}
-              {notificationSettings?.deliveryStyle === 'daily_batch' && (
-                <div className="ml-6 pl-4 border-l-2 border-muted space-y-3">
-                  <Label className="text-sm font-medium">Timing</Label>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        id="morning"
-                        name="timing"
-                        value="morning"
-                        checked={notificationSettings?.timing === 'morning'}
-                        onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 8 })}
-                        className="mt-1"
-                      />
-                      <div>
-                        <Label htmlFor="morning" className="text-sm font-medium cursor-pointer">
-                          Morning (8 AM)
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          Start the day with clarity.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        id="afternoon"
-                        name="timing"
-                        value="afternoon"
-                        checked={notificationSettings?.timing === 'afternoon'}
-                        onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 12 })}
-                        className="mt-1"
-                      />
-                      <div>
-                        <Label htmlFor="afternoon" className="text-sm font-medium cursor-pointer">
-                          Afternoon (12 PM)
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          Check in at midday.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        id="evening"
-                        name="timing"
-                        value="evening"
-                        checked={notificationSettings?.timing === 'evening'}
-                        onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 18 })}
-                        className="mt-1"
-                      />
-                      <div>
-                        <Label htmlFor="evening" className="text-sm font-medium cursor-pointer">
-                          Evening (6 PM)
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          Pause and review before the day ends.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
           </div>
