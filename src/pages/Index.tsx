@@ -627,7 +627,7 @@ console.log('Rendering main Index content');
                          </div>
                        </div>
                     ) : (
-                       <div className="w-full overflow-hidden px-1 max-w-3xl mx-auto">
+                       <div className="w-full max-w-3xl mx-auto">
                          <Carousel className="w-full">
                             <CarouselContent className="pl-0">
                               {currentPausedItems.map((it) => (

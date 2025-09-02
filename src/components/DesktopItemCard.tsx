@@ -62,7 +62,7 @@ const DesktopItemCard = ({ item, showImages = true, onClick, onEdit, onDelete }:
       <div className="cursor-pointer" onClick={onClick}>
         {/* Main image - only show when showImages is true */}
         {showImages && (
-          <div className="relative w-full h-56 bg-muted/30 overflow-hidden">
+          <div className="relative w-full aspect-[4/3] bg-muted/30 overflow-hidden">
             <ItemImage item={item} />
             
             {/* Actions dropdown overlay */}
