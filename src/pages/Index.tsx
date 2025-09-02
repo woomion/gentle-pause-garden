@@ -595,7 +595,7 @@ console.log('Rendering main Index content');
       </div>
       
       {/* Fixed bottom area */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 bg-white border-t w-full ${hideBottomArea ? 'translate-y-full' : 'translate-y-0'}`}
+      <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 bg-white border-t w-full`}
            style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
         {/* Container: match main content exactly */}
         <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-4">
@@ -605,20 +605,19 @@ console.log('Rendering main Index content');
               prefillValue={sharedPrefill || ''}
               onExpandRequest={() => setCompactQuickBar(false)}
               onUrlEntry={() => {
-                setHideBottomArea(false);
+                // Footer stays visible, just compact
               }}
               onBarcodeScanned={() => {
-                setHideBottomArea(false);
+                // Footer stays visible, just compact
               }}
               onCollapseChange={(collapsed) => {
-                setHideBottomArea(collapsed);
+                // Footer never hides completely, just compacts
               }}
             />
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />
           )}
-          {/* Only show FooterLinks when bottom area is not hidden */}
-          {!hideBottomArea && <FooterLinks />}
+          <FooterLinks />
         </div>
       </div>
       
