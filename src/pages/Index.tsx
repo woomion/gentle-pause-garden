@@ -610,7 +610,7 @@ console.log('Rendering main Index content');
                         </Carousel>
                       </div>
                     ) : (
-                      <div className="w-full px-4 space-y-4 max-h-[60vh] overflow-y-auto">
+                      <div className="w-full px-4 space-y-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
                         {currentPausedItems.map((it) => (
                           <DesktopItemCard
                             key={it.id}

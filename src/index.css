@@ -264,4 +264,14 @@
     background: radial-gradient(600px 300px at 70% -50px, hsl(var(--foreground) / 0.12), transparent 70%);
     filter: blur(10px);
   }
+
+  /* Hide scrollbar while keeping scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
 }
