@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff, ArrowUp, ArrowDown, Grid3X3, List } from 'lucide-react';
+import { Eye, EyeOff, ArrowUp, ArrowDown, MoreHorizontal, List } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
@@ -421,7 +421,7 @@ console.log('Rendering main Index content');
                   {mobileViewMode === 'carousel' ? (
                     <List size={16} className="text-muted-foreground" />
                   ) : (
-                    <Grid3X3 size={16} className="text-muted-foreground" />
+                    <MoreHorizontal size={16} className="text-muted-foreground" />
                   )}
                 </button>
               </div>
