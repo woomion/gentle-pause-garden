@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
         // Check user settings
         const { data: userSettings, error: settingsError } = await supabase
           .from('user_settings')
-          .select('notifications_enabled, email_batching_enabled')
+          .select('notifications_enabled, notification_delivery_style')
           .eq('user_id', userId)
           .single();
 
@@ -93,20 +93,50 @@ const handler = async (req: Request): Promise<Response> => {
           continue;
         }
 
-        // Email functionality removed - no longer sending email reminders
-        console.log(`📱 Push notifications only for user ${userId}`);
-        skipCount += userItems.length;
+        // Process items based on notification delivery style
+        if (userSettings.notification_delivery_style === 'item_by_item') {
+          console.log(`📱 Sending individual notifications for user ${userId}`);
+          
+          // Send individual notification for each item
+          for (const item of userItems) {
+            try {
+              const { error: notificationError } = await supabase.functions.invoke('send-item-notifications', {
+                body: {
+                  type: 'individual',
+                  userId: userId,
+                  itemId: item.id
+                }
+              });
+
+              if (notificationError) {
+                console.error(`❌ Error sending notification for item ${item.id}:`, notificationError);
+                skipCount++;
+              } else {
+                console.log(`✅ Individual notification sent for item ${item.id}`);
+                successCount++;
+              }
+              processedCount++;
+            } catch (error) {
+              console.error(`❌ Error processing item ${item.id}:`, error);
+              skipCount++;
+              processedCount++;
+            }
+          }
+        } else {
+          console.log(`⏰ User ${userId} has ${userSettings.notification_delivery_style} delivery style, skipping individual notifications`);
+          skipCount += userItems.length;
+        }
       } catch (error) {
         console.error(`❌ Error processing user ${userId}:`, error);
         skipCount += userItems.length;
       }
     }
 
-    console.log(`✅ Processing complete: ${processedCount} processed, ${successCount} emails sent, ${skipCount} skipped`);
+    console.log(`✅ Processing complete: ${processedCount} processed, ${successCount} notifications sent, ${skipCount} skipped`);
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: `Processed ${processedCount} items, sent ${successCount} emails, skipped ${skipCount}`,
+      message: `Processed ${processedCount} items, sent ${successCount} notifications, skipped ${skipCount}`,
       processedCount,
       successCount,
       skipCount
