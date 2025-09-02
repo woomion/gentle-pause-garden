@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff, List, Columns, ArrowUp, ArrowDown } from 'lucide-react';
+import { Eye, EyeOff, ArrowUp, ArrowDown } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
@@ -58,10 +58,6 @@ const Index = () => {
     return saved !== null ? JSON.parse(saved) : true;
   });
 
-  const [mobileViewMode, setMobileViewMode] = useState<'list' | 'carousel'>(() => {
-    const stored = localStorage.getItem('pocketpause-mobile-view');
-    return stored ? JSON.parse(stored) : 'list';
-  });
   const [sortMode, setSortMode] = useState<'soonest' | 'newest'>(
     (localStorage.getItem('pill_sort') as 'soonest' | 'newest') || 'soonest'
   );
@@ -280,24 +276,13 @@ const Index = () => {
       
       // Enhanced intelligent collapse logic for both mobile and desktop
       if (isMobile) {
-        // Mobile: Allow collapse only when carousel is enabled
-        if (mobileViewMode === 'carousel') {
-          if (scrollingDown && scrollTop > 15) {
-            setHideBottomArea(true);
-          } else if (!scrollingDown && scrollTop < 10) {
-            setHideBottomArea(false);
-          } else if (scrollTop === 0) {
-            setHideBottomArea(false);
-          }
-        } else {
-          // List mode: only compact, never hide
-          if (scrollingDown && scrollTop > 15) {
-            setCompactQuickBar(true);
-          } else if (!scrollingDown && scrollTop < 10) {
-            setCompactQuickBar(false);
-          } else if (scrollTop === 0) {
-            setCompactQuickBar(false);
-          }
+        // Mobile: Always carousel mode now
+        if (scrollingDown && scrollTop > 15) {
+          setHideBottomArea(true);
+        } else if (!scrollingDown && scrollTop < 10) {
+          setHideBottomArea(false);
+        } else if (scrollTop === 0) {
+          setHideBottomArea(false);
         }
       } else {
         // Desktop: Only compact, never hide completely
@@ -316,7 +301,7 @@ const Index = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, isMobile, mobileViewMode]);
+  }, [lastScrollY, isMobile]);
 
   // Debug scroll container dimensions
   useEffect(() => {
@@ -424,23 +409,6 @@ console.log('Rendering main Index content');
                     <Eye size={16} className="text-muted-foreground" />
                   ) : (
                     <EyeOff size={16} className="text-muted-foreground" />
-                  )}
-                </button>
-                
-                <button
-                  onClick={() => {
-                    const newValue = mobileViewMode === 'list' ? 'carousel' : 'list';
-                    setMobileViewMode(newValue);
-                    localStorage.setItem('pocketpause-mobile-view', JSON.stringify(newValue));
-                  }}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
-                  title={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
-                  aria-label={mobileViewMode === 'list' ? 'Switch to carousel' : 'Switch to list'}
-                >
-                  {mobileViewMode === 'list' ? (
-                    <List size={16} className="text-muted-foreground" />
-                  ) : (
-                    <Columns size={16} className="text-muted-foreground" />
                   )}
                 </button>
               </div>
@@ -603,28 +571,10 @@ console.log('Rendering main Index content');
                     </div>
                   </div>
 
-                  {/* Mobile carousel/list content container */}
+                  {/* Mobile carousel content container */}
                   <div className="md:hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
-                    ) : mobileViewMode === 'list' ? (
-                        <div className="w-full max-w-3xl mx-auto">
-                          <div className="space-y-4 px-1">
-                            {currentPausedItems.map((it) => (
-                               <DesktopItemCard
-                                 key={it.id}
-                                 item={it}
-                                 showImages={showImages}
-                                 onClick={() => {
-                                   setSelectedItem(it);
-                                   setShowItemDetail(true);
-                                 }}
-                                 onEdit={(item, updates) => updateItem(item.id, updates)}
-                                 onDelete={removeItem}
-                               />
-                            ))}
-                          </div>
-                        </div>
                     ) : (
                        <div className="w-full max-w-3xl mx-auto">
                          <Carousel className="w-full px-1">
@@ -728,8 +678,8 @@ console.log('Rendering main Index content');
                 setHideBottomArea(false);
               }}
               onCollapseChange={(collapsed) => {
-                // On mobile carousel mode, allow hiding
-                if (isMobile && mobileViewMode === 'carousel') {
+                // Mobile carousel mode allows hiding
+                if (isMobile) {
                   setHideBottomArea(collapsed);
                 }
               }}
