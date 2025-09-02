@@ -210,27 +210,14 @@ const Index = () => {
       
       // Enhanced intelligent collapse logic for both mobile and desktop
       if (isMobile) {
-        // Mobile: Enhanced collapse behavior - always collapse at least once on scroll up
+        // Mobile: Only compact, never hide completely
         if (scrollingDown && scrollTop > 15) {
-          // Scrolling down: first compact, then hide if user continues scrolling down
-          if (!compactQuickBar) {
-            setCompactQuickBar(true);
-          } else if (scrollTop > 50) {
-            setHideBottomArea(true);
-          }
-        } else if (!scrollingDown) {
-          // Scrolling up: always collapse at least once, immediately
-          if (!hideBottomArea) {
-            setHideBottomArea(true);
-          } else if (scrollTop < 10) {
-            // Show footer again when near top
-            setHideBottomArea(false);
-            setCompactQuickBar(false);
-          }
+          setCompactQuickBar(true);
+        } else if (!scrollingDown && scrollTop < 10) {
+          setCompactQuickBar(false);
         } else if (scrollTop === 0) {
           // Always expand when at top
           setCompactQuickBar(false);
-          setHideBottomArea(false);
         }
       } else {
         // Desktop: Only compact, never hide completely
