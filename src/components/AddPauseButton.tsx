@@ -118,7 +118,8 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const handleClick = async () => {
     console.log('🔘 Add to Pause button clicked');
     console.log('🔘 Current URL:', url);
-    console.log('🔘 Current parsed data:', parsedData);
+    console.log('🔘 Current parsed data:', JSON.stringify(parsedData, null, 2));
+    console.log('🔘 Is parsing URL currently?', isParsingUrl);
     
     // Dismiss first use tooltip if showing
     if (showFirstUseTooltip) {

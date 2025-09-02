@@ -15,10 +15,13 @@ export const useModalStates = () => {
   const { toast } = useToast();
 
   const handleAddPause = async (parsedData?: any) => {
-    console.log('🎯 handleAddPause called with data:', parsedData);
+    console.log('🎯 handleAddPause called with data:', JSON.stringify(parsedData, null, 2));
     console.log('🔍 Usage limit check - canAddItem:', usageLimit.canAddItem());
     console.log('🔍 Usage limit check - isAtLimit:', usageLimit.isAtLimit);
     console.log('🔍 Usage limit check - freeItemsUsed:', usageLimit.monthlyItemsUsed);
+    console.log('🔍 parsedData type:', typeof parsedData);
+    console.log('🔍 parsedData has itemName?', !!(parsedData?.itemName));
+    console.log('🔍 parsedData has link?', !!(parsedData?.link));
     
     // Check usage limit first
     if (!usageLimit.checkUsageLimit()) {
@@ -32,7 +35,7 @@ export const useModalStates = () => {
         console.log('✅ Adding item directly to paused items:', parsedData);
         console.log('📊 Before addItem - current items count:', usageLimit.monthlyItemsUsed);
         
-        await addItem({
+        const itemData = {
           itemName: parsedData.itemName || 'Product',
           storeName: parsedData.storeName || '',
           price: parsedData.price || '',
@@ -43,9 +46,12 @@ export const useModalStates = () => {
           imageUrl: parsedData.imageUrl,
           tags: [],
           isCart: false,
-          itemType: 'item',
+          itemType: 'item' as const,
           usePlaceholder: false,
-        });
+        };
+        console.log('🔄 About to call addItem with:', JSON.stringify(itemData, null, 2));
+        
+        await addItem(itemData);
         
         console.log('🎉 addItem completed successfully');
         
