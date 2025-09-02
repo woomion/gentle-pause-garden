@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from 'react';
-import { Eye, EyeOff, ArrowUp, ArrowDown } from 'lucide-react';
+import { Eye, EyeOff, ArrowUp, ArrowDown, Grid3X3, List } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import PauseHeader from '../components/PauseHeader';
 import { WelcomeWithValues } from '../components/WelcomeWithValues';
@@ -113,6 +113,7 @@ const Index = () => {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const installed = useInstalledApp();
   const isMobile = useIsMobile();
+  const [mobileViewMode, setMobileViewMode] = useState<'carousel' | 'list'>('carousel');
   
   // Update ready count automatically every minute and when items change
   useEffect(() => {
@@ -411,6 +412,18 @@ console.log('Rendering main Index content');
                     <EyeOff size={16} className="text-muted-foreground" />
                   )}
                 </button>
+                <button
+                  onClick={() => setMobileViewMode(mobileViewMode === 'carousel' ? 'list' : 'carousel')}
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-muted/60 rounded-full transition-colors"
+                  title={mobileViewMode === 'carousel' ? 'Switch to list view' : 'Switch to carousel view'}
+                  aria-label={mobileViewMode === 'carousel' ? 'Switch to list view' : 'Switch to carousel view'}
+                >
+                  {mobileViewMode === 'carousel' ? (
+                    <List size={16} className="text-muted-foreground" />
+                  ) : (
+                    <Grid3X3 size={16} className="text-muted-foreground" />
+                  )}
+                </button>
               </div>
               <div className="flex items-center justify-end">
                 <button
@@ -571,11 +584,11 @@ console.log('Rendering main Index content');
                     </div>
                   </div>
 
-                  {/* Mobile carousel content container */}
+                  {/* Mobile content container */}
                   <div className="md:hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
-                    ) : (
+                    ) : mobileViewMode === 'carousel' ? (
                        <div className="w-full max-w-3xl mx-auto">
                          <Carousel className="w-full px-1">
                             <CarouselContent className="pl-0">
@@ -595,6 +608,22 @@ console.log('Rendering main Index content');
                             ))}
                           </CarouselContent>
                         </Carousel>
+                      </div>
+                    ) : (
+                      <div className="w-full px-4 space-y-4 max-h-[60vh] overflow-y-auto">
+                        {currentPausedItems.map((it) => (
+                          <DesktopItemCard
+                            key={it.id}
+                            item={it}
+                            showImages={showImages}
+                            onClick={() => {
+                              setSelectedItem(it);
+                              setShowItemDetail(true);
+                            }}
+                            onEdit={(item, updates) => updateItem(item.id, updates)}
+                            onDelete={removeItem}
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
