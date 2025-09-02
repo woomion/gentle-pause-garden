@@ -169,19 +169,38 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [notificationsEnabled]);
   
+  
   const handleRequestNotificationPermission = async () => {
     try {
       console.log('🔔 Requesting notification permission...');
+      
+      // First try browser permission
+      if ('Notification' in window && Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        console.log('🔔 Browser permission result:', permission);
+        if (permission !== 'granted') {
+          alert('Please allow notifications in your browser to receive updates when items are ready for review.');
+          return;
+        }
+      }
+      
+      // Then request Progressier subscription
       const success = await platformNotificationService.requestPermission();
-      console.log('🔔 Permission request result:', success);
+      console.log('🔔 Progressier subscription result:', success);
       
       if (success) {
+        // Enable notifications in user settings
+        if (enableNotifications) {
+          await enableNotifications();
+        }
         testNotification();
+        alert('Great! You\'ll now receive notifications when items are ready for review.');
       } else {
-        alert('Please allow notifications in your browser settings');
+        alert('Unable to set up push notifications. Please try again or check your browser settings.');
       }
     } catch (error) {
       console.error('Error requesting permission:', error);
+      alert('Error setting up notifications. Please try again.');
     }
   };
 
@@ -592,6 +611,23 @@ console.log('Rendering main Index content');
                 <div className="text-center py-8 md:py-16 md:bg-card/20 md:backdrop-blur-sm md:rounded-2xl md:border md:border-border/30">
                   <div className="text-muted-foreground text-sm md:text-base">No paused items yet</div>
                   <div className="text-xs text-muted-foreground mt-1 md:text-sm md:mt-2">Add something below to get started</div>
+                  
+                  {/* Notification setup prompt */}
+                  {Notification.permission === 'denied' && (
+                    <div className="mt-4 p-4 border border-orange-200 rounded-lg bg-orange-50/50">
+                      <div className="text-sm text-orange-700 mb-2">🔔 Get notified when items are ready for review</div>
+                      <div className="text-xs text-orange-600 mb-3">
+                        Status: {notificationStatus}
+                      </div>
+                      <Button 
+                        onClick={handleRequestNotificationPermission}
+                        size="sm"
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                      >
+                        Enable Notifications
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
               
