@@ -676,22 +676,6 @@ console.log('Rendering main Index content');
                 </div>
               )}
 
-              {/* Show notification setup prominently for all users */}
-              {Notification.permission !== 'granted' && (
-                <div className="mt-4 mb-4 p-4 border border-orange-200 rounded-lg bg-orange-50/50">
-                  <div className="text-sm text-orange-700 mb-2">🔔 Enable notifications to get alerted when items are ready</div>
-                  <div className="text-xs text-orange-600 mb-3">
-                    Status: {notificationStatus}
-                  </div>
-                  <Button 
-                    onClick={handleRequestNotificationPermission}
-                    size="sm"
-                    className="bg-orange-600 hover:bg-orange-700 text-white"
-                  >
-                    Enable Notifications
-                  </Button>
-                </div>
-              )}
               
               <div aria-hidden className="h-16" />
             </>
@@ -706,6 +690,25 @@ console.log('Rendering main Index content');
           )}
 
         </div>
+        
+        {/* Show notification setup prominently for all users */}
+        {Notification.permission !== 'granted' && (
+          <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 mt-4 mb-4">
+            <div className="p-4 border border-orange-200 rounded-lg bg-orange-50/50">
+              <div className="text-sm text-orange-700 mb-2">🔔 Enable notifications to get alerted when items are ready</div>
+              <div className="text-xs text-orange-600 mb-3">
+                Status: {notificationStatus}
+              </div>
+              <Button 
+                onClick={handleRequestNotificationPermission}
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                Enable Notifications
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Fixed bottom area */}
