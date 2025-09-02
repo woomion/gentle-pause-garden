@@ -21,7 +21,7 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[100] flex items-start justify-center px-6 pt-16">
-      <div className="bg-card rounded-2xl max-w-sm w-full max-h-[80vh] p-6 relative flex flex-col">
+      <div className="bg-card rounded-2xl max-w-sm w-full max-h-[85vh] p-6 relative flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-foreground">
             App Preferences
@@ -159,7 +159,7 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
 
               {/* Timing (only show if daily batch is selected) */}
               {notificationSettings?.deliveryStyle === 'daily_batch' && (
-                <div className="space-y-3">
+                <div className="ml-6 pl-4 border-l-2 border-muted space-y-3">
                   <Label className="text-sm font-medium">Timing</Label>
                   <div className="space-y-2">
                     <div className="flex items-start gap-3">
