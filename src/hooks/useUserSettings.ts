@@ -5,10 +5,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { NotificationScheduleSettings } from '@/services/notificationSchedulingService';
 
+export interface NotificationSettings {
+  deliveryStyle: 'item_by_item' | 'daily_batch' | 'muted';
+  timing: 'morning' | 'afternoon' | 'evening';
+  timingHour: number;
+}
+
 export const useUserSettings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings | null>(null);
   
   const [scheduleSettings, setScheduleSettings] = useState<NotificationScheduleSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,7 +44,10 @@ export const useUserSettings = () => {
           notification_batch_window,
           quiet_hours_start,
           quiet_hours_end,
-          notification_profile
+          notification_profile,
+          notification_delivery_style,
+          notification_timing,
+          notification_timing_hour
         `)
         .eq('user_id', user.id)
         .single();
@@ -50,6 +60,11 @@ export const useUserSettings = () => {
         }
       } else {
         setNotificationsEnabled(data.notifications_enabled);
+        setNotificationSettings({
+          deliveryStyle: (data.notification_delivery_style as any) || 'item_by_item',
+          timing: (data.notification_timing as any) || 'evening',
+          timingHour: data.notification_timing_hour || 18
+        });
         setScheduleSettings({
           notification_schedule_type: (data.notification_schedule_type as any) || 'immediate',
           notification_time_preference: data.notification_time_preference || '20:00',
@@ -85,6 +100,11 @@ export const useUserSettings = () => {
         console.error('Error creating default settings:', error);
       } else {
         setNotificationsEnabled(false);
+        setNotificationSettings({
+          deliveryStyle: 'item_by_item',
+          timing: 'evening',
+          timingHour: 18
+        });
         setScheduleSettings({
           notification_schedule_type: 'custom_time',
           notification_time_preference: '19:00',
@@ -135,10 +155,65 @@ export const useUserSettings = () => {
   };
 
 
+  const updateNotificationSettings = async (settings: Partial<NotificationSettings>) => {
+    if (user) {
+      try {
+        const updates: any = {};
+        if (settings.deliveryStyle !== undefined) {
+          updates.notification_delivery_style = settings.deliveryStyle;
+        }
+        if (settings.timing !== undefined) {
+          updates.notification_timing = settings.timing;
+        }
+        if (settings.timingHour !== undefined) {
+          updates.notification_timing_hour = settings.timingHour;
+        }
+
+        const { error } = await supabase
+          .from('user_settings')
+          .update({ 
+            ...updates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error updating notification settings:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save notification preferences. Please try again.",
+            variant: "destructive"
+          });
+          return false;
+        } else {
+          setNotificationSettings(prev => prev ? { ...prev, ...settings } : {
+            deliveryStyle: 'item_by_item',
+            timing: 'evening',
+            timingHour: 18,
+            ...settings
+          });
+          return true;
+        }
+      } catch (error) {
+        console.error('Error in updateNotificationSettings:', error);
+        return false;
+      }
+    } else {
+      // For non-authenticated users, fall back to localStorage
+      const current = JSON.parse(localStorage.getItem('notificationSettings') || '{}');
+      const updated = { ...current, ...settings };
+      localStorage.setItem('notificationSettings', JSON.stringify(updated));
+      setNotificationSettings(updated as NotificationSettings);
+      return true;
+    }
+  };
+
   return {
     notificationsEnabled,
+    notificationSettings,
     scheduleSettings,
     updateNotificationSetting,
+    updateNotificationSettings,
     loading
   };
 };

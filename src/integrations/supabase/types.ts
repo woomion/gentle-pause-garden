@@ -212,9 +212,12 @@ export type Database = {
           last_reminder_sent: string | null
           monthly_usage_count: number | null
           notification_batch_window: number | null
+          notification_delivery_style: string | null
           notification_profile: string | null
           notification_schedule_type: string | null
           notification_time_preference: string | null
+          notification_timing: string | null
+          notification_timing_hour: number | null
           notifications_enabled: boolean
           platform: string | null
           push_token: string | null
@@ -237,9 +240,12 @@ export type Database = {
           last_reminder_sent?: string | null
           monthly_usage_count?: number | null
           notification_batch_window?: number | null
+          notification_delivery_style?: string | null
           notification_profile?: string | null
           notification_schedule_type?: string | null
           notification_time_preference?: string | null
+          notification_timing?: string | null
+          notification_timing_hour?: number | null
           notifications_enabled?: boolean
           platform?: string | null
           push_token?: string | null
@@ -262,9 +268,12 @@ export type Database = {
           last_reminder_sent?: string | null
           monthly_usage_count?: number | null
           notification_batch_window?: number | null
+          notification_delivery_style?: string | null
           notification_profile?: string | null
           notification_schedule_type?: string | null
           notification_time_preference?: string | null
+          notification_timing?: string | null
+          notification_timing_hour?: number | null
           notifications_enabled?: boolean
           platform?: string | null
           push_token?: string | null
