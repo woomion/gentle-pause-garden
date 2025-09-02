@@ -73,7 +73,8 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
       parseTimeoutRef.current = setTimeout(async () => {
         try {
           console.log('🔍 DEBUG: Calling parseProductUrl with URL:', value);
-          console.log('🔍 DEBUG: URL contains shopbop?', value.toLowerCase().includes('shopbop'));
+          console.log('🔍 DEBUG: Current user agent:', navigator.userAgent);
+          console.log('🔍 DEBUG: Network status:', navigator.onLine);
           const productInfo = await parseProductUrl(value);
           console.log('🔍 DEBUG: Parse result from parseProductUrl:', JSON.stringify(productInfo, null, 2));
           
@@ -87,7 +88,13 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
           console.log('Setting parsed data:', parsedData);
           setParsedData(parsedData);
         } catch (error) {
-          console.error('Error parsing URL:', error);
+          console.error('❌ Error parsing URL:', error);
+          console.error('❌ Error details:', {
+            name: error?.name,
+            message: error?.message,
+            stack: error?.stack,
+            url: value
+          });
           setParsedData({
             itemName: '',
             storeName: '',
