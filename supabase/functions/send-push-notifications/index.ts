@@ -73,12 +73,21 @@ serve(async (req) => {
 
     for (const userId of usersToNotify) {
       try {
-        // Get user's notification settings
-        const { data: userSettings, error: settingsError } = await supabase
-          .from('user_settings')
-          .select('notifications_enabled')
-          .eq('user_id', userId)
-          .single();
+        // Get user's notification settings and push tokens
+        const [settingsResult, tokensResult] = await Promise.all([
+          supabase
+            .from('user_settings')
+            .select('notifications_enabled')
+            .eq('user_id', userId)
+            .single(),
+          supabase
+            .from('push_tokens')
+            .select('token, platform')
+            .eq('user_id', userId)
+        ]);
+
+        const { data: userSettings, error: settingsError } = settingsResult;
+        const { data: userTokens, error: tokensError } = tokensResult;
 
         if (settingsError || !userSettings?.notifications_enabled) {
           console.log(`❌ Skipping user ${userId}: notifications disabled`);
@@ -86,14 +95,55 @@ serve(async (req) => {
           continue;
         }
 
-        // Log the notification (actual push notification would need FCM setup)
-        console.log(`📧 Notification for user ${userId}:`, {
-          title: payload.title,
-          body: payload.body,
-          data: payload.data
-        });
+        if (tokensError || !userTokens || userTokens.length === 0) {
+          console.log(`❌ Skipping user ${userId}: no push tokens found`);
+          failureCount++;
+          continue;
+        }
 
-        successCount++;
+        // Send push notification via Progressier
+        const progressierApiKey = Deno.env.get('PROGRESSIER_API_KEY');
+        if (!progressierApiKey) {
+          console.error('❌ Progressier API key not found');
+          failureCount++;
+          continue;
+        }
+
+        for (const tokenData of userTokens) {
+          try {
+            const notificationPayload = {
+              title: payload.title,
+              body: payload.body,
+              icon: '/icons/app-icon-512.png',
+              badge: '/icons/app-icon-512.png',
+              data: payload.data || {}
+            };
+
+            // Send via Progressier API
+            const response = await fetch('https://progressier.app/api/push', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${progressierApiKey}`
+              },
+              body: JSON.stringify({
+                registration_id: tokenData.token,
+                notification: notificationPayload
+              })
+            });
+
+            if (response.ok) {
+              console.log(`📧 Notification sent to user ${userId} on ${tokenData.platform}`);
+              successCount++;
+            } else {
+              console.error(`❌ Failed to send to ${userId}:`, await response.text());
+              failureCount++;
+            }
+          } catch (pushError) {
+            console.error(`❌ Push error for user ${userId}:`, pushError);
+            failureCount++;
+          }
+        }
 
       } catch (error) {
         console.error(`Error processing user ${userId}:`, error);

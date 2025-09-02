@@ -92,10 +92,16 @@ export class ProgressierNotificationService {
       window.progressierRegistration.showOptIn();
       
       // Register for push notifications
-      await window.progressierRegistration.register();
+      const subscription = await window.progressierRegistration.register();
+      console.log('🔔 Progressier registration result:', subscription);
       
       const nowSubscribed = await window.progressierRegistration.isSubscribed();
       console.log('🔔 Push notification subscription result:', nowSubscribed);
+      
+      // Store the push token in our database
+      if (nowSubscribed && subscription) {
+        await this.storePushToken(subscription);
+      }
       
       return nowSubscribed;
     } catch (error) {
@@ -181,6 +187,53 @@ export class ProgressierNotificationService {
         data: { type: 'test' }
       }
     );
+  }
+
+  private async storePushToken(subscription: any): Promise<void> {
+    try {
+      // Get the current user from auth
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('❌ No user found, cannot store push token');
+        return;
+      }
+
+      // Extract token from subscription
+      let token = '';
+      if (subscription.endpoint) {
+        token = subscription.endpoint;
+      } else if (typeof subscription === 'string') {
+        token = subscription;
+      } else if (subscription.subscriptionId) {
+        token = subscription.subscriptionId;
+      }
+
+      if (!token) {
+        console.log('❌ No token found in subscription:', subscription);
+        return;
+      }
+
+      console.log('🔔 Storing push token for user:', user.id);
+
+      // Call our edge function to store the token
+      const { error } = await supabase.functions.invoke('store-push-token', {
+        body: {
+          userId: user.id,
+          token: token,
+          platform: 'web'
+        }
+      });
+
+      if (error) {
+        console.error('❌ Error storing push token:', error);
+      } else {
+        console.log('✅ Push token stored successfully');
+      }
+    } catch (error) {
+      console.error('❌ Error in storePushToken:', error);
+    }
   }
 }
 

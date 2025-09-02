@@ -37,38 +37,16 @@ serve(async (req) => {
         );
       }
 
-      // Create push_tokens table if it doesn't exist (will be handled by migration)
-      // For now, store in user_settings or create a new table
-      
-      // First check if token already exists for this user
-      const { data: existingToken, error: selectError } = await supabase
-        .from('user_settings')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (selectError && selectError.code !== 'PGRST116') {
-        console.error('Error checking existing token:', selectError);
-        return new Response(
-          JSON.stringify({ error: 'Database error' }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
-
-      // For now, we'll extend user_settings to include push token
-      // In production, you'd want a separate push_tokens table
+      // Store in the new push_tokens table
       const { error: upsertError } = await supabase
-        .from('user_settings')
+        .from('push_tokens')
         .upsert({ 
           user_id: userId,
-          push_token: token,
-          platform: platform,
+          token: token,
+          platform: platform || 'web',
           updated_at: new Date().toISOString()
         }, { 
-          onConflict: 'user_id' 
+          onConflict: 'user_id,platform' 
         });
 
       if (upsertError) {
