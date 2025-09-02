@@ -609,10 +609,10 @@ console.log('Rendering main Index content');
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
                         <div className="w-full max-w-3xl mx-auto">
-                          <div className="space-y-4">
+                          <div className="space-y-4 px-1">
                             {currentPausedItems.map((it) => (
-                              <div key={it.id} className="basis-full">
                                <DesktopItemCard
+                                 key={it.id}
                                  item={it}
                                  showImages={showImages}
                                  onClick={() => {
@@ -622,13 +622,12 @@ console.log('Rendering main Index content');
                                  onEdit={(item, updates) => updateItem(item.id, updates)}
                                  onDelete={removeItem}
                                />
-                             </div>
-                           ))}
-                         </div>
-                       </div>
+                            ))}
+                          </div>
+                        </div>
                     ) : (
                        <div className="w-full max-w-3xl mx-auto">
-                         <Carousel className="w-full">
+                         <Carousel className="w-full px-1">
                             <CarouselContent className="pl-0">
                               {currentPausedItems.map((it) => (
                                 <CarouselItem key={it.id} className="basis-full">

@@ -28,7 +28,7 @@ const ItemImage = ({ item }: ItemImageProps) => {
   );
 
   return (
-    <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl rounded-b-none flex items-center justify-center overflow-hidden">
+    <div className="w-full aspect-[4/3] bg-gray-200 dark:bg-gray-700 rounded-2xl rounded-b-none flex items-center justify-center overflow-hidden">
       {imageUrl === 'cart-placeholder' ? (
         <div className="w-full h-full bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
           <ShoppingCart size={48} className="text-blue-600 dark:text-blue-400" />
