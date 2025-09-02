@@ -33,6 +33,7 @@ import DesktopItemCard from '../components/DesktopItemCard';
 import { useInstalledApp } from '../hooks/useInstalledApp';
 import { Button } from '../components/ui/button';
 import { platformNotificationService } from '../services/platformNotificationService';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -115,6 +116,7 @@ const Index = () => {
   const [sharedPrefill, setSharedPrefill] = useState<string | undefined>(undefined);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const installed = useInstalledApp();
+  const isMobile = useIsMobile();
   
   // Update ready count automatically every minute and when items change
   useEffect(() => {
@@ -206,18 +208,27 @@ const Index = () => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       const scrollingDown = scrollTop > lastScrollY;
-      const isMobile = window.innerWidth < 768;
       
       // Enhanced intelligent collapse logic for both mobile and desktop
       if (isMobile) {
-        // Mobile: Only compact, never hide completely
-        if (scrollingDown && scrollTop > 15) {
-          setCompactQuickBar(true);
-        } else if (!scrollingDown && scrollTop < 10) {
-          setCompactQuickBar(false);
-        } else if (scrollTop === 0) {
-          // Always expand when at top
-          setCompactQuickBar(false);
+        // Mobile: Allow collapse only when carousel is enabled
+        if (mobileViewMode === 'carousel') {
+          if (scrollingDown && scrollTop > 15) {
+            setHideBottomArea(true);
+          } else if (!scrollingDown && scrollTop < 10) {
+            setHideBottomArea(false);
+          } else if (scrollTop === 0) {
+            setHideBottomArea(false);
+          }
+        } else {
+          // List mode: only compact, never hide
+          if (scrollingDown && scrollTop > 15) {
+            setCompactQuickBar(true);
+          } else if (!scrollingDown && scrollTop < 10) {
+            setCompactQuickBar(false);
+          } else if (scrollTop === 0) {
+            setCompactQuickBar(false);
+          }
         }
       } else {
         // Desktop: Only compact, never hide completely
@@ -236,7 +247,7 @@ const Index = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, isMobile, mobileViewMode]);
 
   // Debug scroll container dimensions
   useEffect(() => {
@@ -595,7 +606,7 @@ console.log('Rendering main Index content');
       </div>
       
       {/* Fixed bottom area */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 bg-white border-t w-full`}
+      <div className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 bg-white border-t w-full ${hideBottomArea ? 'translate-y-full' : 'translate-y-0'}`}
            style={{ paddingLeft: 'max(1rem, env(safe-area-inset-left))', paddingRight: 'max(1rem, env(safe-area-inset-right))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
         {/* Container: match main content exactly */}
         <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-4">
@@ -605,19 +616,23 @@ console.log('Rendering main Index content');
               prefillValue={sharedPrefill || ''}
               onExpandRequest={() => setCompactQuickBar(false)}
               onUrlEntry={() => {
-                // Footer stays visible, just compact
+                setHideBottomArea(false);
               }}
               onBarcodeScanned={() => {
-                // Footer stays visible, just compact
+                setHideBottomArea(false);
               }}
               onCollapseChange={(collapsed) => {
-                // Footer never hides completely, just compacts
+                // On mobile carousel mode, allow hiding
+                if (isMobile && mobileViewMode === 'carousel') {
+                  setHideBottomArea(collapsed);
+                }
               }}
             />
           ) : (
             <AddPauseButton ref={addPauseButtonRef} onAddPause={modalStates.handleAddPause} isCompact={false} />
           )}
-          <FooterLinks />
+          {/* Only show FooterLinks when bottom area is not hidden */}
+          {!hideBottomArea && <FooterLinks />}
         </div>
       </div>
       
