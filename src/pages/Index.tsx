@@ -189,34 +189,62 @@ const Index = () => {
   
   const handleRequestNotificationPermission = async () => {
     try {
-      console.log('🔔 Requesting notification permission...');
+      console.log('🔔 Starting notification setup process...');
       
-      // First try browser permission
-      if ('Notification' in window && Notification.permission === 'default') {
-        const permission = await Notification.requestPermission();
-        console.log('🔔 Browser permission result:', permission);
-        if (permission !== 'granted') {
-          alert('Please allow notifications in your browser to receive updates when items are ready for review.');
+      // Check if user is logged in first
+      if (!user) {
+        alert('Please sign in first to enable notifications.');
+        return;
+      }
+      
+      // First, request browser permission if needed
+      if ('Notification' in window) {
+        if (Notification.permission === 'denied') {
+          alert('Notifications are blocked. Please go to your browser settings and allow notifications for this site, then try again.');
           return;
+        }
+        
+        if (Notification.permission === 'default') {
+          console.log('🔔 Requesting browser permission...');
+          const permission = await Notification.requestPermission();
+          console.log('🔔 Browser permission result:', permission);
+          
+          if (permission !== 'granted') {
+            alert('Please allow notifications to receive updates when items are ready for review.');
+            return;
+          }
         }
       }
       
-      // Then request Progressier subscription
+      // Then initialize Progressier and register
+      console.log('🔔 Initializing Progressier...');
+      const initialized = await platformNotificationService.initialize();
+      if (!initialized) {
+        alert('Unable to initialize push notifications. Please try again in a few seconds.');
+        return;
+      }
+      
+      // Request Progressier subscription
+      console.log('🔔 Requesting Progressier subscription...');
       const success = await platformNotificationService.requestPermission();
       console.log('🔔 Progressier subscription result:', success);
       
       if (success) {
         // Enable notifications in user settings
         if (enableNotifications) {
-          await enableNotifications();
+          const settingsUpdated = await enableNotifications();
+          if (settingsUpdated) {
+            alert('Perfect! You\'ll now receive notifications when items are ready for review.');
+            testNotification();
+          } else {
+            alert('Notifications set up, but there was an issue saving your preferences. Please check your settings.');
+          }
         }
-        testNotification();
-        alert('Great! You\'ll now receive notifications when items are ready for review.');
       } else {
-        alert('Unable to set up push notifications. Please try again or check your browser settings.');
+        alert('Unable to set up push notifications. Please ensure notifications are allowed in your browser settings and try again.');
       }
     } catch (error) {
-      console.error('Error requesting permission:', error);
+      console.error('Error setting up notifications:', error);
       alert('Error setting up notifications. Please try again.');
     }
   };
@@ -629,8 +657,8 @@ console.log('Rendering main Index content');
                   <div className="text-muted-foreground text-sm md:text-base">No paused items yet</div>
                   <div className="text-xs text-muted-foreground mt-1 md:text-sm md:mt-2">Add something below to get started</div>
                   
-                  {/* Notification setup prompt */}
-                  {Notification.permission === 'denied' && (
+                  {/* Notification setup prompt - show even if user has items */}
+                  {user && Notification.permission !== 'granted' && (
                     <div className="mt-4 p-4 border border-orange-200 rounded-lg bg-orange-50/50">
                       <div className="text-sm text-orange-700 mb-2">🔔 Get notified when items are ready for review</div>
                       <div className="text-xs text-orange-600 mb-3">
@@ -645,6 +673,23 @@ console.log('Rendering main Index content');
                       </Button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Also show notification setup in non-empty state if needed */}
+              {user && Notification.permission !== 'granted' && (storeReadyItems.length > 0 || currentPausedItems.length > 0) && (
+                <div className="mt-4 mb-4 p-4 border border-orange-200 rounded-lg bg-orange-50/50">
+                  <div className="text-sm text-orange-700 mb-2">🔔 Enable notifications to get alerted when items are ready</div>
+                  <div className="text-xs text-orange-600 mb-3">
+                    Status: {notificationStatus}
+                  </div>
+                  <Button 
+                    onClick={handleRequestNotificationPermission}
+                    size="sm"
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                  >
+                    Enable Notifications
+                  </Button>
                 </div>
               )}
               
