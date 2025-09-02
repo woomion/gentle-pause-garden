@@ -611,18 +611,17 @@ console.log('Rendering main Index content');
                        <div className="w-full overflow-hidden px-4">
                          <div className="space-y-3">
                            {currentPausedItems.map((it) => (
-                             <div key={it.id} className="w-[240px] mx-auto">
-                               <DesktopItemCard
-                                 item={it}
-                                 showImages={showImages}
-                                 onClick={() => {
-                                   setSelectedItem(it);
-                                   setShowItemDetail(true);
-                                 }}
-                                 onEdit={(item, updates) => updateItem(item.id, updates)}
-                                 onDelete={removeItem}
-                               />
-                             </div>
+                             <DesktopItemCard
+                               key={it.id}
+                               item={it}
+                               showImages={showImages}
+                               onClick={() => {
+                                 setSelectedItem(it);
+                                 setShowItemDetail(true);
+                               }}
+                               onEdit={(item, updates) => updateItem(item.id, updates)}
+                               onDelete={removeItem}
+                             />
                            ))}
                          </div>
                        </div>
@@ -631,7 +630,7 @@ console.log('Rendering main Index content');
                         <Carousel className="w-full">
                           <CarouselContent className="pl-0">
                             {currentPausedItems.map((it) => (
-                              <CarouselItem key={it.id} className="pl-4 basis-[240px]">
+                              <CarouselItem key={it.id} className="pl-4">
                                 <DesktopItemCard
                                   item={it}
                                   showImages={showImages}
