@@ -151,7 +151,7 @@ const Index = () => {
   const [notificationStatus, setNotificationStatus] = useState<string>('checking...');
   
   useEffect(() => {
-    const checkNotificationStatus = () => {
+    const checkNotificationStatus = async () => {
       if (!('Notification' in window)) {
         setNotificationStatus('Browser does not support notifications');
         return;
@@ -161,13 +161,30 @@ const Index = () => {
       const serviceEnabled = platformNotificationService.getEnabled();
       const settingsEnabled = notificationsEnabled;
       
-      setNotificationStatus(`Permission: ${permission}, Service: ${serviceEnabled}, Settings: ${settingsEnabled}`);
+      // Check Progressier subscription status
+      let progressierSubscribed = false;
+      try {
+        progressierSubscribed = await platformNotificationService.isSubscribed();
+      } catch (error) {
+        console.error('Error checking Progressier subscription:', error);
+      }
+      
+      setNotificationStatus(`Permission: ${permission}, Service: ${serviceEnabled}, Settings: ${settingsEnabled}, Progressier: ${progressierSubscribed}`);
+      
+      // Debug: Log the full status
+      console.log('🔔 Full notification status:', {
+        permission,
+        serviceEnabled,
+        settingsEnabled,
+        progressierSubscribed,
+        user: !!user
+      });
     };
     
     checkNotificationStatus();
-    const interval = setInterval(checkNotificationStatus, 2000);
+    const interval = setInterval(checkNotificationStatus, 5000); // Check every 5 seconds
     return () => clearInterval(interval);
-  }, [notificationsEnabled]);
+  }, [notificationsEnabled, user]);
   
   
   const handleRequestNotificationPermission = async () => {
