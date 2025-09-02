@@ -608,23 +608,24 @@ console.log('Rendering main Index content');
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
                     ) : mobileViewMode === 'list' ? (
-                      <div className="w-full overflow-hidden px-4">
-                        <div className="space-y-3">
-                          {currentPausedItems.map((it) => (
-                            <DesktopItemCard
-                              key={it.id}
-                              item={it}
-                              showImages={showImages}
-                              onClick={() => {
-                                setSelectedItem(it);
-                                setShowItemDetail(true);
-                              }}
-                              onEdit={(item, updates) => updateItem(item.id, updates)}
-                              onDelete={removeItem}
-                            />
-                          ))}
-                        </div>
-                      </div>
+                       <div className="w-full overflow-hidden px-4">
+                         <div className="space-y-3">
+                           {currentPausedItems.map((it) => (
+                             <div key={it.id} className="w-[240px] mx-auto">
+                               <DesktopItemCard
+                                 item={it}
+                                 showImages={showImages}
+                                 onClick={() => {
+                                   setSelectedItem(it);
+                                   setShowItemDetail(true);
+                                 }}
+                                 onEdit={(item, updates) => updateItem(item.id, updates)}
+                                 onDelete={removeItem}
+                               />
+                             </div>
+                           ))}
+                         </div>
+                       </div>
                     ) : (
                       <div className="w-full overflow-hidden px-4">
                         <Carousel className="w-full">
