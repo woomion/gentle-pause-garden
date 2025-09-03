@@ -444,6 +444,30 @@ console.log('Rendering main Index content');
                 </Button>
                 <Button 
                   onClick={async () => {
+                    try {
+                      const { supabase } = await import('@/integrations/supabase/client');
+                      
+                      // Check what tokens are stored
+                      const { data: tokens, error } = await supabase
+                        .from('push_tokens')
+                        .select('*');
+                      
+                      if (error) {
+                        alert('❌ Error checking tokens: ' + error.message);
+                      } else {
+                        alert(`Found ${tokens?.length || 0} tokens: ${JSON.stringify(tokens)}`);
+                      }
+                    } catch (error) {
+                      alert('❌ Error: ' + error);
+                    }
+                  }}
+                  size="sm"
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white mr-2"
+                >
+                  Check Tokens
+                </Button>
+                <Button 
+                  onClick={async () => {
                     const result = await createTestItem();
                     if (result.success) {
                       // Refresh the items list
