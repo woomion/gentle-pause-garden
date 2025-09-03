@@ -468,6 +468,62 @@ console.log('Rendering main Index content');
                 </Button>
                 <Button 
                   onClick={async () => {
+                    try {
+                      const { supabase } = await import('@/integrations/supabase/client');
+                      
+                      // Check user
+                      const { data: { user }, error: authError } = await supabase.auth.getUser();
+                      if (authError || !user) {
+                        alert('❌ Not logged in: ' + (authError?.message || 'No user'));
+                        return;
+                      }
+                      
+                      // Check Progressier
+                      if (!window.progressier) {
+                        alert('❌ Progressier not available');
+                        return;
+                      }
+                      
+                      // Check service worker subscription
+                      if ('serviceWorker' in navigator && 'PushManager' in window) {
+                        const registration = await navigator.serviceWorker.ready;
+                        const subscription = await registration.pushManager.getSubscription();
+                        
+                        if (!subscription) {
+                          alert('❌ No push subscription found. Try subscribing to notifications first in browser settings.');
+                          return;
+                        }
+                        
+                        // Try to store this subscription manually
+                        const endpoint = subscription.endpoint;
+                        const { error: storeError } = await supabase.functions.invoke('store-push-token', {
+                          body: {
+                            userId: user.id,
+                            token: endpoint,
+                            endpoint: endpoint,
+                            platform: 'web'
+                          }
+                        });
+                        
+                        if (storeError) {
+                          alert('❌ Error storing token: ' + storeError.message);
+                        } else {
+                          alert('✅ Token stored successfully! Endpoint: ' + endpoint.substring(0, 50) + '...');
+                        }
+                      } else {
+                        alert('❌ Service worker or PushManager not available');
+                      }
+                    } catch (error) {
+                      alert('❌ Error: ' + error);
+                    }
+                  }}
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white mr-2"
+                >
+                  Debug & Fix Token
+                </Button>
+                <Button 
+                  onClick={async () => {
                     const result = await createTestItem();
                     if (result.success) {
                       // Refresh the items list
