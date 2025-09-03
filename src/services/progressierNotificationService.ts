@@ -128,18 +128,18 @@ export class ProgressierNotificationService {
 
   async isSubscribed(): Promise<boolean> {
     try {
-      const initialized = await this.initialize();
-      if (!initialized || !window.progressier) {
-        return false;
+      if (typeof window !== 'undefined' && window.progressier) {
+        // Since isSubscribed method isn't available, check if we have a service worker push subscription
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
+          const hasSubscription = subscription !== null;
+          console.log('🔔 Push subscription status:', hasSubscription);
+          return hasSubscription;
+        }
       }
-
-      // Check if the method exists before calling it
-      if (typeof window.progressier.isSubscribed === 'function') {
-        return await window.progressier.isSubscribed();
-      } else {
-        console.log('❌ Progressier.isSubscribed method not available, checking notification permission instead');
-        return 'Notification' in window && Notification.permission === 'granted';
-      }
+      console.log('❌ Service worker or PushManager not available');
+      return false;
     } catch (error) {
       console.error('❌ Error checking subscription status:', error);
       return false;
