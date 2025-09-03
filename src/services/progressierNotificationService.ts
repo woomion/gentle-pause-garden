@@ -3,15 +3,13 @@
 
 declare global {
   interface Window {
-    progressierRegistration?: {
-      ready: Promise<any>;
-      register: () => Promise<any>;
-      unregister: () => Promise<any>;
+    progressier?: {
+      subscribe: () => Promise<any>;
+      unsubscribe: () => Promise<any>;
       isSubscribed: () => Promise<boolean>;
-      getSubscription: () => Promise<any>;
       showOptIn: () => void;
       hideOptIn: () => void;
-      sendNotification: (options: {
+      push: (options: {
         title: string;
         body: string;
         icon?: string;
@@ -20,6 +18,7 @@ declare global {
         data?: any;
       }) => Promise<any>;
     };
+    progressierRegistration?: any;
   }
 }
 
@@ -39,44 +38,25 @@ export class ProgressierNotificationService {
     try {
       console.log('🔔 Progressier: Initializing...');
       
-      // Wait for both DOM and Progressier script to be ready
-      return new Promise((resolve) => {
-        let attempts = 0;
-        const maxAttempts = 100; // Try for 10 seconds
-        
-        const checkProgressier = () => {
-          attempts++;
-          console.log(`🔔 Progressier check attempt ${attempts}/${maxAttempts}`);
-          
-          if (window.progressierRegistration) {
-            console.log('🔔 Progressier registration object found, waiting for ready...');
-            window.progressierRegistration.ready
-              .then(() => {
-                console.log('✅ Progressier: Ready and initialized');
-                resolve(true);
-              })
-              .catch((error) => {
-                console.error('❌ Progressier ready promise failed:', error);
-                resolve(false);
-              });
-          } else if (attempts < maxAttempts) {
-            setTimeout(checkProgressier, 100);
-          } else {
-            console.log('❌ Progressier: Failed to initialize after', maxAttempts, 'attempts');
-            console.log('❌ Window object keys:', Object.keys(window).filter(k => k.includes('progress')));
-            resolve(false);
-          }
-        };
-        
-        // Start checking immediately, but also wait for DOM ready
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(checkProgressier, 100); // Give script a moment to load
-          });
-        } else {
-          setTimeout(checkProgressier, 100);
-        }
-      });
+      // Wait for DOM to be ready first
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => {
+          document.addEventListener('DOMContentLoaded', resolve);
+        });
+      }
+      
+      // Give Progressier script time to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Check if Progressier API is available through the global object
+      if (typeof window.progressier !== 'undefined' && window.progressier) {
+        console.log('✅ Progressier: Ready and initialized via global object');
+        return true;
+      }
+      
+      console.log('❌ Progressier: Not available');
+      console.log('❌ Available Progressier objects:', Object.keys(window).filter(k => k.includes('progress')));
+      return false;
     } catch (error) {
       console.error('❌ Progressier: Initialization error:', error);
       return false;
@@ -85,28 +65,39 @@ export class ProgressierNotificationService {
 
   async requestPermission(): Promise<boolean> {
     try {
-      await this.initialize();
-      
-      if (!window.progressierRegistration) {
-        console.log('❌ Progressier not available');
+      const initialized = await this.initialize();
+      if (!initialized) {
+        console.log('❌ Progressier not available, falling back to browser notifications');
+        
+        // Fallback to standard browser notifications
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          console.log('🔔 Browser notification permission:', permission);
+          return permission === 'granted';
+        }
+        return false;
+      }
+
+      if (!window.progressier) {
+        console.log('❌ Progressier API not available');
         return false;
       }
 
       // Check if already subscribed
-      const isSubscribed = await window.progressierRegistration.isSubscribed();
+      const isSubscribed = await window.progressier.isSubscribed();
       if (isSubscribed) {
         console.log('✅ Already subscribed to push notifications');
         return true;
       }
 
-      // Show Progressier's opt-in UI
-      window.progressierRegistration.showOptIn();
+      // Show Progressier's opt-in UI and subscribe
+      window.progressier.showOptIn();
       
-      // Register for push notifications
-      const subscription = await window.progressierRegistration.register();
-      console.log('🔔 Progressier registration result:', subscription);
+      // Subscribe for push notifications
+      const subscription = await window.progressier.subscribe();
+      console.log('🔔 Progressier subscription result:', subscription);
       
-      const nowSubscribed = await window.progressierRegistration.isSubscribed();
+      const nowSubscribed = await window.progressier.isSubscribed();
       console.log('🔔 Push notification subscription result:', nowSubscribed);
       
       // Store the push token in our database
@@ -123,13 +114,12 @@ export class ProgressierNotificationService {
 
   async isSubscribed(): Promise<boolean> {
     try {
-      await this.initialize();
-      
-      if (!window.progressierRegistration) {
+      const initialized = await this.initialize();
+      if (!initialized || !window.progressier) {
         return false;
       }
 
-      return await window.progressierRegistration.isSubscribed();
+      return await window.progressier.isSubscribed();
     } catch (error) {
       console.error('❌ Error checking subscription status:', error);
       return false;
@@ -138,13 +128,12 @@ export class ProgressierNotificationService {
 
   async unsubscribe(): Promise<boolean> {
     try {
-      await this.initialize();
-      
-      if (!window.progressierRegistration) {
+      const initialized = await this.initialize();
+      if (!initialized || !window.progressier) {
         return false;
       }
 
-      await window.progressierRegistration.unregister();
+      await window.progressier.unsubscribe();
       console.log('🔔 Unsubscribed from push notifications');
       return true;
     } catch (error) {
@@ -160,10 +149,21 @@ export class ProgressierNotificationService {
     data?: any;
   } = {}): Promise<void> {
     try {
-      await this.initialize();
-      
-      if (!window.progressierRegistration) {
-        console.log('❌ Progressier not available for sending notification');
+      const initialized = await this.initialize();
+      if (!initialized || !window.progressier) {
+        console.log('❌ Progressier not available for sending notification, using browser fallback');
+        
+        // Fallback to browser notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification(title, {
+            body,
+            icon: options.icon || '/icons/app-icon-512.png',
+            badge: options.badge || '/icons/app-icon-512.png',
+            tag: options.tag || 'pocket-pause',
+            data: options.data || {}
+          });
+          console.log('✅ Browser notification sent');
+        }
         return;
       }
 
@@ -182,7 +182,7 @@ export class ProgressierNotificationService {
         data: options.data || {}
       };
 
-      await window.progressierRegistration.sendNotification(notificationOptions);
+      await window.progressier.push(notificationOptions);
       console.log('✅ Push notification sent via Progressier');
     } catch (error) {
       console.error('❌ Error sending push notification:', error);
