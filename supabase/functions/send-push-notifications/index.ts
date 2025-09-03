@@ -115,30 +115,36 @@ serve(async (req) => {
             body: payload.body,
             icon: '/icons/app-icon-512.png',
             badge: '/icons/app-icon-512.png',
-            data: payload.data || {}
+            data: payload.data || {},
+            tag: `notification-${Date.now()}`
           };
 
-          // Send via Progressier notifications API (not push API)
-          const response = await fetch('https://progressier.app/api/notifications', {
+          console.log(`📤 Sending notification to user ${userId}:`, notificationPayload);
+
+          // Try the correct Progressier API endpoint for sending to specific users
+          const response = await fetch('https://progressier.app/api/push', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${progressierApiKey}`
             },
             body: JSON.stringify({
-              ...notificationPayload,
               audience: {
                 userIds: [userId]
-              }
+              },
+              notification: notificationPayload
             })
           });
+
+          console.log(`📥 Progressier response status: ${response.status}`);
+          const responseText = await response.text();
+          console.log(`📥 Progressier response:`, responseText);
 
           if (response.ok) {
             console.log(`📧 Notification sent to user ${userId}`);
             successCount++;
           } else {
-            const errorText = await response.text();
-            console.error(`❌ Failed to send to ${userId}:`, errorText);
+            console.error(`❌ Failed to send to ${userId} (${response.status}):`, responseText);
             failureCount++;
           }
         } catch (pushError) {
