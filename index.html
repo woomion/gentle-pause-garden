@@ -115,20 +115,40 @@
     <!-- Progressier PWA Push Notifications - Load immediately -->
     <script async src="https://progressier.app/9LL6P8U26R3MyH8El0RL/script.js"></script>
     <script>
-      // Configure share target through Progressier
-      window.addEventListener('load', function() {
-        if (window.progressier) {
-          progressier.manifest.shareTarget = {
-            action: "/",
-            method: "GET", 
-            enctype: "application/x-www-form-urlencoded",
-            params: {
-              url: "url",
-              text: "text", 
-              title: "title"
+      // Fix the Progressier share target configuration
+      document.addEventListener('DOMContentLoaded', function() {
+        // Wait for Progressier to be ready
+        function configureShareTarget() {
+          if (window.progressier && window.progressier.manifest) {
+            try {
+              // Set up share target configuration
+              const manifestUpdate = {
+                share_target: {
+                  action: "/",
+                  method: "GET",
+                  enctype: "application/x-www-form-urlencoded",
+                  params: {
+                    url: "url",
+                    text: "text",
+                    title: "title"
+                  }
+                }
+              };
+              
+              // Update the manifest
+              progressier.manifest.update(manifestUpdate);
+              console.log('✅ Share target configured via Progressier');
+            } catch (error) {
+              console.error('❌ Failed to configure share target:', error);
             }
-          };
+          } else {
+            // Retry after a short delay
+            setTimeout(configureShareTarget, 500);
+          }
         }
+        
+        // Start configuration
+        configureShareTarget();
       });
     </script>
   </head>

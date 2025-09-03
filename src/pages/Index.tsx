@@ -72,7 +72,7 @@ const Index = () => {
   
   
   const now = Date.now();
-  // First get ready items from the store function (authoritative source)
+  // Get ready items from the store function (authoritative source)
   const storeReadyItems = getItemsForReview ? getItemsForReview() : [];
   const readyItemIds = new Set(storeReadyItems.map(item => item.id));
   
@@ -91,12 +91,15 @@ const Index = () => {
         isActuallyReady,
         isInReadyList,
         checkInTime: item.checkInTime,
-        checkInDate: item.checkInDate
+        checkInDate: item.checkInDate,
+        storeReadyItemsCount: storeReadyItems.length,
+        storeReadyItemIds: Array.from(readyItemIds)
       });
     }
     
-    // Item should be filtered out if EITHER condition is true
-    const shouldRemoveFromPausedList = isInReadyList || isActuallyReady;
+    // Item should be filtered out if it's in the ready list
+    // We primarily trust the store's getItemsForReview function
+    const shouldRemoveFromPausedList = isInReadyList;
     
     // Return true to KEEP in paused list, false to REMOVE from paused list
     return !shouldRemoveFromPausedList;
