@@ -115,40 +115,33 @@
     <!-- Progressier PWA Push Notifications - Load immediately -->
     <script async src="https://progressier.app/9LL6P8U26R3MyH8El0RL/script.js"></script>
     <script>
-      // Fix the Progressier share target configuration
-      document.addEventListener('DOMContentLoaded', function() {
-        // Wait for Progressier to be ready
-        function configureShareTarget() {
-          if (window.progressier && window.progressier.manifest) {
-            try {
-              // Set up share target configuration
-              const manifestUpdate = {
-                share_target: {
-                  action: "/",
-                  method: "GET",
-                  enctype: "application/x-www-form-urlencoded",
-                  params: {
-                    url: "url",
-                    text: "text",
-                    title: "title"
-                  }
-                }
-              };
-              
-              // Update the manifest
-              progressier.manifest.update(manifestUpdate);
-              console.log('✅ Share target configured via Progressier');
-            } catch (error) {
-              console.error('❌ Failed to configure share target:', error);
-            }
-          } else {
-            // Retry after a short delay
-            setTimeout(configureShareTarget, 500);
-          }
-        }
+      // Configure share target and handle shared content
+      window.addEventListener('load', function() {
+        // Handle shared content from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedUrl = urlParams.get('url') || urlParams.get('shared_url');
+        const sharedText = urlParams.get('text') || urlParams.get('shared_text');
+        const sharedTitle = urlParams.get('title') || urlParams.get('shared_title');
         
-        // Start configuration
-        configureShareTarget();
+        if (sharedUrl || sharedText || sharedTitle) {
+          console.log('📤 Share target activated with content:', { sharedUrl, sharedText, sharedTitle });
+          
+          // Clean up URL
+          if (window.history && window.history.replaceState) {
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+          }
+          
+          // Dispatch custom event for the app to handle
+          const event = new CustomEvent('sharedContentReceived', {
+            detail: {
+              url: sharedUrl,
+              text: sharedText,
+              title: sharedTitle
+            }
+          });
+          window.dispatchEvent(event);
+        }
       });
     </script>
   </head>
