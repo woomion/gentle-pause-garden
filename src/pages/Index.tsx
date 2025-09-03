@@ -402,28 +402,42 @@ console.log('Rendering main Index content');
           <div className="w-full px-4 mb-4">
             <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/50">
               <div className="text-sm text-blue-700 mb-2">🧪 Test Notifications</div>
-              <Button 
-                onClick={async () => {
-                  const result = await createTestItem();
-                  if (result.success) {
-                    // Refresh the items list
-                    if (user) {
-                      // For logged in users, refresh Supabase store
-                      window.location.reload();
+              <div className="space-y-2">
+                <Button 
+                  onClick={async () => {
+                    // Import and run debug function
+                    const { debugNotificationSetup } = await import('../utils/notificationDebug');
+                    await debugNotificationSetup();
+                    alert('✅ Debug setup complete! Check console for details.');
+                  }}
+                  size="sm"
+                  className="bg-purple-600 hover:bg-purple-700 text-white mr-2"
+                >
+                  Setup Push Tokens
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    const result = await createTestItem();
+                    if (result.success) {
+                      // Refresh the items list
+                      if (user) {
+                        // For logged in users, refresh Supabase store
+                        window.location.reload();
+                      } else {
+                        // For guest users, refresh local store  
+                        window.location.reload();
+                      }
+                      alert('✅ Test item created! Page will refresh to show it.');
                     } else {
-                      // For guest users, refresh local store  
-                      window.location.reload();
+                      alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
                     }
-                    alert('✅ Test item created! Page will refresh to show it.');
-                  } else {
-                    alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
-                  }
-                }}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Create Test Item (Ready in 5 min)
-              </Button>
+                  }}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Create Test Item (Ready in 5 min)
+                </Button>
+              </div>
             </div>
           </div>
 
