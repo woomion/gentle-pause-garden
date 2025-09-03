@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
-import { Settings, User, Moon, Sun, ChevronDown, ChevronRight } from 'lucide-react';
+import { Settings, User, Moon, Sun, ChevronDown, ChevronRight, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTheme } from '@/components/ThemeProvider';
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserSettings } from '@/hooks/useUserSettings';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const SettingsSection = () => {
   // Collapsible state for account section
   const [accountOpen, setAccountOpen] = useState(false);
-  // Collapsible state for color theme section
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [colorThemeOpen, setColorThemeOpen] = useState(false);
   
   const { user } = useAuth();
   const { theme, setTheme, actualTheme } = useTheme();
+  const { notificationsEnabled, updateNotificationSetting, loading } = useUserSettings();
+  const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
 
   return (
     <div className="space-y-6">
@@ -109,6 +113,65 @@ const SettingsSection = () => {
                    Delete Account
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Notifications */}
+      <Collapsible open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+        <CollapsibleTrigger className="w-full">
+          <Card className="bg-card border-border cursor-pointer hover:bg-card/80 transition-colors">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  Notifications
+                </div>
+                {notificationsOpen ? (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                )}
+              </CardTitle>
+              <CardDescription className="text-sm text-left">
+                Configure when and how you receive notifications
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <Card className="bg-card border-border border-t-0 rounded-t-none">
+            <CardContent className="space-y-4 pt-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Enable Notifications</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Get notified when your paused items are ready for review
+                  </p>
+                </div>
+                <Switch
+                  checked={notificationsEnabled}
+                  onCheckedChange={updateNotificationSetting}
+                  disabled={loading}
+                />
+              </div>
+              
+              {notificationsEnabled && (
+                <div className="space-y-3 pt-2 border-t border-border">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={testNotification}
+                    className="w-full text-xs h-8"
+                  >
+                    Send Test Notification
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    If you don't receive test notifications, check your browser settings and allow notifications for this site.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </CollapsibleContent>
