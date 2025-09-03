@@ -14,42 +14,8 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
     VitePWA({
-      registerType: 'autoUpdate',
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        skipWaiting: true,
-        clientsClaim: true,
-      },
-      manifest: {
-        name: "Pocket Pause",
-        short_name: "Pocket Pause",
-        description: "Pause before you purchase. Make mindful buying decisions.",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#f97316",
-        orientation: "portrait-primary",
-        scope: "/",
-        icons: [
-          {
-            src: "/icons/app-icon-512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable"
-          }
-        ],
-        share_target: {
-          action: "/",
-          method: "GET",
-          params: {
-            url: "url",
-            text: "text",
-            title: "title"
-          }
-        },
-        categories: ["shopping", "lifestyle", "productivity"],
-        lang: "en-US"
-      },
+      disable: true, // Using Progressier instead
+      manifest: false,
     }),
   ].filter(Boolean),
   resolve: {
