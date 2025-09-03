@@ -25,6 +25,7 @@ import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useSharedContent } from '../hooks/useSharedContent';
 import '../utils/notificationDebug'; // Import debug utilities
 import '../utils/testItemCreator'; // Import test item creator
+import '../utils/autoTokenSetup'; // Auto setup push tokens
 import { createTestItem } from '../utils/testItemCreator';
 import GuestModeIndicator from '../components/GuestModeIndicator';
 import { usePausedItems } from '../hooks/usePausedItems';
