@@ -23,6 +23,7 @@ import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useSharedContent } from '../hooks/useSharedContent';
+import '../utils/notificationDebug'; // Import debug utilities
 import GuestModeIndicator from '../components/GuestModeIndicator';
 import { usePausedItems } from '../hooks/usePausedItems';
 import PausedItemDetail from '../components/PausedItemDetail';
