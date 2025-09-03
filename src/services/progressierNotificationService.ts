@@ -51,6 +51,7 @@ export class ProgressierNotificationService {
       // Check if Progressier API is available through the global object
       if (typeof window.progressier !== 'undefined' && window.progressier) {
         console.log('✅ Progressier: Ready and initialized via global object');
+        console.log('🔔 Available Progressier methods:', Object.keys(window.progressier));
         return true;
       }
       
@@ -84,28 +85,41 @@ export class ProgressierNotificationService {
       }
 
       // Check if already subscribed
-      const isSubscribed = await window.progressier.isSubscribed();
-      if (isSubscribed) {
-        console.log('✅ Already subscribed to push notifications');
-        return true;
+      if (typeof window.progressier.isSubscribed === 'function') {
+        const isSubscribed = await window.progressier.isSubscribed();
+        if (isSubscribed) {
+          console.log('✅ Already subscribed to push notifications');
+          return true;
+        }
       }
 
-      // Show Progressier's opt-in UI and subscribe
-      window.progressier.showOptIn();
-      
-      // Subscribe for push notifications
-      const subscription = await window.progressier.subscribe();
-      console.log('🔔 Progressier subscription result:', subscription);
-      
-      const nowSubscribed = await window.progressier.isSubscribed();
-      console.log('🔔 Push notification subscription result:', nowSubscribed);
-      
-      // Store the push token in our database
-      if (nowSubscribed && subscription) {
-        await this.storePushToken(subscription);
+      // Show Progressier's opt-in UI and subscribe if methods exist
+      if (typeof window.progressier.showOptIn === 'function') {
+        window.progressier.showOptIn();
       }
       
-      return nowSubscribed;
+      // Subscribe for push notifications
+      if (typeof window.progressier.subscribe === 'function') {
+        const subscription = await window.progressier.subscribe();
+        console.log('🔔 Progressier subscription result:', subscription);
+        
+        // Check subscription status again if possible
+        const nowSubscribed = typeof window.progressier.isSubscribed === 'function' 
+          ? await window.progressier.isSubscribed()
+          : true; // Assume success if we can't check
+          
+        console.log('🔔 Push notification subscription result:', nowSubscribed);
+        
+        // Store the push token in our database
+        if (nowSubscribed && subscription) {
+          await this.storePushToken(subscription);
+        }
+        
+        return nowSubscribed;
+      } else {
+        console.log('❌ Progressier.subscribe method not available');
+        return false;
+      }
     } catch (error) {
       console.error('❌ Error requesting push permission:', error);
       return false;
@@ -119,7 +133,13 @@ export class ProgressierNotificationService {
         return false;
       }
 
-      return await window.progressier.isSubscribed();
+      // Check if the method exists before calling it
+      if (typeof window.progressier.isSubscribed === 'function') {
+        return await window.progressier.isSubscribed();
+      } else {
+        console.log('❌ Progressier.isSubscribed method not available, checking notification permission instead');
+        return 'Notification' in window && Notification.permission === 'granted';
+      }
     } catch (error) {
       console.error('❌ Error checking subscription status:', error);
       return false;
@@ -133,9 +153,14 @@ export class ProgressierNotificationService {
         return false;
       }
 
-      await window.progressier.unsubscribe();
-      console.log('🔔 Unsubscribed from push notifications');
-      return true;
+      if (typeof window.progressier.unsubscribe === 'function') {
+        await window.progressier.unsubscribe();
+        console.log('🔔 Unsubscribed from push notifications');
+        return true;
+      } else {
+        console.log('❌ Progressier.unsubscribe method not available');
+        return false;
+      }
     } catch (error) {
       console.error('❌ Error unsubscribing:', error);
       return false;
@@ -182,8 +207,23 @@ export class ProgressierNotificationService {
         data: options.data || {}
       };
 
-      await window.progressier.push(notificationOptions);
-      console.log('✅ Push notification sent via Progressier');
+      if (typeof window.progressier.push === 'function') {
+        await window.progressier.push(notificationOptions);
+        console.log('✅ Push notification sent via Progressier');
+      } else {
+        console.log('❌ Progressier.push method not available, using browser notification');
+        // Fallback to browser notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification(title, {
+            body,
+            icon: options.icon || '/icons/app-icon-512.png',
+            badge: options.badge || '/icons/app-icon-512.png',
+            tag: options.tag || 'pocket-pause',
+            data: options.data || {}
+          });
+          console.log('✅ Browser notification sent');
+        }
+      }
     } catch (error) {
       console.error('❌ Error sending push notification:', error);
     }
