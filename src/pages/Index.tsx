@@ -417,6 +417,33 @@ console.log('Rendering main Index content');
                 </Button>
                 <Button 
                   onClick={async () => {
+                    try {
+                      // Test direct push notification
+                      const { supabase } = await import('@/integrations/supabase/client');
+                      const { error } = await supabase.functions.invoke('send-push-notifications', {
+                        body: {
+                          title: 'Test Notification',
+                          body: 'Direct test from app - notifications working!',
+                          data: { type: 'test' }
+                        }
+                      });
+                      
+                      if (error) {
+                        alert('❌ Error sending test notification: ' + error.message);
+                      } else {
+                        alert('✅ Test notification sent!');
+                      }
+                    } catch (error) {
+                      alert('❌ Error: ' + error);
+                    }
+                  }}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white mr-2"
+                >
+                  Send Test Push
+                </Button>
+                <Button 
+                  onClick={async () => {
                     const result = await createTestItem();
                     if (result.success) {
                       // Refresh the items list
