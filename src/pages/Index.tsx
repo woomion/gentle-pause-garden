@@ -553,27 +553,43 @@ console.log('Rendering main Index content');
                            alert('❌ Not subscribed to Progressier. The notifications might not work until you\'re properly subscribed.');
                          }
                          
-                         // Try to send via Progressier's SDK
-                         if (typeof progressier.push === 'function') {
-                           console.log('📤 Using Progressier push method...');
-                           try {
-                             await progressier.push({
-                               title: 'Progressier SDK Test',
-                               body: 'This should be a real push notification!',
-                               icon: '/icons/app-icon-512.png',
-                               badge: '/icons/app-icon-512.png',
-                               tag: 'progressier-test'
-                             });
-                             alert('✅ Progressier SDK notification sent!');
-                             return;
-                           } catch (pushError) {
-                             console.error('❌ Progressier push error:', pushError);
-                             alert('❌ Progressier push failed: ' + pushError.message);
-                           }
-                         } else {
-                           console.log('⚠️ Progressier push method not available');
-                           alert('⚠️ Progressier push method not available. Check console for available methods.');
-                         }
+                          // Try to send via Progressier's SDK
+                          if (typeof progressier.push === 'function') {
+                            console.log('📤 Using Progressier push method...');
+                            try {
+                              await progressier.push({
+                                title: 'Progressier SDK Test',
+                                body: 'This should be a real push notification!',
+                                icon: '/icons/app-icon-512.png',
+                                badge: '/icons/app-icon-512.png',
+                                tag: 'progressier-test'
+                              });
+                              alert('✅ Progressier SDK notification sent!');
+                              return;
+                            } catch (pushError) {
+                              console.error('❌ Progressier push error:', pushError);
+                              alert('❌ Progressier push failed: ' + pushError.message);
+                            }
+                          } else if (typeof progressier.showNotification === 'function') {
+                            console.log('📤 Using Progressier showNotification method...');
+                            try {
+                              await progressier.showNotification('Progressier Test', {
+                                body: 'This should be a real push notification!',
+                                icon: '/icons/app-icon-512.png',
+                                badge: '/icons/app-icon-512.png',
+                                tag: 'progressier-test'
+                              });
+                              alert('✅ Progressier notification sent!');
+                              return;
+                            } catch (notifError) {
+                              console.error('❌ Progressier notification error:', notifError);
+                              alert('❌ Progressier notification failed: ' + notifError.message);
+                            }
+                          } else {
+                            console.log('⚠️ Progressier push method not available');
+                            console.log('Available methods:', Object.keys(progressier));
+                            alert('⚠️ Progressier push method not available. Check console for available methods.');
+                          }
                        } else {
                          console.log('❌ Progressier not available');
                          alert('❌ Progressier not available - check console logs');
