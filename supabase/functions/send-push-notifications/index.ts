@@ -109,40 +109,41 @@ serve(async (req) => {
           continue;
         }
 
-        for (const tokenData of userTokens) {
-          try {
-            const notificationPayload = {
-              title: payload.title,
-              body: payload.body,
-              icon: '/icons/app-icon-512.png',
-              badge: '/icons/app-icon-512.png',
-              data: payload.data || {}
-            };
+        try {
+          const notificationPayload = {
+            title: payload.title,
+            body: payload.body,
+            icon: '/icons/app-icon-512.png',
+            badge: '/icons/app-icon-512.png',
+            data: payload.data || {}
+          };
 
-            // Send via Progressier API
-            const response = await fetch('https://progressier.app/api/push', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${progressierApiKey}`
-              },
-              body: JSON.stringify({
-                registration_id: tokenData.token,
-                notification: notificationPayload
-              })
-            });
+          // Send via Progressier notifications API (not push API)
+          const response = await fetch('https://progressier.app/api/notifications', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${progressierApiKey}`
+            },
+            body: JSON.stringify({
+              ...notificationPayload,
+              audience: {
+                userIds: [userId]
+              }
+            })
+          });
 
-            if (response.ok) {
-              console.log(`📧 Notification sent to user ${userId} on ${tokenData.platform}`);
-              successCount++;
-            } else {
-              console.error(`❌ Failed to send to ${userId}:`, await response.text());
-              failureCount++;
-            }
-          } catch (pushError) {
-            console.error(`❌ Push error for user ${userId}:`, pushError);
+          if (response.ok) {
+            console.log(`📧 Notification sent to user ${userId}`);
+            successCount++;
+          } else {
+            const errorText = await response.text();
+            console.error(`❌ Failed to send to ${userId}:`, errorText);
             failureCount++;
           }
+        } catch (pushError) {
+          console.error(`❌ Push error for user ${userId}:`, pushError);
+          failureCount++;
         }
 
       } catch (error) {

@@ -522,10 +522,53 @@ console.log('Rendering main Index content');
                   className="bg-red-600 hover:bg-red-700 text-white mr-2"
                 >
                   Debug & Fix Token
-                </Button>
-                <Button 
-                  onClick={async () => {
-                    const result = await createTestItem();
+                 </Button>
+                 
+                 <Button
+                   onClick={async () => {
+                     try {
+                       if (typeof window !== 'undefined' && (window as any).progressier) {
+                         const progressier = (window as any).progressier;
+                         const isSubscribed = await progressier.isSubscribed();
+                         
+                         if (isSubscribed) {
+                           console.log('✅ Testing Progressier notification...');
+                           const { supabase } = await import('@/integrations/supabase/client');
+                           const { data: { user } } = await supabase.auth.getUser();
+                           
+                           const { data, error } = await supabase.functions.invoke('send-push-notifications', {
+                             body: {
+                               userIds: [user?.id],
+                               title: 'Test Notification',
+                               body: 'This is a test from Progressier!',
+                               data: { test: true }
+                             }
+                           });
+                           
+                           if (error) {
+                             alert('Test failed: ' + error.message);
+                           } else {
+                             alert('Test notification sent! Check your notifications.');
+                           }
+                         } else {
+                           alert('Please subscribe to notifications first using the "Debug & Fix Token" button');
+                         }
+                       } else {
+                         alert('Progressier not available - please refresh the page');
+                       }
+                     } catch (error) {
+                       alert('Test error: ' + error);
+                     }
+                   }}
+                   size="sm"
+                   className="bg-green-600 hover:bg-green-700 text-white mr-2"
+                 >
+                   Test Progressier
+                 </Button>
+                 
+                 <Button 
+                   onClick={async () => {
+                     const result = await createTestItem();
                     if (result.success) {
                       // Refresh the items list
                       if (user) {

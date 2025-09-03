@@ -22,57 +22,62 @@ export async function autoSetupPushToken(): Promise<boolean> {
       return true;
     }
 
-    // Wait a bit for Progressier to load
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Wait for Progressier to load
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Check if service worker and push manager are available
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      console.log('❌ Service worker or PushManager not available');
+    // Check if Progressier is available
+    if (typeof window !== 'undefined' && (window as any).progressier) {
+      console.log('📱 Progressier is available, setting up subscription...');
+      
+      const progressier = (window as any).progressier;
+      
+      try {
+        // Check if user is already subscribed
+        const isSubscribed = await progressier.isSubscribed();
+        console.log('🔔 Is subscribed to Progressier:', isSubscribed);
+        
+        if (!isSubscribed) {
+          console.log('📝 Not subscribed, attempting to subscribe...');
+          
+          // Show the opt-in UI and subscribe
+          await progressier.subscribe();
+          console.log('✅ Successfully subscribed to Progressier');
+        }
+        
+        // Verify subscription and store token
+        const finalIsSubscribed = await progressier.isSubscribed();
+        if (finalIsSubscribed) {
+          console.log('✅ User is subscribed, storing token...');
+          
+          // Store a Progressier token record
+          const { error: storeError } = await supabase.functions.invoke('store-push-token', {
+            body: {
+              userId: user.id,
+              token: 'progressier-managed',
+              endpoint: 'progressier-managed',
+              platform: 'web'
+            }
+          });
+
+          if (storeError) {
+            console.error('❌ Error storing push token:', storeError);
+            return false;
+          } else {
+            console.log('✅ Progressier subscription recorded successfully!');
+            return true;
+          }
+        } else {
+          console.log('📭 User declined push notifications');
+          return false;
+        }
+      } catch (progressierError) {
+        console.log('ℹ️ Progressier subscription failed or was declined:', progressierError);
+        return false;
+      }
+    } else {
+      console.log('❌ Progressier not available');
       return false;
     }
-
-    // Get service worker registration and check for push subscription
-    const registration = await navigator.serviceWorker.ready;
-    let subscription = await registration.pushManager.getSubscription();
-    
-    if (!subscription) {
-      console.log('⚠️ No push subscription found, trying to create one...');
-      
-      // Try to subscribe for push notifications
-      try {
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: null // Let Progressier handle this
-        });
-      } catch (subscribeError) {
-        console.log('❌ Could not subscribe for push notifications:', subscribeError);
-        return false;
-      }
-    }
-
-    if (subscription) {
-      console.log('✅ Found push subscription, storing token...');
-      
-      // Store the push token
-      const { error: storeError } = await supabase.functions.invoke('store-push-token', {
-        body: {
-          userId: user.id,
-          token: subscription.endpoint,
-          endpoint: subscription.endpoint,
-          platform: 'web'
-        }
-      });
-
-      if (storeError) {
-        console.error('❌ Error storing push token:', storeError);
-        return false;
-      } else {
-        console.log('✅ Push token stored successfully!');
-        return true;
-      }
-    }
-    
-    return false;
   } catch (error) {
     console.error('❌ Error in auto token setup:', error);
     return false;
