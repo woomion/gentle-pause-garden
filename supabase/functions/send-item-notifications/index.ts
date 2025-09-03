@@ -112,68 +112,56 @@ async function sendIndividualNotification(
     return;
   }
 
-  // Send notification via Progressier
-  const notificationData = {
-    title: "Space brings clarity. Your item is ready for review.",
-    body: `${item.title}${item.store_name ? ` from ${item.store_name}` : ''} is ready for review.`,
-    icon: '/icons/app-icon-512.png',
-    badge: '/icons/app-icon-512.png',
-    tag: `item-${itemId}`,
-    data: {
-      itemId: itemId,
-      userId: userId,
-      type: 'individual'
-    }
-  };
-
-  try {
-    const requestBody = {
-      ...notificationData,
-      audience: {
-        userIds: [userId]
+    // Send notification via Progressier
+    const notificationData = {
+      title: "Space brings clarity. Your item is ready for review.",
+      body: `${item.title}${item.store_name ? ` from ${item.store_name}` : ''} is ready for review.`,
+      icon: '/icons/app-icon-512.png',
+      badge: '/icons/app-icon-512.png',
+      tag: `item-${itemId}`,
+      data: {
+        itemId: itemId,
+        userId: userId,
+        type: 'individual'
       }
     };
-    
-    console.log(`📤 Sending notification request to Progressier for user ${userId}:`, JSON.stringify(requestBody, null, 2));
 
-    const response = await fetch('https://progressier.app/api/notifications', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${progressierApiKey}`
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    console.log(`📥 Progressier API response status: ${response.status}`);
-    const responseText = await response.text();
-    console.log(`📥 Progressier API response:`, responseText);
-
-    if (response.ok) {
-      console.log(`✅ Individual notification sent for item ${itemId}`);
+    try {
+      // Use the send-push-notifications function instead of calling Progressier directly
+      console.log(`📤 Sending notification via send-push-notifications function for user ${userId}`);
       
-      // Mark individual reminder as sent
-      await supabase
-        .from('paused_items')
-        .update({ individual_reminder_sent_at: new Date().toISOString() })
-        .eq('id', itemId);
-    } else {
-      console.error(`❌ Failed to send individual notification (${response.status}):`, responseText);
-      
-      // Still mark as sent to avoid repeated attempts for API failures
-      if (response.status === 401 || response.status === 403) {
+      const { data, error } = await supabase.functions.invoke('send-push-notifications', {
+        body: {
+          userIds: [userId],
+          title: notificationData.title,
+          body: notificationData.body,
+          data: notificationData.data
+        }
+      });
+
+      if (error) {
+        console.error(`❌ Failed to send individual notification:`, error);
+        
+        // Still mark as sent to avoid repeated attempts for API failures
         console.log('🔄 Marking as sent despite API error to avoid repeated attempts');
         await supabase
           .from('paused_items')
           .update({ individual_reminder_sent_at: new Date().toISOString() })
           .eq('id', itemId);
+      } else {
+        console.log(`✅ Individual notification sent for item ${itemId}`);
+        
+        // Mark individual reminder as sent
+        await supabase
+          .from('paused_items')
+          .update({ individual_reminder_sent_at: new Date().toISOString() })
+          .eq('id', itemId);
       }
+    } catch (error) {
+      console.error('❌ Error sending individual notification:', error);
+      
+      // Don't mark as sent for network errors, allow retry
     }
-  } catch (error) {
-    console.error('❌ Error sending individual notification:', error);
-    
-    // Don't mark as sent for network errors, allow retry
-  }
 }
 
 async function sendBatchNotifications(supabase: any, progressierApiKey: string) {
