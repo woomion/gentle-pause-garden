@@ -406,7 +406,15 @@ console.log('Rendering main Index content');
                 onClick={async () => {
                   const result = await createTestItem();
                   if (result.success) {
-                    alert('✅ Test item created! It will be ready for review in 5 minutes.');
+                    // Refresh the items list
+                    if (user) {
+                      // For logged in users, refresh Supabase store
+                      window.location.reload();
+                    } else {
+                      // For guest users, refresh local store  
+                      window.location.reload();
+                    }
+                    alert('✅ Test item created! Page will refresh to show it.');
                   } else {
                     alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
                   }
