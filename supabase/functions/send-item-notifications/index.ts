@@ -19,7 +19,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🔔 Item notification function called');
+    console.log('🔔 Item notification function called with method:', req.method);
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -27,14 +27,24 @@ serve(async (req) => {
     const progressierApiKey = Deno.env.get('PROGRESSIER_API_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    if (req.method !== 'POST') {
+    // Accept both GET and POST requests to handle different trigger types
+    if (req.method !== 'POST' && req.method !== 'GET') {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
         status: 405,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    const payload: NotificationPayload = await req.json();
+    let payload: NotificationPayload;
+    
+    if (req.method === 'GET') {
+      // Handle GET requests from database triggers (batch check)
+      payload = { type: 'batch' };
+    } else {
+      // Handle POST requests with specific payload
+      payload = await req.json();
+    }
+    
     console.log('📨 Notification payload:', payload);
 
     if (payload.type === 'individual' && payload.itemId && payload.userId) {
