@@ -559,7 +559,30 @@ console.log('Rendering main Index content');
                          return;
                        }
                        
-                       // Send test notification
+                       // Send test notification using Progressier's JavaScript SDK
+                       if (typeof window !== 'undefined' && (window as any).progressier) {
+                         const progressier = (window as any).progressier;
+                         
+                         try {
+                           // Use Progressier's push method to send a local notification
+                           if (typeof progressier.push === 'function') {
+                             progressier.push({
+                               title: 'Test Notification',
+                               body: 'This is a test from Progressier!',
+                               icon: '/icons/app-icon-512.png',
+                               badge: '/icons/app-icon-512.png',
+                               tag: 'test-notification',
+                               data: { test: true }
+                             });
+                             alert('✅ Test notification sent via Progressier SDK! Check your notifications.');
+                             return;
+                           }
+                         } catch (sdkError) {
+                           console.error('❌ Progressier SDK error:', sdkError);
+                         }
+                       }
+                       
+                       // Fallback: Send via backend (for testing backend integration)
                        const { supabase } = await import('@/integrations/supabase/client');
                        const { data: { user } } = await supabase.auth.getUser();
                        
@@ -568,23 +591,23 @@ console.log('Rendering main Index content');
                          return;
                        }
                        
-                       console.log('📤 Sending test notification for user:', user.id);
+                       console.log('📤 Sending test notification via backend for user:', user.id);
                        
                        const { data, error } = await supabase.functions.invoke('send-push-notifications', {
                          body: {
                            userIds: [user.id],
-                           title: 'Test Notification',
-                           body: 'This is a test from Progressier!',
-                           data: { test: true }
+                           title: 'Backend Test Notification',
+                           body: 'This is a backend test!',
+                           data: { test: true, backend: true }
                          }
                        });
                        
                        if (error) {
-                         console.error('❌ Test failed:', error);
-                         alert('❌ Test failed: ' + error.message);
+                         console.error('❌ Backend test failed:', error);
+                         alert('❌ Backend test failed: ' + error.message);
                        } else {
-                         console.log('✅ Test notification sent:', data);
-                         alert('✅ Test notification sent! Check your device for the notification.');
+                         console.log('✅ Backend test completed:', data);
+                         alert('✅ Backend test completed (may not show notification if API issues persist).');
                        }
                        
                      } catch (error) {
