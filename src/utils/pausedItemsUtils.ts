@@ -50,7 +50,7 @@ export const calculateCheckInTimeDisplay = (checkInDate: Date): string => {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffMinutes <= 0) return 'Ready to review';
+  if (diffMinutes < 0) return 'Ready to review';
   if (diffMinutes < 60) return `Reviewing in ${diffMinutes} min${diffMinutes === 1 ? '' : 's'}`;
   if (diffHours < 24) return `Reviewing in ${diffHours}hr${diffHours === 1 ? '' : 's'}`;
   if (diffDays === 1) return 'Reviewing in 1 day';
