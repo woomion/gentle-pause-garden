@@ -527,37 +527,69 @@ console.log('Rendering main Index content');
                  <Button
                    onClick={async () => {
                      try {
-                       if (typeof window !== 'undefined' && (window as any).progressier) {
-                         const progressier = (window as any).progressier;
-                         const isSubscribed = await progressier.isSubscribed();
-                         
-                         if (isSubscribed) {
-                           console.log('✅ Testing Progressier notification...');
-                           const { supabase } = await import('@/integrations/supabase/client');
-                           const { data: { user } } = await supabase.auth.getUser();
-                           
-                           const { data, error } = await supabase.functions.invoke('send-push-notifications', {
-                             body: {
-                               userIds: [user?.id],
-                               title: 'Test Notification',
-                               body: 'This is a test from Progressier!',
-                               data: { test: true }
-                             }
-                           });
-                           
-                           if (error) {
-                             alert('Test failed: ' + error.message);
-                           } else {
-                             alert('Test notification sent! Check your notifications.');
-                           }
-                         } else {
-                           alert('Please subscribe to notifications first using the "Debug & Fix Token" button');
-                         }
-                       } else {
-                         alert('Progressier not available - please refresh the page');
+                       console.log('🧪 Testing Progressier notification...');
+                       
+                       // Check if Progressier is available
+                       if (typeof window === 'undefined' || !(window as any).progressier) {
+                         alert('❌ Progressier not available - please refresh the page and wait a few seconds');
+                         return;
                        }
+                       
+                       const progressier = (window as any).progressier;
+                       console.log('📱 Progressier object:', progressier);
+                       console.log('📱 Available methods:', Object.keys(progressier));
+                       
+                       // Try different ways to check subscription
+                       let isSubscribed = false;
+                       if (typeof progressier.isSubscribed === 'function') {
+                         isSubscribed = await progressier.isSubscribed();
+                       } else if (typeof progressier.getSubscription === 'function') {
+                         const subscription = await progressier.getSubscription();
+                         isSubscribed = !!subscription;
+                       } else {
+                         // If we can't check, just try to send anyway
+                         console.log('⚠️ Cannot check subscription status, proceeding with test');
+                         isSubscribed = true;
+                       }
+                       
+                       console.log('🔔 Subscription status:', isSubscribed);
+                       
+                       if (!isSubscribed) {
+                         alert('❌ Not subscribed to notifications. Please try the "Debug & Fix Token" button first to subscribe.');
+                         return;
+                       }
+                       
+                       // Send test notification
+                       const { supabase } = await import('@/integrations/supabase/client');
+                       const { data: { user } } = await supabase.auth.getUser();
+                       
+                       if (!user) {
+                         alert('❌ Please log in first');
+                         return;
+                       }
+                       
+                       console.log('📤 Sending test notification for user:', user.id);
+                       
+                       const { data, error } = await supabase.functions.invoke('send-push-notifications', {
+                         body: {
+                           userIds: [user.id],
+                           title: 'Test Notification',
+                           body: 'This is a test from Progressier!',
+                           data: { test: true }
+                         }
+                       });
+                       
+                       if (error) {
+                         console.error('❌ Test failed:', error);
+                         alert('❌ Test failed: ' + error.message);
+                       } else {
+                         console.log('✅ Test notification sent:', data);
+                         alert('✅ Test notification sent! Check your device for the notification.');
+                       }
+                       
                      } catch (error) {
-                       alert('Test error: ' + error);
+                       console.error('❌ Test error:', error);
+                       alert('❌ Test error: ' + error);
                      }
                    }}
                    size="sm"
