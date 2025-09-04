@@ -243,8 +243,19 @@ export const useNotifications = (enabled: boolean) => {
 
   const testNotification = async () => {
     try {
-      console.log('🧪 Test notification triggered via Progressier');
+      console.log('🧪 Test notification triggered');
       
+      // For authenticated users, send both platform and push notifications
+      if (user) {
+        console.log('📱 Sending test push notification for authenticated user');
+        await sendPushNotification(
+          'Test Notification', 
+          'Your notifications are working perfectly!',
+          { test: true }
+        );
+      }
+      
+      // Also send platform notification
       if (platformNotificationService.getEnabled()) {
         await platformNotificationService.testNotification();
         

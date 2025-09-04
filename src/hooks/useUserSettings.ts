@@ -89,17 +89,20 @@ export const useUserSettings = () => {
         .from('user_settings')
         .insert({
           user_id: user.id,
-          notifications_enabled: false,
-          notification_schedule_type: 'custom_time',
-          notification_time_preference: '19:00:00', // 7pm default
-          timezone: 'UTC', // Default timezone
+          notifications_enabled: true, // Enable by default
+          notification_delivery_style: 'item_by_item',
+          notification_timing: 'evening',
+          notification_timing_hour: 18,
+          notification_schedule_type: 'immediate',
+          notification_time_preference: '19:00:00',
+          timezone: 'UTC',
           theme: 'light'
         });
 
       if (error) {
         console.error('Error creating default settings:', error);
       } else {
-        setNotificationsEnabled(false);
+        setNotificationsEnabled(true); // Enable by default
         setNotificationSettings({
           deliveryStyle: 'item_by_item',
           timing: 'evening',
