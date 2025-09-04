@@ -101,57 +101,48 @@ serve(async (req) => {
           continue;
         }
 
-        // Send push notification via Progressier
-        const progressierApiKey = Deno.env.get('PROGRESSIER_API_KEY');
-        console.log(`🔑 Progressier API key exists: ${progressierApiKey ? 'YES' : 'NO'}`);
-        
-        if (!progressierApiKey) {
-          console.error('❌ Progressier API key not found');
-          failureCount++;
-          continue;
-        }
-
+        // Send notification directly via Web Push API using stored push tokens
         try {
-          const notificationPayload = {
-            title: payload.title,
-            body: payload.body,
-            icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
-            badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
-            data: payload.data || {},
-            tag: `notification-${Date.now()}`
-          };
+          console.log(`📤 Sending notification to user ${userId}`);
+          
+          // For each push token, send notification via Web Push API
+          for (const tokenData of userTokens) {
+            try {
+              const notificationPayload = {
+                title: payload.title,
+                body: payload.body,
+                icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
+                badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
+                data: payload.data || {},
+                tag: `notification-${Date.now()}`,
+                requireInteraction: false,
+                silent: false
+              };
 
-          console.log(`📤 Sending notification to user ${userId}:`, notificationPayload);
+              console.log(`📤 Sending to token ${tokenData.token.substring(0, 20)}...`);
 
-          // Send via Progressier's server-side API
-          const progressierPayload = {
-            audience: {
-              userIds: [userId] // Target specific user by their registered ID
-            },
-            notification: notificationPayload
-          };
+              // Use the browser's native push mechanism via service worker
+              // This sends the notification directly to the user's device
+              const pushResponse = await fetch(tokenData.token, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'TTL': '86400' // 24 hours
+                },
+                body: JSON.stringify(notificationPayload)
+              });
 
-          console.log(`📤 Progressier payload:`, progressierPayload);
-
-          const response = await fetch('https://api.progressier.app/push', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${progressierApiKey}`
-            },
-            body: JSON.stringify(progressierPayload)
-          });
-
-          console.log(`📥 Progressier response status: ${response.status}`);
-          const responseText = await response.text();
-          console.log(`📥 Progressier response:`, responseText);
-
-          if (response.ok) {
-            console.log(`📧 Notification sent to user ${userId}`);
-            successCount++;
-          } else {
-            console.error(`❌ Failed to send to ${userId} (${response.status}):`, responseText);
-            failureCount++;
+              if (pushResponse.ok) {
+                console.log(`📧 Notification sent to token ${tokenData.token.substring(0, 20)}...`);
+                successCount++;
+              } else {
+                console.error(`❌ Failed to send to token (${pushResponse.status})`);
+                failureCount++;
+              }
+            } catch (tokenError) {
+              console.error(`❌ Error sending to token:`, tokenError);
+              failureCount++;
+            }
           }
         } catch (pushError) {
           console.error(`❌ Push error for user ${userId}:`, pushError);
