@@ -103,6 +103,8 @@ serve(async (req) => {
 
         // Send push notification via Progressier
         const progressierApiKey = Deno.env.get('PROGRESSIER_API_KEY');
+        console.log(`🔑 Progressier API key exists: ${progressierApiKey ? 'YES' : 'NO'}`);
+        
         if (!progressierApiKey) {
           console.error('❌ Progressier API key not found');
           failureCount++;
@@ -113,34 +115,31 @@ serve(async (req) => {
           const notificationPayload = {
             title: payload.title,
             body: payload.body,
-            icon: '/icons/app-icon-512.png',
-            badge: '/icons/app-icon-512.png',
+            icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
+            badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
             data: payload.data || {},
             tag: `notification-${Date.now()}`
           };
 
           console.log(`📤 Sending notification to user ${userId}:`, notificationPayload);
 
-          // Send via Progressier API - use their correct server-side endpoint
+          // Send via Progressier's server-side API
+          const progressierPayload = {
+            audience: {
+              userIds: [userId] // Target specific user by their registered ID
+            },
+            notification: notificationPayload
+          };
+
+          console.log(`📤 Progressier payload:`, progressierPayload);
+
           const response = await fetch('https://progressier.com/api/push', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${progressierApiKey}`
             },
-            body: JSON.stringify({
-              audience: {
-                userIds: [userId] // Send to specific user by their ID
-              },
-              notification: {
-                title: payload.title,
-                body: payload.body,
-                icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
-                badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
-                data: payload.data || {},
-                tag: `notification-${Date.now()}`
-              }
-            })
+            body: JSON.stringify(progressierPayload)
           });
 
           console.log(`📥 Progressier response status: ${response.status}`);
