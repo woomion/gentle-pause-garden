@@ -183,42 +183,136 @@ const SettingsSection = () => {
                       size="sm"
                       onClick={async () => {
                         try {
-                          console.log('🔔 Testing background notifications...');
-                          console.log('Browser permission:', Notification.permission);
+                          console.log('🔍 COMPREHENSIVE BACKGROUND NOTIFICATION DEBUGGING...');
+                          console.log('━'.repeat(50));
                           
-                          // Test Progressier first
+                          // 1. Check browser capabilities
+                          console.log('1️⃣ BROWSER CAPABILITIES:');
+                          console.log('  • Notification permission:', Notification.permission);
+                          console.log('  • Service Worker support:', 'serviceWorker' in navigator);
+                          console.log('  • Push Manager support:', 'PushManager' in window);
+                          console.log('  • User Agent:', navigator.userAgent);
+                          
+                          // 2. Check service worker status
+                          if ('serviceWorker' in navigator) {
+                            const registration = await navigator.serviceWorker.ready;
+                            const subscription = await registration.pushManager.getSubscription();
+                            console.log('  • SW registration:', !!registration);
+                            console.log('  • Push subscription exists:', !!subscription);
+                            if (subscription) {
+                              console.log('  • Subscription endpoint:', subscription.endpoint.substring(0, 50) + '...');
+                            }
+                          }
+                          
+                          // 3. Check Progressier status
+                          console.log('2️⃣ PROGRESSIER STATUS:');
+                          console.log('  • Progressier available:', !!window.progressier);
                           if (window.progressier) {
-                            console.log('✅ Progressier available');
-                            const isSubscribed = await window.progressier.isSubscribed();
-                            console.log('Progressier subscribed:', isSubscribed);
+                            console.log('  • Available methods:', Object.keys(window.progressier));
                             
-                            if (!isSubscribed) {
-                              console.log('🔄 Subscribing to Progressier...');
-                              await window.progressier.subscribe();
+                            try {
+                              const isSubscribed = await window.progressier.isSubscribed();
+                              console.log('  • Progressier subscribed:', isSubscribed);
+                            } catch (e) {
+                              console.log('  • isSubscribed() error:', e.message);
+                            }
+                          }
+                          
+                          // 4. Check authentication
+                          console.log('3️⃣ AUTHENTICATION STATUS:');
+                          const { supabase } = await import('@/integrations/supabase/client');
+                          const { data: { user } } = await supabase.auth.getUser();
+                          console.log('  • User logged in:', !!user);
+                          if (user) {
+                            console.log('  • User ID:', user.id);
+                            
+                            // Check push tokens in database
+                            const { data: tokens } = await supabase
+                              .from('push_tokens')
+                              .select('*')
+                              .eq('user_id', user.id);
+                            console.log('  • Push tokens in DB:', tokens?.length || 0);
+                            tokens?.forEach((token, i) => {
+                              console.log(`    Token ${i + 1}: ${token.platform} - ${token.token.substring(0, 20)}...`);
+                            });
+                          }
+                          
+                          // 5. Test Progressier registration and subscription
+                          if (window.progressier && user) {
+                            console.log('4️⃣ PROGRESSIER SETUP TEST:');
+                            
+                            // Test user registration
+                            try {
+                              if (typeof (window.progressier as any).setUserId === 'function') {
+                                await (window.progressier as any).setUserId(user.id);
+                                console.log('  ✅ User ID set with setUserId()');
+                              } else if (typeof window.progressier.add === 'function') {
+                                await window.progressier.add({
+                                  id: user.id,
+                                  tags: ['authenticated', 'debug-test']
+                                });
+                                console.log('  ✅ User registered with add()');
+                              } else {
+                                console.log('  ❌ No user registration method available');
+                              }
+                            } catch (e) {
+                              console.log('  ❌ User registration failed:', e.message);
                             }
                             
-                            // Test Progressier push notification
-                            console.log('📤 Sending Progressier test notification...');
-                            await window.progressier.push({
-                              title: 'Background Test - Progressier',
-                              body: 'This is a Progressier push notification test. Close the app and you should still receive notifications.',
-                              data: { test: true, service: 'progressier' }
-                            });
+                            // Test subscription
+                            try {
+                              const wasSubscribed = await window.progressier.isSubscribed();
+                              if (!wasSubscribed) {
+                                console.log('  🔄 Attempting subscription...');
+                                await window.progressier.subscribe();
+                                const nowSubscribed = await window.progressier.isSubscribed();
+                                console.log('  • Subscription result:', nowSubscribed);
+                              } else {
+                                console.log('  ✅ Already subscribed');
+                              }
+                            } catch (e) {
+                              console.log('  ❌ Subscription failed:', e.message);
+                            }
                             
-                            // Also test our backend notification system
-                            console.log('📤 Testing backend notification system...');
-                            await testNotification();
-                            
-                            alert('✅ Tests sent!\n• Progressier push notification\n• Backend notification system\n\nClose the app completely and notifications should still work via Progressier.');
-                          } else {
-                            console.log('❌ Progressier not available');
-                            await enableNotifications();
-                            await testNotification();
-                            alert('⚠️ Progressier not available. Using browser notifications only (requires app to be open).');
+                            // Test direct push
+                            console.log('5️⃣ PROGRESSIER PUSH TEST:');
+                            try {
+                              if (typeof window.progressier.push === 'function') {
+                                await window.progressier.push({
+                                  title: '🧪 Debug Test - Direct Progressier',
+                                  body: 'This is a direct Progressier push notification test. You should see this even with the app closed.',
+                                  data: { 
+                                    test: true, 
+                                    service: 'progressier-direct',
+                                    timestamp: Date.now()
+                                  }
+                                });
+                                console.log('  ✅ Direct Progressier notification sent');
+                              } else {
+                                console.log('  ❌ Progressier.push() method not available');
+                              }
+                            } catch (e) {
+                              console.log('  ❌ Direct Progressier push failed:', e.message);
+                            }
                           }
+                          
+                          // 6. Test backend notification
+                          console.log('6️⃣ BACKEND NOTIFICATION TEST:');
+                          try {
+                            await testNotification();
+                            console.log('  ✅ Backend notification test triggered');
+                          } catch (e) {
+                            console.log('  ❌ Backend notification failed:', e.message);
+                          }
+                          
+                          console.log('━'.repeat(50));
+                          console.log('🏁 DEBUG COMPLETE - Check console for detailed results');
+                          
+                          alert(`🧪 Comprehensive debugging complete!\n\nKey findings:\n• Progressier available: ${!!window.progressier}\n• Browser permission: ${Notification.permission}\n• User authenticated: ${!!user}\n\nCheck console for full debug report.\n\nTo test background notifications:\n1. Close this app completely\n2. Wait for notifications to arrive\n3. They should work if Progressier is properly set up`);
+                          
                         } catch (error) {
-                          console.error('❌ Background notification test failed:', error);
-                          alert('❌ Test failed: ' + error.message);
+                          console.error('❌ Debug test failed:', error);
+                          alert('❌ Debug failed: ' + error.message);
                         }
                       }}
                       className="w-full text-xs h-7"
