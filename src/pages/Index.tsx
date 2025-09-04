@@ -18,6 +18,7 @@ import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useSearchParams } from 'react-router-dom';
 import { useUsageLimit } from '../hooks/useUsageLimit';
+import { toast } from 'sonner';
 
 import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
@@ -524,117 +525,21 @@ console.log('Rendering main Index content');
                   Debug & Fix Token
                  </Button>
                  
-                 <Button
-                   onClick={async () => {
-                     try {
-                       console.log('🧪 Testing Progressier notification...');
-                       
-                       // Debug: Check what Progressier provides
-                       if (typeof window !== 'undefined' && (window as any).progressier) {
-                         const progressier = (window as any).progressier;
-                         console.log('📱 Progressier object:', progressier);
-                         console.log('📱 Available methods:', Object.keys(progressier));
-                         console.log('📱 Type of push:', typeof progressier.push);
-                         console.log('📱 Type of subscribe:', typeof progressier.subscribe);
-                         console.log('📱 Type of isSubscribed:', typeof progressier.isSubscribed);
-                         
-                         // Check subscription status first
-                         let isSubscribed = false;
-                         try {
-                           if (typeof progressier.isSubscribed === 'function') {
-                             isSubscribed = await progressier.isSubscribed();
-                             console.log('🔔 Is subscribed:', isSubscribed);
-                           }
-                         } catch (subError) {
-                           console.error('❌ Error checking subscription:', subError);
-                         }
-                         
-                         if (!isSubscribed) {
-                           alert('❌ Not subscribed to Progressier. The notifications might not work until you\'re properly subscribed.');
-                         }
-                         
-                          // Try to send via Progressier's SDK
-                          if (typeof progressier.push === 'function') {
-                            console.log('📤 Using Progressier push method...');
-                            try {
-                              await progressier.push({
-                                title: 'Progressier SDK Test',
-                                body: 'This should be a real push notification!',
-                                icon: '/icons/app-icon-512.png',
-                                badge: '/icons/app-icon-512.png',
-                                tag: 'progressier-test'
-                              });
-                              alert('✅ Progressier SDK notification sent!');
-                              return;
-                            } catch (pushError) {
-                              console.error('❌ Progressier push error:', pushError);
-                              alert('❌ Progressier push failed: ' + pushError.message);
-                            }
-                          } else if (typeof progressier.showNotification === 'function') {
-                            console.log('📤 Using Progressier showNotification method...');
-                            try {
-                              await progressier.showNotification('Progressier Test', {
-                                body: 'This should be a real push notification!',
-                                icon: '/icons/app-icon-512.png',
-                                badge: '/icons/app-icon-512.png',
-                                tag: 'progressier-test'
-                              });
-                              alert('✅ Progressier notification sent!');
-                              return;
-                            } catch (notifError) {
-                              console.error('❌ Progressier notification error:', notifError);
-                              alert('❌ Progressier notification failed: ' + notifError.message);
-                            }
-                          } else {
-                            console.log('⚠️ Progressier push method not available');
-                            console.log('Available methods:', Object.keys(progressier));
-                            alert('⚠️ Progressier push method not available. Check console for available methods.');
-                          }
-                       } else {
-                         console.log('❌ Progressier not available');
-                         alert('❌ Progressier not available - check console logs');
-                       }
-                       
-                       
-                       // Fallback: Send via backend (for testing backend integration)
-                       const { supabase } = await import('@/integrations/supabase/client');
-                       
-                        const { data: { user } } = await supabase.auth.getUser();
-                        
-                        if (!user) {
-                          alert('❌ Please log in first');
-                          return;
-                        }
-                        
-                        console.log('📤 Sending test notification via backend for user:', user.id);
-                        
-                        const { data, error } = await supabase.functions.invoke('send-push-notifications', {
-                          body: {
-                            userIds: [user.id],
-                            title: 'Backend Test Notification',
-                            body: 'This is a backend test!',
-                            data: { test: true, backend: true }
-                          }
-                        });
-                        
-                        if (error) {
-                          console.error('❌ Backend test failed:', error);
-                          alert('❌ Backend test failed: ' + error.message);
-                        } else {
-                          console.log('✅ Backend test completed:', data);
-                          alert('✅ Backend test completed (may not show notification if API issues persist).');
-                        }
-                       
-                     } catch (error) {
-                       console.error('❌ Test error:', error);
-                       alert('❌ Test error: ' + error);
-                     }
-                   }}
-                   size="sm"
-                   className="bg-green-600 hover:bg-green-700 text-white mr-2"
-                 >
-                   Test Progressier
-                 </Button>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await platformNotificationService.testNotification();
+                        toast.success('Test notification sent!');
+                      } catch (error) {
+                        console.error('Test notification error:', error);
+                        toast.error('Failed to send test notification');
+                      }
+                    }}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white mr-2"
+                  >
+                    Test Notifications
+                  </Button>
                  
                  <Button 
                    onClick={async () => {
