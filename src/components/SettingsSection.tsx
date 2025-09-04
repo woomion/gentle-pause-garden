@@ -183,25 +183,42 @@ const SettingsSection = () => {
                       size="sm"
                       onClick={async () => {
                         try {
-                          // Check notification permission
-                          console.log('Permission:', Notification.permission);
+                          console.log('🔔 Testing background notifications...');
+                          console.log('Browser permission:', Notification.permission);
                           
-                          // Check Progressier subscription
-                          if (window.progressier?.isSubscribed) {
+                          // Test Progressier first
+                          if (window.progressier) {
+                            console.log('✅ Progressier available');
                             const isSubscribed = await window.progressier.isSubscribed();
                             console.log('Progressier subscribed:', isSubscribed);
                             
                             if (!isSubscribed) {
+                              console.log('🔄 Subscribing to Progressier...');
                               await window.progressier.subscribe();
-                            } else {
-                              await testNotification();
-                              console.log('Background notification test sent');
                             }
+                            
+                            // Test Progressier push notification
+                            console.log('📤 Sending Progressier test notification...');
+                            await window.progressier.push({
+                              title: 'Background Test - Progressier',
+                              body: 'This is a Progressier push notification test. Close the app and you should still receive notifications.',
+                              data: { test: true, service: 'progressier' }
+                            });
+                            
+                            // Also test our backend notification system
+                            console.log('📤 Testing backend notification system...');
+                            await testNotification();
+                            
+                            alert('✅ Tests sent!\n• Progressier push notification\n• Backend notification system\n\nClose the app completely and notifications should still work via Progressier.');
                           } else {
+                            console.log('❌ Progressier not available');
                             await enableNotifications();
+                            await testNotification();
+                            alert('⚠️ Progressier not available. Using browser notifications only (requires app to be open).');
                           }
                         } catch (error) {
-                          console.error('Background notification test failed:', error);
+                          console.error('❌ Background notification test failed:', error);
+                          alert('❌ Test failed: ' + error.message);
                         }
                       }}
                       className="w-full text-xs h-7"
