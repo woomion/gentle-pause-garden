@@ -32,6 +32,15 @@ export async function autoSetupPushToken(): Promise<boolean> {
       const progressier = (window as any).progressier;
       
       try {
+        // Register user with Progressier first
+        if (typeof progressier.add === 'function') {
+          await progressier.add({
+            id: user.id, // Use Supabase user ID
+            tags: 'authenticated'
+          });
+          console.log('✅ User registered with Progressier');
+        }
+
         // Check if user is already subscribed
         const isSubscribed = await progressier.isSubscribed();
         console.log('🔔 Is subscribed to Progressier:', isSubscribed);

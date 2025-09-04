@@ -17,6 +17,11 @@ declare global {
         tag?: string;
         data?: any;
       }) => Promise<any>;
+      add: (userData: {
+        id?: string;
+        email?: string;
+        tags?: string | string[];
+      }) => Promise<any>;
     };
     progressierRegistration?: any;
   }
@@ -84,11 +89,15 @@ export class ProgressierNotificationService {
         return false;
       }
 
+      // First register the user with Progressier
+      await this.registerUserWithProgressier();
+
       // Check if already subscribed
       if (typeof window.progressier.isSubscribed === 'function') {
         const isSubscribed = await window.progressier.isSubscribed();
         if (isSubscribed) {
           console.log('✅ Already subscribed to push notifications');
+          await this.storePushToken({ subscribed: true });
           return true;
         }
       }
@@ -111,8 +120,8 @@ export class ProgressierNotificationService {
         console.log('🔔 Push notification subscription result:', nowSubscribed);
         
         // Store the push token in our database
-        if (nowSubscribed && subscription) {
-          await this.storePushToken(subscription);
+        if (nowSubscribed) {
+          await this.storePushToken(subscription || { subscribed: true });
         }
         
         return nowSubscribed;
@@ -123,6 +132,34 @@ export class ProgressierNotificationService {
     } catch (error) {
       console.error('❌ Error requesting push permission:', error);
       return false;
+    }
+  }
+
+  async registerUserWithProgressier(): Promise<void> {
+    try {
+      if (!window.progressier || typeof window.progressier.add !== 'function') {
+        console.log('❌ Progressier.add method not available');
+        return;
+      }
+
+      // Get the current user
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('❌ No authenticated user to register with Progressier');
+        return;
+      }
+
+      // Register user with Progressier using their unique ID
+      await window.progressier.add({
+        id: user.id, // Use Supabase user ID as unique identifier
+        tags: 'authenticated'
+      });
+
+      console.log('✅ User registered with Progressier:', user.id);
+    } catch (error) {
+      console.error('❌ Error registering user with Progressier:', error);
     }
   }
 

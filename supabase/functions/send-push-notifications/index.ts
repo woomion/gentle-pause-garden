@@ -121,22 +121,25 @@ serve(async (req) => {
 
           console.log(`📤 Sending notification to user ${userId}:`, notificationPayload);
 
-          // Send via Progressier API - use the correct endpoint and format
-          const response = await fetch('https://progressier.app/api/push', {
+          // Send via Progressier API - use their correct server-side endpoint
+          const response = await fetch('https://progressier.com/api/push', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-API-Key': progressierApiKey
+              'Authorization': `Bearer ${progressierApiKey}`
             },
             body: JSON.stringify({
-              title: payload.title,
-              body: payload.body,
-              icon: '/icons/app-icon-512.png',
-              badge: '/icons/app-icon-512.png',
-              data: payload.data || {},
-              tag: `notification-${Date.now()}`,
-              // Send to specific user tokens instead of userIds
-              tokens: userTokens.map(t => t.token)
+              audience: {
+                userIds: [userId] // Send to specific user by their ID
+              },
+              notification: {
+                title: payload.title,
+                body: payload.body,
+                icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
+                badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
+                data: payload.data || {},
+                tag: `notification-${Date.now()}`
+              }
             })
           });
 
