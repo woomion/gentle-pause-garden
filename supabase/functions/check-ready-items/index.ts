@@ -20,15 +20,18 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log('🔍 Checking for newly ready items...');
 
-    // Find items that are ready for review but haven't had individual reminders sent
-    // Add a 2-minute buffer to prevent notifications for very recently created items
+    // Find items that RECENTLY became ready for review but haven't had individual reminders sent
+    // Only process items that became ready within the last hour to avoid spam
     const now = new Date().toISOString();
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    
     const { data: readyItems, error: itemsError } = await supabase
       .from('paused_items')
       .select('id, user_id, title, review_at, individual_reminder_sent_at, created_at')
       .eq('status', 'paused')
       .lte('review_at', now)
+      .gte('review_at', oneHourAgo) // Only items that became ready within the last hour
       .lte('created_at', twoMinutesAgo) // Only items created more than 2 minutes ago
       .is('individual_reminder_sent_at', null)
       .limit(50); // Process in batches to avoid timeouts
