@@ -133,8 +133,8 @@ serve(async (req) => {
 
           console.log(`📤 Sending notification to ${userData.user.email}:`, notificationPayload);
 
-          // Use the correct Progressier endpoint format
-          const progressierUrl = `https://progressier.app/${progressierApiKey}/send`;
+          // Use the correct Progressier endpoint with app ID
+          const progressierUrl = 'https://progressier.app/9LL6P8U26R3MyH8El0RL/send';
           
           const response = await fetch(progressierUrl, {
             method: 'POST',
