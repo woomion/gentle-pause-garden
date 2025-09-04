@@ -141,7 +141,7 @@ const Index = () => {
     const interval = setInterval(updateReadyCount, 60 * 1000);
     
     return () => clearInterval(interval);
-  }, [getItemsForReview, items]); // Re-run when items change
+  }, [getItemsForReview]); // Remove 'items' dependency to prevent interval recreation
   
   // Handle redirects for invitations
   useIndexRedirects();

@@ -54,10 +54,10 @@ export const useItemReview = () => {
 
     if (user) {
       unsubscribe = supabasePausedItemsStore.subscribe(updateItemsForReview);
-      interval = setInterval(updateItemsForReview, 60000);
+      interval = setInterval(updateItemsForReview, 5 * 60 * 1000); // Reduce to 5 minutes
     } else {
       unsubscribe = pausedItemsStore.subscribe(updateItemsForReview);
-      interval = setInterval(updateItemsForReview, 60000);
+      interval = setInterval(updateItemsForReview, 5 * 60 * 1000); // Reduce to 5 minutes
     }
 
     return () => {
