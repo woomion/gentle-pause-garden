@@ -165,11 +165,13 @@ export const useNotifications = (enabled: boolean) => {
       return;
     }
 
-    // For authenticated users with individual notifications, don't use frontend polling
-    // The backend edge functions handle individual notifications
-    if (user && notificationSettings?.deliveryStyle === 'item_by_item') {
-      console.log('✅ Individual notifications enabled - backend will handle notifications');
-      return;
+    // For authenticated users with individual notifications, reduce frontend polling frequency
+    // The backend edge functions handle push notifications, but we still need frontend checks for browser notifications
+    const isIndividualUser = user && notificationSettings?.deliveryStyle === 'item_by_item';
+    const checkInterval = isIndividualUser ? 5 * 60 * 1000 : 60 * 1000; // 5 minutes vs 1 minute
+    
+    if (isIndividualUser) {
+      console.log('✅ Individual notifications mode - backend handles push, frontend provides backup checks');
     }
 
     try {
@@ -187,9 +189,9 @@ export const useNotifications = (enabled: boolean) => {
       }
       
       intervalRef.current = setInterval(() => {
-        console.log('⏰ 1-minute interval check triggered');
+        console.log(`⏰ ${checkInterval / 1000 / 60}-minute interval check triggered`);
         checkForReadyItems();
-      }, 60 * 1000); // Check every minute instead of 5 minutes
+      }, checkInterval);
 
       // Also check when page becomes visible again (helps with mobile)
       const handleVisibilityChange = () => {
