@@ -19,10 +19,19 @@ export const useNotifications = (enabled: boolean) => {
     try {
       console.log('🔔 Settings sync - enabled:', enabled, 'platform:', platformNotificationService.getPlatformName());
       platformNotificationService.setEnabled(enabled);
+      
+      // If enabling notifications and user is logged in, ensure proper registration
+      if (enabled && user) {
+        console.log('🔄 Re-initializing notification service for user:', user.id);
+        // Trigger re-registration to ensure backend targeting works
+        platformNotificationService.requestPermission().catch(error => {
+          console.log('Permission request failed:', error);
+        });
+      }
     } catch (error) {
       console.error('Error syncing notification service:', error);
     }
-  }, [enabled]);
+  }, [enabled, user]);
 
   const sendPushNotification = useCallback(async (title: string, body: string, data?: Record<string, any>) => {
     if (!user) return; // Only send push notifications to authenticated users

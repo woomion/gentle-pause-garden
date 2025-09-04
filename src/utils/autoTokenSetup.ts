@@ -32,13 +32,22 @@ export async function autoSetupPushToken(): Promise<boolean> {
       const progressier = (window as any).progressier;
       
       try {
-        // Register user with Progressier first
-        if (typeof progressier.add === 'function') {
-          await progressier.add({
-            id: user.id, // Use Supabase user ID
-            tags: 'authenticated'
-          });
-          console.log('✅ User registered with Progressier');
+        // Register user with Progressier using correct method
+        try {
+          if (typeof progressier.setUserId === 'function') {
+            await progressier.setUserId(user.id);
+            console.log('✅ User ID set with Progressier:', user.id);
+          } else if (typeof progressier.add === 'function') {
+            await progressier.add({
+              id: user.id,
+              tags: 'authenticated'
+            });
+            console.log('✅ User registered with Progressier');
+          } else {
+            console.log('⚠️ No user registration method available');
+          }
+        } catch (registrationError) {
+          console.error('❌ Error registering user with Progressier:', registrationError);
         }
 
         // Check if user is already subscribed

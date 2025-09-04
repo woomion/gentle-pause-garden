@@ -226,11 +226,6 @@ export class ProgressierNotificationService {
 
   async registerUserWithProgressier(): Promise<void> {
     try {
-      if (!window.progressier || typeof window.progressier.add !== 'function') {
-        console.log('❌ Progressier.add method not available');
-        return;
-      }
-
       // Get the current user
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: { user } } = await supabase.auth.getUser();
@@ -240,13 +235,42 @@ export class ProgressierNotificationService {
         return;
       }
 
-      // Register user with Progressier using their unique ID
-      await (window.progressier as any).add({
-        id: user.id, // Use Supabase user ID as unique identifier
-        tags: ['authenticated']
-      });
+      if (!window.progressier) {
+        console.log('❌ Progressier not available');
+        return;
+      }
 
-      console.log('✅ User registered with Progressier:', user.id);
+      // Try multiple registration methods for better backend targeting
+      let registered = false;
+      
+      // Method 1: setUserId (most direct for backend targeting)
+      if (typeof (window.progressier as any)?.setUserId === 'function') {
+        try {
+          await (window.progressier as any).setUserId(user.id);
+          console.log('✅ User ID set with Progressier (setUserId):', user.id);
+          registered = true;
+        } catch (error) {
+          console.log('⚠️ setUserId failed, trying add method:', error);
+        }
+      }
+      
+      // Method 2: add with user data (fallback)
+      if (!registered && typeof (window.progressier as any)?.add === 'function') {
+        try {
+          await (window.progressier as any).add({
+            id: user.id,
+            tags: ['authenticated']
+          });
+          console.log('✅ User registered with Progressier (add):', user.id);
+          registered = true;
+        } catch (error) {
+          console.log('❌ Progressier.add method failed:', error);
+        }
+      }
+      
+      if (!registered) {
+        console.log('❌ No working Progressier registration method found');
+      }
     } catch (error) {
       console.error('❌ Error registering user with Progressier:', error);
     }
