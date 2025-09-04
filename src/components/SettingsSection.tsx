@@ -167,6 +167,49 @@ const SettingsSection = () => {
                   >
                     Send Test Notification
                   </Button>
+                  
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs font-medium mb-2">Background Notifications</p>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      For notifications when the app is closed:
+                    </p>
+                    <ul className="text-xs text-muted-foreground space-y-1 mb-3">
+                      <li>• Allow browser notifications</li>
+                      <li>• Enable background app refresh</li>
+                      <li>• Keep device notifications on</li>
+                    </ul>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          // Check notification permission
+                          console.log('Permission:', Notification.permission);
+                          
+                          // Check Progressier subscription
+                          if (window.progressier?.isSubscribed) {
+                            const isSubscribed = await window.progressier.isSubscribed();
+                            console.log('Progressier subscribed:', isSubscribed);
+                            
+                            if (!isSubscribed) {
+                              await window.progressier.subscribe();
+                            } else {
+                              await testNotification();
+                              console.log('Background notification test sent');
+                            }
+                          } else {
+                            await enableNotifications();
+                          }
+                        } catch (error) {
+                          console.error('Background notification test failed:', error);
+                        }
+                      }}
+                      className="w-full text-xs h-7"
+                    >
+                      Test Background Notifications
+                    </Button>
+                  </div>
+                  
                   <p className="text-xs text-muted-foreground">
                     If you don't receive test notifications, check your browser settings and allow notifications for this site.
                   </p>
