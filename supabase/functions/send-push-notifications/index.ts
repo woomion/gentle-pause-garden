@@ -121,32 +121,33 @@ serve(async (req) => {
             continue;
           }
 
-          // Try the correct Progressier API endpoint for sending notifications
+          // Use the correct Progressier API format
           const notificationPayload = {
+            recipients: {
+              email: userData.user.email
+            },
             title: payload.title,
             body: payload.body,
-            url: "https://cnjznmbgxprsrovmdywe.supabase.co",
-            email: userData.user.email,
-            icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/icons/app-icon-512.png',
-            badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/icons/app-icon-512.png'
+            url: "https://cnjznmbgxprsrovmdywe.supabase.co"
           };
 
           console.log(`📤 Sending notification to ${userData.user.email}:`, notificationPayload);
 
-          // Try the webhook URL instead of direct API
-          const progressierWebhookUrl = `https://progressier.app/webhooks/${progressierApiKey}/push`;
+          // Use the correct Progressier endpoint format
+          const progressierUrl = `https://progressier.app/${progressierApiKey}/send`;
           
-          const response = await fetch(progressierWebhookUrl, {
+          const response = await fetch(progressierUrl, {
             method: 'POST',
             headers: {
+              'Authorization': `Bearer ${progressierApiKey}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(notificationPayload)
           });
 
-          console.log(`📥 Progressier webhook response status: ${response.status}`);
+          console.log(`📥 Progressier API response status: ${response.status}`);
           const responseText = await response.text();
-          console.log(`📥 Progressier webhook response:`, responseText);
+          console.log(`📥 Progressier API response:`, responseText);
 
           if (response.ok) {
             console.log(`📧 Notification sent to ${userData.user.email}`);
