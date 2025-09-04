@@ -172,10 +172,10 @@ export const useNotifications = (enabled: boolean) => {
       return;
     }
 
-    // For authenticated users with individual notifications, reduce frontend polling frequency
+    // For authenticated users with individual notifications, reduce frontend polling frequency significantly
     // The backend cron job handles push notifications, so frontend just provides backup
     const isIndividualUser = user && notificationSettings?.deliveryStyle === 'item_by_item';
-    const checkInterval = isIndividualUser ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10 minutes vs 5 minutes
+    const checkInterval = isIndividualUser ? 30 * 60 * 1000 : 15 * 60 * 1000; // 30 minutes vs 15 minutes
     
     if (isIndividualUser) {
       console.log('✅ Individual notifications mode - backend handles push, frontend provides backup checks');
