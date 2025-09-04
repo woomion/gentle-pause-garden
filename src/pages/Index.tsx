@@ -39,6 +39,7 @@ import { useInstalledApp } from '../hooks/useInstalledApp';
 import { Button } from '../components/ui/button';
 import { platformNotificationService } from '../services/platformNotificationService';
 import { useIsMobile } from '../hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
@@ -566,21 +567,42 @@ console.log('Rendering main Index content');
                 <Button
                   onClick={async () => {
                     try {
-                      const permission = await platformNotificationService.requestPermission();
-                      if (permission) {
-                        toast.success('✅ Notifications enabled! You should now receive push notifications.');
+                      // Use the same notification system as the backend
+                      if (user) {
+                        // Send via backend Progressier API (same as real notifications)
+                        const { error } = await supabase.functions.invoke('send-push-notifications', {
+                          body: { 
+                            userIds: [user.id], 
+                            title: 'Test Store: Test Notification Item - Ready in 5 minutes',
+                            body: 'Ready for review • 20 total items waiting',
+                            data: { action: 'review_items', count: 20 }
+                          }
+                        });
+
+                        if (error) {
+                          toast.error('❌ Backend notification failed: ' + error.message);
+                        } else {
+                          toast.success('✅ Backend notification sent! Check your device.');
+                        }
                       } else {
-                        toast.error('❌ Notification permission denied. Please enable notifications in your browser settings.');
+                        // For guests, use browser notifications
+                        const permission = await platformNotificationService.requestPermission();
+                        if (permission) {
+                          await platformNotificationService.testNotification();
+                          toast.success('✅ Browser notification sent!');
+                        } else {
+                          toast.error('❌ Please enable notifications first.');
+                        }
                       }
                     } catch (error) {
-                      console.error('Error enabling notifications:', error);
-                      toast.error('❌ Error enabling notifications: ' + (error instanceof Error ? error.message : 'Unknown error'));
+                      console.error('Error testing notifications:', error);
+                      toast.error('❌ Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
                     }
                   }}
                   size="sm"
                   className="bg-green-600 hover:bg-green-700 text-white"
                 >
-                  Enable Push Notifications
+                  Test Backend Notifications
                 </Button>
               </div>
             </div>
