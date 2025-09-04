@@ -121,6 +121,7 @@ serve(async (req) => {
             continue;
           }
 
+          // Try the correct Progressier API endpoint for sending notifications
           const notificationPayload = {
             title: payload.title,
             body: payload.body,
@@ -132,18 +133,20 @@ serve(async (req) => {
 
           console.log(`📤 Sending notification to ${userData.user.email}:`, notificationPayload);
 
-          const response = await fetch('https://progressier.app/api/push', {
+          // Try the webhook URL instead of direct API
+          const progressierWebhookUrl = `https://progressier.app/webhooks/${progressierApiKey}/push`;
+          
+          const response = await fetch(progressierWebhookUrl, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${progressierApiKey}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify(notificationPayload)
           });
 
-          console.log(`📥 Progressier API response status: ${response.status}`);
+          console.log(`📥 Progressier webhook response status: ${response.status}`);
           const responseText = await response.text();
-          console.log(`📥 Progressier API response:`, responseText);
+          console.log(`📥 Progressier webhook response:`, responseText);
 
           if (response.ok) {
             console.log(`📧 Notification sent to ${userData.user.email}`);
