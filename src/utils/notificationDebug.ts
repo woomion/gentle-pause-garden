@@ -24,7 +24,7 @@ export async function debugNotificationSetup() {
       }
       
       // Check subscription status
-      if (window.progressier.isSubscribed) {
+      if (window.progressier && typeof window.progressier.isSubscribed === 'function') {
         const isSubscribed = await window.progressier.isSubscribed();
         console.log('🔔 Subscription status:', isSubscribed);
         
@@ -42,11 +42,13 @@ export async function debugNotificationSetup() {
           }
         } else {
           console.log('❌ User not subscribed, requesting subscription...');
-          const newSubscription = await window.progressier.subscribe();
-          console.log('🔔 New subscription:', newSubscription);
-          
-          if (newSubscription) {
-            await storeUserToken(user.id, newSubscription);
+          if (window.progressier && typeof window.progressier.subscribe === 'function') {
+            const newSubscription = await window.progressier.subscribe();
+            console.log('🔔 New subscription:', newSubscription);
+            
+            if (newSubscription) {
+              await storeUserToken(user.id, newSubscription);
+            }
           }
         }
       }

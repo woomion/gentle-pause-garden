@@ -172,8 +172,8 @@ export class ProgressierNotificationService {
       await this.registerUserWithProgressier();
 
       // Check if already subscribed
-      if (typeof window.progressier.isSubscribed === 'function') {
-        const isSubscribed = await window.progressier.isSubscribed();
+      if (typeof (window.progressier as any)?.isSubscribed === 'function') {
+        const isSubscribed = await (window.progressier as any).isSubscribed();
         if (isSubscribed) {
           console.log('✅ Already subscribed to push notifications');
           await this.storePushToken({ subscribed: true });
@@ -182,18 +182,18 @@ export class ProgressierNotificationService {
       }
 
       // Show Progressier's opt-in UI and subscribe if methods exist
-      if (typeof window.progressier.showOptIn === 'function') {
-        window.progressier.showOptIn();
+      if (typeof (window.progressier as any)?.showOptIn === 'function') {
+        (window.progressier as any).showOptIn();
       }
       
       // Subscribe for push notifications
-      if (typeof window.progressier.subscribe === 'function') {
-        const subscription = await window.progressier.subscribe();
+      if (typeof (window.progressier as any)?.subscribe === 'function') {
+        const subscription = await (window.progressier as any).subscribe();
         console.log('🔔 Progressier subscription result:', subscription);
         
         // Check subscription status again if possible
-        const nowSubscribed = typeof window.progressier.isSubscribed === 'function' 
-          ? await window.progressier.isSubscribed()
+        const nowSubscribed = typeof (window.progressier as any)?.isSubscribed === 'function' 
+          ? await (window.progressier as any).isSubscribed()
           : true; // Assume success if we can't check
           
         console.log('🔔 Push notification subscription result:', nowSubscribed);
@@ -231,9 +231,9 @@ export class ProgressierNotificationService {
       }
 
       // Register user with Progressier using their unique ID
-      await window.progressier.add({
+      await (window.progressier as any).add({
         id: user.id, // Use Supabase user ID as unique identifier
-        tags: 'authenticated'
+        tags: ['authenticated']
       });
 
       console.log('✅ User registered with Progressier:', user.id);
@@ -269,8 +269,8 @@ export class ProgressierNotificationService {
         return false;
       }
 
-      if (typeof window.progressier.unsubscribe === 'function') {
-        await window.progressier.unsubscribe();
+      if (typeof (window.progressier as any)?.unsubscribe === 'function') {
+        await (window.progressier as any).unsubscribe();
         console.log('🔔 Unsubscribed from push notifications');
         return true;
       } else {
@@ -323,8 +323,8 @@ export class ProgressierNotificationService {
         data: options.data || {}
       };
 
-      if (typeof window.progressier.push === 'function') {
-        await window.progressier.push(notificationOptions);
+      if (typeof (window.progressier as any)?.push === 'function') {
+        await (window.progressier as any).push(notificationOptions);
         console.log('✅ Push notification sent via Progressier');
       } else {
         console.log('❌ Progressier.push method not available, using browser notification');
