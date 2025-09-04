@@ -99,23 +99,41 @@ async function sendIndividualNotification(
     return;
   }
 
-  // Get item details
-  const { data: item } = await supabase
+  
+  // IMMEDIATELY mark as being processed to prevent duplicates from concurrent calls
+  console.log('🔒 Marking item as being processed to prevent duplicate notifications');
+  const processingTimestamp = new Date().toISOString();
+  const { error: updateError } = await supabase
     .from('paused_items')
-    .select('title, store_name')
+    .update({ individual_reminder_sent_at: processingTimestamp })
+    .eq('id', itemId)
+    .eq('user_id', userId)
+    .is('individual_reminder_sent_at', null); // Only update if not already processed
+
+  if (updateError) {
+    console.error('❌ Error marking item as processed:', updateError);
+    return;
+  }
+
+  // Verify the update was successful (no other process beat us to it)
+  const { data: checkItem } = await supabase
+    .from('paused_items')
+    .select('individual_reminder_sent_at, title, store_name')
     .eq('id', itemId)
     .eq('user_id', userId)
     .single();
 
-  if (!item) {
-    console.log(`❌ Item ${itemId} not found for user ${userId}`);
+  if (!checkItem || checkItem.individual_reminder_sent_at !== processingTimestamp) {
+    console.log('⏭️ Item already processed by another instance, skipping');
     return;
   }
+
+  console.log(`📱 Processing individual notification for item ${itemId} to user ${userId}`);
 
   // Send individual notification with proper content
   const notificationData = {
     title: "Space brings clarity. Your item is ready for review.",
-    body: `${item.title}${item.store_name ? ` from ${item.store_name}` : ''} is ready for review.`,
+    body: `${checkItem.title}${checkItem.store_name ? ` from ${checkItem.store_name}` : ''} is ready for review.`,
     data: {
       itemId: itemId,
       userId: userId,
@@ -123,42 +141,30 @@ async function sendIndividualNotification(
     }
   };
 
-    try {
-      // Use the send-push-notifications function instead of calling Progressier directly
-      console.log(`📤 Sending notification via send-push-notifications function for user ${userId}`);
-      
-      const { data, error } = await supabase.functions.invoke('send-push-notifications', {
-        body: {
-          userIds: [userId],
-          title: notificationData.title,
-          body: notificationData.body,
-          data: notificationData.data
-        }
-      });
-
-      if (error) {
-        console.error(`❌ Failed to send individual notification:`, error);
-        
-        // Still mark as sent to avoid repeated attempts for API failures
-        console.log('🔄 Marking as sent despite API error to avoid repeated attempts');
-        await supabase
-          .from('paused_items')
-          .update({ individual_reminder_sent_at: new Date().toISOString() })
-          .eq('id', itemId);
-      } else {
-        console.log(`✅ Individual notification sent for item ${itemId}`);
-        
-        // Mark individual reminder as sent
-        await supabase
-          .from('paused_items')
-          .update({ individual_reminder_sent_at: new Date().toISOString() })
-          .eq('id', itemId);
+  try {
+    // Use the send-push-notifications function instead of calling Progressier directly
+    console.log(`📤 Sending notification via send-push-notifications function for user ${userId}`);
+    
+    const { data, error } = await supabase.functions.invoke('send-push-notifications', {
+      body: {
+        userIds: [userId],
+        title: notificationData.title,
+        body: notificationData.body,
+        data: notificationData.data
       }
-    } catch (error) {
-      console.error('❌ Error sending individual notification:', error);
-      
-      // Don't mark as sent for network errors, allow retry
+    });
+
+    if (error) {
+      console.error(`❌ Failed to send individual notification:`, error);
+      // Timestamp already set above, no need to update again
+    } else {
+      console.log(`✅ Individual notification sent for item ${itemId}`);
+      // Timestamp already set above, no need to update again
     }
+  } catch (error) {
+    console.error('❌ Error sending individual notification:', error);
+    // Timestamp already set above - we attempted to send it, don't retry automatically
+  }
 }
 
 async function sendBatchNotifications(supabase: any, progressierApiKey: string) {
