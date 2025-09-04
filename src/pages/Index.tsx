@@ -563,6 +563,25 @@ console.log('Rendering main Index content');
                 >
                   Create Test Item (Ready in 5 min)
                 </Button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const permission = await platformNotificationService.requestPermission();
+                      if (permission) {
+                        toast.success('✅ Notifications enabled! You should now receive push notifications.');
+                      } else {
+                        toast.error('❌ Notification permission denied. Please enable notifications in your browser settings.');
+                      }
+                    } catch (error) {
+                      console.error('Error enabling notifications:', error);
+                      toast.error('❌ Error enabling notifications: ' + (error instanceof Error ? error.message : 'Unknown error'));
+                    }
+                  }}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Enable Push Notifications
+                </Button>
               </div>
             </div>
           </div>

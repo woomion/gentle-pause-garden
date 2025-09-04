@@ -133,7 +133,7 @@ serve(async (req) => {
 
           console.log(`📤 Progressier payload:`, progressierPayload);
 
-          const response = await fetch('https://progressier.app/api/push', {
+          const response = await fetch('https://api.progressier.app/push', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
