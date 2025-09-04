@@ -101,48 +101,55 @@ serve(async (req) => {
           continue;
         }
 
-        // Send notification directly via Web Push API using stored push tokens
+        // Send push notification via Progressier webhook
+        const progressierWebhookUrl = Deno.env.get('PROGRESSIER_WEBHOOK_URL');
+        console.log(`🔑 Progressier webhook URL exists: ${progressierWebhookUrl ? 'YES' : 'NO'}`);
+        
+        if (!progressierWebhookUrl) {
+          console.error('❌ Progressier webhook URL not found - please set PROGRESSIER_WEBHOOK_URL');
+          failureCount++;
+          continue;
+        }
+
         try {
-          console.log(`📤 Sending notification to user ${userId}`);
+          // Get user email for targeting
+          const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
           
-          // For each push token, send notification via Web Push API
-          for (const tokenData of userTokens) {
-            try {
-              const notificationPayload = {
-                title: payload.title,
-                body: payload.body,
-                icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
-                badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
-                data: payload.data || {},
-                tag: `notification-${Date.now()}`,
-                requireInteraction: false,
-                silent: false
-              };
+          if (userError || !userData?.user?.email) {
+            console.error(`❌ Could not get user email for ${userId}:`, userError);
+            failureCount++;
+            continue;
+          }
 
-              console.log(`📤 Sending to token ${tokenData.token.substring(0, 20)}...`);
+          const webhookPayload = {
+            title: payload.title,
+            body: payload.body,
+            url: "https://cnjznmbgxprsrovmdywe.supabase.co", // Your app URL
+            email: userData.user.email, // Target specific user by email
+            icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
+            badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png'
+          };
 
-              // Use the browser's native push mechanism via service worker
-              // This sends the notification directly to the user's device
-              const pushResponse = await fetch(tokenData.token, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'TTL': '86400' // 24 hours
-                },
-                body: JSON.stringify(notificationPayload)
-              });
+          console.log(`📤 Sending notification to ${userData.user.email}:`, webhookPayload);
 
-              if (pushResponse.ok) {
-                console.log(`📧 Notification sent to token ${tokenData.token.substring(0, 20)}...`);
-                successCount++;
-              } else {
-                console.error(`❌ Failed to send to token (${pushResponse.status})`);
-                failureCount++;
-              }
-            } catch (tokenError) {
-              console.error(`❌ Error sending to token:`, tokenError);
-              failureCount++;
-            }
+          const response = await fetch(progressierWebhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(webhookPayload)
+          });
+
+          console.log(`📥 Progressier webhook response status: ${response.status}`);
+          const responseText = await response.text();
+          console.log(`📥 Progressier webhook response:`, responseText);
+
+          if (response.ok) {
+            console.log(`📧 Notification sent to ${userData.user.email}`);
+            successCount++;
+          } else {
+            console.error(`❌ Failed to send to ${userData.user.email} (${response.status}):`, responseText);
+            failureCount++;
           }
         } catch (pushError) {
           console.error(`❌ Push error for user ${userId}:`, pushError);
