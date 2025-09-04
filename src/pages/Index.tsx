@@ -183,7 +183,10 @@ const Index = () => {
         serviceEnabled,
         settingsEnabled,
         progressierSubscribed,
-        user: !!user
+        user: !!user,
+        userEmail: user?.email,
+        authLoading,
+        settingsLoading
       });
     };
     
