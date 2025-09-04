@@ -168,8 +168,18 @@ export class ProgressierNotificationService {
         return false;
       }
 
-      // First register the user with Progressier
+      // First register the user with Progressier - this is critical for backend targeting
       await this.registerUserWithProgressier();
+
+      // For browsers that support browser notifications, request permission first
+      if ('Notification' in window) {
+        const browserPermission = await Notification.requestPermission();
+        console.log('🔔 Browser notification permission:', browserPermission);
+        if (browserPermission !== 'granted') {
+          console.log('❌ Browser notification permission denied');
+          return false;
+        }
+      }
 
       // Check if already subscribed
       if (typeof (window.progressier as any)?.isSubscribed === 'function') {
@@ -177,19 +187,19 @@ export class ProgressierNotificationService {
         if (isSubscribed) {
           console.log('✅ Already subscribed to push notifications');
           await this.storePushToken({ subscribed: true });
+          // Re-register user to ensure backend targeting works
+          await this.registerUserWithProgressier();
           return true;
         }
       }
 
-      // Show Progressier's opt-in UI and subscribe if methods exist
-      if (typeof (window.progressier as any)?.showOptIn === 'function') {
-        (window.progressier as any).showOptIn();
-      }
-      
       // Subscribe for push notifications
       if (typeof (window.progressier as any)?.subscribe === 'function') {
         const subscription = await (window.progressier as any).subscribe();
         console.log('🔔 Progressier subscription result:', subscription);
+        
+        // Always re-register after subscription to ensure user ID is properly linked
+        await this.registerUserWithProgressier();
         
         // Check subscription status again if possible
         const nowSubscribed = typeof (window.progressier as any)?.isSubscribed === 'function' 
