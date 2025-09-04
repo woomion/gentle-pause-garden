@@ -1,0 +1,68 @@
+{
+  "name": "Pocket Pause",
+  "short_name": "Pocket Pause",
+  "description": "Your mindful shopping companion",
+  "start_url": "/?utm_source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#CAB6F7",
+  "background_color": "#1a1a1a",
+  "categories": ["productivity", "lifestyle", "shopping"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/app-icon-512.png", 
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Pause",
+      "short_name": "Pause",
+      "description": "Pause an item quickly",
+      "url": "/?action=quick-pause",
+      "icons": [
+        {
+          "src": "/icons/app-icon-512.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Review Items",
+      "short_name": "Review",
+      "description": "Review paused items",
+      "url": "/?action=review",
+      "icons": [
+        {
+          "src": "/icons/app-icon-512.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text", 
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+pause",
+      "url": "/?url=%s"
+    }
+  ]
+}

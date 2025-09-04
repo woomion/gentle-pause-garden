@@ -14,8 +14,46 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
     VitePWA({
-      disable: true, // Using Progressier instead
-      manifest: false,
+      registerType: 'autoUpdate',
+      workbox: {
+        // Let Progressier handle push notifications, but enable other PWA features
+        skipWaiting: true,
+        clientsClaim: true,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 365 days
+              }
+            }
+          }
+        ]
+      },
+      manifest: {
+        name: 'Pocket Pause',
+        short_name: 'Pocket Pause',
+        description: 'Your mindful shopping companion',
+        theme_color: '#CAB6F7',
+        background_color: '#1a1a1a',
+        display: 'standalone',
+        scope: '/',
+        start_url: '/?utm_source=pwa',
+        icons: [
+          {
+            src: '/icons/app-icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
+      },
+      devOptions: {
+        enabled: false // Disable in dev to avoid conflicts with Progressier
+      }
     }),
   ].filter(Boolean),
   resolve: {
