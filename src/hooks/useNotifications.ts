@@ -166,9 +166,9 @@ export const useNotifications = (enabled: boolean) => {
     }
 
     // For authenticated users with individual notifications, reduce frontend polling frequency
-    // The backend edge functions handle push notifications, but we still need frontend checks for browser notifications
+    // The backend cron job handles push notifications, so frontend just provides backup
     const isIndividualUser = user && notificationSettings?.deliveryStyle === 'item_by_item';
-    const checkInterval = isIndividualUser ? 5 * 60 * 1000 : 60 * 1000; // 5 minutes vs 1 minute
+    const checkInterval = isIndividualUser ? 10 * 60 * 1000 : 5 * 60 * 1000; // 10 minutes vs 5 minutes
     
     if (isIndividualUser) {
       console.log('✅ Individual notifications mode - backend handles push, frontend provides backup checks');
