@@ -5,9 +5,11 @@ import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { platformNotificationService } from '../services/platformNotificationService';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserSettings } from './useUserSettings';
 
 export const useNotifications = (enabled: boolean) => {
   const { user } = useAuth();
+  const { notificationSettings } = useUserSettings();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastNotificationCountRef = useRef<number>(0);
   const lastCheckTimeRef = useRef<number>(0);
@@ -163,8 +165,15 @@ export const useNotifications = (enabled: boolean) => {
       return;
     }
 
+    // For authenticated users with individual notifications, don't use frontend polling
+    // The backend edge functions handle individual notifications
+    if (user && notificationSettings?.deliveryStyle === 'item_by_item') {
+      console.log('✅ Individual notifications enabled - backend will handle notifications');
+      return;
+    }
+
     try {
-      console.log('Setting up notifications - checking immediately');
+      console.log('Setting up frontend notifications for batch/guest users - checking immediately');
       
       // Check immediately, but with a small delay to ensure everything is initialized
       const immediateCheck = setTimeout(() => {
@@ -203,7 +212,7 @@ export const useNotifications = (enabled: boolean) => {
     } catch (error) {
       console.error('Error setting up notifications:', error);
     }
-  }, [enabled, checkForReadyItems]);
+  }, [enabled, user, notificationSettings, checkForReadyItems]);
 
   const enableNotifications = async () => {
     try {

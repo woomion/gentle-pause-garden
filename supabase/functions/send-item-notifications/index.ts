@@ -112,19 +112,16 @@ async function sendIndividualNotification(
     return;
   }
 
-    // Send notification via Progressier
-    const notificationData = {
-      title: "Space brings clarity. Your item is ready for review.",
-      body: `${item.title}${item.store_name ? ` from ${item.store_name}` : ''} is ready for review.`,
-      icon: '/icons/app-icon-512.png',
-      badge: '/icons/app-icon-512.png',
-      tag: `item-${itemId}`,
-      data: {
-        itemId: itemId,
-        userId: userId,
-        type: 'individual'
-      }
-    };
+  // Send individual notification with proper content
+  const notificationData = {
+    title: "Space brings clarity. Your item is ready for review.",
+    body: `${item.title}${item.store_name ? ` from ${item.store_name}` : ''} is ready for review.`,
+    data: {
+      itemId: itemId,
+      userId: userId,
+      type: 'individual'
+    }
+  };
 
     try {
       // Use the send-push-notifications function instead of calling Progressier directly
@@ -204,9 +201,6 @@ async function sendBatchNotifications(supabase: any, progressierApiKey: string) 
       const notificationData = {
         title: `It's time to meet your paused ${itemText} again.`,
         body: `You have ${itemCount} ${itemText} ready for review.`,
-        icon: '/icons/app-icon-512.png',
-        badge: '/icons/app-icon-512.png',
-        tag: `batch-${user.user_id}`,
         data: {
           userId: user.user_id,
           type: 'batch',
@@ -214,24 +208,20 @@ async function sendBatchNotifications(supabase: any, progressierApiKey: string) 
         }
       };
 
-      const response = await fetch('https://progressier.app/api/notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${progressierApiKey}`
-        },
-        body: JSON.stringify({
-          ...notificationData,
-          audience: {
-            userIds: [user.user_id]
-          }
-        })
+      // Use the send-push-notifications function for consistency
+      const { data, error } = await supabase.functions.invoke('send-push-notifications', {
+        body: {
+          userIds: [user.user_id],
+          title: notificationData.title,
+          body: notificationData.body,
+          data: notificationData.data
+        }
       });
 
-      if (response.ok) {
-        console.log(`✅ Batch notification sent to user ${user.user_id} for ${itemCount} items`);
+      if (error) {
+        console.error(`❌ Failed to send batch notification to user ${user.user_id}:`, error);
       } else {
-        console.error(`❌ Failed to send batch notification to user ${user.user_id}:`, await response.text());
+        console.log(`✅ Batch notification sent to user ${user.user_id} for ${itemCount} items`);
       }
     } catch (error) {
       console.error(`❌ Error sending batch notification to user ${user.user_id}:`, error);
