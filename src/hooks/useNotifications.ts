@@ -128,20 +128,27 @@ export const useNotifications = (enabled: boolean) => {
           body = 'Your paused items are waiting for thoughtful decisions';
         }
 
-        console.log('🚀 Sending notification via platform service...');
-        
-        // Send notification via platform service
-        await platformNotificationService.showNotification(title, {
-          body,
-          tag: 'pocket-pause-review',
-          requireInteraction: false
-        });
+        // For authenticated users with individual notifications, backend handles everything
+        if (user && notificationSettings?.deliveryStyle === 'item_by_item') {
+          console.log('✅ Individual notification user - backend handles notifications, frontend skipping');
+        } else {
+          console.log('🚀 Sending notification via platform service...');
+          
+          // Send notification via platform service for guest users or batch users
+          await platformNotificationService.showNotification(title, {
+            body,
+            tag: 'pocket-pause-review',
+            requireInteraction: false
+          });
+        }
 
-        // Send push notification to user's devices (for authenticated users)
-        await sendPushNotification(title, body, {
-          action: 'review_items',
-          count: itemsForReview.length
-        });
+        // For authenticated users, only send push notifications for batch delivery or fallback
+        if (user && notificationSettings?.deliveryStyle !== 'item_by_item') {
+          await sendPushNotification(title, body, {
+            action: 'review_items',
+            count: itemsForReview.length
+          });
+        }
 
         lastNotificationCountRef.current = itemsForReview.length;
         lastCheckTimeRef.current = now;
