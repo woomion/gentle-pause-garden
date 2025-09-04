@@ -112,26 +112,17 @@ serve(async (req) => {
         }
 
         try {
-          // Get user email for targeting
-          const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
-          
-          if (userError || !userData?.user?.email) {
-            console.error(`❌ Could not get user email for ${userId}:`, userError);
-            failureCount++;
-            continue;
-          }
-
-          // Use the correct Progressier API format
+          // Use the Progressier API format with user ID targeting
           const notificationPayload = {
             recipients: {
-              email: userData.user.email
+              id: userId
             },
             title: payload.title,
             body: payload.body,
             url: "https://cnjznmbgxprsrovmdywe.supabase.co"
           };
 
-          console.log(`📤 Sending notification to ${userData.user.email}:`, notificationPayload);
+          console.log(`📤 Sending notification to user ID ${userId}:`, notificationPayload);
 
           // Use the correct Progressier endpoint with app ID
           const progressierUrl = 'https://progressier.app/9LL6P8U26R3MyH8El0RL/send';
@@ -150,10 +141,10 @@ serve(async (req) => {
           console.log(`📥 Progressier API response:`, responseText);
 
           if (response.ok) {
-            console.log(`📧 Notification sent to ${userData.user.email}`);
+            console.log(`📧 Notification sent to user ID ${userId}`);
             successCount++;
           } else {
-            console.error(`❌ Failed to send to ${userData.user.email} (${response.status}):`, responseText);
+            console.error(`❌ Failed to send to user ID ${userId} (${response.status}):`, responseText);
             failureCount++;
           }
         } catch (pushError) {
