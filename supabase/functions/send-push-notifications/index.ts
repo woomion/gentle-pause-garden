@@ -101,12 +101,12 @@ serve(async (req) => {
           continue;
         }
 
-        // Send push notification via Progressier webhook
-        const progressierWebhookUrl = Deno.env.get('PROGRESSIER_WEBHOOK_URL');
-        console.log(`🔑 Progressier webhook URL exists: ${progressierWebhookUrl ? 'YES' : 'NO'}`);
+        // Send push notification via Progressier API
+        const progressierApiKey = Deno.env.get('PROGRESSIER_API_KEY');
+        console.log(`🔑 Progressier API key exists: ${progressierApiKey ? 'YES' : 'NO'}`);
         
-        if (!progressierWebhookUrl) {
-          console.error('❌ Progressier webhook URL not found - please set PROGRESSIER_WEBHOOK_URL');
+        if (!progressierApiKey) {
+          console.error('❌ Progressier API key not found');
           failureCount++;
           continue;
         }
@@ -121,28 +121,29 @@ serve(async (req) => {
             continue;
           }
 
-          const webhookPayload = {
+          const notificationPayload = {
             title: payload.title,
             body: payload.body,
-            url: "https://cnjznmbgxprsrovmdywe.supabase.co", // Your app URL
-            email: userData.user.email, // Target specific user by email
-            icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png',
-            badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/storage/v1/object/public/icons/app-icon-512.png'
+            url: "https://cnjznmbgxprsrovmdywe.supabase.co",
+            email: userData.user.email,
+            icon: 'https://cnjznmbgxprsrovmdywe.supabase.co/icons/app-icon-512.png',
+            badge: 'https://cnjznmbgxprsrovmdywe.supabase.co/icons/app-icon-512.png'
           };
 
-          console.log(`📤 Sending notification to ${userData.user.email}:`, webhookPayload);
+          console.log(`📤 Sending notification to ${userData.user.email}:`, notificationPayload);
 
-          const response = await fetch(progressierWebhookUrl, {
+          const response = await fetch('https://progressier.app/api/push', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${progressierApiKey}`
             },
-            body: JSON.stringify(webhookPayload)
+            body: JSON.stringify(notificationPayload)
           });
 
-          console.log(`📥 Progressier webhook response status: ${response.status}`);
+          console.log(`📥 Progressier API response status: ${response.status}`);
           const responseText = await response.text();
-          console.log(`📥 Progressier webhook response:`, responseText);
+          console.log(`📥 Progressier API response:`, responseText);
 
           if (response.ok) {
             console.log(`📧 Notification sent to ${userData.user.email}`);
