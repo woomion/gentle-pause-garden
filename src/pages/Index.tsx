@@ -191,8 +191,8 @@ const Index = () => {
     };
     
     checkNotificationStatus();
-    const interval = setInterval(checkNotificationStatus, 5000); // Check every 5 seconds
-    return () => clearInterval(interval);
+    // Remove aggressive 5-second polling that was causing infinite re-renders
+    // Only check on state changes, not continuously
   }, [notificationsEnabled, user]);
   
   
