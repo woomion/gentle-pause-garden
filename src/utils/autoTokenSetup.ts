@@ -32,8 +32,10 @@ export async function autoSetupPushToken(): Promise<boolean> {
       const progressier = (window as any).progressier;
       
       try {
-        // Register user with Progressier using correct method
+        // Register user with Progressier using correct method - this is critical for background notifications
         try {
+          console.log('🔄 Registering user with Progressier for background notifications...');
+          
           if (typeof progressier.setUserId === 'function') {
             await progressier.setUserId(user.id);
             console.log('✅ User ID set with Progressier:', user.id);
@@ -43,9 +45,17 @@ export async function autoSetupPushToken(): Promise<boolean> {
               tags: 'authenticated'
             });
             console.log('✅ User registered with Progressier');
-          } else {
-            console.log('⚠️ No user registration method available');
           }
+          
+          // Also try the identify method if available for better server-side tracking
+          if (typeof progressier.identify === 'function') {
+            await progressier.identify(user.id, {
+              authenticated: true,
+              platform: 'web'
+            });
+            console.log('✅ User identified with Progressier for server-side tracking');
+          }
+          
         } catch (registrationError) {
           console.error('❌ Error registering user with Progressier:', registrationError);
         }
