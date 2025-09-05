@@ -6,16 +6,13 @@ import App from './App.tsx'
 import './index.css'
 
 console.log('Main.tsx: Starting app');
-
-// Register our minimal service worker that cooperates with Progressier
 const updateSW = registerSW({
-  immediate: false, // Don't auto-refresh
+  immediate: true,
   onOfflineReady() {
     console.log('🔋 App ready to work offline');
   },
   onNeedRefresh() {
-    console.log('⬆️ New content available; manual refresh needed');
-    // Don't auto-update, let user control when to refresh
+    console.log('⬆️ New content available; will update automatically');
   }
 });
 

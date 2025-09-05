@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="apple-touch-icon" href="/icons/app-icon-512.png" />
-    <link rel="manifest" href="/manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Domine:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -113,16 +112,7 @@
         }));
       });
     </script>
-    <!-- Progressier PWA Push Notifications - Load immediately and configure -->
-    <script>
-      // Configure Progressier to work with our service worker
-      window.progressierSettings = {
-        worker: {
-          url: '/sw.js', // Use our custom service worker
-          scope: '/'
-        }
-      };
-    </script>
+    <!-- Progressier PWA Push Notifications - Load immediately -->
     <script async src="https://progressier.app/9LL6P8U26R3MyH8El0RL/script.js"></script>
     <script>
       // Configure share target and handle shared content

@@ -141,7 +141,7 @@ const Index = () => {
     const interval = setInterval(updateReadyCount, 60 * 1000);
     
     return () => clearInterval(interval);
-  }, []); // Remove dependencies that cause infinite loops
+  }, [getItemsForReview, items]); // Re-run when items change
   
   // Handle redirects for invitations
   useIndexRedirects();
@@ -190,8 +190,9 @@ const Index = () => {
       });
     };
     
-    // Only check once when dependencies change, no interval
     checkNotificationStatus();
+    const interval = setInterval(checkNotificationStatus, 5000); // Check every 5 seconds
+    return () => clearInterval(interval);
   }, [notificationsEnabled, user]);
   
   
