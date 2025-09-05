@@ -141,7 +141,7 @@ const Index = () => {
     const interval = setInterval(updateReadyCount, 60 * 1000);
     
     return () => clearInterval(interval);
-  }, [getItemsForReview]); // Remove 'items' dependency to prevent interval recreation
+  }, [getItemsForReview, items]); // Re-run when items change
   
   // Handle redirects for invitations
   useIndexRedirects();
@@ -191,8 +191,8 @@ const Index = () => {
     };
     
     checkNotificationStatus();
-    // Remove aggressive 5-second polling that was causing infinite re-renders
-    // Only check on state changes, not continuously
+    const interval = setInterval(checkNotificationStatus, 5000); // Check every 5 seconds
+    return () => clearInterval(interval);
   }, [notificationsEnabled, user]);
   
   
