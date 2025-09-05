@@ -172,8 +172,7 @@ export const useNotifications = (enabled: boolean) => {
         lastNotificationCountRef.current = itemsForReview.length;
         lastCheckTimeRef.current = now;
       } else if (itemsForReview.length === 0) {
-        // Clear notified items when no items are ready
-        notifiedItemIdsRef.current.clear();
+        // Don't clear notified items - each item should only be notified about once ever
         lastNotificationCountRef.current = 0;
         console.log('📭 No items ready for review');
       }
