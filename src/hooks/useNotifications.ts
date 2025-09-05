@@ -13,7 +13,26 @@ export const useNotifications = (enabled: boolean) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastNotificationCountRef = useRef<number>(0);
   const lastCheckTimeRef = useRef<number>(0);
-  const notifiedItemIdsRef = useRef<Set<string>>(new Set());
+  
+  // Load notified items from localStorage on init
+  const getNotifiedItemIds = (): Set<string> => {
+    try {
+      const stored = localStorage.getItem('pocket-pause-notified-items');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  };
+  
+  const saveNotifiedItemIds = (ids: Set<string>) => {
+    try {
+      localStorage.setItem('pocket-pause-notified-items', JSON.stringify(Array.from(ids)));
+    } catch (error) {
+      console.error('Failed to save notified items to localStorage:', error);
+    }
+  };
+  
+  const notifiedItemIdsRef = useRef<Set<string>>(getNotifiedItemIds());
 
   // Sync notification service with settings when enabled state changes
   useEffect(() => {
@@ -164,9 +183,10 @@ export const useNotifications = (enabled: boolean) => {
           });
         }
 
-        // Mark these items as notified
+        // Mark these items as notified and save to localStorage
         if (shouldNotifyForNewItems) {
           newItems.forEach(item => notifiedItemIdsRef.current.add(item.id));
+          saveNotifiedItemIds(notifiedItemIdsRef.current);
         }
         
         lastNotificationCountRef.current = itemsForReview.length;
