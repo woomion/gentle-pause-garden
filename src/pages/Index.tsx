@@ -190,9 +190,8 @@ const Index = () => {
       });
     };
     
+    // Only check once when dependencies change, no interval
     checkNotificationStatus();
-    const interval = setInterval(checkNotificationStatus, 5000); // Check every 5 seconds
-    return () => clearInterval(interval);
   }, [notificationsEnabled, user]);
   
   
