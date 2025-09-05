@@ -6,6 +6,8 @@ import App from './App.tsx'
 import './index.css'
 
 console.log('Main.tsx: Starting app');
+
+// Register our minimal service worker that cooperates with Progressier
 const updateSW = registerSW({
   immediate: true,
   onOfflineReady() {

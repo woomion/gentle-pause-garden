@@ -113,7 +113,16 @@
         }));
       });
     </script>
-    <!-- Progressier PWA Push Notifications - Load immediately -->
+    <!-- Progressier PWA Push Notifications - Load immediately and configure -->
+    <script>
+      // Configure Progressier to work with our service worker
+      window.progressierSettings = {
+        worker: {
+          url: '/sw.js', // Use our custom service worker
+          scope: '/'
+        }
+      };
+    </script>
     <script async src="https://progressier.app/9LL6P8U26R3MyH8El0RL/script.js"></script>
     <script>
       // Configure share target and handle shared content
