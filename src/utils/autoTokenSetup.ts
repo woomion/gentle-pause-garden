@@ -102,10 +102,4 @@ export async function autoSetupPushToken(): Promise<boolean> {
   }
 }
 
-// Run automatically when module loads
-if (typeof window !== 'undefined') {
-  // Wait for the page to be ready, then try to set up push token
-  setTimeout(() => {
-    autoSetupPushToken();
-  }, 3000); // Wait 3 seconds for everything to load
-}
+// Modified to not run automatically - will be triggered by useNotifications when user auth is confirmed

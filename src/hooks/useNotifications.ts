@@ -38,11 +38,20 @@ export const useNotifications = (enabled: boolean) => {
   useEffect(() => {
     try {
       console.log('🔔 Settings sync - enabled:', enabled, 'platform:', platformNotificationService.getPlatformName());
+      console.log('🔔 User state:', user ? `logged in (${user.id})` : 'not logged in');
       platformNotificationService.setEnabled(enabled);
       
       // If enabling notifications and user is logged in, ensure proper registration
       if (enabled && user) {
         console.log('🔄 Re-initializing notification service for user:', user.id);
+        
+        // Import and run auto token setup after user is confirmed
+        import('../utils/autoTokenSetup').then(({ autoSetupPushToken }) => {
+          autoSetupPushToken().then(success => {
+            console.log('🔄 Auto token setup result:', success);
+          });
+        });
+        
         // Trigger re-registration to ensure backend targeting works
         platformNotificationService.requestPermission().catch(error => {
           console.log('Permission request failed:', error);
