@@ -19,7 +19,8 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
   const [firstName, setFirstName] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(true);
-  const { signUp, signIn } = useAuth();
+  const [isMagicLink, setIsMagicLink] = useState(false);
+  const { signUp, signIn, signInWithMagicLink } = useAuth();
   const { toast } = useToast();
   
   // Lock background scroll when modal is open
@@ -27,6 +28,45 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isMagicLink) {
+      if (!email) {
+        toast({
+          title: "Error",
+          description: "Please enter your email address",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const { error } = await signInWithMagicLink(email);
+        if (error) {
+          toast({
+            title: "Magic link failed",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Check your email",
+            description: "We've sent you a magic link to sign in. Click the link in your email to continue.",
+          });
+          onClose();
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Something went wrong. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+    
     if (!email || !password) {
       toast({
         title: "Error",
@@ -108,12 +148,14 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
 
         <div className="text-center mb-6">
           <h2 className="text-xl font-semibold text-black dark:text-[#F9F5EB] mb-4">
-            Want to keep this pause?
+            {isMagicLink ? 'Sign in with magic link' : 'Want to keep this pause?'}
           </h2>
           <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
-            {isSignUp 
-              ? "Create an account to save your items and reflections." 
-              : "Sign in to your account to save your items and reflections."
+            {isMagicLink
+              ? "Enter your email and we'll send you a secure login link"
+              : isSignUp 
+                ? "Create an account to save your items and reflections." 
+                : "Sign in to your account to save your items and reflections."
             }
           </p>
         </div>
@@ -150,20 +192,22 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
             />
           </div>
 
-          <div>
-            <Label htmlFor="password" className="text-black dark:text-[#F9F5EB] font-medium">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
+          {!isMagicLink && (
+            <div>
+              <Label htmlFor="password" className="text-black dark:text-[#F9F5EB] font-medium">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 bg-white/60 dark:bg-white/10 border-gray-200 dark:border-white/20 text-black dark:text-[#F9F5EB]"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+          )}
 
           <div className="flex gap-3 pt-4">
             <Button
@@ -180,25 +224,57 @@ const SignupModal = ({ isOpen, onClose }: SignupModalProps) => {
               className="flex-1 bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-[#F9F5EB] font-medium py-3 px-6 rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-md"
               style={{ boxShadow: '0 4px 8px rgba(214, 187, 247, 0.3)' }}
             >
-              {loading ? 'Loading...' : (isSignUp ? 'Create Account' : 'Sign In')}
+              {loading ? 'Loading...' : (
+                isMagicLink ? 'Send Magic Link' :
+                isSignUp ? 'Create Account' : 'Sign In'
+              )}
             </Button>
           </div>
         </form>
 
+        {!isMagicLink && (
+          <div className="mt-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-cream dark:bg-[#200E3B] text-gray-500">Or</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => setIsMagicLink(true)}
+              disabled={loading}
+              className="w-full mt-3 bg-transparent border-2 border-taupe hover:bg-taupe/10 text-black dark:text-[#F9F5EB] font-medium py-2 px-4 rounded-xl transition-all duration-200"
+            >
+              Sign in with magic link
+            </Button>
+          </div>
+        )}
 
         <div className="mt-4 text-center space-y-2">
           <button
             type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
+            onClick={() => {
+              if (isMagicLink) {
+                setIsMagicLink(false);
+              } else {
+                setIsSignUp(!isSignUp);
+              }
+            }}
             className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-[#F9F5EB] transition-colors text-sm"
           >
-            {isSignUp 
-              ? 'Already have an account? Sign in' 
-              : "Don't have an account? Sign up"
+            {isMagicLink
+              ? 'Back to sign in'
+              : isSignUp 
+                ? 'Already have an account? Sign in' 
+                : "Don't have an account? Sign up"
             }
           </button>
           
-          {!isSignUp && (
+          {!isSignUp && !isMagicLink && (
             <div>
               <button
                 type="button"
