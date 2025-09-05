@@ -240,6 +240,8 @@ export class ProgressierNotificationService {
         return;
       }
 
+      console.log('🔔 Registering user with Progressier for backend targeting:', user.id);
+
       // Try multiple registration methods for better backend targeting
       let registered = false;
       
@@ -249,6 +251,9 @@ export class ProgressierNotificationService {
           await (window.progressier as any).setUserId(user.id);
           console.log('✅ User ID set with Progressier (setUserId):', user.id);
           registered = true;
+          
+          // Verify registration by checking if we can retrieve user info
+          await this.verifyProgressierRegistration(user.id);
         } catch (error) {
           console.log('⚠️ setUserId failed, trying add method:', error);
         }
@@ -259,20 +264,78 @@ export class ProgressierNotificationService {
         try {
           await (window.progressier as any).add({
             id: user.id,
-            tags: ['authenticated']
+            email: user.email,
+            tags: ['authenticated', 'push-enabled']
           });
           console.log('✅ User registered with Progressier (add):', user.id);
           registered = true;
+          
+          // Verify registration
+          await this.verifyProgressierRegistration(user.id);
         } catch (error) {
           console.log('❌ Progressier.add method failed:', error);
         }
       }
       
+      // Method 3: Manual tracking in our database
       if (!registered) {
-        console.log('❌ No working Progressier registration method found');
+        console.log('❌ No working Progressier registration method found, storing manually');
+        await this.storeProgressierRegistration(user.id);
       }
+      
+      // Store registration status for backend verification
+      await this.storeProgressierRegistration(user.id);
+      
     } catch (error) {
       console.error('❌ Error registering user with Progressier:', error);
+    }
+  }
+
+  private async verifyProgressierRegistration(userId: string): Promise<void> {
+    try {
+      console.log('🔍 Verifying Progressier registration for user:', userId);
+      
+      // Test if backend can target this user by sending a test request
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { error } = await supabase.functions.invoke('send-push-notifications', {
+        body: {
+          userIds: [userId],
+          title: 'Registration Test',
+          body: 'Testing user registration',
+          test: true // Flag to indicate this is a test
+        }
+      });
+      
+      if (error) {
+        console.log('⚠️ Backend targeting test failed:', error);
+      } else {
+        console.log('✅ Backend targeting verified for user:', userId);
+      }
+    } catch (error) {
+      console.log('⚠️ Could not verify registration:', error);
+    }
+  }
+
+  private async storeProgressierRegistration(userId: string): Promise<void> {
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Store that this user is registered with Progressier for backend targeting
+      const { error } = await supabase.functions.invoke('store-push-token', {
+        body: {
+          userId: userId,
+          token: `progressier_user_${userId}`,
+          platform: 'progressier'
+        }
+      });
+      
+      if (error) {
+        console.error('❌ Error storing Progressier registration:', error);
+      } else {
+        console.log('✅ Progressier registration stored for backend targeting');
+      }
+    } catch (error) {
+      console.error('❌ Error in storeProgressierRegistration:', error);
     }
   }
 

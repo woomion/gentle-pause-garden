@@ -48,15 +48,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (session) {
               console.log('🔐 Session persisted successfully');
               localStorage.setItem('supabase-session-check', 'true');
-              // Auto-setup push token when user logs in
+              // Auto-setup push token and register user when user logs in
               if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 setTimeout(async () => {
                   try {
+                    // First register user with Progressier for backend targeting
+                    const { progressierNotificationService } = await import('../services/progressierNotificationService');
+                    await progressierNotificationService.registerUserWithProgressier();
+                    console.log('🔔 User registered with Progressier on auth');
+                    
+                    // Then setup push token
                     const { autoSetupPushToken } = await import('../utils/autoTokenSetup');
                     const success = await autoSetupPushToken();
                     console.log('🔔 Auto token setup on auth change:', success);
                   } catch (error) {
-                    console.error('🔔 Auto token setup failed:', error);
+                    console.error('🔔 Auto setup failed:', error);
                   }
                 }, 1000);
               }

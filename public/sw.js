@@ -52,37 +52,88 @@ self.addEventListener('fetch', (event) => {
 
 // Push event - handle incoming push notifications
 self.addEventListener('push', (event) => {
-  console.log('📱 Push notification received:', event.data?.text());
+  console.log('📱 Push notification received in service worker');
+  console.log('📱 Raw push data:', event.data?.text());
   
   let notificationData = {
     title: 'Pocket Pause',
     body: 'You have items ready to review!',
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
+    icon: '/icons/app-icon-512.png',
+    badge: '/icons/app-icon-512.png',
     tag: 'pocket-pause-notification',
     requireInteraction: false,
     data: {
-      url: '/'
+      url: 'https://cnjznmbgxprsrovmdywe.supabase.co'
     }
   };
 
-  // Parse push data if available
+  // Parse push data if available - handle multiple formats
   if (event.data) {
     try {
+      // Try parsing as JSON first (standard format)
       const data = event.data.json();
-      notificationData = {
-        ...notificationData,
-        ...data,
-        data: {
-          url: data.url || '/',
-          ...data.data
-        }
-      };
+      console.log('📱 Parsed push data as JSON:', data);
+      
+      // Handle Progressier's data format
+      if (data.notification) {
+        // Progressier wraps data in a notification object
+        notificationData = {
+          title: data.notification.title || notificationData.title,
+          body: data.notification.body || notificationData.body,
+          icon: data.notification.icon || notificationData.icon,
+          badge: data.notification.badge || notificationData.badge,
+          tag: data.notification.tag || notificationData.tag,
+          requireInteraction: data.notification.requireInteraction || false,
+          data: {
+            url: data.notification.url || data.url || notificationData.data.url,
+            ...data.notification.data,
+            ...data.data
+          }
+        };
+      } else {
+        // Standard format
+        notificationData = {
+          title: data.title || notificationData.title,
+          body: data.body || notificationData.body,
+          icon: data.icon || notificationData.icon,
+          badge: data.badge || notificationData.badge,
+          tag: data.tag || notificationData.tag,
+          requireInteraction: data.requireInteraction || false,
+          data: {
+            url: data.url || notificationData.data.url,
+            ...data.data
+          }
+        };
+      }
+      
+      console.log('📱 Final notification data:', notificationData);
+      
     } catch (e) {
-      console.log('📝 Using text content for notification');
-      notificationData.body = event.data.text();
+      console.log('📱 Failed to parse as JSON, trying text format');
+      console.log('📱 Parse error:', e);
+      
+      // Try to extract data from text format
+      const textData = event.data.text();
+      console.log('📱 Text data:', textData);
+      
+      // Check if it's a JSON string that failed initial parsing
+      try {
+        const parsedText = JSON.parse(textData);
+        console.log('📱 Successfully parsed text as JSON:', parsedText);
+        
+        notificationData.title = parsedText.title || notificationData.title;
+        notificationData.body = parsedText.body || notificationData.body;
+        notificationData.data.url = parsedText.url || notificationData.data.url;
+      } catch (textParseError) {
+        console.log('📱 Using raw text as notification body');
+        notificationData.body = textData || notificationData.body;
+      }
     }
+  } else {
+    console.log('📱 No push data available, using defaults');
   }
+
+  console.log('📱 Showing notification with data:', notificationData);
 
   const notificationPromise = self.registration.showNotification(
     notificationData.title,
@@ -92,7 +143,17 @@ self.addEventListener('push', (event) => {
       badge: notificationData.badge,
       tag: notificationData.tag,
       requireInteraction: notificationData.requireInteraction,
-      data: notificationData.data
+      data: notificationData.data,
+      actions: [
+        {
+          action: 'open',
+          title: 'Open App'
+        },
+        {
+          action: 'dismiss',
+          title: 'Dismiss'
+        }
+      ]
     }
   );
 
@@ -102,19 +163,36 @@ self.addEventListener('push', (event) => {
 // Notification click event - handle user interaction
 self.addEventListener('notificationclick', (event) => {
   console.log('👆 Notification clicked:', event.notification.tag);
+  console.log('👆 Notification action:', event.action);
+  console.log('👆 Notification data:', event.notification.data);
   
   event.notification.close();
   
+  // Handle different actions
+  if (event.action === 'dismiss') {
+    console.log('👆 User dismissed notification');
+    return;
+  }
+  
   // Get the URL to open from notification data
-  const urlToOpen = event.notification.data?.url || '/';
+  let urlToOpen = event.notification.data?.url || 'https://cnjznmbgxprsrovmdywe.supabase.co';
+  
+  // Ensure we have a full URL
+  if (urlToOpen.startsWith('/')) {
+    urlToOpen = 'https://cnjznmbgxprsrovmdywe.supabase.co' + urlToOpen;
+  }
+  
+  console.log('👆 Opening URL:', urlToOpen);
   
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
+        console.log('👆 Found', clientList.length, 'open windows');
+        
         // Check if app is already open
         for (const client of clientList) {
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            console.log('🔍 Focusing existing window');
+          if (client.url.includes('cnjznmbgxprsrovmdywe.supabase.co') && 'focus' in client) {
+            console.log('🔍 Focusing existing window:', client.url);
             return client.focus();
           }
         }
@@ -124,6 +202,9 @@ self.addEventListener('notificationclick', (event) => {
           console.log('🆕 Opening new window:', urlToOpen);
           return clients.openWindow(urlToOpen);
         }
+      })
+      .catch(error => {
+        console.error('👆 Error handling notification click:', error);
       })
   );
 });

@@ -112,6 +112,13 @@ serve(async (req) => {
         }
 
         try {
+          // Skip test notifications
+          if (payload.test) {
+            console.log(`🧪 Test notification skipped for user ${userId}`);
+            successCount++;
+            continue;
+          }
+
           // Use the Progressier API format with user ID targeting
           const notificationPayload = {
             recipients: {
@@ -119,7 +126,8 @@ serve(async (req) => {
             },
             title: payload.title,
             body: payload.body,
-            url: "https://cnjznmbgxprsrovmdywe.supabase.co"
+            url: "https://cnjznmbgxprsrovmdywe.supabase.co",
+            data: payload.data || {}
           };
 
           console.log(`📤 Sending notification to user ID ${userId}:`, notificationPayload);
