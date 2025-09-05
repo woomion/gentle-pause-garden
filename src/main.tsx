@@ -9,12 +9,13 @@ console.log('Main.tsx: Starting app');
 
 // Register our minimal service worker that cooperates with Progressier
 const updateSW = registerSW({
-  immediate: true,
+  immediate: false, // Don't auto-refresh
   onOfflineReady() {
     console.log('🔋 App ready to work offline');
   },
   onNeedRefresh() {
-    console.log('⬆️ New content available; will update automatically');
+    console.log('⬆️ New content available; manual refresh needed');
+    // Don't auto-update, let user control when to refresh
   }
 });
 
