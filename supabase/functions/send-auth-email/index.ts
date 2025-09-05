@@ -56,7 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; background: #f8fafc; margin: 0; padding: 0;">
           <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); overflow: hidden; margin-top: 40px; margin-bottom: 40px;">
             <!-- Header -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+            <div style="background: linear-gradient(135deg, hsl(262, 83%, 58%) 0%, hsl(270, 60%, 85%) 100%); padding: 40px 30px; text-align: center;">
               <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 600;">✨ Your Magic Link</h1>
               <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">Ready to continue your pause journey?</p>
             </div>
@@ -69,16 +69,11 @@ const handler = async (req: Request): Promise<Response> => {
               
               <!-- Magic Link Button -->
               <div style="text-align: center; margin: 40px 0;">
-                <a href="${magicLinkUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: transform 0.2s ease;">
-                  🚀 Sign In to Pause
+                <a href="${magicLinkUrl}" style="display: inline-block; background: linear-gradient(135deg, hsl(262, 83%, 58%) 0%, hsl(270, 60%, 85%) 100%); color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); transition: transform 0.2s ease;">
+                  Sign In to Pocket Pause
                 </a>
               </div>
               
-              <!-- Alternative Code -->
-              <div style="background: #f7fafc; border-radius: 8px; padding: 20px; margin: 30px 0; border-left: 4px solid #667eea;">
-                <p style="margin: 0 0 10px 0; font-weight: 600; color: #2d3748;">Or use this code:</p>
-                <code style="font-family: 'Monaco', 'Menlo', monospace; font-size: 18px; letter-spacing: 2px; color: #667eea; font-weight: 600;">${token}</code>
-              </div>
               
               <!-- Security Notice -->
               <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px;">
@@ -91,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
             <!-- Footer -->
             <div style="background: #f8fafc; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
               <p style="margin: 0; font-size: 14px; color: #a0aec0;">
-                Made with ❤️ by Pause - Your mindful shopping companion
+                Made with ❤️ by Pocket Pause - Your mindful shopping companion
               </p>
             </div>
           </div>
@@ -100,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const { error } = await resend.emails.send({
-      from: 'Pause <noreply@resend.dev>',
+      from: 'Pocket Pause <noreply@resend.dev>',
       to: [user.email],
       subject: '🔗 Your Magic Link to Pause',
       html: emailHtml,
