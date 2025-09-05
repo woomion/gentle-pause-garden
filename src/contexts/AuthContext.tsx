@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Set up auth state listener first
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (event, session) => {
+        async (event, session) => {
           console.log('🔐 Auth state change:', event, 'Session:', session?.user?.email, 'User ID:', session?.user?.id);
           if (mounted) {
             // Persist session immediately
@@ -52,6 +52,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (session) {
               console.log('🔐 Session persisted successfully');
               localStorage.setItem('supabase-session-check', 'true');
+              // Auto-setup push token when user logs in
+              if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                setTimeout(async () => {
+                  try {
+                    const { autoSetupPushToken } = await import('../utils/autoTokenSetup');
+                    const success = await autoSetupPushToken();
+                    console.log('🔔 Auto token setup on auth change:', success);
+                  } catch (error) {
+                    console.error('🔔 Auto token setup failed:', error);
+                  }
+                }, 1000);
+              }
             } else {
               console.log('🔐 Session cleared');
               localStorage.removeItem('supabase-session-check');
