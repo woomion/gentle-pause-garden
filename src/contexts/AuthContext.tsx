@@ -35,44 +35,80 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let timeoutId: NodeJS.Timeout;
     
     try {
-      // Set up auth state listener
+      console.log('🔐 AuthProvider: Initializing authentication...');
+      
+      // Set up auth state listener first
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (event, session) => {
           console.log('🔐 Auth state change:', event, 'Session:', session?.user?.email, 'User ID:', session?.user?.id);
           if (mounted) {
+            // Persist session immediately
             setSession(session);
             setUser(session?.user ?? null);
             if (timeoutId) clearTimeout(timeoutId);
             setLoading(false);
+            
+            // Log session storage for debugging
+            if (session) {
+              console.log('🔐 Session persisted successfully');
+              localStorage.setItem('supabase-session-check', 'true');
+            } else {
+              console.log('🔐 Session cleared');
+              localStorage.removeItem('supabase-session-check');
+            }
           }
         }
       );
 
-      // Get initial session with better error handling
-      supabase.auth.getSession()
-        .then(({ data: { session }, error }) => {
+      // Get initial session with retry logic for better persistence
+      const getInitialSession = async () => {
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
           console.log('🔐 Initial session check:', session?.user?.email, 'User ID:', session?.user?.id, 'Error:', error);
+          
           if (mounted) {
             setSession(session);
             setUser(session?.user ?? null);
             if (timeoutId) clearTimeout(timeoutId);
             setLoading(false);
+            
+            if (session) {
+              console.log('🔐 Session restored from storage');
+              localStorage.setItem('supabase-session-check', 'true');
+            }
           }
-        })
-        .catch((error) => {
-          console.error('AuthProvider: Error getting initial session:', error);
-          if (mounted) {
-            if (timeoutId) clearTimeout(timeoutId);
-            setLoading(false);
-          }
-        });
+        } catch (error) {
+          console.error('🔐 Error getting initial session:', error);
+          // Retry once after a short delay
+          setTimeout(async () => {
+            try {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (mounted && session) {
+                console.log('🔐 Session restored on retry');
+                setSession(session);
+                setUser(session?.user ?? null);
+                localStorage.setItem('supabase-session-check', 'true');
+              }
+            } catch (retryError) {
+              console.error('🔐 Session retry failed:', retryError);
+            }
+            if (mounted) {
+              if (timeoutId) clearTimeout(timeoutId);
+              setLoading(false);
+            }
+          }, 1000);
+        }
+      };
 
-      // Timeout for loading state - 5 seconds
+      getInitialSession();
+
+      // Timeout for loading state - 8 seconds to allow for retry
       timeoutId = setTimeout(() => {
         if (mounted) {
+          console.log('🔐 Auth loading timeout reached');
           setLoading(false);
         }
-      }, 5000);
+      }, 8000);
 
       return () => {
         mounted = false;
@@ -80,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         subscription.unsubscribe();
       };
     } catch (error) {
-      console.error('AuthProvider: Error in useEffect:', error);
+      console.error('🔐 AuthProvider: Error in useEffect:', error);
       if (mounted) {
         setLoading(false);
       }
