@@ -13,6 +13,7 @@ export const useNotifications = (enabled: boolean) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastNotificationCountRef = useRef<number>(0);
   const lastCheckTimeRef = useRef<number>(0);
+  const notifiedItemIdsRef = useRef<Set<string>>(new Set());
 
   // Sync notification service with settings when enabled state changes
   useEffect(() => {
@@ -82,7 +83,10 @@ export const useNotifications = (enabled: boolean) => {
       console.log('📋 Items for review found:', itemsForReview.length);
       
       const timeSinceLastCheck = now - lastCheckTimeRef.current;
-      const shouldNotifyForNewItems = itemsForReview.length > 0 && itemsForReview.length !== lastNotificationCountRef.current;
+      
+      // Find items that haven't been notified about yet
+      const newItems = itemsForReview.filter(item => !notifiedItemIdsRef.current.has(item.id));
+      const shouldNotifyForNewItems = newItems.length > 0;
       
       // Check if any items will become ready later today
       const endOfToday = new Date();
@@ -109,7 +113,8 @@ export const useNotifications = (enabled: boolean) => {
       
       console.log('📊 Notification decision factors:', {
         itemsCount: itemsForReview.length,
-        lastCount: lastNotificationCountRef.current,
+        newItemsCount: newItems.length,
+        notifiedItemIds: Array.from(notifiedItemIdsRef.current),
         timeSinceLastCheck: Math.round(timeSinceLastCheck / 1000 / 60), // minutes
         shouldNotifyForNewItems,
         shouldRemindAfterDelay
@@ -119,16 +124,16 @@ export const useNotifications = (enabled: boolean) => {
         let title: string;
         let body: string;
         
-        if (shouldNotifyForNewItems && itemsForReview.length > lastNotificationCountRef.current) {
+        if (shouldNotifyForNewItems) {
           // New item(s) became ready - show specific details for the newest item
-          const newestItem = itemsForReview[0]; // Assuming items are sorted by readiness
+          const newestItem = newItems[0]; // Get the newest item that hasn't been notified about
           const storeName = newestItem.storeName?.trim();
           const itemName = newestItem.itemName || 'Item';
           
           title = storeName ? `${storeName}: ${itemName}` : itemName;
-          body = itemsForReview.length === 1 
+          body = newItems.length === 1 
             ? 'Ready for your thoughtful decision'
-            : `Ready for review • ${itemsForReview.length} total items waiting`;
+            : `Ready for review • ${newItems.length} new item${newItems.length > 1 ? 's' : ''} waiting`;
         } else {
           // Reminder for existing items
           title = itemsForReview.length === 1 
@@ -159,9 +164,16 @@ export const useNotifications = (enabled: boolean) => {
           });
         }
 
+        // Mark these items as notified
+        if (shouldNotifyForNewItems) {
+          newItems.forEach(item => notifiedItemIdsRef.current.add(item.id));
+        }
+        
         lastNotificationCountRef.current = itemsForReview.length;
         lastCheckTimeRef.current = now;
       } else if (itemsForReview.length === 0) {
+        // Clear notified items when no items are ready
+        notifiedItemIdsRef.current.clear();
         lastNotificationCountRef.current = 0;
         console.log('📭 No items ready for review');
       }
