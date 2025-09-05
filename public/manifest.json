@@ -1,0 +1,43 @@
+{
+  "name": "Pocket Pause",
+  "short_name": "Pocket Pause",
+  "description": "Pause purchases, make thoughtful decisions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#CAB6F7",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "categories": ["productivity", "finance", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Quick Pause",
+      "short_name": "Pause",
+      "description": "Quickly pause a purchase decision",
+      "url": "/?quick=true",
+      "icons": [
+        {
+          "src": "/icons/app-icon-512.png",
+          "sizes": "512x512"
+        }
+      ]
+    }
+  ]
+}
