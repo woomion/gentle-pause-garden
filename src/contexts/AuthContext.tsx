@@ -7,13 +7,9 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, firstName?: string) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signInWithGoogle: () => Promise<{ error: Error | null }>;
   signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
+  signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: Error | null }>;
-  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -136,41 +132,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const signUp = async (email: string, password: string, firstName?: string) => {
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            first_name: firstName
-          }
-        }
-      });
-      return { error };
-    } catch (error) {
-      console.error('AuthProvider: Error in signUp:', error);
-      return { error };
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      return { error };
-    } catch (error) {
-      console.error('AuthProvider: Error in signIn:', error);
-      return { error };
-    }
-  };
-
-
   const signInWithGoogle = async () => {
     try {
       const redirectUrl = `${window.location.origin}/`;
@@ -213,43 +174,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const resetPassword = async (email: string) => {
-    try {
-      const redirectUrl = `${window.location.origin}/auth?reset=true`;
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl
-      });
-      return { error };
-    } catch (error) {
-      console.error('AuthProvider: Error in resetPassword:', error);
-      return { error };
-    }
-  };
-
-  const updatePassword = async (newPassword: string) => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-      return { error };
-    } catch (error) {
-      console.error('AuthProvider: Error in updatePassword:', error);
-      return { error };
-    }
-  };
-
   const value = {
     user,
     session,
     loading,
-    signUp,
-    signIn,
-    signInWithGoogle,
     signInWithMagicLink,
-    signOut,
-    resetPassword,
-    updatePassword
+    signInWithGoogle,
+    signOut
   };
 
   return (
