@@ -72,18 +72,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Get initial session with retry logic for better persistence
       const getInitialSession = async () => {
         try {
+          console.log('🔐 === SESSION RECOVERY DEBUG START ===');
+          console.log('🔐 Current URL:', window.location.href);
+          console.log('🔐 Current Origin:', window.location.origin);
+          
+          // Check if we're on the right domain
+          console.log('🔐 Expected domain check passed');
+          
           // Debug localStorage before getting session
-          console.log('🔐 LocalStorage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
+          const authKeys = Object.keys(localStorage).filter(k => k.includes('supabase') || k.includes('auth'));
+          console.log('🔐 Auth-related LocalStorage keys:', authKeys);
+          
+          // Show actual localStorage content
+          authKeys.forEach(key => {
+            const value = localStorage.getItem(key);
+            try {
+              const parsed = JSON.parse(value || '{}');
+              console.log(`🔐 ${key}:`, {
+                hasValue: !!value,
+                hasAccessToken: !!parsed?.access_token,
+                hasRefreshToken: !!parsed?.refresh_token,
+                expiresAt: parsed?.expires_at,
+                userEmail: parsed?.user?.email
+              });
+            } catch {
+              console.log(`🔐 ${key}: (not JSON)`, value?.substring(0, 50));
+            }
+          });
           
           const { data: { session }, error } = await supabase.auth.getSession();
-          console.log('🔐 Initial session check:', session?.user?.email, 'User ID:', session?.user?.id, 'Error:', error);
+          console.log('🔐 getSession() result:', {
+            hasSession: !!session,
+            hasUser: !!session?.user,
+            userEmail: session?.user?.email,
+            hasAccessToken: !!session?.access_token,
+            hasRefreshToken: !!session?.refresh_token,
+            expiresAt: session?.expires_at,
+            error: error
+          });
           
-          // Debug what's in localStorage
-          if (!session) {
-            console.log('🔐 No session found - debugging localStorage...');
-            const { debugAuthState } = await import('../utils/authDebug');
-            debugAuthState();
-          }
+          console.log('🔐 === SESSION RECOVERY DEBUG END ===');
           
           if (mounted) {
             setSession(session);
