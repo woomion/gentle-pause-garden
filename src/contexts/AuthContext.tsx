@@ -72,8 +72,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Get initial session with retry logic for better persistence
       const getInitialSession = async () => {
         try {
+          // Debug localStorage before getting session
+          console.log('🔐 LocalStorage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
+          
           const { data: { session }, error } = await supabase.auth.getSession();
           console.log('🔐 Initial session check:', session?.user?.email, 'User ID:', session?.user?.id, 'Error:', error);
+          
+          // Debug what's in localStorage
+          if (!session) {
+            console.log('🔐 No session found - debugging localStorage...');
+            const { debugAuthState } = await import('../utils/authDebug');
+            debugAuthState();
+          }
           
           if (mounted) {
             setSession(session);
