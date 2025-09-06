@@ -112,7 +112,12 @@ serve(async (req) => {
         }
 
         try {
-          // Allow all notifications including test ones for proper testing
+          // Skip registration test notifications but allow real item notifications
+          if (payload.test === true && payload.title === 'Registration Test') {
+            console.log(`🧪 Registration test notification skipped for user ${userId}`);
+            successCount++;
+            continue;
+          }
 
           // Use the Progressier API format with user ID targeting
           const notificationPayload = {
