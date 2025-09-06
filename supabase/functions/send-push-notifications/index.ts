@@ -112,12 +112,7 @@ serve(async (req) => {
         }
 
         try {
-          // Skip test notifications only if explicitly marked as test
-          if (payload.test === true) {
-            console.log(`🧪 Test notification skipped for user ${userId}`);
-            successCount++;
-            continue;
-          }
+          // Allow all notifications including test ones for proper testing
 
           // Use the Progressier API format with user ID targeting
           const notificationPayload = {
