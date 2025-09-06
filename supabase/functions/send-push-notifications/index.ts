@@ -112,8 +112,8 @@ serve(async (req) => {
         }
 
         try {
-          // Skip test notifications
-          if (payload.test) {
+          // Skip test notifications only if explicitly marked as test
+          if (payload.test === true) {
             console.log(`🧪 Test notification skipped for user ${userId}`);
             successCount++;
             continue;
