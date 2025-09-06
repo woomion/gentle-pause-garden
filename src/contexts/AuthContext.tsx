@@ -52,12 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 setTimeout(async () => {
                   try {
-                    // First register user with Progressier for backend targeting
-                    const { progressierNotificationService } = await import('../services/progressierNotificationService');
-                    await progressierNotificationService.registerUserWithProgressier();
-                    console.log('🔔 User registered with Progressier on auth');
-                    
-                    // Then setup push token
+                    // Setup push token (user registration happens within this call now)
                     const { autoSetupPushToken } = await import('../utils/autoTokenSetup');
                     const success = await autoSetupPushToken();
                     console.log('🔔 Auto token setup on auth change:', success);
