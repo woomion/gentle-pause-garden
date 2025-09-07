@@ -158,6 +158,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Enhanced mobile web detection
       const isMobileWeb = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       console.log('📱 Mobile web detected:', isMobileWeb);
+      console.log('📱 Setting up auth persistence event listeners');
 
       // Add event listeners for web app lifecycle
       document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -167,6 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       window.addEventListener('blur', handleProgressierHidden);
       
       // Progressier-specific events (if available)
+      console.log('📱 Checking for Progressier:', typeof (window as any).progressier);
       if (typeof window !== 'undefined' && (window as any).progressier) {
         console.log('📱 Progressier detected, adding specific handlers');
         // Listen for Progressier app state changes
@@ -175,12 +177,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Check for restored auth state first
-      const restoredState = restoreAuthState();
-      if (restoredState) {
-        console.log('📱 Temporarily restoring auth state while verifying...');
-        setUser(restoredState.user);
-        setSession(restoredState.session);
-        setLoading(false);
+      console.log('📱 Checking localStorage for backup auth state...');
+      const backupAuth = localStorage.getItem('app-auth-backup');
+      if (backupAuth) {
+        try {
+          const parsed = JSON.parse(backupAuth);
+          console.log('📱 Found backup auth, has session:', !!parsed.session);
+          if (parsed.session?.refresh_token) {
+            console.log('📱 Setting backup session temporarily...');
+            setUser(parsed.user);
+            setSession(parsed.session);
+            setLoading(false);
+          }
+        } catch (e) {
+          console.log('📱 Invalid backup auth data, removing');
+          localStorage.removeItem('app-auth-backup');
+        }
+      } else {
+        console.log('📱 No backup auth found in localStorage');
       }
       // Enhanced session recovery for mobile app closures
       const getInitialSession = async () => {
