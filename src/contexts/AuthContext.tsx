@@ -69,49 +69,60 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       );
 
-      // Get initial session with retry logic for better persistence
+      // Enhanced session recovery for mobile app closures
       const getInitialSession = async () => {
         try {
-          console.log('🔐 === SESSION RECOVERY DEBUG START ===');
-          console.log('🔐 Current URL:', window.location.href);
-          console.log('🔐 Current Origin:', window.location.origin);
+          console.log('📱 === MOBILE SESSION RECOVERY START ===');
+          console.log('📱 Current URL:', window.location.href);
+          console.log('📱 Is mobile:', /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
           
-          // Check if we're on the right domain
-          console.log('🔐 Expected domain check passed');
+          // First attempt: Get session normally
+          let { data: { session }, error } = await supabase.auth.getSession();
+          console.log('📱 Initial session check:', { hasSession: !!session, error });
           
-          // Debug localStorage before getting session
-          const authKeys = Object.keys(localStorage).filter(k => k.includes('supabase') || k.includes('auth'));
-          console.log('🔐 Auth-related LocalStorage keys:', authKeys);
-          
-          // Show actual localStorage content
-          authKeys.forEach(key => {
-            const value = localStorage.getItem(key);
-            try {
-              const parsed = JSON.parse(value || '{}');
-              console.log(`🔐 ${key}:`, {
-                hasValue: !!value,
-                hasAccessToken: !!parsed?.access_token,
-                hasRefreshToken: !!parsed?.refresh_token,
-                expiresAt: parsed?.expires_at,
-                userEmail: parsed?.user?.email
-              });
-            } catch {
-              console.log(`🔐 ${key}: (not JSON)`, value?.substring(0, 50));
+          // If no session but we have localStorage data, try to refresh
+          if (!session && !error) {
+            const authKeys = Object.keys(localStorage).filter(k => k.includes('supabase'));
+            console.log('📱 Found localStorage keys:', authKeys);
+            
+            // Check for existing refresh token in localStorage
+            for (const key of authKeys) {
+              try {
+                const value = localStorage.getItem(key);
+                if (value) {
+                  const parsed = JSON.parse(value);
+                  if (parsed?.refresh_token) {
+                    console.log('📱 Found refresh token, attempting recovery...');
+                    
+                    // Try to refresh the session
+                    const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession({
+                      refresh_token: parsed.refresh_token
+                    });
+                    
+                    if (refreshData?.session && !refreshError) {
+                      console.log('📱 Session recovery successful!');
+                      session = refreshData.session;
+                      break;
+                    } else {
+                      console.log('📱 Session refresh failed:', refreshError);
+                    }
+                  }
+                }
+              } catch (e) {
+                console.log('📱 Error parsing localStorage key:', key, e);
+              }
             }
-          });
+          }
           
-          const { data: { session }, error } = await supabase.auth.getSession();
-          console.log('🔐 getSession() result:', {
+          // Final session state
+          console.log('📱 Final session state:', {
             hasSession: !!session,
             hasUser: !!session?.user,
             userEmail: session?.user?.email,
-            hasAccessToken: !!session?.access_token,
-            hasRefreshToken: !!session?.refresh_token,
-            expiresAt: session?.expires_at,
-            error: error
+            expiresAt: session?.expires_at
           });
           
-          console.log('🔐 === SESSION RECOVERY DEBUG END ===');
+          console.log('📱 === MOBILE SESSION RECOVERY END ===');
           
           if (mounted) {
             setSession(session);
