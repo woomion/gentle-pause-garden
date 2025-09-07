@@ -132,21 +132,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         saveAuthState();
       };
 
-      // Capacitor-specific app events
-      const handlePause = () => {
-        console.log('📱 App paused (Capacitor)');
+      // Progressier-specific app events
+      const handleProgressierHidden = () => {
+        console.log('📱 Progressier app hidden');
         saveAuthState();
       };
 
-      const handleResume = () => {
-        console.log('📱 App resumed (Capacitor)');
+      const handleProgressierVisible = () => {
+        console.log('📱 Progressier app visible');
         if (session) {
           supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
             if (currentSession) {
               setSession(currentSession);
               setUser(currentSession.user);
             } else {
-              console.log('📱 Session invalid after Capacitor resume');
+              console.log('📱 Session invalid after Progressier resume');
               setSession(null);
               setUser(null);
               localStorage.removeItem('app-auth-backup');
@@ -155,15 +155,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       };
 
-      // Add event listeners for app lifecycle
+      // Enhanced mobile web detection
+      const isMobileWeb = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      console.log('📱 Mobile web detected:', isMobileWeb);
+
+      // Add event listeners for web app lifecycle
       document.addEventListener('visibilitychange', handleVisibilityChange);
       window.addEventListener('beforeunload', handleBeforeUnload);
       window.addEventListener('pagehide', handleBeforeUnload);
+      window.addEventListener('focus', handleProgressierVisible);
+      window.addEventListener('blur', handleProgressierHidden);
       
-      // Capacitor app events (if available)
-      if (typeof window !== 'undefined' && (window as any).Capacitor) {
-        document.addEventListener('pause', handlePause);
-        document.addEventListener('resume', handleResume);
+      // Progressier-specific events (if available)
+      if (typeof window !== 'undefined' && (window as any).progressier) {
+        console.log('📱 Progressier detected, adding specific handlers');
+        // Listen for Progressier app state changes
+        document.addEventListener('progressier:hidden', handleProgressierHidden);
+        document.addEventListener('progressier:visible', handleProgressierVisible);
       }
 
       // Check for restored auth state first
@@ -278,14 +286,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (timeoutId) clearTimeout(timeoutId);
         subscription.unsubscribe();
         
-        // Clean up mobile lifecycle event listeners
+        // Clean up web app lifecycle event listeners
         document.removeEventListener('visibilitychange', handleVisibilityChange);
         window.removeEventListener('beforeunload', handleBeforeUnload);
         window.removeEventListener('pagehide', handleBeforeUnload);
+        window.removeEventListener('focus', handleProgressierVisible);
+        window.removeEventListener('blur', handleProgressierHidden);
         
-        if (typeof window !== 'undefined' && (window as any).Capacitor) {
-          document.removeEventListener('pause', handlePause);
-          document.removeEventListener('resume', handleResume);
+        if (typeof window !== 'undefined' && (window as any).progressier) {
+          document.removeEventListener('progressier:hidden', handleProgressierHidden);
+          document.removeEventListener('progressier:visible', handleProgressierVisible);
         }
       };
     } catch (error) {
