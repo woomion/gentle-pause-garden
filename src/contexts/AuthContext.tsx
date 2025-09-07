@@ -69,6 +69,111 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       );
 
+      // Mobile app lifecycle management for session persistence
+      const saveAuthState = () => {
+        console.log('📱 App closing - saving auth state');
+        if (session) {
+          localStorage.setItem('app-auth-backup', JSON.stringify({
+            user: user,
+            session: session,
+            timestamp: Date.now()
+          }));
+          console.log('📱 Auth state saved for app closure');
+        }
+      };
+
+      const restoreAuthState = () => {
+        console.log('📱 App opening - checking for saved auth state');
+        try {
+          const saved = localStorage.getItem('app-auth-backup');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            const age = Date.now() - parsed.timestamp;
+            
+            // If saved state is less than 24 hours old, use it temporarily
+            if (age < 24 * 60 * 60 * 1000) {
+              console.log('📱 Found recent auth state, will verify with server');
+              return parsed;
+            } else {
+              console.log('📱 Saved auth state too old, removing');
+              localStorage.removeItem('app-auth-backup');
+            }
+          }
+        } catch (e) {
+          console.log('📱 Error restoring auth state:', e);
+          localStorage.removeItem('app-auth-backup');
+        }
+        return null;
+      };
+
+      // Listen for app lifecycle events
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'hidden') {
+          console.log('📱 App going to background');
+          saveAuthState();
+        } else if (document.visibilityState === 'visible') {
+          console.log('📱 App coming to foreground - verifying session');
+          if (session) {
+            // Verify session is still valid when returning
+            supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+              if (!currentSession && session) {
+                console.log('📱 Session expired while app was backgrounded');
+                setSession(null);
+                setUser(null);
+                localStorage.removeItem('app-auth-backup');
+              }
+            });
+          }
+        }
+      };
+
+      const handleBeforeUnload = () => {
+        console.log('📱 App unloading - saving state');
+        saveAuthState();
+      };
+
+      // Capacitor-specific app events
+      const handlePause = () => {
+        console.log('📱 App paused (Capacitor)');
+        saveAuthState();
+      };
+
+      const handleResume = () => {
+        console.log('📱 App resumed (Capacitor)');
+        if (session) {
+          supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+            if (currentSession) {
+              setSession(currentSession);
+              setUser(currentSession.user);
+            } else {
+              console.log('📱 Session invalid after Capacitor resume');
+              setSession(null);
+              setUser(null);
+              localStorage.removeItem('app-auth-backup');
+            }
+          });
+        }
+      };
+
+      // Add event listeners for app lifecycle
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      window.addEventListener('pagehide', handleBeforeUnload);
+      
+      // Capacitor app events (if available)
+      if (typeof window !== 'undefined' && (window as any).Capacitor) {
+        document.addEventListener('pause', handlePause);
+        document.addEventListener('resume', handleResume);
+      }
+
+      // Check for restored auth state first
+      const restoredState = restoreAuthState();
+      if (restoredState) {
+        console.log('📱 Temporarily restoring auth state while verifying...');
+        setUser(restoredState.user);
+        setSession(restoredState.session);
+        setLoading(false);
+      }
       // Enhanced session recovery for mobile app closures
       const getInitialSession = async () => {
         try {
@@ -172,6 +277,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         mounted = false;
         if (timeoutId) clearTimeout(timeoutId);
         subscription.unsubscribe();
+        
+        // Clean up mobile lifecycle event listeners
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        window.removeEventListener('pagehide', handleBeforeUnload);
+        
+        if (typeof window !== 'undefined' && (window as any).Capacitor) {
+          document.removeEventListener('pause', handlePause);
+          document.removeEventListener('resume', handleResume);
+        }
       };
     } catch (error) {
       console.error('🔐 AuthProvider: Error in useEffect:', error);
