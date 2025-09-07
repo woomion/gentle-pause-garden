@@ -119,10 +119,10 @@ serve(async (req) => {
             continue;
           }
 
-          // Use the Progressier API format with user ID targeting
+          // Use the Progressier API format - target by user ID that was registered via progressier.add()
           const notificationPayload = {
             recipients: {
-              id: userId
+              userId: userId // Use userId field, not id
             },
             title: payload.title,
             body: payload.body,
