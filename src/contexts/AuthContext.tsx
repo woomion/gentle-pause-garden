@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener FIRST - this is critical
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('🔐 Auth state change:', event, session?.user?.email);
+        console.log('🔐 Auth state change:', event, session?.user?.email || 'no user');
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -53,13 +53,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     // THEN check for existing session
-    const getInitialSession = async () => {
+    const initializeAuth = async () => {
       try {
+        console.log('🔐 Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('🔐 Error getting session:', error);
         } else {
-          console.log('🔐 Initial session check:', session?.user?.email || 'No session');
+          console.log('🔐 Initial session:', session?.user?.email || 'No session found');
           setSession(session);
           setUser(session?.user ?? null);
         }
@@ -70,10 +71,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    getInitialSession();
+    initializeAuth();
 
     // Cleanup
     return () => {
+      console.log('🔐 Cleaning up auth listener');
       subscription.unsubscribe();
     };
   }, []);
