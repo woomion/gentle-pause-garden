@@ -39,33 +39,7 @@ self.addEventListener('fetch', event => {
 });
 
 // --- Push handling ---
-// Progressier's own handler will run because we imported their SW.
-// Keep ours defensive and additive; never throw.
-self.addEventListener('push', event => {
-  event.waitUntil((async () => {
-    try {
-      let data = {};
-      if (event.data) {
-        try { data = event.data.json(); } catch { data = { body: event.data.text() }; }
-      }
-
-      // If Progressier already showed a notification, showing another is optional.
-      // Keep ours as a fallback only when Progressier didn't include a payload.
-      if (!data || (!data.title && !data.notification)) {
-        await self.registration.showNotification('Pocket Pause', {
-          body: 'You have items ready to review.',
-          icon: '/icons/app-icon-512.png',
-          badge: '/icons/app-icon-512.png',
-          tag: 'pocket-pause-fallback',
-          data: { url: '/' }
-        });
-      }
-    } catch (e) {
-      // swallow to avoid breaking Progressier handler
-      console.error('Custom push handler error:', e);
-    }
-  })());
-});
+// Progressier handles all push notifications
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
