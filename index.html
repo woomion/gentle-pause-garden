@@ -116,20 +116,16 @@
     <!-- Register Service Worker for offline support and push notifications -->
     <script>
       if ('serviceWorker' in navigator) {
-        // Delay service worker registration to avoid interfering with auth
-        window.addEventListener('load', function() {
-          setTimeout(function() {
-            navigator.serviceWorker.register('/sw.js')
-              .then(function(registration) {
-                console.log('✅ SW registered with scope:', registration.scope);
-                // Force update to ensure latest version
-                registration.update();
-              })
-              .catch(function(error) {
-                console.log('❌ SW registration failed:', error);
-              });
-          }, 3000); // Wait 3 seconds after page load
-        });
+        // Register service worker immediately - Progressier needs this early
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(registration) {
+            console.log('✅ SW registered with scope:', registration.scope);
+            // Force update to ensure latest version
+            registration.update();
+          })
+          .catch(function(error) {
+            console.log('❌ SW registration failed:', error);
+          });
       }
     </script>
     <!-- Progressier PWA Push Notifications - Load immediately -->
