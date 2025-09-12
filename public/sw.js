@@ -1,33 +1,33 @@
-// public/sw.js — Pocket Pause PWA (fixed)
+// public/sw.js — Pocket Pause PWA
+self.skipWaiting();
 
-// 0) Load Progressier's service worker FIRST (replace <YOUR_ID> or URL they gave you)
+self.addEventListener('install', () => {
+  // Skip waiting to activate immediately
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+// IMPORTANT: load Progressier's SW (handles push, click, etc.)
 try {
   importScripts('https://progressier.app/9LL6P8U26R3MyH8El0RL/sw.js');
 } catch (e) {
-  // If this fails, Progressier pushes won't work
   console.error('Failed to import Progressier SW:', e);
 }
 
-const CACHE_NAME = 'pocket-pause-v2';
-const urlsToCache = ['/', '/static/js/bundle.js', '/static/css/main.css', '/favicon.ico'];
+// Basic caching
+const CACHE_NAME = 'pocket-pause-v3';
+const urlsToCache = ['/', '/favicon.ico'];
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     try {
       const cache = await caches.open(CACHE_NAME);
       await cache.addAll(urlsToCache);
-    } finally {
-      // Ensure new SW takes over ASAP
-      self.skipWaiting();
+    } catch (e) {
+      console.log('Cache setup failed:', e);
     }
-  })());
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : undefined)));
-    await clients.claim();
   })());
 });
 
@@ -39,33 +39,7 @@ self.addEventListener('fetch', event => {
 });
 
 // --- Push handling ---
-// Progressier's own handler will run because we imported their SW.
-// Keep ours defensive and additive; never throw.
-self.addEventListener('push', event => {
-  event.waitUntil((async () => {
-    try {
-      let data = {};
-      if (event.data) {
-        try { data = event.data.json(); } catch { data = { body: event.data.text() }; }
-      }
-
-      // If Progressier already showed a notification, showing another is optional.
-      // Keep ours as a fallback only when Progressier didn't include a payload.
-      if (!data || (!data.title && !data.notification)) {
-        await self.registration.showNotification('Pocket Pause', {
-          body: 'You have items ready to review.',
-          icon: '/icons/app-icon-512.png',
-          badge: '/icons/app-icon-512.png',
-          tag: 'pocket-pause-fallback',
-          data: { url: '/' }
-        });
-      }
-    } catch (e) {
-      // swallow to avoid breaking Progressier handler
-      console.error('Custom push handler error:', e);
-    }
-  })());
-});
+// Progressier handles all push notifications
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();

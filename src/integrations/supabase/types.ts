@@ -361,6 +361,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      send_test_push_notification: {
+        Args: { target_user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

@@ -61,6 +61,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.error('🔐 Error getting session:', error);
         } else {
           console.log('🔐 Initial session:', session?.user?.email || 'No session found');
+          console.log('🔐 Session details:', {
+            hasSession: !!session,
+            hasUser: !!session?.user,
+            userId: session?.user?.id,
+            email: session?.user?.email
+          });
           setSession(session);
           setUser(session?.user ?? null);
         }

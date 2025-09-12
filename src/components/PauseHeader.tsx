@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
+import { TestNotificationButton } from './TestNotificationButton';
 
 interface PauseHeaderProps {
   onProfileModalChange?: (isOpen: boolean) => void;
@@ -69,6 +70,9 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
                       <BookOpen size={24} />
                     </button>
                   )}
+
+                  {/* Quick access: Send Test Push */}
+                  <TestNotificationButton size="sm" className="" />
 
                   <button
                     className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"

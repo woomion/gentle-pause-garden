@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
-import { platformNotificationService } from '../services/platformNotificationService';
 import { supabasePausedItemsStore } from '../stores/supabasePausedItemsStore';
 import { pausedItemsStore } from '../stores/pausedItemsStore';
 import { useAuth } from '../contexts/AuthContext';
+import { ensureProgressierSubscribed } from '../utils/autoTokenSetup';
+import { TestNotificationButton } from './TestNotificationButton';
 import FeedbackModal from './FeedbackModal';
 // import PausePartnersSection from './PausePartnersSection';
 
@@ -27,67 +28,48 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
 
   const handleNotificationToggle = async (checked: boolean) => {
-    console.log('🔔 Progressier toggle clicked - checked:', checked);
+    console.log('🔔 Notification toggle clicked - checked:', checked);
     
-    if (checked) {
+    if (checked && user) {
       console.log('🔔 User wants to enable push notifications');
       
       try {
-        // Request permission via Progressier
-        const permission = await platformNotificationService.requestPermission();
-        console.log('🔔 Progressier permission result:', permission);
+        // Use the enhanced subscription method
+        const success = await ensureProgressierSubscribed(user);
         
-        if (permission) {
-          platformNotificationService.setEnabled(true);
-          const success = await updateNotificationSetting(true);
-          if (success) {
-            console.log('✅ Successfully enabled push notifications');
-            toast({
-              title: "Push notifications enabled",
-              description: "You'll receive push notifications when items are ready for review.",
-            });
-          }
-        } else {
-          console.log('❌ Permission denied by user');
+        if (success) {
+          console.log('✅ Progressier subscription successful');
+          updateNotificationSetting(true);
           toast({
-            title: "Permission denied",
-            description: "Please allow notifications when prompted to receive push alerts.",
+            title: "Push notifications enabled",
+            description: "You'll receive notifications when items are ready for review.",
+          });
+        } else {
+          console.log('❌ Progressier subscription failed');
+          toast({
+            title: "Setup incomplete",
+            description: "Please allow notifications in your browser and try again.",
             variant: "destructive"
           });
         }
       } catch (error) {
-        console.error('❌ Error requesting permission:', error);
+        console.error('❌ Error enabling push notifications:', error);
         toast({
-          title: "Permission error", 
-          description: "There was an error requesting notification permission.",
+          title: "Error",
+          description: "Failed to enable push notifications. Please try again.",
           variant: "destructive"
         });
       }
     } else {
-      console.log('🔔 Disabling push notifications...');
-      try {
-        await platformNotificationService.unsubscribe();
-        platformNotificationService.setEnabled(false);
-        const success = await updateNotificationSetting(false);
-        if (success) {
-          console.log('✅ Successfully disabled push notifications');
-          toast({
-            title: "Push notifications disabled",
-            description: "You won't receive push notifications anymore.",
-          });
-        }
-      } catch (error) {
-        console.error('❌ Error disabling notifications:', error);
-      }
+      updateNotificationSetting(checked);
     }
   };
 
   const handleTestNotification = async () => {
-    console.log('🧪 Progressier test notification button clicked');
+    console.log('🧪 Test notification button clicked');
     
     try {
-      // Test Progressier notification directly
-      await platformNotificationService.testNotification();
+      await testNotification();
       
       toast({
         title: "Test notification sent",
@@ -176,15 +158,23 @@ const SettingsSidebar = ({ open, onOpenChange }: SettingsSidebarProps) => {
                   />
                 </div>
                 
-                {notificationsEnabled && (
-                  <Button
-                    onClick={handleTestNotification}
-                    variant="outline"
-                    size="sm"
-                    className="w-full bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 border-gray-300 dark:border-gray-600 text-black dark:text-[#F9F5EB]"
-                  >
-                    Test Notification
-                  </Button>
+                {notificationsEnabled && user && (
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                      Notifications are enabled. Use the test buttons to verify they work.
+                    </p>
+                    <div className="space-y-2">
+                      <Button
+                        onClick={handleTestNotification}
+                        variant="outline"
+                        size="sm"
+                        className="w-full bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 border-gray-300 dark:border-gray-600 text-black dark:text-[#F9F5EB]"
+                      >
+                        🔔 Test Browser Notification
+                      </Button>
+                      <TestNotificationButton />
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
