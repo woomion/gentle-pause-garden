@@ -11,6 +11,8 @@ async function waitForProgressierReady(timeoutMs = 8000) {
 }
 
 export async function ensureProgressierSubscribed(user: { id: string, email?: string }) {
+  console.log('🔔 Ensuring Progressier subscription for user:', user.id);
+  
   // Ensure permission first
   const perm = await ensureNotificationPermission();
   if (perm !== 'granted') {
@@ -19,22 +21,39 @@ export async function ensureProgressierSubscribed(user: { id: string, email?: st
   }
 
   try {
+    console.log('⏳ Waiting for Progressier to be ready...');
     const progressier = await waitForProgressierReady();
+    
     // Ensure SW ready
+    console.log('⏳ Waiting for service worker to be ready...');
     await navigator.serviceWorker.ready;
 
     // Subscribe (idempotent)
-    console.log('📝 Subscribing to Progressier...');
+    console.log('📝 Subscribing to Progressier push notifications...');
     await progressier.subscribe();
+    console.log('✅ Progressier subscription successful');
 
     // Register user (for targeted sends)
-    console.log('👤 Registering user with Progressier...');
+    console.log('👤 Registering user with Progressier for targeted notifications...');
     await progressier.add({
       id: user.id,
       email: user.email || undefined
     });
+    console.log('✅ User registration with Progressier complete');
 
-    console.log('✅ Progressier subscription complete');
+    // Verify subscription is active
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      console.log('🔔 Push subscription status:', subscription ? 'ACTIVE' : 'INACTIVE');
+      
+      if (!subscription) {
+        console.log('⚠️ No push subscription found after setup');
+        return false;
+      }
+    }
+
+    console.log('✅ Progressier setup complete - user can receive closed-app notifications');
     return true;
   } catch (error) {
     console.error('❌ Progressier subscription failed:', error);
@@ -82,4 +101,18 @@ export async function autoSetupPushToken(): Promise<boolean> {
   }
 }
 
-// Modified to not run automatically - will be triggered by useNotifications when user auth is confirmed
+// Auto-run setup when module loads for authenticated users
+(async () => {
+  // Wait a bit for app to initialize
+  setTimeout(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        console.log('🔄 Auto-initializing push notifications for authenticated user');
+        await autoSetupPushToken();
+      }
+    } catch (error) {
+      console.log('ℹ️ Auto-setup skipped:', error.message);
+    }
+  }, 2000); // Wait 2 seconds for app to be ready
+})();
