@@ -37,6 +37,22 @@ class SupabasePausedItemsStore {
   constructor() {
     // Load items when store is created
     this.loadItems();
+
+    // Keep items in sync with auth state so refresh doesn’t lose data
+    try {
+      supabase.auth.onAuthStateChange((event) => {
+        console.log('🔐 SupabasePausedItemsStore auth event:', event);
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          this.loadItems();
+        } else if (event === 'SIGNED_OUT') {
+          this.items = [];
+          this.isLoaded = true;
+          this.notifyListeners();
+        }
+      });
+    } catch (e) {
+      console.error('Auth listener setup failed in store:', e);
+    }
   }
 
   private updateCheckInTimes(): void {
