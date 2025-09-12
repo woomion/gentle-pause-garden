@@ -721,7 +721,7 @@ console.log('Rendering main Index content');
                   {/* Desktop Grid Layout - same as regular items */}
                   <div className="hidden md:block">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 auto-rows-fr max-w-7xl mx-auto">
-                      <EmptyStateCard mode="desktop" />
+                      <EmptyStateCard mode="desktop" showImages={showImages} />
                     </div>
                   </div>
 
@@ -732,14 +732,14 @@ console.log('Rendering main Index content');
                          <Carousel className="w-full px-1">
                             <CarouselContent className="pl-0">
                               <CarouselItem className="basis-full">
-                                <EmptyStateCard mode="desktop" />
+                                <EmptyStateCard mode="desktop" showImages={showImages} />
                               </CarouselItem>
                             </CarouselContent>
                         </Carousel>
                       </div>
                     ) : (
                       <div className="w-full px-4">
-                        <EmptyStateCard mode="desktop" />
+                        <EmptyStateCard mode="desktop" showImages={showImages} />
                       </div>
                     )}
                   </div>
