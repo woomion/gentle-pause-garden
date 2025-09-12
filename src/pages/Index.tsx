@@ -8,8 +8,6 @@ import ReviewBanner from '../components/ReviewBanner';
 import AddPauseButton, { AddPauseButtonRef } from '../components/AddPauseButton';
 import MainTabs from '../components/MainTabs';
 import FooterLinks from '../components/FooterLinks';
-import { TestNotificationButton } from '../components/TestNotificationButton';
-import EmptyStateCard from '../components/EmptyStateCard';
 
 
 import SignupModal from '../components/SignupModal';
@@ -39,7 +37,6 @@ import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
 import DesktopItemCard from '../components/DesktopItemCard';
 import { useInstalledApp } from '../hooks/useInstalledApp';
 import { Button } from '../components/ui/button';
-import NotificationFixBanner from '../components/NotificationFixBanner';
 import { platformNotificationService } from '../services/platformNotificationService';
 import { useIsMobile } from '../hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -273,7 +270,6 @@ const Index = () => {
     if (pillMode) {
       setSharedPrefill(incoming || sharedContent.title);
       setCompactQuickBar(false); // ensure Pause button is visible
-      setHideBottomArea(false); // ensure footer area is visible for shared content
       console.log('📤 Index - Set pill prefill:', incoming || sharedContent.title);
     } else if (addPauseButtonRef.current) {
       console.log('📤 Index - Opening add pause modal');
@@ -380,7 +376,7 @@ console.log('Rendering main Index content');
       <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 flex flex-col md:bg-gradient-to-br md:from-background md:via-background/95 md:to-accent/10">
         {/* Header area - moved outside container for precise alignment */}
         <div className={`flex-shrink-0 ${installed ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-10' : 'pt-8 sm:pt-12 md:pt-14 lg:pt-16'}`}>
-      <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+          <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
             <PauseHeader onProfileModalChange={(isOpen) => {
               console.log('Profile modal changed:', isOpen);
               setProfileModalOpen(isOpen);
@@ -391,7 +387,6 @@ console.log('Rendering main Index content');
                 setHideBottomArea(false); // Keep footer visible but compact
               }
             }} />
-            <NotificationFixBanner />
           </div>
         </div>
         
@@ -399,39 +394,7 @@ console.log('Rendering main Index content');
         <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12`}>
           <WelcomeWithValues />
         </div>
-        
-        {/* Desktop test controls - mirrors mobile test card */}
-        <div className="hidden md:block flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
-          <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/50 mt-4">
-            <div className="text-sm text-blue-700 mb-2">🧪 Test Notifications</div>
-            <div className="space-y-2">
-              <Button 
-                onClick={async () => {
-                  const result = await createTestItem();
-                  if (result.success) {
-                    // Refresh the items list
-                    if (user) {
-                      // For logged in users, refresh Supabase store
-                      window.location.reload();
-                    } else {
-                      // For guest users, refresh local store  
-                      window.location.reload();
-                    }
-                    alert('✅ Test item created! Page will refresh to show it.');
-                  } else {
-                    alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
-                  }
-                }}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
-              >
-                Create Test Item (Ready in 5 min)
-              </Button>
-              <TestNotificationButton />
-            </div>
-          </div>
-        </div>
-        
+
         {/* Mobile controls - completely independent and stable - OUTSIDE scroll container */}
         <div className="md:hidden flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto">
           {/* Ready to review pill container */}
@@ -464,11 +427,10 @@ console.log('Rendering main Index content');
                     }
                   }}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Create Test Item (Ready in 5 min)
                 </Button>
-                <TestNotificationButton />
               </div>
             </div>
           </div>
@@ -717,36 +679,13 @@ console.log('Rendering main Index content');
                 </div>
               )}
 
-              {/* Beautiful empty state for new users */}
-              {!itemsLoading && currentPausedItems.length === 0 && (
-                <div className="mb-4">
-                  {/* Desktop Grid Layout - same as regular items */}
-                  <div className="hidden md:block">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 auto-rows-fr max-w-7xl mx-auto">
-                      <EmptyStateCard mode="desktop" showImages={showImages} />
-                    </div>
-                  </div>
-
-                  {/* Mobile content container - same as regular items */}
-                  <div className="md:hidden">
-                    {mobileViewMode === 'carousel' ? (
-                       <div className="w-full max-w-3xl mx-auto">
-                         <Carousel className="w-full px-1">
-                            <CarouselContent className="pl-0">
-                              <CarouselItem className="basis-full">
-                                <EmptyStateCard mode="desktop" showImages={showImages} />
-                              </CarouselItem>
-                            </CarouselContent>
-                        </Carousel>
-                      </div>
-                    ) : (
-                      <div className="w-full px-4">
-                        <EmptyStateCard mode="desktop" showImages={showImages} />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Notification setup prompt */}
+              {/* Empty state */}
+              {!itemsLoading && storeReadyItems.length === 0 && currentPausedItems.length === 0 && (
+                <div className="text-center py-8 md:py-16 md:bg-card/20 md:backdrop-blur-sm md:rounded-2xl md:border md:border-border/30">
+                  <div className="text-muted-foreground text-sm md:text-base">No paused items yet</div>
+                  <div className="text-xs text-muted-foreground mt-1 md:text-sm md:mt-2">Add something below to get started</div>
+                  
+                  {/* Notification setup prompt - show even if user has items */}
                   {user && Notification.permission !== 'granted' && (
                     <div className="mt-4 p-4 border border-orange-200 rounded-lg bg-orange-50/50">
                       <div className="text-sm text-orange-700 mb-2">🔔 Get notified when items are ready for review</div>
@@ -786,23 +725,20 @@ console.log('Rendering main Index content');
             {/* Test item creation button */}
             <div className="p-4 border border-blue-200 rounded-lg bg-blue-50/50 mb-4">
               <div className="text-sm text-blue-700 mb-2">🧪 Test Notifications</div>
-              <div className="space-y-2">
-                <Button 
-                  onClick={async () => {
-                    const result = await createTestItem();
-                    if (result.success) {
-                      alert('✅ Test item created! It will be ready for review in 5 minutes.');
-                    } else {
-                      alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
-                    }
-                  }}
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
-                >
-                  Create Test Item (Ready in 5 min)
-                </Button>
-                <TestNotificationButton />
-              </div>
+              <Button 
+                onClick={async () => {
+                  const result = await createTestItem();
+                  if (result.success) {
+                    alert('✅ Test item created! It will be ready for review in 5 minutes.');
+                  } else {
+                    alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
+                  }
+                }}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
+              >
+                Create Test Item (Ready in 5 min)
+              </Button>
             </div>
             
             {/* Notification setup */}
@@ -846,17 +782,12 @@ console.log('Rendering main Index content');
             <PillQuickPauseBar
               compact={compactQuickBar}
               prefillValue={sharedPrefill || ''}
-              onExpandRequest={() => {
-                setCompactQuickBar(false);
-                setHideBottomArea(false); // always show footer when expanding
-              }}
+              onExpandRequest={() => setCompactQuickBar(false)}
               onUrlEntry={() => {
                 setHideBottomArea(false);
-                setCompactQuickBar(false); // expand when user starts typing
               }}
               onBarcodeScanned={() => {
                 setHideBottomArea(false);
-                setCompactQuickBar(false); // expand when scanning
               }}
               onCollapseChange={(collapsed) => {
                 // Mobile only compacts, never hides

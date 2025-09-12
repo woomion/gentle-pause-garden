@@ -34,21 +34,13 @@ export class PlatformNotificationService {
   ): Promise<void> {
     const { delayMs = 0 } = options;
     
-    console.log('🔔 PlatformNotificationService: Scheduling notification:', {
+    console.log('🔔 PlatformNotificationService: Scheduling web notification:', {
       title,
       body,
-      delayMs,
-      isProgressierSubscribed: await progressierNotificationService.isSubscribed()
+      delayMs
     });
 
-    // Use showNotification which properly routes through Progressier first
-    if (delayMs > 0) {
-      setTimeout(() => {
-        this.showNotification(title, { body });
-      }, delayMs);
-    } else {
-      await this.showNotification(title, { body });
-    }
+    await webNotificationService.scheduleNotification(title, body, delayMs);
   }
 
   async requestPermission(): Promise<boolean> {

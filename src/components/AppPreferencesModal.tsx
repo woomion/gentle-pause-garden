@@ -2,15 +2,10 @@ import React from 'react';
 import { X, Palette, Monitor, Sun, Moon, Laptop, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from '@/components/ThemeProvider';
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { useAuth } from '@/contexts/AuthContext';
-import { ensureProgressierSubscribed } from '@/utils/autoTokenSetup';
-import { TestNotificationButton } from './TestNotificationButton';
-import { useToast } from '@/hooks/use-toast';
 
 
 interface AppPreferencesModalProps {
@@ -20,43 +15,7 @@ interface AppPreferencesModalProps {
 
 const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClose }) => {
   const { theme, setTheme, actualTheme } = useTheme();
-  const { notificationSettings, notificationsEnabled, updateNotificationSettings, updateNotificationSetting, loading } = useUserSettings();
-  const { user } = useAuth();
-  const { toast } = useToast();
-
-  const handleNotificationToggle = async (checked: boolean) => {
-    if (checked && user) {
-      try {
-        // Use the enhanced subscription method
-        const success = await ensureProgressierSubscribed(user);
-        
-        if (success) {
-          console.log('✅ Progressier subscription successful');
-          updateNotificationSetting(true);
-          toast({
-            title: "Push notifications enabled",
-            description: "You'll receive notifications when items are ready for review.",
-          });
-        } else {
-          console.log('❌ Progressier subscription failed');
-          toast({
-            title: "Setup incomplete",
-            description: "Please allow notifications in your browser and try again.",
-            variant: "destructive"
-          });
-        }
-      } catch (error) {
-        console.error('❌ Error enabling push notifications:', error);
-        toast({
-          title: "Error",
-          description: "Failed to enable push notifications. Please try again.",
-          variant: "destructive"
-        });
-      }
-    } else {
-      updateNotificationSetting(checked);
-    }
-  };
+  const { notificationSettings, updateNotificationSettings } = useUserSettings();
 
   if (!isOpen) return null;
 
@@ -132,25 +91,9 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
                 Notifications
               </Label>
               
-              {/* Main notification toggle */}
-              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                <div>
-                  <div className="text-sm font-medium">Enable Notifications</div>
-                  <div className="text-xs text-muted-foreground">
-                    Get notified when paused items are ready for review
-                  </div>
-                </div>
-                <Switch
-                  checked={notificationsEnabled}
-                  onCheckedChange={handleNotificationToggle}
-                  disabled={loading}
-                />
-              </div>
-
-              {/* Show delivery options only when notifications are enabled */}
-              {notificationsEnabled && (
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">Delivery Style</Label>
+              {/* Delivery Style */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Delivery Style</Label>
                 <div className="space-y-2">
                   <div className="flex items-start gap-3">
                     <input
@@ -281,18 +224,7 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
                   </div>
                 </div>
               </div>
-              )}
 
-              {/* Test buttons when notifications are enabled */}
-              {notificationsEnabled && user && (
-                <div className="space-y-3 p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="text-sm font-medium text-blue-700 dark:text-blue-300">Test Notifications</div>
-                  <div className="text-xs text-blue-600 dark:text-blue-400 mb-2">
-                    Use this button to test push notifications (close the app tab first)
-                  </div>
-                  <TestNotificationButton />
-                </div>
-              )}
             </div>
 
           </div>

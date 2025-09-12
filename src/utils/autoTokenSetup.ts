@@ -1,65 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { ensureNotificationPermission } from './ensureNotificationPermission';
-
-async function waitForProgressierReady(timeoutMs = 8000) {
-  const start = Date.now();
-  while (!(window as any).progressier) {
-    if (Date.now() - start > timeoutMs) throw new Error('Progressier not found');
-    await new Promise(r => setTimeout(r, 100));
-  }
-  return (window as any).progressier;
-}
-
-export async function ensureProgressierSubscribed(user: { id: string, email?: string }) {
-  console.log('🔔 Ensuring Progressier subscription for user:', user.id);
-  
-  // Ensure permission first
-  const perm = await ensureNotificationPermission();
-  if (perm !== 'granted') {
-    console.log('❌ Notification permission not granted');
-    return false;
-  }
-
-  try {
-    console.log('⏳ Waiting for Progressier to be ready...');
-    const progressier = await waitForProgressierReady();
-    
-    // Ensure SW ready
-    console.log('⏳ Waiting for service worker to be ready...');
-    await navigator.serviceWorker.ready;
-
-    // Subscribe (idempotent)
-    console.log('📝 Subscribing to Progressier push notifications...');
-    await progressier.subscribe();
-    console.log('✅ Progressier subscription successful');
-
-    // Register user (for targeted sends)
-    console.log('👤 Registering user with Progressier for targeted notifications...');
-    await progressier.add({
-      id: user.id,
-      email: user.email || undefined
-    });
-    console.log('✅ User registration with Progressier complete');
-
-    // Verify subscription is active
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      console.log('🔔 Push subscription status:', subscription ? 'ACTIVE' : 'INACTIVE');
-      
-      if (!subscription) {
-        console.log('⚠️ No push subscription found after setup');
-        return false;
-      }
-    }
-
-    console.log('✅ Progressier setup complete - user can receive closed-app notifications');
-    return true;
-  } catch (error) {
-    console.error('❌ Progressier subscription failed:', error);
-    return false;
-  }
-}
 
 export async function autoSetupPushToken(): Promise<boolean> {
   try {
@@ -72,47 +11,98 @@ export async function autoSetupPushToken(): Promise<boolean> {
       return false;
     }
 
-    // Use the new ensure function
-    const success = await ensureProgressierSubscribed(user);
-    if (!success) {
-      return false;
-    }
-    // Store token in database
-    console.log('💾 Storing push token...');
-    const { error: storeError } = await supabase.functions.invoke('store-push-token', {
-      body: {
-        userId: user.id,
-        token: 'progressier-managed',
-        endpoint: 'progressier-managed',
-        platform: 'web'
-      }
-    });
-
-    if (storeError) {
-      console.error('❌ Error storing push token:', storeError);
-      return false;
-    }
+    // Check if we already have a token stored
+    const { data: existingTokens } = await supabase
+      .from('push_tokens')
+      .select('*')
+      .eq('user_id', user.id);
     
-    console.log('✅ Push token setup complete!');
-    return true;
+    if (existingTokens && existingTokens.length > 0) {
+      console.log('✅ Push token already exists');
+      return true;
+    }
+
+    // Wait for service worker to be ready
+    await navigator.serviceWorker.ready;
+    console.log('✅ Service worker ready');
+
+    // Wait for Progressier to load
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Check if Progressier is available
+    if (typeof window !== 'undefined' && (window as any).progressier) {
+      console.log('📱 Progressier is available, setting up subscription...');
+      
+      const progressier = (window as any).progressier;
+      
+      try {
+        // Subscribe directly (Progressier handles permission internally)
+        console.log('📝 Attempting to subscribe...');
+        await progressier.subscribe();
+
+        // Identify the user so backend can target pushes
+        if (typeof progressier.setUserId === 'function') {
+          await progressier.setUserId(user.id);
+          console.log('✅ User ID set with Progressier:', user.id);
+        } else if (typeof progressier.add === 'function') {
+          await progressier.add({ 
+            id: user.id, 
+            email: user.email, 
+            tags: ['authenticated', 'push-enabled'] 
+          });
+          console.log('✅ User registered with Progressier');
+        }
+        
+        // Store token (no need to verify subscription since subscribe() would throw if it failed)
+        console.log('✅ Subscription successful, storing token...');
+        
+        // Store token using fetch to avoid SW issues
+        const response = await fetch('/api/v1/store-push-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            token: 'progressier-managed',
+            endpoint: 'progressier-managed',
+            platform: 'web'
+          })
+        });
+
+        if (!response.ok) {
+          console.error('❌ Error storing push token via fetch');
+          // Fallback to Supabase function
+          const { error: storeError } = await supabase.functions.invoke('store-push-token', {
+            body: {
+              userId: user.id,
+              token: 'progressier-managed',
+              endpoint: 'progressier-managed',
+              platform: 'web'
+            }
+          });
+
+          if (storeError) {
+            console.error('❌ Error storing push token:', storeError);
+            return false;
+          }
+        }
+        
+        console.log('✅ Progressier subscription recorded successfully!');
+        return true;
+      } catch (progressierError) {
+        console.log('ℹ️ Progressier subscription failed or was declined:', progressierError);
+        return false;
+      }
+    } else {
+      console.log('❌ Progressier not available');
+      return false;
+    }
   } catch (error) {
     console.error('❌ Error in auto token setup:', error);
     return false;
   }
 }
 
-// Auto-run setup when module loads for authenticated users
-(async () => {
-  // Wait a bit for app to initialize
-  setTimeout(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        console.log('🔄 Auto-initializing push notifications for authenticated user');
-        await autoSetupPushToken();
-      }
-    } catch (error) {
-      console.log('ℹ️ Auto-setup skipped:', error.message);
-    }
-  }, 2000); // Wait 2 seconds for app to be ready
-})();
+// Modified to not run automatically - will be triggered by useNotifications when user auth is confirmed
