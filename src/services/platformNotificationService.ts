@@ -56,17 +56,33 @@ export class PlatformNotificationService {
     
     // Try Progressier first
     const progressierResult = await progressierNotificationService.requestPermission();
-    if (progressierResult) {
-      console.log('✅ Progressier permission granted');
-      return true;
+    let granted = !!progressierResult;
+
+    if (!granted) {
+      // Fallback to regular browser notifications
+      console.log('⚠️ Progressier failed, falling back to browser notifications');
+      const browserResult = await notificationService.requestPermission();
+      console.log('🔔 Browser notification permission result:', browserResult);
+      granted = !!browserResult;
     }
-    
-    // Fallback to regular browser notifications
-    console.log('⚠️ Progressier failed, falling back to browser notifications');
-    const browserResult = await notificationService.requestPermission();
-    console.log('🔔 Browser notification permission result:', browserResult);
-    
-    return browserResult;
+
+    // Persist preference for authenticated users
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('user_settings')
+          .upsert(
+            { user_id: user.id, notifications_enabled: granted },
+            { onConflict: 'user_id' }
+          );
+      }
+    } catch (e) {
+      console.log('🔔 Could not persist notification preference:', e);
+    }
+
+    return granted;
   }
 
   async showNotification(title: string, options: NotificationOptions = {}): Promise<void> {
