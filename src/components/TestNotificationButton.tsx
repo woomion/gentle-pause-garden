@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export const TestNotificationButton = () => {
+export const TestNotificationButton = ({ size = 'sm', className }: { size?: 'sm' | 'default' | 'lg'; className?: string }) => {
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -57,8 +57,8 @@ export const TestNotificationButton = () => {
     <Button 
       onClick={sendTestPush}
       variant="outline"
-      size="sm"
-      className="w-full"
+      size={size}
+      className={className ?? "w-full"}
     >
       🧪 Send Test Push
     </Button>
