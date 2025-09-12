@@ -132,6 +132,28 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
                 Notifications
               </Label>
               
+              {/* Explicit enable/repair button in case the toggle UI doesn't appear */}
+              {user && !notificationsEnabled && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => handleNotificationToggle(true)}
+                  className="w-full"
+                >
+                  Enable Push Notifications
+                </Button>
+              )}
+              {user && notificationsEnabled && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleNotificationToggle(true)}
+                  className="w-full"
+                >
+                  Repair/Resubscribe Push
+                </Button>
+              )}
+              
               {/* Main notification toggle */}
               <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                 <div>
