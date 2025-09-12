@@ -9,7 +9,7 @@ import { extractStoreName } from '@/utils/pausedItemsUtils';
 import { Clipboard, Check, Scan } from 'lucide-react';
 import BarcodeScanner from '../BarcodeScanner';
 import { lookupProductByBarcode } from '@/utils/productLookup';
-import { triggerHapticFeedback, stopHapticFeedback } from '@/utils/hapticUtils';
+import { startHapticPulse, stopHapticPulse } from '@/utils/hapticUtils';
 
 import { useSubscription } from '@/hooks/useSubscription';
 import PremiumDurationModal from '../PremiumDurationModal';
@@ -132,8 +132,8 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
     
     console.log('✅ Usage limit check passed, proceeding...');
     
-    // Trigger soft pulsing haptic feedback when starting to pause
-    triggerHapticFeedback('soft');
+    // Start soft pulsing haptic feedback while pausing
+    startHapticPulse('soft');
     
     setSubmitting(true);
 
@@ -197,7 +197,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
       toast({ title: 'Error', description: 'Could not add item', variant: 'destructive' });
     } finally {
       // Stop haptic feedback when pausing completes
-      stopHapticFeedback();
+      stopHapticPulse();
       setSubmitting(false);
     }
   };
