@@ -8,6 +8,7 @@ import ReviewBanner from '../components/ReviewBanner';
 import AddPauseButton, { AddPauseButtonRef } from '../components/AddPauseButton';
 import MainTabs from '../components/MainTabs';
 import FooterLinks from '../components/FooterLinks';
+import { TestNotificationButton } from '../components/TestNotificationButton';
 
 
 import SignupModal from '../components/SignupModal';
@@ -725,20 +726,23 @@ console.log('Rendering main Index content');
             {/* Test item creation button */}
             <div className="p-4 border border-blue-200 rounded-lg bg-blue-50/50 mb-4">
               <div className="text-sm text-blue-700 mb-2">🧪 Test Notifications</div>
-              <Button 
-                onClick={async () => {
-                  const result = await createTestItem();
-                  if (result.success) {
-                    alert('✅ Test item created! It will be ready for review in 5 minutes.');
-                  } else {
-                    alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
-                  }
-                }}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
-              >
-                Create Test Item (Ready in 5 min)
-              </Button>
+              <div className="space-y-2">
+                <Button 
+                  onClick={async () => {
+                    const result = await createTestItem();
+                    if (result.success) {
+                      alert('✅ Test item created! It will be ready for review in 5 minutes.');
+                    } else {
+                      alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
+                    }
+                  }}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
+                >
+                  Create Test Item (Ready in 5 min)
+                </Button>
+                <TestNotificationButton />
+              </div>
             </div>
             
             {/* Notification setup */}
