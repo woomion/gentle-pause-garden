@@ -79,53 +79,7 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
         
         <ScrollArea className="flex-1">
           <div className="space-y-6 pr-3">
-            {/* Light/Dark Theme Toggle */}
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <Monitor size={16} />
-                Theme Mode
-              </Label>
-              <div className="flex gap-2">
-                <Button
-                  variant={theme === 'light' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTheme('light')}
-                  className="flex-1 flex items-center gap-2"
-                >
-                  <Sun size={16} />
-                  Light
-                </Button>
-                <Button
-                  variant={theme === 'dark' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTheme('dark')}
-                  className="flex-1 flex items-center gap-2"
-                >
-                  <Moon size={16} />
-                  Dark
-                </Button>
-                <Button
-                  variant={theme === 'system' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTheme('system')}
-                  className="flex-1 flex items-center gap-2"
-                >
-                  <Laptop size={16} />
-                  Auto
-                </Button>
-              </div>
-            </div>
-
-            {/* Color Theme Selection */}
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <Palette size={16} />
-                Color Theme
-              </Label>
-              <ThemeSelector />
-            </div>
-
-            {/* Notifications Section */}
+            {/* Notifications Section (moved to top for visibility) */}
             <div className="space-y-4">
               <Label className="flex items-center gap-2">
                 <Bell size={16} />
@@ -173,136 +127,136 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
               {notificationsEnabled && (
                 <div className="space-y-3">
                   <Label className="text-sm font-medium">Delivery Style</Label>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      id="item-by-item"
-                      name="delivery-style"
-                      value="item_by_item"
-                      checked={notificationSettings?.deliveryStyle === 'item_by_item'}
-                      onChange={(e) => updateNotificationSettings({ deliveryStyle: e.target.value as any })}
-                      className="mt-1"
-                    />
-                    <div>
-                      <Label htmlFor="item-by-item" className="text-sm font-medium cursor-pointer">
-                        Item-by-item
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        Get a notification each time a paused item is ready.
-                      </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        id="item-by-item"
+                        name="delivery-style"
+                        value="item_by_item"
+                        checked={notificationSettings?.deliveryStyle === 'item_by_item'}
+                        onChange={(e) => updateNotificationSettings({ deliveryStyle: e.target.value as any })}
+                        className="mt-1"
+                      />
+                      <div>
+                        <Label htmlFor="item-by-item" className="text-sm font-medium cursor-pointer">
+                          Item-by-item
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Get a notification each time a paused item is ready.
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      id="daily-batch"
-                      name="delivery-style"
-                      value="daily_batch"
-                      checked={notificationSettings?.deliveryStyle === 'daily_batch'}
-                      onChange={(e) => updateNotificationSettings({ deliveryStyle: e.target.value as any })}
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <Label htmlFor="daily-batch" className="text-sm font-medium cursor-pointer">
-                        Daily batch
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        One notification per day with all items that are ready.
-                      </p>
-                      
-                      {/* Timing options nested under daily batch */}
-                      {notificationSettings?.deliveryStyle === 'daily_batch' && (
-                        <div className="mt-3 ml-4 pl-3 border-l-2 border-muted space-y-2">
-                          <Label className="text-xs font-medium text-muted-foreground">Timing</Label>
-                          <div className="space-y-2">
-                            <div className="flex items-start gap-2">
-                              <input
-                                type="radio"
-                                id="morning"
-                                name="timing"
-                                value="morning"
-                                checked={notificationSettings?.timing === 'morning'}
-                                onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 8 })}
-                                className="mt-1"
-                              />
-                              <div>
-                                <Label htmlFor="morning" className="text-xs font-medium cursor-pointer">
-                                  Morning (8 AM)
-                                </Label>
-                                <p className="text-xs text-muted-foreground">
-                                  Start the day with clarity.
-                                </p>
+                    
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        id="daily-batch"
+                        name="delivery-style"
+                        value="daily_batch"
+                        checked={notificationSettings?.deliveryStyle === 'daily_batch'}
+                        onChange={(e) => updateNotificationSettings({ deliveryStyle: e.target.value as any })}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="daily-batch" className="text-sm font-medium cursor-pointer">
+                          Daily batch
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          One notification per day with all items that are ready.
+                        </p>
+                        
+                        {/* Timing options nested under daily batch */}
+                        {notificationSettings?.deliveryStyle === 'daily_batch' && (
+                          <div className="mt-3 ml-4 pl-3 border-l-2 border-muted space-y-2">
+                            <Label className="text-xs font-medium text-muted-foreground">Timing</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-start gap-2">
+                                <input
+                                  type="radio"
+                                  id="morning"
+                                  name="timing"
+                                  value="morning"
+                                  checked={notificationSettings?.timing === 'morning'}
+                                  onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 8 })}
+                                  className="mt-1"
+                                />
+                                <div>
+                                  <Label htmlFor="morning" className="text-xs font-medium cursor-pointer">
+                                    Morning (8 AM)
+                                  </Label>
+                                  <p className="text-xs text-muted-foreground">
+                                    Start the day with clarity.
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            
-                            <div className="flex items-start gap-2">
-                              <input
-                                type="radio"
-                                id="afternoon"
-                                name="timing"
-                                value="afternoon"
-                                checked={notificationSettings?.timing === 'afternoon'}
-                                onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 12 })}
-                                className="mt-1"
-                              />
-                              <div>
-                                <Label htmlFor="afternoon" className="text-xs font-medium cursor-pointer">
-                                  Afternoon (12 PM)
-                                </Label>
-                                <p className="text-xs text-muted-foreground">
-                                  Check in at midday.
-                                </p>
+                              
+                              <div className="flex items-start gap-2">
+                                <input
+                                  type="radio"
+                                  id="afternoon"
+                                  name="timing"
+                                  value="afternoon"
+                                  checked={notificationSettings?.timing === 'afternoon'}
+                                  onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 12 })}
+                                  className="mt-1"
+                                />
+                                <div>
+                                  <Label htmlFor="afternoon" className="text-xs font-medium cursor-pointer">
+                                    Afternoon (12 PM)
+                                  </Label>
+                                  <p className="text-xs text-muted-foreground">
+                                    Check in at midday.
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            
-                            <div className="flex items-start gap-2">
-                              <input
-                                type="radio"
-                                id="evening"
-                                name="timing"
-                                value="evening"
-                                checked={notificationSettings?.timing === 'evening'}
-                                onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 18 })}
-                                className="mt-1"
-                              />
-                              <div>
-                                <Label htmlFor="evening" className="text-xs font-medium cursor-pointer">
-                                  Evening (6 PM)
-                                </Label>
-                                <p className="text-xs text-muted-foreground">
-                                  Pause and review before the day ends.
-                                </p>
+                              
+                              <div className="flex items-start gap-2">
+                                <input
+                                  type="radio"
+                                  id="evening"
+                                  name="timing"
+                                  value="evening"
+                                  checked={notificationSettings?.timing === 'evening'}
+                                  onChange={(e) => updateNotificationSettings({ timing: e.target.value as any, timingHour: 18 })}
+                                  className="mt-1"
+                                />
+                                <div>
+                                  <Label htmlFor="evening" className="text-xs font-medium cursor-pointer">
+                                    Evening (6 PM)
+                                  </Label>
+                                  <p className="text-xs text-muted-foreground">
+                                    Pause and review before the day ends.
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      id="muted"
-                      name="delivery-style"
-                      value="muted"
-                      checked={notificationSettings?.deliveryStyle === 'muted'}
-                      onChange={(e) => updateNotificationSettings({ deliveryStyle: e.target.value as any })}
-                      className="mt-1"
-                    />
-                    <div>
-                      <Label htmlFor="muted" className="text-sm font-medium cursor-pointer">
-                        Mute All
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        Silence notifications, but keep your Pause List updated.
-                      </p>
+                    
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="radio"
+                        id="muted"
+                        name="delivery-style"
+                        value="muted"
+                        checked={notificationSettings?.deliveryStyle === 'muted'}
+                        onChange={(e) => updateNotificationSettings({ deliveryStyle: e.target.value as any })}
+                        className="mt-1"
+                      />
+                      <div>
+                        <Label htmlFor="muted" className="text-sm font-medium cursor-pointer">
+                          Mute All
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Silence notifications, but keep your Pause List updated.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
               )}
 
               {/* Test buttons when notifications are enabled */}
@@ -317,6 +271,51 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
               )}
             </div>
 
+            {/* Light/Dark Theme Toggle */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Monitor size={16} />
+                Theme Mode
+              </Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={theme === 'light' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTheme('light')}
+                  className="flex-1 flex items-center gap-2"
+                >
+                  <Sun size={16} />
+                  Light
+                </Button>
+                <Button
+                  variant={theme === 'dark' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTheme('dark')}
+                  className="flex-1 flex items-center gap-2"
+                >
+                  <Moon size={16} />
+                  Dark
+                </Button>
+                <Button
+                  variant={theme === 'system' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setTheme('system')}
+                  className="flex-1 flex items-center gap-2"
+                >
+                  <Laptop size={16} />
+                  Auto
+                </Button>
+              </div>
+            </div>
+
+            {/* Color Theme Selection */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Palette size={16} />
+                Color Theme
+              </Label>
+              <ThemeSelector />
+            </div>
           </div>
         </ScrollArea>
       </div>
