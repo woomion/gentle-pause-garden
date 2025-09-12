@@ -73,14 +73,11 @@ const EmptyStateCard = ({ mode, showImages = true }: EmptyStateCardProps) => {
               <Heart className="h-5 w-5 text-primary/60 flex-shrink-0" />
               Welcome to Pocket Pause!
             </h3>
-            <p className="text-sm text-muted-foreground mb-2 line-clamp-1">
-              Take control of impulse purchases
-            </p>
           </div>
 
           <div className="space-y-2 mb-3">
             <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2">
-              Paste any shopping link above to pause your impulse purchases. Give yourself time to think it over before buying.
+              Paste any shopping link to give yourself time to think it over before buying.
             </p>
 
             <div className="flex items-center gap-2 text-xs text-primary/60">
@@ -93,9 +90,6 @@ const EmptyStateCard = ({ mode, showImages = true }: EmptyStateCardProps) => {
           <div className="flex items-center justify-between">
             <div className="text-xs text-muted-foreground/60">
               Start above ✨
-            </div>
-            <div className="text-xs text-primary/60 font-medium">
-              Get started
             </div>
           </div>
         </div>
