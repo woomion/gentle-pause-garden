@@ -4,7 +4,7 @@
   "description": "Pause purchases, make thoughtful decisions",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
+  "background_color": "#f9f5eb",
   "theme_color": "#CAB6F7",
   "orientation": "portrait-primary",
   "scope": "/",
