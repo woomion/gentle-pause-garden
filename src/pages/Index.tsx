@@ -9,6 +9,7 @@ import AddPauseButton, { AddPauseButtonRef } from '../components/AddPauseButton'
 import MainTabs from '../components/MainTabs';
 import FooterLinks from '../components/FooterLinks';
 import { TestNotificationButton } from '../components/TestNotificationButton';
+import EmptyStateCard from '../components/EmptyStateCard';
 
 
 import SignupModal from '../components/SignupModal';
@@ -714,13 +715,36 @@ console.log('Rendering main Index content');
                 </div>
               )}
 
-              {/* Empty state */}
+              {/* Beautiful empty state for new users */}
               {!itemsLoading && storeReadyItems.length === 0 && currentPausedItems.length === 0 && (
-                <div className="text-center py-8 md:py-16 md:bg-card/20 md:backdrop-blur-sm md:rounded-2xl md:border md:border-border/30">
-                  <div className="text-muted-foreground text-sm md:text-base">No paused items yet</div>
-                  <div className="text-xs text-muted-foreground mt-1 md:text-sm md:mt-2">Add something below to get started</div>
-                  
-                  {/* Notification setup prompt - show even if user has items */}
+                <div className="mb-4">
+                  {/* Desktop Grid Layout - same as regular items */}
+                  <div className="hidden md:block">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 auto-rows-fr max-w-7xl mx-auto">
+                      <EmptyStateCard mode="desktop" />
+                    </div>
+                  </div>
+
+                  {/* Mobile content container - same as regular items */}
+                  <div className="md:hidden">
+                    {mobileViewMode === 'carousel' ? (
+                       <div className="w-full max-w-3xl mx-auto">
+                         <Carousel className="w-full px-1">
+                            <CarouselContent className="pl-0">
+                              <CarouselItem className="basis-full">
+                                <EmptyStateCard mode="desktop" />
+                              </CarouselItem>
+                            </CarouselContent>
+                        </Carousel>
+                      </div>
+                    ) : (
+                      <div className="w-full px-4">
+                        <EmptyStateCard mode="desktop" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Notification setup prompt */}
                   {user && Notification.permission !== 'granted' && (
                     <div className="mt-4 p-4 border border-orange-200 rounded-lg bg-orange-50/50">
                       <div className="text-sm text-orange-700 mb-2">🔔 Get notified when items are ready for review</div>
