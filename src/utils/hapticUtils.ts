@@ -1,33 +1,34 @@
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
-
 /**
- * Haptic feedback utilities with Capacitor (native on iOS/Android) + web fallback
+ * Haptic feedback utilities for PWA using Web Vibration API
+ * Works great on Android PWAs, limited on iOS
  */
 let pulseTimer: number | undefined;
 
-export const triggerHapticFeedback = async (
+export const triggerHapticFeedback = (
   strength: 'soft' | 'medium' | 'strong' = 'soft'
 ) => {
+  if (!navigator.vibrate) {
+    console.log('Vibration API not supported');
+    return;
+  }
+
   try {
-    const style =
-      strength === 'strong' ? ImpactStyle.Heavy : strength === 'medium' ? ImpactStyle.Medium : ImpactStyle.Light;
-    await Haptics.impact({ style });
-  } catch (err) {
-    // Web fallback
-    if (navigator.vibrate) {
-      const pattern = strength === 'strong' ? [30] : strength === 'medium' ? [20] : [10];
-      navigator.vibrate(pattern);
-    }
+    const pattern = strength === 'strong' ? [50] : strength === 'medium' ? [30] : [15];
+    navigator.vibrate(pattern);
+  } catch (error) {
+    console.error('Haptic feedback failed:', error);
   }
 };
 
-export const startHapticPulse = async (
+export const startHapticPulse = (
   strength: 'soft' | 'medium' | 'strong' = 'soft',
-  intervalMs = 280
+  intervalMs = 300
 ) => {
   stopHapticPulse();
-  // Initial tap
-  await triggerHapticFeedback(strength);
+  
+  // Initial vibration
+  triggerHapticFeedback(strength);
+  
   // Repeating pulse while an operation is ongoing
   pulseTimer = window.setInterval(() => {
     triggerHapticFeedback(strength);
@@ -39,5 +40,8 @@ export const stopHapticPulse = () => {
     clearInterval(pulseTimer);
     pulseTimer = undefined;
   }
-  if (navigator.vibrate) navigator.vibrate(0);
+  // Stop any ongoing vibration
+  if (navigator.vibrate) {
+    navigator.vibrate(0);
+  }
 };
