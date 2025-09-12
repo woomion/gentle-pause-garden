@@ -39,6 +39,7 @@ import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
 import DesktopItemCard from '../components/DesktopItemCard';
 import { useInstalledApp } from '../hooks/useInstalledApp';
 import { Button } from '../components/ui/button';
+import NotificationFixBanner from '../components/NotificationFixBanner';
 import { platformNotificationService } from '../services/platformNotificationService';
 import { useIsMobile } from '../hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -379,7 +380,7 @@ console.log('Rendering main Index content');
       <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 flex flex-col md:bg-gradient-to-br md:from-background md:via-background/95 md:to-accent/10">
         {/* Header area - moved outside container for precise alignment */}
         <div className={`flex-shrink-0 ${installed ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-10' : 'pt-8 sm:pt-12 md:pt-14 lg:pt-16'}`}>
-          <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+      <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
             <PauseHeader onProfileModalChange={(isOpen) => {
               console.log('Profile modal changed:', isOpen);
               setProfileModalOpen(isOpen);
@@ -390,6 +391,7 @@ console.log('Rendering main Index content');
                 setHideBottomArea(false); // Keep footer visible but compact
               }
             }} />
+            <NotificationFixBanner />
           </div>
         </div>
         

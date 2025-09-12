@@ -31,7 +31,7 @@ const EmptyStateCard = ({ mode, showImages = true }: EmptyStateCardProps) => {
 
   // Desktop mode - match exact DesktopItemCard structure and dimensions
   return (
-    <div className="group relative bg-card/40 backdrop-blur-sm border border-dashed border-border/40 rounded-xl shadow-sm hover:shadow-md hover:bg-card/30 transition-all duration-300 overflow-hidden">
+    <div className="group relative bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl shadow-sm hover:shadow-lg hover:bg-card/60 transition-all duration-300 overflow-hidden">
       {/* Progress bar at top when images are hidden - matches DesktopItemCard */}
       {!showImages && (
         <div className="h-2 bg-muted/30 relative">
