@@ -37,7 +37,6 @@ import PillQuickPauseBar from '../components/pill/PillQuickPauseBar';
 import PillItem from '../components/pill/PillItem';
 import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
 import DesktopItemCard from '../components/DesktopItemCard';
-import EmptyPausedItemCard from '../components/EmptyPausedItemCard';
 import { useInstalledApp } from '../hooks/useInstalledApp';
 import { Button } from '../components/ui/button';
 import { platformNotificationService } from '../services/platformNotificationService';
@@ -646,16 +645,6 @@ console.log('Rendering main Index content');
                             </div>
                           </div>
                         ))
-                      ) : currentPausedItems.length === 0 ? (
-                        <EmptyPausedItemCard
-                          showImages={showImages}
-                          onClick={() => {
-                            // Focus on the pause input
-                            if (addPauseButtonRef.current) {
-                              addPauseButtonRef.current.focusInput();
-                            }
-                          }}
-                        />
                       ) : (
                         currentPausedItems.map((it) => (
                           <DesktopItemCard
@@ -678,77 +667,49 @@ console.log('Rendering main Index content');
                   <div className="md:hidden">
                     {itemsLoading ? (
                       <div className="text-sm text-muted-foreground w-full px-4 max-w-sm mx-auto">Loading…</div>
-                     ) : mobileViewMode === 'carousel' ? (
-                       currentPausedItems.length === 0 ? (
-                         <div className="w-full max-w-3xl mx-auto px-1">
-                           <EmptyPausedItemCard
-                             showImages={showImages}
-                             onClick={() => {
-                               // Focus on the pause input
-                               if (addPauseButtonRef.current) {
-                                 addPauseButtonRef.current.focusInput();
-                               }
-                             }}
-                           />
-                         </div>
-                       ) : (
-                         <div className="w-full max-w-3xl mx-auto">
-                           <Carousel className="w-full px-1">
-                              <CarouselContent className="pl-0">
-                                {currentPausedItems.map((it) => (
-                                  <CarouselItem key={it.id} className="basis-full">
-                                  <DesktopItemCard
-                                    item={it}
-                                    showImages={showImages}
-                                    onClick={() => {
-                                      setSelectedItem(it);
-                                      setShowItemDetail(true);
-                                    }}
-                                    onEdit={(item, updates) => updateItem(item.id, updates)}
-                                    onDelete={removeItem}
-                                  />
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                          </Carousel>
-                        </div>
-                       )
-                     ) : (
-                       currentPausedItems.length === 0 ? (
-                         <div className="w-full px-4">
-                           <EmptyPausedItemCard
-                             showImages={showImages}
-                             onClick={() => {
-                               // Focus on the pause input
-                               if (addPauseButtonRef.current) {
-                                 addPauseButtonRef.current.focusInput();
-                               }
-                             }}
-                           />
-                         </div>
-                       ) : (
-                         <div 
-                           className="w-full px-4 space-y-4 max-h-[60vh] overflow-y-scroll [&::-webkit-scrollbar]:hidden" 
-                           style={{ 
-                             scrollbarWidth: 'none', 
-                             msOverflowStyle: 'none'
-                           }}
-                         >
-                           {currentPausedItems.map((it) => (
-                             <DesktopItemCard
-                               key={it.id}
-                               item={it}
-                               showImages={showImages}
-                               onClick={() => {
-                                 setSelectedItem(it);
-                                 setShowItemDetail(true);
-                               }}
-                               onEdit={(item, updates) => updateItem(item.id, updates)}
-                               onDelete={removeItem}
-                             />
-                           ))}
-                         </div>
-                       )
+                    ) : mobileViewMode === 'carousel' ? (
+                       <div className="w-full max-w-3xl mx-auto">
+                         <Carousel className="w-full px-1">
+                            <CarouselContent className="pl-0">
+                              {currentPausedItems.map((it) => (
+                                <CarouselItem key={it.id} className="basis-full">
+                                <DesktopItemCard
+                                  item={it}
+                                  showImages={showImages}
+                                  onClick={() => {
+                                    setSelectedItem(it);
+                                    setShowItemDetail(true);
+                                  }}
+                                  onEdit={(item, updates) => updateItem(item.id, updates)}
+                                  onDelete={removeItem}
+                                />
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                        </Carousel>
+                      </div>
+                    ) : (
+                      <div 
+                        className="w-full px-4 space-y-4 max-h-[60vh] overflow-y-scroll [&::-webkit-scrollbar]:hidden" 
+                        style={{ 
+                          scrollbarWidth: 'none', 
+                          msOverflowStyle: 'none'
+                        }}
+                      >
+                        {currentPausedItems.map((it) => (
+                          <DesktopItemCard
+                            key={it.id}
+                            item={it}
+                            showImages={showImages}
+                            onClick={() => {
+                              setSelectedItem(it);
+                              setShowItemDetail(true);
+                            }}
+                            onEdit={(item, updates) => updateItem(item.id, updates)}
+                            onDelete={removeItem}
+                          />
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -17,7 +17,6 @@ interface AddPauseButtonProps {
 
 export interface AddPauseButtonRef {
   clearUrl: () => void;
-  focusInput: () => void;
 }
 
 const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onAddPause, isCompact = false }, ref) => {
@@ -30,7 +29,6 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
   // Initialize rules store and check first time user
@@ -178,12 +176,6 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
     }
   };
 
-  const handleFocusInput = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
   const handleBarcodeScanned = async (barcode: string) => {
     console.log('Barcode scanned:', barcode);
     
@@ -216,8 +208,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
 
   // Expose the clear function to parent via ref
   useImperativeHandle(ref, () => ({
-    clearUrl: handleClearUrl,
-    focusInput: handleFocusInput
+    clearUrl: handleClearUrl
   }));
 
   // On mobile, only use isCompact prop (My Pauses toggle), ignore scroll
@@ -246,7 +237,6 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <input
-              ref={inputRef}
               type="text"
               value={url}
               onChange={(e) => handleUrlChange(e.target.value)}
