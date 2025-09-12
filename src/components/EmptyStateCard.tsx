@@ -46,15 +46,12 @@ const EmptyStateCard = ({ mode, showImages = true }: EmptyStateCardProps) => {
       <div className="cursor-pointer">
         {/* Main image area - only show when showImages is true, matches exact aspect ratio */}
         {showImages && (
-          <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-muted/20 to-muted/30 overflow-hidden flex items-center justify-center">
-            <div className="text-center space-y-3">
-              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <ShoppingBag className="h-8 w-8 text-primary/60" />
-              </div>
-              <div className="text-sm text-muted-foreground font-medium">
-                Your first pause awaits
-              </div>
-            </div>
+          <div className="relative w-full aspect-[4/3] bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
+              alt="Placeholder" 
+              className="w-full h-full object-cover"
+            />
             
             {/* Progress bar at bottom of image area - matches DesktopItemCard */}
             <div className="absolute bottom-0 left-0 right-0 h-2 bg-muted/30">
@@ -89,7 +86,6 @@ const EmptyStateCard = ({ mode, showImages = true }: EmptyStateCardProps) => {
           {/* Bottom area - matches DesktopItemCard structure */}
           <div className="flex items-center justify-between">
             <div className="text-xs text-muted-foreground/60">
-              Start above ✨
             </div>
           </div>
         </div>
