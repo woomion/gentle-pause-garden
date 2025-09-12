@@ -55,6 +55,15 @@ const Index = () => {
   const pillMode = pillParam ? pillParam === '1' : true;
   const usageLimit = useUsageLimit();
   
+  // Handle shared content auto-input
+  useEffect(() => {
+    if (sharedContent?.url && addPauseButtonRef.current) {
+      console.log('📤 Index - Auto-inputting shared URL:', sharedContent.url);
+      addPauseButtonRef.current.setUrlFromShared(sharedContent.url);
+      clearSharedContent();
+    }
+  }, [sharedContent, clearSharedContent]);
+  
   // Custom hooks for managing different aspects of the page
   const modalStates = useModalStates();
   const itemReview = useItemReview();

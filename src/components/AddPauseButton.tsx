@@ -17,6 +17,8 @@ interface AddPauseButtonProps {
 
 export interface AddPauseButtonRef {
   clearUrl: () => void;
+  focusInput: () => void;
+  setUrlFromShared: (url: string) => void;
 }
 
 const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onAddPause, isCompact = false }, ref) => {
@@ -28,7 +30,9 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const [showFirstUseTooltip, setShowFirstUseTooltip] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [hasUserInput, setHasUserInput] = useState(false); // Track if user has started typing
   const parseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
   // Initialize rules store and check first time user
@@ -54,6 +58,11 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
   const handleUrlChange = async (value: string) => {
     setUrl(value);
     console.log('URL input changed:', value);
+    
+    // Track that user has started inputting content
+    if (value.trim()) {
+      setHasUserInput(true);
+    }
     
     // Dismiss tooltip when user starts typing
     if (showFirstUseTooltip && value.trim()) {
@@ -206,14 +215,22 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
     }
   };
 
-  // Expose the clear function to parent via ref
+  // Expose functions to parent via ref
   useImperativeHandle(ref, () => ({
-    clearUrl: handleClearUrl
+    clearUrl: handleClearUrl,
+    focusInput: () => inputRef.current?.focus(),
+    setUrlFromShared: (sharedUrl: string) => {
+      setUrl(sharedUrl);
+      setHasUserInput(true);
+      handleUrlChange(sharedUrl);
+    }
   }));
 
   // On mobile, only use isCompact prop (My Pauses toggle), ignore scroll
   // On desktop, use scroll behavior
+  // But always show button if user has input content
   const shouldBeCompact = isMobile ? isCompact : (isCompact || isScrolled);
+  const shouldShowButton = hasUserInput || url.trim() || parsedData;
 
   return (
     <div 
@@ -237,6 +254,7 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <input
+              ref={inputRef}
               type="text"
               value={url}
               onChange={(e) => handleUrlChange(e.target.value)}
@@ -288,53 +306,55 @@ const AddPauseButton = forwardRef<AddPauseButtonRef, AddPauseButtonProps>(({ onA
         )}
       </div>
 
-      {/* Add to Pause Button */}
-      <button
-        onClick={(e) => {
-          console.log('🔥 BUTTON CLICKED!', e);
-          e.preventDefault();
-          e.stopPropagation();
-          handleClick();
-        }}
-        onPointerDown={(e) => console.log('🔥 POINTER DOWN', e)}
-        onTouchStart={(e) => console.log('🔥 TOUCH START', e)}
-        disabled={false}
-        className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-5 rounded-xl transition-colors cursor-pointer"
-        style={{ 
-          position: 'relative',
-          zIndex: 9999,
-          pointerEvents: 'auto',
-          touchAction: 'manipulation',
-          WebkitUserSelect: 'none',
-          userSelect: 'none'
-        }}
-      >
-        {/* Click ripple effect */}
-        {showRipple && (
-          <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="w-4 h-4 bg-white/40 rounded-full animate-ripple"></div>
+      {/* Add to Pause Button - always show if user has input or forced to show */}
+      {shouldShowButton && (
+        <button
+          onClick={(e) => {
+            console.log('🔥 BUTTON CLICKED!', e);
+            e.preventDefault();
+            e.stopPropagation();
+            handleClick();
+          }}
+          onPointerDown={(e) => console.log('🔥 POINTER DOWN', e)}
+          onTouchStart={(e) => console.log('🔥 TOUCH START', e)}
+          disabled={false}
+          className="relative w-full bg-white/20 hover:bg-white/30 text-primary-foreground font-medium py-5 rounded-xl transition-colors cursor-pointer"
+          style={{ 
+            position: 'relative',
+            zIndex: 9999,
+            pointerEvents: 'auto',
+            touchAction: 'manipulation',
+            WebkitUserSelect: 'none',
+            userSelect: 'none'
+          }}
+        >
+          {/* Click ripple effect */}
+          {showRipple && (
+            <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 bg-white/40 rounded-full animate-ripple"></div>
+              </div>
             </div>
-          </div>
-        )}
-        
-        {/* Processing ripple effect */}
-        {isParsingUrl && (
-          <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="w-20 h-20 bg-white/20 rounded-full animate-processing-ripple"></div>
+          )}
+          
+          {/* Processing ripple effect */}
+          {isParsingUrl && (
+            <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="w-20 h-20 bg-white/20 rounded-full animate-processing-ripple"></div>
+              </div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="w-16 h-16 bg-white/15 rounded-full animate-processing-ripple" style={{ animationDelay: '0.3s' }}></div>
+              </div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="w-12 h-12 bg-white/10 rounded-full animate-processing-ripple" style={{ animationDelay: '0.6s' }}></div>
+              </div>
             </div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="w-16 h-16 bg-white/15 rounded-full animate-processing-ripple" style={{ animationDelay: '0.3s' }}></div>
-            </div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="w-12 h-12 bg-white/10 rounded-full animate-processing-ripple" style={{ animationDelay: '0.6s' }}></div>
-            </div>
-          </div>
-        )}
-        
-        + Add to Pause
-      </button>
+          )}
+          
+          + Add to Pause for 24 Hours
+        </button>
+      )}
 
       {/* Feedback Modal */}
       <ItemFeedbackModal
