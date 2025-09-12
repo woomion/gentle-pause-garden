@@ -9,7 +9,6 @@ import { ThemeSelector } from '@/components/ThemeSelector';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useAuth } from '@/contexts/AuthContext';
 import { ensureProgressierSubscribed } from '@/utils/autoTokenSetup';
-import { TestNotificationButton } from './TestNotificationButton';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -259,16 +258,6 @@ const AppPreferencesModal: React.FC<AppPreferencesModalProps> = ({ isOpen, onClo
                 </div>
               )}
 
-              {/* Test buttons when notifications are enabled */}
-              {notificationsEnabled && user && (
-                <div className="space-y-3 p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="text-sm font-medium text-blue-700 dark:text-blue-300">Test Notifications</div>
-                  <div className="text-xs text-blue-600 dark:text-blue-400 mb-2">
-                    Use this button to test push notifications (close the app tab first)
-                  </div>
-                  <TestNotificationButton />
-                </div>
-              )}
             </div>
 
             {/* Light/Dark Theme Toggle */}

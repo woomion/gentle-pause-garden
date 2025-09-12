@@ -8,7 +8,7 @@ import ReviewBanner from '../components/ReviewBanner';
 import AddPauseButton, { AddPauseButtonRef } from '../components/AddPauseButton';
 import MainTabs from '../components/MainTabs';
 import FooterLinks from '../components/FooterLinks';
-import { TestNotificationButton } from '../components/TestNotificationButton';
+
 import EmptyStateCard from '../components/EmptyStateCard';
 
 

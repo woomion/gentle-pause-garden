@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import UserProfileModal from './UserProfileModal';
 import SignupModal from './SignupModal';
 import { useInstalledApp } from '@/hooks/useInstalledApp';
-import { TestNotificationButton } from './TestNotificationButton';
+
 
 interface PauseHeaderProps {
   onProfileModalChange?: (isOpen: boolean) => void;

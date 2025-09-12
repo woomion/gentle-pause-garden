@@ -157,16 +157,6 @@ const SettingsSection = () => {
                 />
               </div>
               
-              {notificationsEnabled && (
-                <div className="space-y-3 pt-2 border-t border-border">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={testNotification}
-                    className="w-full text-xs h-8"
-                  >
-                    Send Test Notification
-                  </Button>
                   
                   <div className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-xs font-medium mb-2">Background Notifications</p>
@@ -325,7 +315,6 @@ const SettingsSection = () => {
                     If you don't receive test notifications, check your browser settings and allow notifications for this site.
                   </p>
                 </div>
-              )}
             </CardContent>
           </Card>
         </CollapsibleContent>
