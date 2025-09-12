@@ -71,8 +71,7 @@ const PauseHeader = ({ onProfileModalChange }: PauseHeaderProps = {}) => {
                     </button>
                   )}
 
-                  {/* Quick access: Send Test Push */}
-                  <TestNotificationButton size="sm" className="" />
+                  {/* Removed duplicate TestNotificationButton - already in settings */}
 
                   <button
                     className="p-2 text-foreground hover:text-muted-foreground transition-colors flex items-center justify-center"
