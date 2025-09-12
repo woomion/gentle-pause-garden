@@ -716,7 +716,7 @@ console.log('Rendering main Index content');
               )}
 
               {/* Beautiful empty state for new users */}
-              {!itemsLoading && storeReadyItems.length === 0 && currentPausedItems.length === 0 && (
+              {!itemsLoading && currentPausedItems.length === 0 && (
                 <div className="mb-4">
                   {/* Desktop Grid Layout - same as regular items */}
                   <div className="hidden md:block">
