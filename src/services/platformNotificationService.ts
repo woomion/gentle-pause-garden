@@ -15,7 +15,6 @@ export class PlatformNotificationService {
   }
 
   isNativePlatform(): boolean {
-    // Always return false since we removed Capacitor
     return false;
   }
 
