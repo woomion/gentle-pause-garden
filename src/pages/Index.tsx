@@ -271,6 +271,7 @@ const Index = () => {
     if (pillMode) {
       setSharedPrefill(incoming || sharedContent.title);
       setCompactQuickBar(false); // ensure Pause button is visible
+      setHideBottomArea(false); // ensure footer area is visible for shared content
       console.log('📤 Index - Set pill prefill:', incoming || sharedContent.title);
     } else if (addPauseButtonRef.current) {
       console.log('📤 Index - Opening add pause modal');
@@ -819,12 +820,17 @@ console.log('Rendering main Index content');
             <PillQuickPauseBar
               compact={compactQuickBar}
               prefillValue={sharedPrefill || ''}
-              onExpandRequest={() => setCompactQuickBar(false)}
+              onExpandRequest={() => {
+                setCompactQuickBar(false);
+                setHideBottomArea(false); // always show footer when expanding
+              }}
               onUrlEntry={() => {
                 setHideBottomArea(false);
+                setCompactQuickBar(false); // expand when user starts typing
               }}
               onBarcodeScanned={() => {
                 setHideBottomArea(false);
+                setCompactQuickBar(false); // expand when scanning
               }}
               onCollapseChange={(collapsed) => {
                 // Mobile only compacts, never hides

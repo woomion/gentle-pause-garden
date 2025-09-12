@@ -86,28 +86,36 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
     }
   }, [prefillValue, lastAppliedPrefill]);
 
-  // Handle scroll to collapse/expand footer - disabled since parent handles this
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     const currentScrollY = window.scrollY;
-  //     
-  //     // Collapse when scrolling down beyond threshold and no input value
-  //     if (currentScrollY > lastScrollY && currentScrollY > 100 && !value.trim()) {
-  //       setIsCollapsed(true);
-  //       onCollapseChange?.(true);
-  //     } 
-  //     // Expand when scrolling up, near top, or when there's input
-  //     else if (currentScrollY < lastScrollY || currentScrollY < 50 || value.trim()) {
-  //       setIsCollapsed(false);
-  //       onCollapseChange?.(false);
-  //     }
-  //     
-  //     setLastScrollY(currentScrollY);
-  //   };
+  // Handle scroll to collapse/expand footer - show pause bar when typing
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Always show pause bar if there's input value (user is typing/pasting)
+      if (value.trim()) {
+        setIsCollapsed(false);
+        onCollapseChange?.(false);
+        if (onExpandRequest) onExpandRequest();
+        return;
+      }
+      
+      // Collapse when scrolling down beyond threshold and no input value
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsCollapsed(true);
+        onCollapseChange?.(true);
+      } 
+      // Expand when scrolling up or near top
+      else if (currentScrollY < lastScrollY || currentScrollY < 50) {
+        setIsCollapsed(false);
+        onCollapseChange?.(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
 
-  //   window.addEventListener('scroll', handleScroll, { passive: true });
-  //   return () => window.removeEventListener('scroll', handleScroll);
-  // }, [lastScrollY, value]);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, value, onCollapseChange, onExpandRequest]);
 
   const handleSubmit = async () => {
     const raw = value.trim();
@@ -276,6 +284,10 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
               onChange={(e) => {
                 const v = e.target.value;
                 setValue(v);
+                // Trigger onUrlEntry callback when user starts typing/pasting
+                if (v.trim() && onUrlEntry) {
+                  onUrlEntry();
+                }
                 // Expand when user starts typing/pasting content
                 if (compact && onExpandRequest && v.trim().length > 0) {
                   onExpandRequest();
@@ -288,9 +300,12 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 }
               }}
               onPaste={() => {
-                // Expand immediately on paste
+                // Expand immediately on paste and trigger URL entry
                 if (compact && onExpandRequest) {
                   setTimeout(() => onExpandRequest(), 10); // Small delay to allow paste to complete
+                }
+                if (onUrlEntry) {
+                  setTimeout(() => onUrlEntry(), 20); // Trigger after paste completes
                 }
               }}
               placeholder="Paste a link..."
