@@ -264,16 +264,24 @@ export class ProgressierNotificationService {
   async isSubscribed(): Promise<boolean> {
     try {
       if (typeof window !== 'undefined' && window.progressier) {
-        // Since isSubscribed method isn't available, check if we have a service worker push subscription
+        // Prefer Progressier's own API when available
+        const api: any = window.progressier as any;
+        if (typeof api.isSubscribed === 'function') {
+          const subscribed = await api.isSubscribed();
+          console.log('🔔 Progressier.isSubscribed():', subscribed);
+          return !!subscribed;
+        }
+
+        // Fallback: check generic PushManager subscription
         if ('serviceWorker' in navigator && 'PushManager' in window) {
           const registration = await navigator.serviceWorker.ready;
           const subscription = await registration.pushManager.getSubscription();
           const hasSubscription = subscription !== null;
-          console.log('🔔 Push subscription status:', hasSubscription);
+          console.log('🔔 PushManager subscription status:', hasSubscription);
           return hasSubscription;
         }
       }
-      console.log('❌ Service worker or PushManager not available');
+      console.log('❌ Progressier API or SW/Push not available');
       return false;
     } catch (error) {
       console.error('❌ Error checking subscription status:', error);
