@@ -72,21 +72,16 @@ const EmptyStateCard = ({ mode, showImages = true }: EmptyStateCardProps) => {
             </h3>
           </div>
 
-          <div className="space-y-2 mb-3">
-            <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2">
-              Paste any shopping link to give yourself time to think it over before buying.
-            </p>
-
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2 text-xs text-primary/60">
               <Clock className="h-3 w-3" />
               <span>Ready when you are</span>
             </div>
           </div>
 
-          {/* Bottom area - matches DesktopItemCard structure */}
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-muted-foreground/60">
-            </div>
+          {/* Notes preview area - matches DesktopItemCard */}
+          <div className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-2">
+            Paste any shopping link to give yourself time to think it over before buying.
           </div>
         </div>
       </div>
