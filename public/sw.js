@@ -1,33 +1,33 @@
-// public/sw.js — Pocket Pause PWA (fixed)
+// public/sw.js — Pocket Pause PWA
+self.skipWaiting();
 
-// 0) Load Progressier's service worker FIRST (replace <YOUR_ID> or URL they gave you)
+self.addEventListener('install', () => {
+  // Skip waiting to activate immediately
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+// IMPORTANT: load Progressier's SW (handles push, click, etc.)
 try {
   importScripts('https://progressier.app/9LL6P8U26R3MyH8El0RL/sw.js');
 } catch (e) {
-  // If this fails, Progressier pushes won't work
   console.error('Failed to import Progressier SW:', e);
 }
 
-const CACHE_NAME = 'pocket-pause-v2';
-const urlsToCache = ['/', '/static/js/bundle.js', '/static/css/main.css', '/favicon.ico'];
+// Basic caching
+const CACHE_NAME = 'pocket-pause-v3';
+const urlsToCache = ['/', '/favicon.ico'];
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     try {
       const cache = await caches.open(CACHE_NAME);
       await cache.addAll(urlsToCache);
-    } finally {
-      // Ensure new SW takes over ASAP
-      self.skipWaiting();
+    } catch (e) {
+      console.log('Cache setup failed:', e);
     }
-  })());
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : undefined)));
-    await clients.claim();
   })());
 });
 

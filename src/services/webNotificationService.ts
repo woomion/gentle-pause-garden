@@ -58,6 +58,14 @@ export class WebNotificationService {
       return;
     }
 
+    // Guard against showing system notifications when tab is visible
+    // Show in-app toast instead when focused
+    if (document.visibilityState === 'visible') {
+      console.log('🔔 Tab is visible, skipping system notification (show toast instead)');
+      // TODO: Trigger in-app toast here instead of system notification
+      return;
+    }
+
     try {
       console.log('🔔 Showing notification:', title, options.body);
       
