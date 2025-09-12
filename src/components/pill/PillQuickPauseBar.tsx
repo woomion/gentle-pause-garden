@@ -132,8 +132,12 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
     
     console.log('✅ Usage limit check passed, proceeding...');
     
-    // Start soft pulsing haptic feedback while pausing
-    startHapticPulse('soft');
+    // Start soft pulsing haptic feedback while pausing (Android PWA supported)
+    if (typeof (navigator as any).vibrate === 'function') {
+      startHapticPulse('soft');
+    } else {
+      toast({ title: 'Haptics unavailable', description: 'Not supported on this device/browser' });
+    }
     
     setSubmitting(true);
 
