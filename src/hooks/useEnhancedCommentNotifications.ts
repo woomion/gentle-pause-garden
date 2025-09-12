@@ -10,11 +10,10 @@ export const useEnhancedCommentNotifications = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Request notification permission
+    // Only proceed if permission already granted (avoid auto-prompting)
     const initializeNotifications = async () => {
-      const hasPermission = await notificationService.requestPermission();
-      if (!hasPermission) {
-        console.log('🔔 Notification permission not granted');
+      if (!('Notification' in window) || Notification.permission !== 'granted') {
+        console.log('🔔 Skipping comment notifications setup until user enables notifications');
         return;
       }
 

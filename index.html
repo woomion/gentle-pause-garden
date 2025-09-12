@@ -113,21 +113,7 @@
         }));
       });
     </script>
-    <!-- Register Service Worker for offline support and push notifications -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        // Register service worker immediately - Progressier needs this early
-        navigator.serviceWorker.register('/sw.js')
-          .then(function(registration) {
-            console.log('✅ SW registered with scope:', registration.scope);
-            // Force update to ensure latest version
-            registration.update();
-          })
-          .catch(function(error) {
-            console.log('❌ SW registration failed:', error);
-          });
-      }
-    </script>
+    <!-- Service worker is registered in src/main.tsx via registerSW() to avoid duplicate registrations -->
     <!-- Progressier PWA Push Notifications - Load immediately -->
     <script async src="https://progressier.app/9LL6P8U26R3MyH8El0RL/script.js"></script>
     <script>
