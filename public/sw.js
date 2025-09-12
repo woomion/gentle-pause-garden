@@ -1,13 +1,4 @@
 // public/sw.js — Pocket Pause PWA
-self.skipWaiting();
-
-self.addEventListener('install', () => {
-  // Skip waiting to activate immediately
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
-});
 
 // IMPORTANT: load Progressier's SW (handles push, click, etc.)
 try {
@@ -21,6 +12,7 @@ const CACHE_NAME = 'pocket-pause-v3';
 const urlsToCache = ['/', '/favicon.ico'];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil((async () => {
     try {
       const cache = await caches.open(CACHE_NAME);
@@ -29,6 +21,10 @@ self.addEventListener('install', event => {
       console.log('Cache setup failed:', e);
     }
   })());
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', event => {
