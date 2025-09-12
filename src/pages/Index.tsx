@@ -428,10 +428,11 @@ console.log('Rendering main Index content');
                     }
                   }}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
                 >
                   Create Test Item (Ready in 5 min)
                 </Button>
+                <TestNotificationButton />
               </div>
             </div>
           </div>
