@@ -395,7 +395,39 @@ console.log('Rendering main Index content');
         <div className={`flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12`}>
           <WelcomeWithValues />
         </div>
-
+        
+        {/* Desktop test controls - mirrors mobile test card */}
+        <div className="hidden md:block flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
+          <div className="p-3 border border-blue-200 rounded-lg bg-blue-50/50 mt-4">
+            <div className="text-sm text-blue-700 mb-2">🧪 Test Notifications</div>
+            <div className="space-y-2">
+              <Button 
+                onClick={async () => {
+                  const result = await createTestItem();
+                  if (result.success) {
+                    // Refresh the items list
+                    if (user) {
+                      // For logged in users, refresh Supabase store
+                      window.location.reload();
+                    } else {
+                      // For guest users, refresh local store  
+                      window.location.reload();
+                    }
+                    alert('✅ Test item created! Page will refresh to show it.');
+                  } else {
+                    alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
+                  }
+                }}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white mr-2"
+              >
+                Create Test Item (Ready in 5 min)
+              </Button>
+              <TestNotificationButton />
+            </div>
+          </div>
+        </div>
+        
         {/* Mobile controls - completely independent and stable - OUTSIDE scroll container */}
         <div className="md:hidden flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto">
           {/* Ready to review pill container */}
