@@ -46,7 +46,7 @@ const EmptyStateCard = ({ mode, showImages = true }: EmptyStateCardProps) => {
       <div className="cursor-pointer">
         {/* Main image area - only show when showImages is true, matches exact aspect ratio */}
         {showImages && (
-          <div className="relative w-full aspect-[4/3] bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+          <div className="relative w-full aspect-[4/3] bg-muted/30 overflow-hidden flex items-center justify-center">
             <img 
               src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
               alt="Placeholder" 
