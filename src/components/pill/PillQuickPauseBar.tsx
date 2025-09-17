@@ -295,13 +295,21 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
               onChange={(e) => {
                 const v = e.target.value;
                 setValue(v);
-                // Trigger onUrlEntry callback when user starts typing/pasting
+                
+                // Immediately trigger callbacks when user starts typing/pasting
                 if (v.trim() && onUrlEntry) {
                   onUrlEntry();
                 }
-                // Expand when user starts typing/pasting content
-                if (compact && onExpandRequest && v.trim().length > 0) {
+                
+                // Expand and show pause button when user starts typing
+                if (v.trim() && compact && onExpandRequest) {
                   onExpandRequest();
+                }
+                
+                // Ensure pause area is visible when typing
+                if (v.trim()) {
+                  setIsCollapsed(false);
+                  onCollapseChange?.(false);
                 }
               }}
               onFocus={() => {
@@ -382,14 +390,8 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
             })}
           </div> */}
           
-          {/* Show pause button when expanded OR when collapsed but there's input - also expand automatically when input is present */}
-          {(() => {
-            const hasInput = value.trim();
-            if (hasInput && compact && onExpandRequest) {
-              setTimeout(() => onExpandRequest(), 0); // Auto-expand when input is present
-            }
-            return (!isCollapsed || hasInput);
-          })() && (
+          {/* Show pause button when there's any input value */}
+          {value.trim() && (
             <Button 
               onClick={(e) => {
                 console.log('🔥 PAUSE BUTTON CLICKED in PillQuickPauseBar!', e);
@@ -421,7 +423,7 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                     <div className="w-8 h-8 bg-white/20 rounded-full animate-processing-ripple" style={{ animationDelay: '1s' }}></div>
                   </div>
                 </div>
-              )}
+          )}
               {submitting ? 'Pausing…' : 'Pause for 24 hours'}
             </Button>
           )}
