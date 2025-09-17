@@ -154,7 +154,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [user, session]); // Add dependencies to re-run when state changes
+  }, []); // Empty dependency array - only run once on mount
 
   const signInWithMagicLink = async (email: string) => {
     try {
