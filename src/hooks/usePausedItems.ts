@@ -56,6 +56,7 @@ export const usePausedItems = () => {
     }
 
     // Authenticated mode - offline-first approach
+    console.log('🔄 Authenticated user adding item. Online status:', isOnline);
     if (isOnline) {
       try {
         console.log('🌐 Online mode: Attempting to add directly to Supabase');
@@ -72,7 +73,7 @@ export const usePausedItems = () => {
         });
         
         // Add to offline queue if direct add fails
-        console.log('📝 Adding to offline queue...');
+        console.log('📝 Adding to offline queue due to Supabase error...');
         offlineQueueStore.addOperation('ADD_ITEM', item);
         
         // Also add to local store for immediate UI feedback
