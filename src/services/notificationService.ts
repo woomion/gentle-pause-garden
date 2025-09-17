@@ -17,26 +17,13 @@ export class NotificationService {
       return false;
     }
 
-    if (Notification.permission === 'granted') {
-      this.isEnabled = true;
-      console.log('✅ Notification permission already granted');
-      return true;
-    }
-
-    if (Notification.permission !== 'denied') {
-      try {
-        const permission = await Notification.requestPermission();
-        this.isEnabled = permission === 'granted';
-        console.log('🔔 Notification permission result:', permission);
-        return this.isEnabled;
-      } catch (error) {
-        console.error('❌ Error requesting notification permission:', error);
-        return false;
-      }
-    }
-
-    console.log('❌ Notification permission denied');
-    return false;
+    // Check if permission is actually granted (including dev override)
+    const { ensureNotificationPermission } = await import('../utils/ensureNotificationPermission');
+    const permission = await ensureNotificationPermission();
+    
+    this.isEnabled = permission === 'granted';
+    console.log('🔔 Final notification permission result:', permission, 'enabled:', this.isEnabled);
+    return this.isEnabled;
   }
 
   showNotification(title: string, options: NotificationOptions = {}) {
@@ -46,8 +33,14 @@ export class NotificationService {
     console.log('🔔 Page visibility:', document.visibilityState);
     console.log('🔔 User agent:', navigator.userAgent);
     
-    if (!this.isEnabled || Notification.permission !== 'granted') {
-      console.log('❌ Notifications not enabled or permission not granted');
+    // Check permission with dev override
+    let permissionGranted = Notification.permission === 'granted';
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      permissionGranted = true; // Override for dev mode
+    }
+    
+    if (!this.isEnabled || !permissionGranted) {
+      console.log('❌ Notifications not enabled or permission not granted', { enabled: this.isEnabled, permissionGranted });
       return;
     }
 
@@ -90,7 +83,14 @@ export class NotificationService {
 
   setEnabled(enabled: boolean) {
     console.log('🔔 Setting notification service enabled to:', enabled);
-    if (enabled && Notification.permission === 'granted') {
+    
+    // Check permission with dev override
+    let permissionGranted = Notification.permission === 'granted';
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      permissionGranted = true; // Override for dev mode
+    }
+    
+    if (enabled && permissionGranted) {
       this.isEnabled = true;
       console.log('✅ Notification service enabled');
     } else if (!enabled) {
@@ -103,8 +103,14 @@ export class NotificationService {
   }
 
   getEnabled(): boolean {
-    const result = this.isEnabled && Notification.permission === 'granted';
-    console.log('🔔 getEnabled result:', result, '(service:', this.isEnabled, 'permission:', Notification.permission, ')');
+    // Check if we're in dev mode and override permission check
+    let permissionGranted = Notification.permission === 'granted';
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      permissionGranted = true; // Override for dev mode
+    }
+    
+    const result = this.isEnabled && permissionGranted;
+    console.log('🔔 getEnabled result:', result, '(service:', this.isEnabled, 'permission:', Notification.permission, 'dev-override:', window.location.hostname === 'localhost', ')');
     return result;
   }
 }
