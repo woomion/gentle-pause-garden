@@ -9,6 +9,9 @@ const OfflineIndicator = () => {
   const { isOnline, wasOffline, clearWasOfflineFlag } = useNetworkStatus();
   const [pendingCount, setPendingCount] = React.useState(0);
 
+  // Debug logging
+  console.log('🔧 OfflineIndicator render:', { isOnline, wasOffline, pendingCount });
+
   React.useEffect(() => {
     const updatePendingCount = () => {
       setPendingCount(offlineQueueStore.getQueue().length);

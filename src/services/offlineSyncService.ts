@@ -14,6 +14,7 @@ class OfflineSyncService {
     }
 
     const queue = offlineQueueStore.getQueue();
+    console.log('🔄 Checking queue for sync operations. Queue length:', queue.length);
     if (queue.length === 0) {
       console.log('🔄 No pending operations to sync');
       return;

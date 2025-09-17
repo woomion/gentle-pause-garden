@@ -51,11 +51,12 @@ class OfflineQueueStore {
       retryCount: 0
     };
 
+    console.log('📝 Adding operation to offline queue:', operation);
     this.queue.push(operation);
     this.saveToStorage();
     this.notifyListeners();
+    console.log('📝 Queue now has', this.queue.length, 'operations');
     
-    console.log('🔄 Added offline operation:', operation);
     return operation.id;
   }
 
