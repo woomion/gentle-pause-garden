@@ -290,13 +290,14 @@ const Index = () => {
     const incoming = sharedContent.url || sharedContent.text || '';
     if (!incoming && !sharedContent.title) return;
 
-    console.log('📤 Index - Processing shared content:', { incoming, title: sharedContent.title, pillMode });
+    console.log('📤 Index - Processing shared content:', { incoming, title: sharedContent.title, pillMode, finalPrefill: incoming || sharedContent.title });
 
     if (pillMode) {
-      setSharedPrefill(incoming || sharedContent.title);
+      const prefillValue = incoming || sharedContent.title;
+      setSharedPrefill(prefillValue);
       setCompactQuickBar(false); // ensure Pause button is visible
       setHideBottomArea(false); // ensure footer area is visible for shared content
-      console.log('📤 Index - Set pill prefill:', incoming || sharedContent.title);
+      console.log('📤 Index - Set pill prefill:', prefillValue, 'Will be passed to PillQuickPauseBar');
     } else if (addPauseButtonRef.current) {
       console.log('📤 Index - Opening add pause modal');
       modalStates.handleAddPause({

@@ -20,7 +20,7 @@ export const useSharedContent = () => {
     const sharedText = urlParams.get('text') || urlParams.get('shared_text');
     const sharedTitle = urlParams.get('title') || urlParams.get('shared_title');
 
-    console.log('🔍 useSharedContent - Found params:', { sharedUrl, sharedText, sharedTitle });
+    console.log('🔍 useSharedContent - Found params:', { sharedUrl, sharedText, sharedTitle, locationSearch: location.search });
 
     if (sharedUrl || sharedText || sharedTitle) {
       const content = {
