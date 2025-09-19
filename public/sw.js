@@ -35,7 +35,40 @@ self.addEventListener('fetch', event => {
 });
 
 // --- Push handling ---
-// Progressier handles all push notifications
+// Progressier handles all push notifications, but we need explicit push handler
+self.addEventListener('push', event => {
+  console.log('🔔 Push event received:', event);
+  
+  // Let Progressier handle the push, but ensure showNotification is called
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      console.log('📱 Push data:', data);
+      
+      // Ensure notification is shown even when app is closed
+      event.waitUntil(
+        self.registration.showNotification(data.title || 'Pocket Pause', {
+          body: data.body || 'You have a notification',
+          icon: '/icons/app-icon-512.png',
+          badge: '/icons/app-icon-512.png',
+          data: data,
+          requireInteraction: false,
+          silent: false
+        })
+      );
+    } catch (e) {
+      console.error('❌ Error parsing push data:', e);
+      // Fallback notification
+      event.waitUntil(
+        self.registration.showNotification('Pocket Pause', {
+          body: 'You have a new notification',
+          icon: '/icons/app-icon-512.png',
+          badge: '/icons/app-icon-512.png'
+        })
+      );
+    }
+  }
+});
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();

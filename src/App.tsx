@@ -23,8 +23,10 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import AuthGuard from "./components/AuthGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-
 import { offlineSyncService } from "./services/offlineSyncService";
+
+// Import debug utilities
+import "@/utils/pushNotificationDebug";
 
 const queryClient = new QueryClient();
 
