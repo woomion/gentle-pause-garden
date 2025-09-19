@@ -15,7 +15,6 @@ import NotFound from "./pages/NotFound";
 import Bookmarklet from "./pages/Bookmarklet";
 import GetApp from "./pages/GetApp";
 import OfflineIndicator from "./components/OfflineIndicator";
-import { ParsingMetrics } from "./components/ParsingMetrics";
 
 import PWAInstallBanner from "./components/PWAInstallBanner";
 
@@ -146,7 +145,6 @@ const App = () => {
               
               <OfflineIndicator />
               <PWAInstallBanner />
-              <ParsingMetrics />
               <Toaster />
               <Sonner />
 

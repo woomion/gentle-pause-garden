@@ -59,28 +59,68 @@ const extractStoreNameFromUrl = (url: string): string => {
   }
 };
 
-// High-performance unified parser with intelligent strategy selection
+// Robust URL parser with multiple strategies
 export const parseProductUrl = async (url: string, options: RobustParsingOptions = {}): Promise<ProductInfo> => {
-  console.log('🚀 Starting unified parse for:', url);
+  console.log('🔍 urlParser: Starting robust parse for', url);
   
+  // Start with URL-based extraction (fast and reliable)
+  const urlBasedResult: ProductInfo = {
+    itemName: extractProductNameFromUrl(url),
+    storeName: extractStoreNameFromUrl(url)
+  };
+  
+  console.log('🔍 urlParser: URL-based extraction result:', urlBasedResult);
+  
+  // Try enhanced parser for additional data (price, image)
   try {
-    // Use the new unified parser which automatically selects the best strategy
-    const { parseProductUrl: unifiedParser } = await import('./unifiedUrlParser');
-    const result = await unifiedParser(url);
+    const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
+    const enhancedResult = await enhancedParser(url);
     
-    console.log('✅ Unified parser result:', result);
-    return result;
+    console.log('🔍 urlParser: Enhanced parser result:', enhancedResult);
     
-  } catch (error) {
-    console.error('🚨 Unified parser failed, using fallback:', error);
-    
-    // Fast fallback using URL-based extraction only
-    const fallbackResult: ProductInfo = {
-      itemName: extractProductNameFromUrl(url) || extractStoreNameFromUrl(url) || 'Product',
-      storeName: extractStoreNameFromUrl(url)
+    // Merge results, preferring URL-based item name if enhanced parser didn't find one
+    const finalResult = {
+      itemName: enhancedResult.itemName || urlBasedResult.itemName || urlBasedResult.storeName,
+      storeName: enhancedResult.storeName || urlBasedResult.storeName,
+      price: enhancedResult.price,
+      imageUrl: enhancedResult.imageUrl
     };
     
-    console.log('🔄 Fallback result:', fallbackResult);
-    return fallbackResult;
+    console.log('🔍 urlParser: Final merged result:', finalResult);
+    return finalResult;
+    
+  } catch (error) {
+    console.error('🔍 urlParser: Enhanced parser failed:', error);
+    
+    // Fallback to smart parser
+    try {
+      const { parseProductUrlSmart } = await import('./smartUrlParser');
+      const smartResult = await parseProductUrlSmart(url);
+      
+      console.log('🔍 urlParser: Smart parser result:', smartResult);
+      
+      // Merge with URL-based results
+      const finalResult = {
+        itemName: smartResult.data?.itemName || urlBasedResult.itemName || urlBasedResult.storeName,
+        storeName: smartResult.data?.storeName || urlBasedResult.storeName,
+        price: smartResult.data?.price,
+        imageUrl: smartResult.data?.imageUrl
+      };
+      
+      console.log('🔍 urlParser: Final smart result:', finalResult);
+      return finalResult;
+      
+    } catch (smartError) {
+      console.error('🔍 urlParser: Smart parser also failed:', smartError);
+      
+      // Return URL-based extraction as final fallback
+      const fallbackResult = {
+        itemName: urlBasedResult.itemName || urlBasedResult.storeName || 'Product',
+        storeName: urlBasedResult.storeName
+      };
+      
+      console.log('🔍 urlParser: Final fallback result:', fallbackResult);
+      return fallbackResult;
+    }
   }
 };
