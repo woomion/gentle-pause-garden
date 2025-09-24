@@ -161,19 +161,6 @@ const Index = () => {
   console.log('Mobile check - User agent:', navigator.userAgent);
   console.log('Mobile check - Screen size:', window.innerWidth, 'x', window.innerHeight);
 
-  // Quick dev login for testing
-  const devLogin = async () => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email: 'woodsmiche@gmail.com',
-      options: { emailRedirectTo: window.location.origin }
-    });
-    if (error) {
-      console.error('Dev login error:', error);
-      toast('❌ Error: ' + error.message);
-    } else {
-      toast('📧 Check your email for the login link!');
-    }
-  };
 
   // Initialize notifications
   const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
@@ -422,24 +409,6 @@ console.log('Rendering main Index content');
           <WelcomeWithValues />
         </div>
         
-        {/* Dev login card for unauthenticated users */}
-        {!user && (
-          <div className="flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
-            <div className="p-4 border border-border rounded-lg bg-card mt-4">
-              <h3 className="text-sm font-medium mb-2">🔐 Dev Login</h3>
-              <p className="text-xs text-muted-foreground mb-3">
-                Notifications only work when logged in. Click to send a magic link to woodsmiche@gmail.com
-              </p>
-              <Button 
-                onClick={devLogin}
-                className="w-full"
-                size="sm"
-              >
-                Send Login Link
-              </Button>
-            </div>
-          </div>
-        )}
         
         {/* Desktop test controls - mirrors mobile test card */}
         <div className="hidden md:block flex-shrink-0 max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
