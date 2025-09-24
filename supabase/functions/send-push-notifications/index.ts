@@ -73,8 +73,8 @@ serve(async (req) => {
 
     for (const userId of usersToNotify) {
       try {
-        // Get user's notification settings and push tokens
-        const [settingsResult, tokensResult] = await Promise.all([
+        // Get user's notification settings, push tokens, and email
+        const [settingsResult, tokensResult, userResult] = await Promise.all([
           supabase
             .from('user_settings')
             .select('notifications_enabled')
@@ -83,11 +83,13 @@ serve(async (req) => {
           supabase
             .from('push_tokens')
             .select('token, platform')
-            .eq('user_id', userId)
+            .eq('user_id', userId),
+          supabase.auth.admin.getUserById(userId)
         ]);
 
         const { data: userSettings, error: settingsError } = settingsResult;
         const { data: userTokens, error: tokensError } = tokensResult;
+        const { data: userAuth, error: userError } = userResult;
 
         if (settingsError || !userSettings?.notifications_enabled) {
           console.log(`❌ Skipping user ${userId}: notifications disabled`);
@@ -97,6 +99,12 @@ serve(async (req) => {
 
         if (tokensError || !userTokens || userTokens.length === 0) {
           console.log(`❌ Skipping user ${userId}: no push tokens found`);
+          failureCount++;
+          continue;
+        }
+
+        if (userError || !userAuth?.user?.email) {
+          console.log(`❌ Skipping user ${userId}: email not found`);
           failureCount++;
           continue;
         }
@@ -119,10 +127,10 @@ serve(async (req) => {
             continue;
           }
 
-          // Use the Progressier API format - target by user ID that was registered via progressier.add()
+          // Use the Progressier API format - target by email since that's how users are registered
           const notificationPayload = {
             recipients: {
-              id: userId // Use id field for Progressier API
+              email: userAuth.user.email // Target by email address
             },
             title: payload.title,
             body: payload.body,
@@ -130,7 +138,7 @@ serve(async (req) => {
             data: payload.data || {}
           };
 
-          console.log(`📤 Sending notification to user ID ${userId}:`, notificationPayload);
+          console.log(`📤 Sending notification to ${userAuth.user.email} (${userId}):`, notificationPayload);
 
           // Use the correct Progressier endpoint with app ID
           const progressierUrl = 'https://progressier.app/9LL6P8U26R3MyH8El0RL/send';
