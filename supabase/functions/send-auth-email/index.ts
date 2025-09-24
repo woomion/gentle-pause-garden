@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "npm:resend@4.0.0";
 import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -40,8 +40,6 @@ const handler = async (req: Request): Promise<Response> => {
       email_data: { token, token_hash, redirect_to, email_action_type }
     } = emailData;
 
-    console.log(`DEBUG: Full emailData:`, JSON.stringify(emailData, null, 2));
-    console.log(`DEBUG: User object:`, JSON.stringify(user, null, 2));
     console.log(`Sending ${email_action_type} email to ${user.email}`);
 
     // Create a beautiful magic link email
