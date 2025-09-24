@@ -50,8 +50,13 @@ export class ProgressierNotificationService {
         });
       }
       
-      // Let Progressier handle its own prompts
-      console.log('🔔 Progressier: Will handle push prompts automatically');
+      // Let Progressier show its native prompt
+      window.addEventListener('pusheligible', () => {
+        console.log('🔔 Progressier: Push eligible event triggered');
+        if (window.progressier?.showOptIn) {
+          window.progressier.showOptIn();
+        }
+      });
       
       // Give Progressier script time to load
       await new Promise(resolve => setTimeout(resolve, 1000));
