@@ -144,6 +144,12 @@ async function sendIndividualNotification(
   try {
     // Use the send-push-notifications function instead of calling Progressier directly
     console.log(`📤 Sending notification via send-push-notifications function for user ${userId}`);
+    console.log(`📤 Notification payload:`, {
+      userIds: [userId],
+      title: notificationData.title,
+      body: notificationData.body,
+      data: notificationData.data
+    });
     
     const { data, error } = await supabase.functions.invoke('send-push-notifications', {
       body: {
@@ -154,11 +160,15 @@ async function sendIndividualNotification(
       }
     });
 
+    console.log(`📥 send-push-notifications response:`, { data, error });
+
     if (error) {
       console.error(`❌ Failed to send individual notification:`, error);
+      console.error(`❌ Full error details:`, JSON.stringify(error, null, 2));
       // Timestamp already set above, no need to update again
     } else {
       console.log(`✅ Individual notification sent for item ${itemId}`);
+      console.log(`✅ Response data:`, data);
       // Timestamp already set above, no need to update again
     }
   } catch (error) {
@@ -215,6 +225,13 @@ async function sendBatchNotifications(supabase: any, progressierApiKey: string) 
       };
 
       // Use the send-push-notifications function for consistency
+      console.log(`📤 Calling send-push-notifications for user ${user.user_id} with payload:`, {
+        userIds: [user.user_id],
+        title: notificationData.title,
+        body: notificationData.body,
+        data: notificationData.data
+      });
+
       const { data, error } = await supabase.functions.invoke('send-push-notifications', {
         body: {
           userIds: [user.user_id],
@@ -224,10 +241,14 @@ async function sendBatchNotifications(supabase: any, progressierApiKey: string) 
         }
       });
 
+      console.log(`📥 send-push-notifications response for user ${user.user_id}:`, { data, error });
+
       if (error) {
         console.error(`❌ Failed to send batch notification to user ${user.user_id}:`, error);
+        console.error(`❌ Full error details:`, JSON.stringify(error, null, 2));
       } else {
         console.log(`✅ Batch notification sent to user ${user.user_id} for ${itemCount} items`);
+        console.log(`✅ Response data:`, data);
       }
     } catch (error) {
       console.error(`❌ Error sending batch notification to user ${user.user_id}:`, error);
