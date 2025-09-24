@@ -58,11 +58,7 @@ export class PlatformNotificationService {
     let granted = !!progressierResult;
 
     if (!granted) {
-      // Fallback to regular browser notifications
-      console.log('⚠️ Progressier failed, falling back to browser notifications');
-      const browserResult = await notificationService.requestPermission();
-      console.log('🔔 Browser notification permission result:', browserResult);
-      granted = !!browserResult;
+      console.log('⚠️ Progressier permission failed');
     }
 
     // Persist preference for authenticated users
@@ -102,9 +98,7 @@ export class PlatformNotificationService {
         tag: options.tag
       });
     } else {
-      // Fallback to browser notifications
-      console.log('🔔 Using browser notifications as fallback');
-      notificationService.showNotification(title, options);
+      console.log('🔔 Not subscribed to Progressier, skipping notification');
     }
   }
 

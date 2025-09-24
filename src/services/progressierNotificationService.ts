@@ -156,14 +156,7 @@ export class ProgressierNotificationService {
 
       const initialized = await this.initialize();
       if (!initialized) {
-        console.log('❌ Progressier not available, falling back to browser notifications');
-        
-        // Fallback to standard browser notifications
-        if ('Notification' in window) {
-          const permission = await Notification.requestPermission();
-          console.log('🔔 Browser notification permission:', permission);
-          return permission === 'granted';
-        }
+        console.log('❌ Progressier not available');
         return false;
       }
 
@@ -319,19 +312,7 @@ export class ProgressierNotificationService {
     try {
       const initialized = await this.initialize();
       if (!initialized || !window.progressier) {
-        console.log('❌ Progressier not available for sending notification, using browser fallback');
-        
-        // Fallback to browser notification
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification(title, {
-            body,
-            icon: options.icon || '/icons/app-icon-512.png',
-            badge: options.badge || '/icons/app-icon-512.png',
-            tag: options.tag || 'pocket-pause',
-            data: options.data || {}
-          });
-          console.log('✅ Browser notification sent');
-        }
+        console.log('❌ Progressier not available for sending notification');
         return;
       }
 
@@ -354,18 +335,7 @@ export class ProgressierNotificationService {
         await (window.progressier as any).push(notificationOptions);
         console.log('✅ Push notification sent via Progressier');
       } else {
-        console.log('❌ Progressier.push method not available, using browser notification');
-        // Fallback to browser notification
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification(title, {
-            body,
-            icon: options.icon || '/icons/app-icon-512.png',
-            badge: options.badge || '/icons/app-icon-512.png',
-            tag: options.tag || 'pocket-pause',
-            data: options.data || {}
-          });
-          console.log('✅ Browser notification sent');
-        }
+        console.log('❌ Progressier.push method not available');
       }
     } catch (error) {
       console.error('❌ Error sending push notification:', error);
