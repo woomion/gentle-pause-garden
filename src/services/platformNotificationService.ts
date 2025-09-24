@@ -131,7 +131,12 @@ export class PlatformNotificationService {
       console.log('🔔 Sending test via Progressier');
       await progressierNotificationService.testNotification();
     } else {
-      console.log('🔔 Not subscribed to Progressier, cannot send test notification');
+      // Fallback to browser notification
+      console.log('🔔 Sending test via browser notifications');
+      notificationService.showNotification('Test Notification', {
+        body: 'This is a test from Pocket Pause! Your notifications are working.',
+        icon: '/icons/app-icon-512.png'
+      });
     }
   }
 

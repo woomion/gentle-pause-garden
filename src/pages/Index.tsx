@@ -231,8 +231,35 @@ const Index = () => {
         return;
       }
       
-      // Only use Progressier for push notifications - it handles browser permissions internally
-      console.log('🔔 Requesting Progressier push notifications...');
+      // First, request browser permission if needed
+      if ('Notification' in window) {
+        if (Notification.permission === 'denied') {
+          alert('Notifications are blocked. Please go to your browser settings and allow notifications for this site, then try again.');
+          return;
+        }
+        
+        if (Notification.permission === 'default') {
+          console.log('🔔 Requesting browser permission...');
+          const permission = await Notification.requestPermission();
+          console.log('🔔 Browser permission result:', permission);
+          
+          if (permission !== 'granted') {
+            alert('Please allow notifications to receive updates when items are ready for review.');
+            return;
+          }
+        }
+      }
+      
+      // Then initialize Progressier and register
+      console.log('🔔 Initializing Progressier...');
+      const initialized = await platformNotificationService.initialize();
+      if (!initialized) {
+        alert('Unable to initialize push notifications. Please try again in a few seconds.');
+        return;
+      }
+      
+      // Request Progressier subscription
+      console.log('🔔 Requesting Progressier subscription...');
       const success = await platformNotificationService.requestPermission();
       console.log('🔔 Progressier subscription result:', success);
       
