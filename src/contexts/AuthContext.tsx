@@ -233,15 +233,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithMagicLink = async (email: string) => {
     try {
-      // Redirect to production domain for PWA testing
+      // For PWA, we want the magic link to open in the app
+      // Use a custom URL scheme if available, otherwise fallback to domain
       const redirectUrl = 'https://pocketpause.app/';
       
+      console.log('🔐 Sending magic link with redirect:', redirectUrl);
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: redirectUrl
         }
       });
+      
+      if (error) {
+        console.error('🔐 Magic link error:', error);
+      } else {
+        console.log('🔐 Magic link sent successfully');
+      }
+      
       return { error };
     } catch (error) {
       console.error('AuthProvider: Error in signInWithMagicLink:', error);
