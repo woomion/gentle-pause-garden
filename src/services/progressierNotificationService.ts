@@ -50,16 +50,23 @@ export class ProgressierNotificationService {
         });
       }
       
-      // Let Progressier show its native prompt
-      window.addEventListener('pusheligible', () => {
-        console.log('🔔 Progressier: Push eligible event triggered');
-        if (window.progressier?.showOptIn) {
-          window.progressier.showOptIn();
-        }
-      });
-      
       // Give Progressier script time to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Try to trigger Progressier's prompt directly after it loads
+      if (window.progressier?.showOptIn) {
+        console.log('🔔 Progressier: Showing opt-in prompt directly');
+        window.progressier.showOptIn();
+      } else {
+        console.log('🔔 Progressier: showOptIn not available, waiting for pusheligible event');
+        // Fallback: wait for the pusheligible event
+        window.addEventListener('pusheligible', () => {
+          console.log('🔔 Progressier: Push eligible event triggered');
+          if (window.progressier?.showOptIn) {
+            window.progressier.showOptIn();
+          }
+        });
+      }
       
       // Check if Progressier API is available through the global object
       if (typeof window.progressier !== 'undefined' && window.progressier) {
