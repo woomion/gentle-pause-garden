@@ -40,6 +40,8 @@ const handler = async (req: Request): Promise<Response> => {
       email_data: { token, token_hash, redirect_to, email_action_type }
     } = emailData;
 
+    console.log(`DEBUG: Full emailData:`, JSON.stringify(emailData, null, 2));
+    console.log(`DEBUG: User object:`, JSON.stringify(user, null, 2));
     console.log(`Sending ${email_action_type} email to ${user.email}`);
 
     // Create a beautiful magic link email
