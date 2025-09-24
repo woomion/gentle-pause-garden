@@ -95,7 +95,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const { error } = await resend.emails.send({
-      from: 'Pocket Pause <noreply@resend.dev>',
+      from: 'Pocket Pause <noreply@pocketpause.app>',
       to: [user.email],
       subject: '🔗 Your Magic Link to Pause',
       html: emailHtml,
