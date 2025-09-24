@@ -233,7 +233,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithMagicLink = async (email: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      // Use production domain for magic link redirects
+      const redirectUrl = 'https://pocketpause.app/';
       
       const { error } = await supabase.auth.signInWithOtp({
         email,
