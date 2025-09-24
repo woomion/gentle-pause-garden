@@ -50,11 +50,8 @@ export class ProgressierNotificationService {
         });
       }
       
-      // Add pusheligible event listener for Progressier
-      window.addEventListener('pusheligible', () => {
-        console.log('🔔 Progressier: Push eligible event triggered');
-        this.showPushPrompt();
-      });
+      // Let Progressier handle its own prompts
+      console.log('🔔 Progressier: Will handle push prompts automatically');
       
       // Give Progressier script time to load
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -75,78 +72,6 @@ export class ProgressierNotificationService {
     }
   }
 
-  private showPushPrompt(): void {
-    // Show a custom UI prompt for push notifications
-    const prompt = document.createElement('div');
-    prompt.innerHTML = `
-      <div style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        z-index: 10000;
-        max-width: 300px;
-        font-family: system-ui, -apple-system, sans-serif;
-      ">
-        <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
-          🔔 Get notified when items are ready
-        </h3>
-        <p style="margin: 0 0 12px 0; font-size: 12px; color: #666;">
-          We'll send you a notification when your paused items are ready for review.
-        </p>
-        <div style="display: flex; gap: 8px;">
-          <button id="progressier-allow" style="
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-          ">Allow</button>
-          <button id="progressier-deny" style="
-            background: #f8f9fa;
-            color: #666;
-            border: 1px solid #ddd;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-          ">Not now</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(prompt);
-
-    // Handle allow button
-    const allowBtn = prompt.querySelector('#progressier-allow');
-    allowBtn?.addEventListener('click', async () => {
-      try {
-        await this.requestPermission();
-        document.body.removeChild(prompt);
-      } catch (error) {
-        console.error('Error requesting permission:', error);
-      }
-    });
-
-    // Handle deny button
-    const denyBtn = prompt.querySelector('#progressier-deny');
-    denyBtn?.addEventListener('click', () => {
-      document.body.removeChild(prompt);
-    });
-
-    // Auto-remove after 10 seconds
-    setTimeout(() => {
-      if (document.body.contains(prompt)) {
-        document.body.removeChild(prompt);
-      }
-    }, 10000);
-  }
 
   async requestPermission(): Promise<boolean> {
     try {
