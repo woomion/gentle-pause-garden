@@ -5,6 +5,55 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper to extract og:image from HTML
+function extractOgImageFromHtml(html: string): string | null {
+  if (!html) return null;
+  
+  // Try og:image meta tag
+  const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
+                       html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+  if (ogImageMatch?.[1]) {
+    console.log('🖼️ Found og:image in HTML:', ogImageMatch[1]);
+    return ogImageMatch[1];
+  }
+  
+  // Try twitter:image
+  const twitterImageMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i) ||
+                            html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i);
+  if (twitterImageMatch?.[1]) {
+    console.log('🖼️ Found twitter:image in HTML:', twitterImageMatch[1]);
+    return twitterImageMatch[1];
+  }
+  
+  // Try to find product image in JSON-LD
+  const jsonLdMatch = html.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+  if (jsonLdMatch) {
+    for (const match of jsonLdMatch) {
+      try {
+        const jsonContent = match.replace(/<script[^>]*>/i, '').replace(/<\/script>/i, '');
+        const data = JSON.parse(jsonContent);
+        const items = Array.isArray(data) ? data : [data];
+        for (const item of items) {
+          if (item['@type'] === 'Product' || item['@type']?.includes?.('Product')) {
+            const img = item.image;
+            if (img) {
+              const imageUrl = Array.isArray(img) ? img[0] : (typeof img === 'string' ? img : img?.url);
+              if (imageUrl) {
+                console.log('🖼️ Found product image in JSON-LD:', imageUrl);
+                return imageUrl;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Invalid JSON, continue
+      }
+    }
+  }
+  
+  return null;
+}
+
 // Helper to do a scrape request and return structured data
 async function doScrape(apiKey: string, formattedUrl: string, includeScreenshot = false) {
   console.log('🕷️ Using Firecrawl scrape mode');
@@ -44,8 +93,13 @@ async function doScrape(apiKey: string, formattedUrl: string, includeScreenshot 
   const screenshot = data.screenshot || null;
   const metadata = data.metadata || null;
   
-  // Extract image from metadata
-  const ogImage = metadata?.ogImage || metadata?.image || null;
+  // Extract image from metadata first, then try parsing HTML directly
+  let ogImage = metadata?.ogImage || metadata?.image || null;
+  
+  // If no ogImage from metadata, parse it from the HTML
+  if (!ogImage && html) {
+    ogImage = extractOgImageFromHtml(html);
+  }
   
   console.log('✅ Scrape successful, html length:', html?.length || 0, 'ogImage:', ogImage);
 
