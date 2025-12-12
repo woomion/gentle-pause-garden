@@ -101,24 +101,6 @@ const NotificationSettingsModal: React.FC<NotificationSettingsModalProps> = ({
             />
           </div>
 
-          {/* Test notification button */}
-          {notificationsEnabled && (
-            <div className="pt-4 border-t">
-              <Button
-                onClick={onTestNotification}
-                variant="outline"
-                className="w-full"
-              >
-                Send Test Notification
-              </Button>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                {isNative 
-                  ? 'Test notifications will appear in your device notification center'
-                  : 'Test notifications will appear as browser notifications'
-                }
-              </p>
-            </div>
-          )}
 
           {/* Platform-specific help text */}
           <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
