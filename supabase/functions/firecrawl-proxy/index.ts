@@ -1,11 +1,5 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-interface FirecrawlCrawlResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-}
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -32,12 +26,20 @@ serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'FIRECRAWL_API_KEY not set' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    // Format URL
+    let formattedUrl = url.trim();
+    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+
+    console.log('🔍 Processing URL:', formattedUrl, 'Mode:', mode);
+
     // Check if this is extract mode request
     if (mode === 'extract' && schema) {
       console.log('🎯 Using Firecrawl extract mode with schema');
       
       const extractPayload = {
-        urls: [url],
+        urls: [formattedUrl],
         schema: schema,
         prompt: prompt || 'Extract detailed product information including name, current price, image URL, brand, and availability from this e-commerce page.'
       };
@@ -65,7 +67,7 @@ serve(async (req: Request) => {
         
         // Poll for results
         let attempts = 0;
-        const maxAttempts = 10;
+        const maxAttempts = 15;
         let resultData;
         
         while (attempts < maxAttempts) {
@@ -78,7 +80,7 @@ serve(async (req: Request) => {
           });
           
           resultData = await statusRes.json();
-          console.log(`📋 Extract status attempt ${attempts + 1}:`, JSON.stringify(resultData, null, 2));
+          console.log(`📋 Extract status attempt ${attempts + 1}:`, resultData.status);
           
           if (resultData.status === 'completed' && resultData.data) {
             break;
@@ -113,48 +115,45 @@ serve(async (req: Request) => {
       });
     }
 
-    // Original crawl mode for HTML/markdown extraction
-    console.log('🕷️ Using Firecrawl crawl mode');
+    // Use /v1/scrape for single-page synchronous scraping (HTML/markdown extraction)
+    console.log('🕷️ Using Firecrawl scrape mode (synchronous)');
     
-    const payload = {
-      url,
-      limit: 1,
-      scrapeOptions: { 
-        formats: ['html', 'markdown'],
-        waitFor: 2000,
-        timeout: 15000
-      },
+    const scrapePayload = {
+      url: formattedUrl,
+      formats: ['html', 'markdown'],
+      onlyMainContent: false,
+      waitFor: 3000,
     };
 
-    const fcRes = await fetch('https://api.firecrawl.dev/v1/crawl', {
+    const scrapeRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(scrapePayload),
     });
 
-    const data: FirecrawlCrawlResponse = await fcRes.json();
-    console.log('📋 Firecrawl crawl response status:', data.success);
+    const scrapeData = await scrapeRes.json();
+    console.log('📋 Firecrawl scrape response success:', scrapeData.success);
     
-    if (!fcRes.ok || !data.success) {
-      console.error('❌ Crawl failed:', data.error);
-      return new Response(JSON.stringify({ error: data.error || 'Firecrawl request failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (!scrapeRes.ok || !scrapeData.success) {
+      console.error('❌ Scrape failed:', scrapeData.error);
+      return new Response(JSON.stringify({ error: scrapeData.error || 'Firecrawl scrape failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Extract a reasonable html/markdown payload
-    let html: string | null = null;
-    let markdown: string | null = null;
-    const first = Array.isArray(data.data) ? data.data[0] : (data.data || {});
-    html = first?.html || first?.content?.html || first?.content || null;
-    markdown = first?.markdown || first?.md || null;
+    // Extract content from response - /v1/scrape returns data directly
+    const html = scrapeData.data?.html || scrapeData.html || null;
+    const markdown = scrapeData.data?.markdown || scrapeData.markdown || null;
+    
+    console.log('✅ Scrape successful, html length:', html?.length || 0, 'markdown length:', markdown?.length || 0);
 
-    return new Response(JSON.stringify({ html, markdown }), {
+    return new Response(JSON.stringify({ html, markdown, content: html }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (e) {
+    console.error('❌ Error:', e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'Unknown error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
