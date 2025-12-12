@@ -8,7 +8,7 @@ try {
 }
 
 // Basic caching
-const CACHE_NAME = 'pocket-pause-v3';
+const CACHE_NAME = 'pocket-pause-v4';
 const urlsToCache = ['/', '/favicon.ico'];
 
 self.addEventListener('install', event => {
@@ -24,13 +24,43 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async () => {
+    // Take control of existing clients
+    await self.clients.claim();
+
+    // Clean up old caches
+    const cacheNames = await caches.keys();
+    await Promise.all(
+      cacheNames
+        .filter(name => name.startsWith('pocket-pause-') && name !== CACHE_NAME)
+        .map(name => caches.delete(name))
+    );
+  })());
 });
 
 self.addEventListener('fetch', event => {
+  const { request } = event;
+
+  // Always try network first for page navigations so new UI changes show up
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(request);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, networkResponse.clone());
+        return networkResponse;
+      } catch (error) {
+        const cached = await caches.match(request);
+        return cached || new Response('Offline', { status: 503, statusText: 'Offline' });
+      }
+    })());
+    return;
+  }
+
+  // Cache-first for other requests (icons, assets, etc.)
   event.respondWith((async () => {
-    const cached = await caches.match(event.request);
-    return cached || fetch(event.request);
+    const cached = await caches.match(request);
+    return cached || fetch(request);
   })());
 });
 
