@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import PauseLog from "./pages/PauseLog";
 import About from "./pages/About";
+import Clarity from "./pages/Clarity";
 // import Courses from "./pages/Courses";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
@@ -169,6 +170,11 @@ const App = () => {
                   <Route path="/about" element={
                     <AuthGuard>
                       <About />
+                    </AuthGuard>
+                  } />
+                  <Route path="/clarity" element={
+                    <AuthGuard>
+                      <Clarity />
                     </AuthGuard>
                   } />
                   <Route path="/courses" element={<Navigate to="/" replace />} />

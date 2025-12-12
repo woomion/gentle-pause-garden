@@ -8,6 +8,12 @@ const FooterLinks = () => {
         <p className="mb-3 sm:mb-2">Pocket Pause—your conscious spending companion</p>
           <div className="flex justify-center gap-4">
             <Link 
+              to="/clarity" 
+              className="hover:text-gray-800 transition-colors underline"
+            >
+              Clarity
+            </Link>
+            <Link 
               to="/get" 
               className="hover:text-gray-800 transition-colors underline"
             >
