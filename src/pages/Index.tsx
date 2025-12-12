@@ -731,26 +731,6 @@ console.log('Rendering main Index content');
         {/* Show notification setup prominently for all users */}
         {user && (
           <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 mt-4 mb-4">
-            {/* Test item creation button */}
-            <div className="p-4 border border-blue-200 rounded-lg bg-blue-50/50 mb-4">
-              <div className="text-sm text-blue-700 mb-2">🧪 Test Notifications</div>
-              <div className="space-y-2">
-                <Button 
-                  onClick={async () => {
-                    const result = await createTestItem();
-                    if (result.success) {
-                      alert('✅ Test item created! It will be ready for review in 5 minutes.');
-                    } else {
-                      alert('❌ Error creating test item: ' + (result.error || 'Unknown error'));
-                    }
-                  }}
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
-                >
-                  Create Test Item (Ready in 5 min)
-                </Button>
-              </div>
-            </div>
             
             {/* Notification setup */}
             {Notification.permission !== 'granted' && (
