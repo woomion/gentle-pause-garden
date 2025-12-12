@@ -232,7 +232,7 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
     console.log('🎯 Using Firecrawl extract mode for:', url);
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout for extract+fallback
 
     const response = await fetch('https://cnjznmbgxprsrovmdywe.supabase.co/functions/v1/firecrawl-proxy', {
       method: 'POST',
@@ -249,11 +249,13 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error(`Firecrawl extract failed: ${response.status} ${response.statusText}`);
+      throw new Error(`Firecrawl request failed: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('🎯 Firecrawl response:', { success: data.success, hasExtracted: !!data.extracted, hasHtml: !!data.html, hasOgImage: !!data.ogImage });
     
+    // Check if we got extracted data
     if (data.success && data.extracted) {
       const extracted = data.extracted;
       const result: ProductInfo = {
@@ -267,7 +269,7 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
       };
 
       // Calculate confidence based on data quality
-      let confidence = 0.3; // Base confidence for Firecrawl
+      let confidence = 0.3;
       if (result.itemName && result.itemName.length > 3) confidence += 0.3;
       if (result.price && !isNaN(parseFloat(result.price))) confidence += 0.2;
       if (result.imageUrl) confidence += 0.1;
@@ -282,10 +284,25 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
         canonicalUrl: result.canonicalUrl || url
       };
     }
+    
+    // Check if we got HTML (fallback from extract to scrape in edge function)
+    if (data.html) {
+      console.log('🔄 Got HTML from scrape fallback, parsing...');
+      const parseResult = await parseGenericEnhanced(data.html, url);
+      
+      // If we got ogImage from metadata but parsing didn't find an image, use it
+      if (!parseResult.data.imageUrl && data.ogImage) {
+        console.log('🖼️ Using ogImage from metadata:', data.ogImage);
+        parseResult.data.imageUrl = data.ogImage;
+        parseResult.confidence = Math.min(parseResult.confidence + 0.15, 1);
+      }
+      
+      return parseResult;
+    }
 
-    throw new Error('No data extracted');
+    throw new Error('No data extracted or scraped');
   } catch (error) {
-    console.error('Firecrawl extract failed:', error);
+    console.error('Firecrawl request failed:', error);
     return {
       success: false,
       data: { storeName: getEnhancedStoreName(url) },

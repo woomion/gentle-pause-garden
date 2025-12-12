@@ -5,6 +5,61 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper to do a scrape request and return structured data
+async function doScrape(apiKey: string, formattedUrl: string, includeScreenshot = false) {
+  console.log('🕷️ Using Firecrawl scrape mode');
+  
+  const formats = includeScreenshot 
+    ? ['html', 'markdown', 'screenshot'] 
+    : ['html', 'markdown'];
+  
+  const scrapePayload = {
+    url: formattedUrl,
+    formats,
+    onlyMainContent: false,
+    waitFor: 3000,
+  };
+
+  const scrapeRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(scrapePayload),
+  });
+
+  const scrapeData = await scrapeRes.json();
+  console.log('📋 Firecrawl scrape response success:', scrapeData.success);
+  
+  if (!scrapeRes.ok || !scrapeData.success) {
+    console.error('❌ Scrape failed:', scrapeData.error);
+    return { success: false, error: scrapeData.error || 'Firecrawl scrape failed' };
+  }
+
+  // Extract content from response
+  const data = scrapeData.data || scrapeData;
+  const html = data.html || null;
+  const markdown = data.markdown || null;
+  const screenshot = data.screenshot || null;
+  const metadata = data.metadata || null;
+  
+  // Extract image from metadata
+  const ogImage = metadata?.ogImage || metadata?.image || null;
+  
+  console.log('✅ Scrape successful, html length:', html?.length || 0, 'ogImage:', ogImage);
+
+  return { 
+    success: true, 
+    html, 
+    markdown, 
+    screenshot,
+    ogImage, 
+    metadata,
+    content: html 
+  };
+}
+
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -34,168 +89,108 @@ serve(async (req: Request) => {
 
     console.log('🔍 Processing URL:', formattedUrl, 'Mode:', mode);
 
-    // Check if this is extract mode request
-    if (mode === 'extract' && schema) {
-      console.log('🎯 Using Firecrawl extract mode with schema');
-      
-      const extractPayload = {
-        urls: [formattedUrl],
-        schema: schema,
-        prompt: prompt || 'Extract detailed product information including name, current price, image URL, brand, and availability from this e-commerce page.'
-      };
-
-      const extractRes = await fetch('https://api.firecrawl.dev/v1/extract', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(extractPayload),
-      });
-
-      const extractData = await extractRes.json();
-      console.log('📋 Firecrawl extract response:', JSON.stringify(extractData, null, 2));
-      
-      if (!extractRes.ok || !extractData.success) {
-        console.error('❌ Extract failed:', extractData.error);
-        return new Response(JSON.stringify({ error: extractData.error || 'Firecrawl extract failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      }
-
-      // Check if this is an async job response
-      if (extractData.id && !extractData.data) {
-        console.log('🔄 Extract job started, polling for results...');
-        
-        // Poll for results
-        let attempts = 0;
-        const maxAttempts = 15;
-        let resultData;
-        
-        while (attempts < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-          
-          const statusRes = await fetch(`https://api.firecrawl.dev/v1/extract/${extractData.id}`, {
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-            },
-          });
-          
-          resultData = await statusRes.json();
-          console.log(`📋 Extract status attempt ${attempts + 1}:`, resultData.status);
-          
-          if (resultData.status === 'completed' && resultData.data) {
-            break;
-          } else if (resultData.status === 'failed') {
-            console.error('❌ Extract job failed:', resultData.error);
-            return new Response(JSON.stringify({ error: resultData.error || 'Extract job failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-          }
-          
-          attempts++;
-        }
-        
-        if (!resultData?.data) {
-          console.error('❌ Extract job timed out or failed');
-          return new Response(JSON.stringify({ error: 'Extract job timed out' }), { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-        }
-        
-        // Return extracted data from polling
-        const extracted = resultData.data || {};
-        console.log('✅ Final extracted data:', JSON.stringify(extracted, null, 2));
-        return new Response(JSON.stringify({ extracted }), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // Return extracted data immediately if available
-      const extracted = extractData.data?.[0] || {};
-      console.log('✅ Immediate extracted data:', JSON.stringify(extracted, null, 2));
-      return new Response(JSON.stringify({ extracted }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Handle screenshot mode
+    // Handle screenshot mode - just do a scrape with screenshot format
     if (mode === 'screenshot') {
-      console.log('📸 Using Firecrawl screenshot mode');
-      
-      const scrapePayload = {
-        url: formattedUrl,
-        formats: ['screenshot', 'html', 'markdown'],
-        onlyMainContent: false,
-        waitFor: 3000,
-      };
-
-      const scrapeRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(scrapePayload),
-      });
-
-      const scrapeData = await scrapeRes.json();
-      console.log('📋 Firecrawl screenshot response success:', scrapeData.success);
-      
-      if (!scrapeRes.ok || !scrapeData.success) {
-        console.error('❌ Screenshot scrape failed:', scrapeData.error);
-        return new Response(JSON.stringify({ error: scrapeData.error || 'Firecrawl screenshot failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      }
-
-      const screenshot = scrapeData.data?.screenshot || scrapeData.screenshot || null;
-      const html = scrapeData.data?.html || scrapeData.html || null;
-      const markdown = scrapeData.data?.markdown || scrapeData.markdown || null;
-      
-      console.log('✅ Screenshot captured:', !!screenshot);
-
-      return new Response(JSON.stringify({ success: true, screenshot, html, markdown }), {
-        status: 200,
+      const result = await doScrape(apiKey, formattedUrl, true);
+      return new Response(JSON.stringify(result), {
+        status: result.success ? 200 : 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    // Use /v1/scrape for single-page synchronous scraping (HTML/markdown extraction)
-    console.log('🕷️ Using Firecrawl scrape mode (synchronous)');
-    
-    const scrapePayload = {
-      url: formattedUrl,
-      formats: ['html', 'markdown', 'links'],
-      onlyMainContent: false,
-      waitFor: 3000,
-    };
+    // Check if this is extract mode request - try it but fallback to scrape
+    if (mode === 'extract' && schema) {
+      console.log('🎯 Trying Firecrawl extract mode with schema');
+      
+      try {
+        const extractPayload = {
+          urls: [formattedUrl],
+          schema: schema,
+          prompt: prompt || 'Extract detailed product information including name, current price, image URL, brand, and availability from this e-commerce page.'
+        };
 
-    const scrapeRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(scrapePayload),
-    });
+        const extractRes = await fetch('https://api.firecrawl.dev/v1/extract', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify(extractPayload),
+        });
 
-    const scrapeData = await scrapeRes.json();
-    console.log('📋 Firecrawl scrape response success:', scrapeData.success);
-    
-    if (!scrapeRes.ok || !scrapeData.success) {
-      console.error('❌ Scrape failed:', scrapeData.error);
-      return new Response(JSON.stringify({ error: scrapeData.error || 'Firecrawl scrape failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        const extractData = await extractRes.json();
+        
+        if (extractRes.ok && extractData.success) {
+          // Check if this is an async job response
+          if (extractData.id && !extractData.data) {
+            console.log('🔄 Extract job started, polling for results...');
+            
+            // Poll for results with shorter timeout
+            let attempts = 0;
+            const maxAttempts = 8; // Reduce attempts to fail faster
+            let resultData;
+            
+            while (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              
+              const statusRes = await fetch(`https://api.firecrawl.dev/v1/extract/${extractData.id}`, {
+                headers: {
+                  'Authorization': `Bearer ${apiKey}`,
+                },
+              });
+              
+              resultData = await statusRes.json();
+              console.log(`📋 Extract status attempt ${attempts + 1}:`, resultData.status);
+              
+              if (resultData.status === 'completed' && resultData.data) {
+                const extracted = resultData.data || {};
+                console.log('✅ Extract completed:', JSON.stringify(extracted, null, 2));
+                return new Response(JSON.stringify({ success: true, extracted }), {
+                  status: 200,
+                  headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+                });
+              } else if (resultData.status === 'failed') {
+                console.log('⚠️ Extract job failed, falling back to scrape');
+                break; // Fall through to scrape
+              }
+              
+              attempts++;
+            }
+            
+            // Extract timed out or failed - fallback to scrape
+            console.log('⚠️ Extract timed out or failed, falling back to scrape');
+          } else if (extractData.data) {
+            // Immediate result
+            const extracted = extractData.data?.[0] || extractData.data || {};
+            console.log('✅ Immediate extracted data:', JSON.stringify(extracted, null, 2));
+            return new Response(JSON.stringify({ success: true, extracted }), {
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+        } else {
+          console.log('⚠️ Extract request failed, falling back to scrape');
+        }
+      } catch (extractError) {
+        console.log('⚠️ Extract error, falling back to scrape:', extractError);
+      }
+      
+      // Fallback to scrape mode if extract failed
+      console.log('🔄 Falling back to scrape mode after extract failure');
+      const result = await doScrape(apiKey, formattedUrl, false);
+      return new Response(JSON.stringify(result), {
+        status: result.success ? 200 : 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    // Extract content from response - /v1/scrape returns data directly
-    const html = scrapeData.data?.html || scrapeData.html || null;
-    const markdown = scrapeData.data?.markdown || scrapeData.markdown || null;
-    const metadata = scrapeData.data?.metadata || scrapeData.metadata || null;
-    
-    // Try to extract og:image from metadata if available
-    const ogImage = metadata?.ogImage || metadata?.image || null;
-    
-    console.log('✅ Scrape successful, html length:', html?.length || 0, 'markdown length:', markdown?.length || 0, 'ogImage:', ogImage);
-
-    return new Response(JSON.stringify({ html, markdown, content: html, ogImage, metadata }), {
-      status: 200,
+    // Default: Use scrape mode
+    const result = await doScrape(apiKey, formattedUrl, false);
+    return new Response(JSON.stringify(result), {
+      status: result.success ? 200 : 502,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
+    
   } catch (e) {
     console.error('❌ Error:', e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : 'Unknown error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
