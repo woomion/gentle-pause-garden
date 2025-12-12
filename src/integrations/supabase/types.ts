@@ -333,14 +333,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      get_current_user_email: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_subscription_tier: {
-        Args: { user_uuid?: string }
-        Returns: string
-      }
+      get_current_user_email: { Args: never; Returns: string }
+      get_subscription_tier: { Args: { user_uuid?: string }; Returns: string }
       get_user_partners: {
         Args: { user_uuid?: string }
         Returns: {
@@ -357,10 +351,7 @@ export type Database = {
         Args: { user_uuid?: string }
         Returns: boolean
       }
-      reset_monthly_usage: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      reset_monthly_usage: { Args: never; Returns: undefined }
       send_test_push_notification: {
         Args: { target_user_id: string }
         Returns: Json
