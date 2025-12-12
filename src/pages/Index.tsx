@@ -122,8 +122,10 @@ const Index = () => {
     return !shouldRemoveFromPausedList;
   });
   
-  // State for ready count with automatic updates
-  const [readyCount, setReadyCount] = useState(0);
+  // Use itemReview.itemsForReview.length directly - it's the authoritative source
+  // that updates immediately when items are reviewed
+  const readyCount = itemReview.itemsForReview.length;
+  
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [showItemDetail, setShowItemDetail] = useState(false);
   const [compactQuickBar, setCompactQuickBar] = useState(false);
@@ -134,25 +136,6 @@ const Index = () => {
   const installed = useInstalledApp();
   const isMobile = useIsMobile();
   const [mobileViewMode, setMobileViewMode] = useState<'carousel' | 'list'>('carousel');
-  
-  // Update ready count automatically every minute and when items change
-  useEffect(() => {
-    const updateReadyCount = () => {
-      if (getItemsForReview) {
-        const count = getItemsForReview().length;
-        console.log('🔄 Updating ready count:', count);
-        setReadyCount(count);
-      }
-    };
-
-    // Update immediately
-    updateReadyCount();
-    
-    // Set up interval to update every minute
-    const interval = setInterval(updateReadyCount, 60 * 1000);
-    
-    return () => clearInterval(interval);
-  }, [getItemsForReview, items]); // Re-run when items change
   
   // Handle redirects for invitations
   useIndexRedirects();
