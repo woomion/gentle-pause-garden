@@ -6,7 +6,7 @@ import { usePausedItems } from '@/hooks/usePausedItems';
 import { useUsageLimit } from '@/hooks/useUsageLimit';
 import { parseProductUrl } from '@/utils/urlParser';
 import { extractStoreName } from '@/utils/pausedItemsUtils';
-import { Clipboard, Check, Scan } from 'lucide-react';
+import { Scan } from 'lucide-react';
 import BarcodeScanner from '../BarcodeScanner';
 import { lookupProductByBarcode } from '@/utils/productLookup';
 import { triggerProcessingHaptic, triggerSuccessHaptic } from '@/utils/hapticUtils';
@@ -68,7 +68,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
   const [value, setValue] = useState('');
   const [duration, setDuration] = useState<string>('24 hours');
   const [submitting, setSubmitting] = useState(false);
-  const [showClipboardSuccess, setShowClipboardSuccess] = useState(false);
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [showPremiumDurationModal, setShowPremiumDurationModal] = useState(false);
   const [pendingPremiumDuration, setPendingPremiumDuration] = useState<string>('');
@@ -202,47 +201,6 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
     }
   };
 
-  const handleReadClipboard = async () => {
-    try {
-      const clipboardValue = await navigator.clipboard.readText();
-      
-      if (clipboardValue && clipboardValue.trim()) {
-        const urlPattern = /https?:\/\//i;
-        if (urlPattern.test(clipboardValue.trim())) {
-          setValue(clipboardValue.trim());
-          setShowClipboardSuccess(true);
-          setTimeout(() => setShowClipboardSuccess(false), 2000);
-          toast({
-            title: "URL pasted from clipboard!",
-            description: "Ready to pause",
-          });
-          if (compact && onExpandRequest) {
-            onExpandRequest();
-          }
-          setTimeout(() => inputRef.current?.focus(), 0);
-        } else {
-          toast({
-            title: "No URL found",
-            description: "Please copy a product URL to your clipboard first",
-            variant: "destructive"
-          });
-        }
-      } else {
-        toast({
-          title: "Clipboard is empty",
-          description: "Please copy a product URL to your clipboard first",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('Failed to read clipboard:', error);
-      toast({
-        title: "Can't access clipboard",
-        description: "Please paste the URL manually",
-        variant: "destructive"
-      });
-    }
-  };
 
   const handleBarcodeScanned = async (barcode: string) => {
     console.log('📱 PillQuickPauseBar received barcode:', barcode);
@@ -324,22 +282,11 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
                 }
               }}
               placeholder="Paste a link..."
-              className="h-14 md:h-17 rounded-full text-base md:text-lg pr-12"
+              className="h-14 md:h-17 rounded-full text-base md:text-lg"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSubmit();
               }}
             />
-            <button
-              onClick={handleReadClipboard}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted/20 rounded-full transition-colors"
-              title="Paste from clipboard"
-            >
-              {showClipboardSuccess ? (
-                <Check size={18} className="text-primary" />
-              ) : (
-                <Clipboard size={18} className="text-primary" />
-              )}
-            </button>
           </div>
           <button
             onClick={() => setShowBarcodeScanner(true)}
