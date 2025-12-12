@@ -17,14 +17,23 @@ const Clarity = () => {
   const supabasePauseLog = useSupabasePauseLog();
   const { items: decidedItems } = user ? supabasePauseLog : localPauseLog;
   
-  // Get currently paused items
-  const { items: pausedItems } = usePausedItems();
+  // Get currently paused items (excluding items ready for review)
+  const { items: allPausedItems, getItemsForReview } = usePausedItems();
+  
+  // Filter out items that are ready for review - they're not "still pausing"
+  const stillPausingItems = useMemo(() => {
+    const now = new Date();
+    return allPausedItems.filter(item => {
+      const checkInDate = item.checkInDate instanceof Date ? item.checkInDate : new Date(item.checkInDate);
+      return checkInDate > now;
+    });
+  }, [allPausedItems]);
 
   // Calculate clarity metrics
   const metrics = useMemo(() => {
     const purchased = decidedItems.filter(item => item.status === 'purchased');
     const letGo = decidedItems.filter(item => item.status === 'let-go');
-    const stillPausing = pausedItems.length;
+    const stillPausing = stillPausingItems.length;
     
     const totalDecisions = purchased.length + letGo.length;
     
@@ -39,7 +48,7 @@ const Clarity = () => {
       return sum + (typeof price === 'number' ? price : parseFloat(price) || 0);
     }, 0);
     
-    const totalPausedValue = pausedItems.reduce((sum, item) => {
+    const totalPausedValue = stillPausingItems.reduce((sum, item) => {
       const price = (item as any).price || 0;
       return sum + (typeof price === 'number' ? price : parseFloat(price) || 0);
     }, 0);
@@ -68,7 +77,7 @@ const Clarity = () => {
       totalPausedValue,
       avgPauseTime,
     };
-  }, [decidedItems, pausedItems]);
+  }, [decidedItems, stillPausingItems]);
 
   const totalItems = metrics.purchased + metrics.letGo + metrics.stillPausing;
   const purchasedPercent = totalItems > 0 ? (metrics.purchased / totalItems) * 100 : 0;
