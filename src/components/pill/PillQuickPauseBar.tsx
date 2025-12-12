@@ -9,7 +9,7 @@ import { extractStoreName } from '@/utils/pausedItemsUtils';
 import { Clipboard, Check, Scan } from 'lucide-react';
 import BarcodeScanner from '../BarcodeScanner';
 import { lookupProductByBarcode } from '@/utils/productLookup';
-import { startHapticPulse, stopHapticPulse } from '@/utils/hapticUtils';
+import { triggerProcessingHaptic, triggerSuccessHaptic } from '@/utils/hapticUtils';
 
 import { useSubscription } from '@/hooks/useSubscription';
 import PremiumDurationModal from '../PremiumDurationModal';
@@ -132,12 +132,8 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
     
     console.log('✅ Usage limit check passed, proceeding...');
     
-    // Start soft pulsing haptic feedback while pausing (Android PWA supported)
-    if (typeof (navigator as any).vibrate === 'function') {
-      startHapticPulse('soft');
-    } else {
-      toast({ title: 'Haptics unavailable', description: 'Not supported on this device/browser' });
-    }
+    // Single elegant haptic at start - no annoying repeated clicks
+    triggerProcessingHaptic();
     
     setSubmitting(true);
 
@@ -194,14 +190,14 @@ const PillQuickPauseBar = ({ compact = false, prefillValue, onExpandRequest, onU
         onUrlEntry();
       }
 
+      // Success haptic - satisfying confirmation
+      triggerSuccessHaptic();
       toast({ title: 'Paused', description: 'Added to your pause list', duration: 2000 });
       setValue('');
     } catch (e) {
       console.error('Quick add failed', e);
       toast({ title: 'Error', description: 'Could not add item', variant: 'destructive' });
     } finally {
-      // Stop haptic feedback when pausing completes
-      stopHapticPulse();
       setSubmitting(false);
     }
   };
