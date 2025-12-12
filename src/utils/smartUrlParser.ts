@@ -516,8 +516,15 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
           
           if (response.ok) {
             const data = await response.json();
-            if (data.success && data.html) {
+            if (data.html) {
               result = await parseGenericEnhanced(data.html, finalUrl);
+              
+              // If we got ogImage from metadata but no imageUrl from parsing, use it
+              if (!result.data.imageUrl && data.ogImage) {
+                console.log('🖼️ Using ogImage from Firecrawl metadata:', data.ogImage);
+                result.data.imageUrl = data.ogImage;
+                result.confidence = Math.min(result.confidence + 0.15, 1);
+              }
             } else {
               throw new Error('No HTML content received');
             }

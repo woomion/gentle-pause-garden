@@ -115,12 +115,52 @@ serve(async (req: Request) => {
       });
     }
 
+    // Handle screenshot mode
+    if (mode === 'screenshot') {
+      console.log('📸 Using Firecrawl screenshot mode');
+      
+      const scrapePayload = {
+        url: formattedUrl,
+        formats: ['screenshot', 'html', 'markdown'],
+        onlyMainContent: false,
+        waitFor: 3000,
+      };
+
+      const scrapeRes = await fetch('https://api.firecrawl.dev/v1/scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(scrapePayload),
+      });
+
+      const scrapeData = await scrapeRes.json();
+      console.log('📋 Firecrawl screenshot response success:', scrapeData.success);
+      
+      if (!scrapeRes.ok || !scrapeData.success) {
+        console.error('❌ Screenshot scrape failed:', scrapeData.error);
+        return new Response(JSON.stringify({ error: scrapeData.error || 'Firecrawl screenshot failed' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const screenshot = scrapeData.data?.screenshot || scrapeData.screenshot || null;
+      const html = scrapeData.data?.html || scrapeData.html || null;
+      const markdown = scrapeData.data?.markdown || scrapeData.markdown || null;
+      
+      console.log('✅ Screenshot captured:', !!screenshot);
+
+      return new Response(JSON.stringify({ success: true, screenshot, html, markdown }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     // Use /v1/scrape for single-page synchronous scraping (HTML/markdown extraction)
     console.log('🕷️ Using Firecrawl scrape mode (synchronous)');
     
     const scrapePayload = {
       url: formattedUrl,
-      formats: ['html', 'markdown'],
+      formats: ['html', 'markdown', 'links'],
       onlyMainContent: false,
       waitFor: 3000,
     };
@@ -145,10 +185,14 @@ serve(async (req: Request) => {
     // Extract content from response - /v1/scrape returns data directly
     const html = scrapeData.data?.html || scrapeData.html || null;
     const markdown = scrapeData.data?.markdown || scrapeData.markdown || null;
+    const metadata = scrapeData.data?.metadata || scrapeData.metadata || null;
     
-    console.log('✅ Scrape successful, html length:', html?.length || 0, 'markdown length:', markdown?.length || 0);
+    // Try to extract og:image from metadata if available
+    const ogImage = metadata?.ogImage || metadata?.image || null;
+    
+    console.log('✅ Scrape successful, html length:', html?.length || 0, 'markdown length:', markdown?.length || 0, 'ogImage:', ogImage);
 
-    return new Response(JSON.stringify({ html, markdown, content: html }), {
+    return new Response(JSON.stringify({ html, markdown, content: html, ogImage, metadata }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
