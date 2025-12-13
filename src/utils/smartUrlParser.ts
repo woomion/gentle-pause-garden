@@ -48,6 +48,8 @@ const SITE_CONFIGS: SiteConfig[] = [
   { domain: 'ssense.com', problematic: true, requiresJs: true },
   { domain: 'mrporter.com', problematic: true, requiresJs: true },
   { domain: 'netaporter.com', problematic: true, requiresJs: true },
+  { domain: 'patagonia.com', problematic: true, requiresJs: true },
+  { domain: 'sculpd.com', problematic: true, requiresJs: true },
   
   // Amazon shortener domains - need expansion first
   { domain: 'a.co', problematic: false, requiresJs: false },
@@ -258,12 +260,22 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
     // Check if we got extracted data
     if (data.success && data.extracted) {
       const extracted = data.extracted;
+      
+      // Determine image URL - prioritize extracted, fallback to ogImage from metadata
+      let finalImageUrl = extracted.imageUrl && isValidUrl(extracted.imageUrl) ? normalizeImageUrl(extracted.imageUrl) : undefined;
+      
+      // Fallback to ogImage if no extracted image
+      if (!finalImageUrl && data.ogImage && isValidUrl(data.ogImage)) {
+        console.log('🖼️ No extracted image, using ogImage from metadata:', data.ogImage);
+        finalImageUrl = normalizeImageUrl(data.ogImage);
+      }
+      
       const result: ProductInfo = {
         itemName: extracted.itemName?.trim(),
         price: extracted.price ? String(extracted.price).replace(/[^\d.]/g, '') : undefined,
         priceCurrency: extracted.currency || 'USD',
         brand: extracted.brand?.trim(),
-        imageUrl: extracted.imageUrl && isValidUrl(extracted.imageUrl) ? extracted.imageUrl : undefined,
+        imageUrl: finalImageUrl,
         availability: extracted.availability,
         storeName: getEnhancedStoreName(url)
       };
@@ -293,7 +305,7 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
       // If we got ogImage from metadata but parsing didn't find an image, use it
       if (!parseResult.data.imageUrl && data.ogImage) {
         console.log('🖼️ Using ogImage from metadata:', data.ogImage);
-        parseResult.data.imageUrl = data.ogImage;
+        parseResult.data.imageUrl = normalizeImageUrl(data.ogImage);
         parseResult.confidence = Math.min(parseResult.confidence + 0.15, 1);
       }
       
@@ -539,7 +551,7 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
               // If we got ogImage from metadata but no imageUrl from parsing, use it
               if (!result.data.imageUrl && data.ogImage) {
                 console.log('🖼️ Using ogImage from Firecrawl metadata:', data.ogImage);
-                result.data.imageUrl = data.ogImage;
+                result.data.imageUrl = normalizeImageUrl(data.ogImage);
                 result.confidence = Math.min(result.confidence + 0.15, 1);
               }
             } else {
@@ -644,25 +656,66 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
         }
       }
     } else {
-      // For non-problematic sites, use the enhanced parser
-      console.log('📋 Using enhanced parser for well-behaved site');
-      const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
-      const enhancedResult = await enhancedParser(finalUrl);
+      // For non-problematic sites, use Firecrawl to ensure we get ogImage from metadata
+      console.log('📋 Using Firecrawl scrape for well-behaved site to get ogImage');
       
-      // Even for well-behaved sites, try URL extraction if no name found
-      if (!enhancedResult.itemName) {
-        enhancedResult.itemName = extractProductNameFromUrl(finalUrl);
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        const response = await fetch('https://cnjznmbgxprsrovmdywe.supabase.co/functions/v1/firecrawl-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: finalUrl }),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('📋 Firecrawl scrape response:', { hasHtml: !!data.html, hasOgImage: !!data.ogImage, ogImage: data.ogImage });
+          
+          if (data.html) {
+            result = await parseGenericEnhanced(data.html, finalUrl);
+            
+            // ALWAYS use ogImage as fallback if no image found in parsing
+            if (!result.data.imageUrl && data.ogImage && isValidUrl(data.ogImage)) {
+              console.log('🖼️ Using ogImage from Firecrawl metadata for well-behaved site:', data.ogImage);
+              result.data.imageUrl = normalizeImageUrl(data.ogImage);
+              result.confidence = Math.min(result.confidence + 0.15, 1);
+            }
+            
+            // Even for well-behaved sites, try URL extraction if no name found
+            if (!result.data.itemName) {
+              result.data.itemName = extractProductNameFromUrl(finalUrl);
+            }
+          } else {
+            throw new Error('No HTML from Firecrawl');
+          }
+        } else {
+          throw new Error('Firecrawl request failed');
+        }
+      } catch (error) {
+        console.log('⚠️ Firecrawl failed for well-behaved site, falling back to enhanced parser:', error);
+        const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
+        const enhancedResult = await enhancedParser(finalUrl);
+        
+        // Even for well-behaved sites, try URL extraction if no name found
+        if (!enhancedResult.itemName) {
+          enhancedResult.itemName = extractProductNameFromUrl(finalUrl);
+        }
+        
+        result = {
+          success: true,
+          data: enhancedResult,
+          method: 'enhanced',
+          confidence: 0.7,
+          url: finalUrl,
+          canonicalUrl: enhancedResult.canonicalUrl || finalUrl,
+          raw: enhancedResult
+        };
       }
-      
-      result = {
-        success: true,
-        data: enhancedResult,
-        method: 'enhanced',
-        confidence: 0.7,
-        url: finalUrl,
-        canonicalUrl: enhancedResult.canonicalUrl || finalUrl,
-        raw: enhancedResult
-      };
     }
 
     // Check if we should use screenshot fallback
@@ -715,7 +768,7 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
   }
 };
 
-// Helper function to validate URLs
+// Helper function to validate URLs and normalize http to https
 const isValidUrl = (url: string): boolean => {
   try {
     new URL(url);
@@ -723,6 +776,14 @@ const isValidUrl = (url: string): boolean => {
   } catch {
     return false;
   }
+};
+
+// Helper function to normalize image URLs (convert http to https)
+const normalizeImageUrl = (url: string): string => {
+  if (url.startsWith('http://')) {
+    return url.replace('http://', 'https://');
+  }
+  return url;
 };
 
 // Enhanced store name extraction with common retailer mappings
