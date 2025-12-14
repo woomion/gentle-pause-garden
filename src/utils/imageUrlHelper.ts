@@ -49,16 +49,12 @@ export const getImageUrl = (item: PausedItem | LocalPausedItem): string | null =
       console.log('📸 Using external image URL:', item.imageUrl);
       return item.imageUrl;
     } catch {
-      console.log('📸 Invalid URL format:', item.imageUrl);
+      console.log('📸 Invalid URL format, using placeholder:', item.imageUrl);
+      return '/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png';
     }
   }
   
-  // If usePlaceholder is explicitly true OR no image available, use placeholder
-  if (item.usePlaceholder || (!item.imageUrl && !item.photoDataUrl && !item.photo)) {
-    console.log('📸 Using default placeholder image');
-    return '/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png';
-  }
-  
-  console.log('📸 No valid image URL found');
-  return null;
+  // Always return placeholder if no valid image found
+  console.log('📸 No valid image URL found, using placeholder');
+  return '/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png';
 };

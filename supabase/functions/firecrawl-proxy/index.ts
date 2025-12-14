@@ -196,10 +196,22 @@ serve(async (req: Request) => {
               resultData = await statusRes.json();
               console.log(`📋 Extract status attempt ${attempts + 1}:`, resultData.status);
               
-              if (resultData.status === 'completed' && resultData.data) {
+          if (resultData.status === 'completed' && resultData.data) {
                 const extracted = resultData.data || {};
                 console.log('✅ Extract completed:', JSON.stringify(extracted, null, 2));
-                return new Response(JSON.stringify({ success: true, extracted }), {
+                
+                // If no image extracted, do a quick scrape for og:image
+                let ogImage = null;
+                if (!extracted.imageUrl) {
+                  console.log('🔄 No image in extract, doing quick scrape for og:image');
+                  const scrapeResult = await doScrape(apiKey, formattedUrl, false);
+                  if (scrapeResult.success && scrapeResult.ogImage) {
+                    ogImage = scrapeResult.ogImage;
+                    console.log('🖼️ Got og:image from fallback scrape:', ogImage);
+                  }
+                }
+                
+                return new Response(JSON.stringify({ success: true, extracted, ogImage }), {
                   status: 200,
                   headers: { ...corsHeaders, 'Content-Type': 'application/json' }
                 });
@@ -217,7 +229,19 @@ serve(async (req: Request) => {
             // Immediate result
             const extracted = extractData.data?.[0] || extractData.data || {};
             console.log('✅ Immediate extracted data:', JSON.stringify(extracted, null, 2));
-            return new Response(JSON.stringify({ success: true, extracted }), {
+            
+            // If no image extracted, do a quick scrape for og:image
+            let ogImage = null;
+            if (!extracted.imageUrl) {
+              console.log('🔄 No image in extract, doing quick scrape for og:image');
+              const scrapeResult = await doScrape(apiKey, formattedUrl, false);
+              if (scrapeResult.success && scrapeResult.ogImage) {
+                ogImage = scrapeResult.ogImage;
+                console.log('🖼️ Got og:image from fallback scrape:', ogImage);
+              }
+            }
+            
+            return new Response(JSON.stringify({ success: true, extracted, ogImage }), {
               status: 200,
               headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
