@@ -257,6 +257,10 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
     const data = await response.json();
     console.log('🎯 Firecrawl response:', { success: data.success, hasExtracted: !!data.extracted, hasHtml: !!data.html, hasOgImage: !!data.ogImage });
     
+    // Get any available ogImage from the response (works for both extract and scrape responses)
+    const responseOgImage = data.ogImage && isValidUrl(data.ogImage) ? normalizeImageUrl(data.ogImage) : undefined;
+    console.log('🖼️ Response ogImage available:', responseOgImage);
+    
     // Check if we got extracted data
     if (data.success && data.extracted) {
       const extracted = data.extracted;
@@ -265,9 +269,9 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
       let finalImageUrl = extracted.imageUrl && isValidUrl(extracted.imageUrl) ? normalizeImageUrl(extracted.imageUrl) : undefined;
       
       // Fallback to ogImage if no extracted image
-      if (!finalImageUrl && data.ogImage && isValidUrl(data.ogImage)) {
-        console.log('🖼️ No extracted image, using ogImage from metadata:', data.ogImage);
-        finalImageUrl = normalizeImageUrl(data.ogImage);
+      if (!finalImageUrl && responseOgImage) {
+        console.log('🖼️ No extracted image, using ogImage from metadata:', responseOgImage);
+        finalImageUrl = responseOgImage;
       }
       
       const result: ProductInfo = {
@@ -298,18 +302,38 @@ const fetchViaFirecrawlExtract = async (url: string): Promise<ParseResult> => {
     }
     
     // Check if we got HTML (fallback from extract to scrape in edge function)
-    if (data.html) {
-      console.log('🔄 Got HTML from scrape fallback, parsing...');
-      const parseResult = await parseGenericEnhanced(data.html, url);
+    if (data.html || data.success) {
+      console.log('🔄 Got response from scrape mode, parsing...', { hasHtml: !!data.html, hasOgImage: !!responseOgImage });
       
-      // If we got ogImage from metadata but parsing didn't find an image, use it
-      if (!parseResult.data.imageUrl && data.ogImage) {
-        console.log('🖼️ Using ogImage from metadata:', data.ogImage);
-        parseResult.data.imageUrl = normalizeImageUrl(data.ogImage);
-        parseResult.confidence = Math.min(parseResult.confidence + 0.15, 1);
+      // If we have HTML, try to parse it
+      if (data.html) {
+        const parseResult = await parseGenericEnhanced(data.html, url);
+        
+        // ALWAYS use ogImage as fallback if parsing didn't find an image
+        if (!parseResult.data.imageUrl && responseOgImage) {
+          console.log('🖼️ Using ogImage from metadata after HTML parsing:', responseOgImage);
+          parseResult.data.imageUrl = responseOgImage;
+          parseResult.confidence = Math.min(parseResult.confidence + 0.15, 1);
+        }
+        
+        return parseResult;
       }
       
-      return parseResult;
+      // No HTML but we might have ogImage - return a basic result with the image
+      if (responseOgImage) {
+        console.log('🖼️ No HTML but have ogImage, creating basic result');
+        return {
+          success: true,
+          data: {
+            storeName: getEnhancedStoreName(url),
+            imageUrl: responseOgImage
+          },
+          method: 'firecrawl-ogimage-only',
+          confidence: 0.3,
+          url,
+          canonicalUrl: url
+        };
+      }
     }
 
     throw new Error('No data extracted or scraped');
