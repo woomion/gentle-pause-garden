@@ -58,18 +58,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           localStorage.removeItem('pocket-pause-last-session');
         }
         
-        // Auto-setup push token when user signs in or session is restored
-        if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-          setTimeout(async () => {
-            try {
-              const { autoSetupPushToken } = await import('../utils/autoTokenSetup');
-              const success = await autoSetupPushToken();
-              console.log('🔔 Auto token setup on auth change:', success);
-            } catch (error) {
-              console.error('🔔 Auto setup failed:', error);
-            }
-          }, 1000);
-        }
       }
     );
 
@@ -195,17 +183,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.log('🔐 Found session on visibility change:', session.user.email);
             setSession(session);
             setUser(session.user);
-            
-            // Re-setup push token after app becomes visible
-            setTimeout(async () => {
-              try {
-                const { autoSetupPushToken } = await import('../utils/autoTokenSetup');
-                const success = await autoSetupPushToken();
-                console.log('🔔 Push token re-setup on visibility:', success);
-              } catch (error) {
-                console.error('🔔 Push re-setup failed:', error);
-              }
-            }, 500);
           }
         });
       }

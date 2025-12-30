@@ -15,7 +15,6 @@ import EmptyStateCard from '../components/EmptyStateCard';
 import SignupModal from '../components/SignupModal';
 import ItemReviewModal from '../components/ItemReviewModal';
 import UsageLimitModal from '../components/UsageLimitModal';
-import { useNotifications } from '../hooks/useNotifications';
 import { useUserSettings } from '../hooks/useUserSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useSearchParams } from 'react-router-dom';
@@ -26,9 +25,7 @@ import { useModalStates } from '../hooks/useModalStates';
 import { useItemReview } from '../hooks/useItemReview';
 import { useIndexRedirects } from '../hooks/useIndexRedirects';
 import { useSharedContent } from '../hooks/useSharedContent';
-import '../utils/notificationDebug'; // Import debug utilities
 import '../utils/testItemCreator'; // Import test item creator
-import '../utils/autoTokenSetup'; // Auto setup push tokens
 import { createTestItem } from '../utils/testItemCreator';
 import GuestModeIndicator from '../components/GuestModeIndicator';
 import { usePausedItems } from '../hooks/usePausedItems';
@@ -39,13 +36,11 @@ import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
 import DesktopItemCard from '../components/DesktopItemCard';
 import { useInstalledApp } from '../hooks/useInstalledApp';
 import { Button } from '../components/ui/button';
-import { platformNotificationService } from '../services/platformNotificationService';
-import { useIsMobile } from '../hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
-  const { notificationsEnabled, loading: settingsLoading } = useUserSettings();
+  const { loading: settingsLoading } = useUserSettings();
   // Removed sectionsExpanded state - no longer needed
   const addPauseButtonRef = useRef<AddPauseButtonRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -143,115 +138,6 @@ const Index = () => {
   console.log('Index page render - Auth loading:', authLoading, 'Settings loading:', settingsLoading, 'User:', !!user);
   console.log('Mobile check - User agent:', navigator.userAgent);
   console.log('Mobile check - Screen size:', window.innerWidth, 'x', window.innerHeight);
-
-
-  // Initialize notifications
-  const { enableNotifications, testNotification } = useNotifications(notificationsEnabled);
-  
-  // Debug notification status
-  const [notificationStatus, setNotificationStatus] = useState<string>('checking...');
-  
-  useEffect(() => {
-    const checkNotificationStatus = async () => {
-      if (!('Notification' in window)) {
-        setNotificationStatus('Browser does not support notifications');
-        return;
-      }
-      
-      const permission = Notification.permission;
-      const serviceEnabled = platformNotificationService.getEnabled();
-      const settingsEnabled = notificationsEnabled;
-      
-      // Check Progressier subscription status
-      let progressierSubscribed = false;
-      try {
-        progressierSubscribed = await platformNotificationService.isSubscribed();
-      } catch (error) {
-        console.error('Error checking Progressier subscription:', error);
-      }
-      
-      setNotificationStatus(`Permission: ${permission}, Service: ${serviceEnabled}, Settings: ${settingsEnabled}, Progressier: ${progressierSubscribed}`);
-      
-      // Debug: Log the full status
-      console.log('🔔 Full notification status:', {
-        permission,
-        serviceEnabled,
-        settingsEnabled,
-        progressierSubscribed,
-        user: !!user,
-        userEmail: user?.email,
-        authLoading,
-        settingsLoading
-      });
-    };
-    
-    checkNotificationStatus();
-    const interval = setInterval(checkNotificationStatus, 5000); // Check every 5 seconds
-    return () => clearInterval(interval);
-  }, [notificationsEnabled, user]);
-  
-  
-  const handleRequestNotificationPermission = async () => {
-    try {
-      console.log('🔔 Starting notification setup process...');
-      
-      // Check if user is logged in first
-      if (!user) {
-        alert('Please sign in first to enable notifications.');
-        return;
-      }
-      
-      // First, request browser permission if needed
-      if ('Notification' in window) {
-        if (Notification.permission === 'denied') {
-          alert('Notifications are blocked. Please go to your browser settings and allow notifications for this site, then try again.');
-          return;
-        }
-        
-        if (Notification.permission === 'default') {
-          console.log('🔔 Requesting browser permission...');
-          const permission = await Notification.requestPermission();
-          console.log('🔔 Browser permission result:', permission);
-          
-          if (permission !== 'granted') {
-            alert('Please allow notifications to receive updates when items are ready for review.');
-            return;
-          }
-        }
-      }
-      
-      // Then initialize Progressier and register
-      console.log('🔔 Initializing Progressier...');
-      const initialized = await platformNotificationService.initialize();
-      if (!initialized) {
-        alert('Unable to initialize push notifications. Please try again in a few seconds.');
-        return;
-      }
-      
-      // Request Progressier subscription
-      console.log('🔔 Requesting Progressier subscription...');
-      const success = await platformNotificationService.requestPermission();
-      console.log('🔔 Progressier subscription result:', success);
-      
-      if (success) {
-        // Enable notifications in user settings
-        if (enableNotifications) {
-          const settingsUpdated = await enableNotifications();
-          if (settingsUpdated) {
-            alert('Perfect! You\'ll now receive notifications when items are ready for review.');
-            testNotification();
-          } else {
-            alert('Notifications set up, but there was an issue saving your preferences. Please check your settings.');
-          }
-        }
-      } else {
-        alert('Unable to set up push notifications. Please ensure notifications are allowed in your browser settings and try again.');
-      }
-    } catch (error) {
-      console.error('Error setting up notifications:', error);
-      alert('Error setting up notifications. Please try again.');
-    }
-  };
 
   // Handle shared content from other apps or PWA share target
   useEffect(() => {
@@ -677,22 +563,6 @@ console.log('Rendering main Index content');
                     )}
                   </div>
 
-                  {/* Notification setup prompt */}
-                  {user && Notification.permission !== 'granted' && (
-                    <div className="mt-4 p-4 border border-orange-200 rounded-lg bg-orange-50/50">
-                      <div className="text-sm text-orange-700 mb-2">🔔 Get notified when items are ready for review</div>
-                      <div className="text-xs text-orange-600 mb-3">
-                        Status: {notificationStatus}
-                      </div>
-                      <Button 
-                        onClick={handleRequestNotificationPermission}
-                        size="sm"
-                        className="bg-orange-600 hover:bg-orange-700 text-white"
-                      >
-                        Enable Notifications
-                      </Button>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -709,42 +579,7 @@ console.log('Rendering main Index content');
             </>
           )}
 
-        </div>
-        
-        {/* Show notification setup prominently for all users */}
-        {user && (
-          <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 mt-4 mb-4">
-            
-            {/* Notification setup */}
-            {Notification.permission !== 'granted' && (
-              <div className="p-4 border border-orange-200 rounded-lg bg-orange-50/50">
-                <div className="text-sm text-orange-700 mb-2">🔔 Enable notifications to get alerted when items are ready</div>
-                <div className="text-xs text-orange-600 mb-3">
-                  Status: {notificationStatus}
-                </div>
-                <Button 
-                  onClick={handleRequestNotificationPermission}
-                  size="sm"
-                  className="bg-orange-600 hover:bg-orange-700 text-white"
-                >
-                  Enable Notifications
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Show notification setup for non-logged-in users */}
-        {!user && Notification.permission !== 'granted' && (
-          <div className="max-w-sm md:max-w-4xl lg:max-w-6xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 mt-4 mb-4">
-            <div className="p-4 border border-orange-200 rounded-lg bg-orange-50/50">
-              <div className="text-sm text-orange-700 mb-2">🔔 Sign in to enable notifications</div>
-              <div className="text-xs text-orange-600 mb-3">
-                Get alerted when items are ready for review
-              </div>
-            </div>
-          </div>
-        )}
+      </div>
       </div>
       
       {/* Fixed bottom area */}

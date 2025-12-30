@@ -10,24 +10,17 @@ import Auth from "./pages/Auth";
 import PauseLog from "./pages/PauseLog";
 import About from "./pages/About";
 import Clarity from "./pages/Clarity";
-// import Courses from "./pages/Courses";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 import Bookmarklet from "./pages/Bookmarklet";
 import GetApp from "./pages/GetApp";
 import OfflineIndicator from "./components/OfflineIndicator";
-
 import PWAInstallBanner from "./components/PWAInstallBanner";
-
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import AuthGuard from "./components/AuthGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
-
 import { offlineSyncService } from "./services/offlineSyncService";
-
-// Import debug utilities
-import "@/utils/pushNotificationDebug";
 
 const queryClient = new QueryClient();
 
@@ -63,46 +56,6 @@ const App = () => {
     console.log('🚀 App starting - Location:', window.location.href);
   }, []);
 
-  // Initialize push notifications AFTER app loads, with comprehensive error handling
-  useEffect(() => {
-    let mounted = true;
-    
-    // Delay push notification initialization to avoid blocking app startup
-    const initializePushNotifications = async () => {
-      try {
-        console.log('🔔 Starting push notification initialization...');
-        
-        if (!mounted) {
-          console.log('🔔 Component unmounted, skipping push notification init');
-          return;
-        }
-        
-        // Add a small delay to ensure app is fully loaded
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        if (!mounted) {
-          console.log('🔔 Component unmounted during delay, skipping push notification init');
-          return;
-        }
-        
-        // Push notifications removed - using web notifications instead
-        const success = true;
-        console.log('🔔 Push notification initialization result:', success);
-        
-      } catch (error) {
-        console.error('❌ Failed to initialize push notifications (non-blocking):', error);
-        // Don't set app error - this should be non-blocking
-      }
-    };
-
-    // Start initialization in the background, but don't block app startup
-    initializePushNotifications();
-    
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
   // Initialize offline sync service with error handling
   useEffect(() => {
     try {
@@ -110,10 +63,8 @@ const App = () => {
       offlineSyncService.startPeriodicSync();
     } catch (error) {
       console.error('❌ Failed to initialize offline sync (non-blocking):', error);
-      // Don't block app for this either
     }
   }, []);
-
 
   // If there's an app-level error, show it
   if (appError) {
