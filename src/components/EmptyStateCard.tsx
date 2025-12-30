@@ -5,20 +5,20 @@ interface EmptyStateCardProps {
 }
 
 const EmptyStateCard = ({ mode }: EmptyStateCardProps) => {
+  const message = "Add the link of something you're thinking about buying below to get started";
+  
   if (mode === 'pill') {
     return (
-      <div className="text-center py-4 text-muted-foreground">
-        <p className="text-sm">No paused items yet</p>
-        <p className="text-xs mt-1">Add something above to get started</p>
+      <div className="flex flex-col items-center justify-center text-center py-8 px-4 w-full">
+        <p className="text-sm text-muted-foreground max-w-xs">{message}</p>
       </div>
     );
   }
 
-  // Desktop mode - simple text version
+  // Desktop mode - centered on all screen sizes
   return (
-    <div className="text-center py-12">
-      <p className="text-lg text-muted-foreground mb-2">No paused items yet</p>
-      <p className="text-sm text-muted-foreground/80">Add something below to get started</p>
+    <div className="flex flex-col items-center justify-center text-center py-16 px-4 w-full min-h-[200px]">
+      <p className="text-base text-muted-foreground max-w-md">{message}</p>
     </div>
   );
 };
