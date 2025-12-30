@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "npm:resend@4.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +13,8 @@ interface NotificationPayload {
   type: 'individual' | 'batch';
 }
 
+const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -19,12 +22,11 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🔔 Item notification function called with method:', req.method);
+    console.log('📧 Item notification function called with method:', req.method);
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const progressierApiKey = Deno.env.get('PROGRESSIER_API_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Accept both GET and POST requests to handle different trigger types
@@ -48,11 +50,11 @@ serve(async (req) => {
     console.log('📨 Notification payload:', payload);
 
     if (payload.type === 'individual' && payload.itemId && payload.userId) {
-      // Send individual notification for a specific item
-      await sendIndividualNotification(supabase, progressierApiKey, payload.userId, payload.itemId);
+      // Send individual email for a specific item
+      await sendIndividualEmail(supabase, payload.userId, payload.itemId);
     } else if (payload.type === 'batch') {
-      // Send batch notifications for all users who have daily batch enabled
-      await sendBatchNotifications(supabase, progressierApiKey);
+      // Send batch emails for all users who have daily batch enabled
+      await sendBatchEmails(supabase);
     } else {
       return new Response(JSON.stringify({ error: 'Invalid payload' }), {
         status: 400,
@@ -62,7 +64,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({
       success: true,
-      message: 'Notifications processed successfully'
+      message: 'Email notifications processed successfully'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
@@ -79,15 +81,14 @@ serve(async (req) => {
   }
 });
 
-async function sendIndividualNotification(
+async function sendIndividualEmail(
   supabase: any, 
-  progressierApiKey: string, 
   userId: string, 
   itemId: string
 ) {
-  console.log(`📱 Sending individual notification for item ${itemId} to user ${userId}`);
+  console.log(`📧 Sending individual email for item ${itemId} to user ${userId}`);
 
-  // Check if user has individual notifications enabled
+  // Check if user has email notifications enabled
   const { data: userSettings } = await supabase
     .from('user_settings')
     .select('notification_delivery_style, notifications_enabled')
@@ -95,13 +96,20 @@ async function sendIndividualNotification(
     .single();
 
   if (!userSettings?.notifications_enabled || userSettings?.notification_delivery_style !== 'item_by_item') {
-    console.log(`❌ Skipping user ${userId}: individual notifications not enabled`);
+    console.log(`❌ Skipping user ${userId}: individual email notifications not enabled`);
     return;
   }
 
+  // Get user's email from auth
+  const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
   
+  if (userError || !user?.email) {
+    console.error('❌ Error fetching user email:', userError);
+    return;
+  }
+
   // IMMEDIATELY mark as being processed to prevent duplicates from concurrent calls
-  console.log('🔒 Marking item as being processed to prevent duplicate notifications');
+  console.log('🔒 Marking item as being processed to prevent duplicate emails');
   const processingTimestamp = new Date().toISOString();
   const { error: updateError } = await supabase
     .from('paused_items')
@@ -118,7 +126,7 @@ async function sendIndividualNotification(
   // Verify the update was successful (no other process beat us to it)
   const { data: checkItem } = await supabase
     .from('paused_items')
-    .select('individual_reminder_sent_at, title, store_name')
+    .select('individual_reminder_sent_at, title, store_name, url')
     .eq('id', itemId)
     .eq('user_id', userId)
     .single();
@@ -128,57 +136,65 @@ async function sendIndividualNotification(
     return;
   }
 
-  console.log(`📱 Processing individual notification for item ${itemId} to user ${userId}`);
-
-  // Send individual notification with proper content
-  const notificationData = {
-    title: "Space brings clarity. Your item is ready for review.",
-    body: `${checkItem.title}${checkItem.store_name ? ` from ${checkItem.store_name}` : ''} is ready for review.`,
-    data: {
-      itemId: itemId,
-      userId: userId,
-      type: 'individual'
-    }
-  };
+  const itemTitle = checkItem.title;
+  const storeName = checkItem.store_name;
+  const itemUrl = checkItem.url;
 
   try {
-    // Use the send-push-notifications function instead of calling Progressier directly
-    console.log(`📤 Sending notification via send-push-notifications function for user ${userId}`);
-    console.log(`📤 Notification payload:`, {
-      userIds: [userId],
-      title: notificationData.title,
-      body: notificationData.body,
-      data: notificationData.data
-    });
+    console.log(`📤 Sending email to ${user.email} for item: ${itemTitle}`);
     
-    const { data, error } = await supabase.functions.invoke('send-push-notifications', {
-      body: {
-        userIds: [userId],
-        title: notificationData.title,
-        body: notificationData.body,
-        data: notificationData.data
-      }
+    const { error: emailError } = await resend.emails.send({
+      from: 'Pocket Pause <notifications@pocketpause.app>',
+      to: [user.email],
+      subject: `Ready to review: ${itemTitle}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #6B46C1; margin: 0; font-size: 24px;">Pocket Pause</h1>
+          </div>
+          
+          <div style="background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+            <h2 style="margin: 0 0 12px 0; font-size: 20px; color: #1a1a1a;">Space brings clarity ✨</h2>
+            <p style="margin: 0; color: #4a4a4a; font-size: 16px;">Your item is ready for review.</p>
+          </div>
+          
+          <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e7eb;">
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1a1a1a;">${itemTitle}</h3>
+            ${storeName ? `<p style="margin: 0 0 16px 0; color: #6b7280; font-size: 14px;">from ${storeName}</p>` : ''}
+            ${itemUrl ? `<a href="${itemUrl}" style="display: inline-block; background: #6B46C1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; font-size: 14px;">View Item</a>` : ''}
+          </div>
+          
+          <div style="text-align: center;">
+            <a href="https://pocketpause.app" style="display: inline-block; background: #1a1a1a; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 500; font-size: 16px;">Open Pocket Pause</a>
+          </div>
+          
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
+            <p>You're receiving this because you enabled email notifications for Pocket Pause.</p>
+            <p>To change your preferences, visit your settings in the app.</p>
+          </div>
+        </body>
+        </html>
+      `,
     });
 
-    console.log(`📥 send-push-notifications response:`, { data, error });
-
-    if (error) {
-      console.error(`❌ Failed to send individual notification:`, error);
-      console.error(`❌ Full error details:`, JSON.stringify(error, null, 2));
-      // Timestamp already set above, no need to update again
+    if (emailError) {
+      console.error(`❌ Failed to send email:`, emailError);
     } else {
-      console.log(`✅ Individual notification sent for item ${itemId}`);
-      console.log(`✅ Response data:`, data);
-      // Timestamp already set above, no need to update again
+      console.log(`✅ Email sent successfully for item ${itemId}`);
     }
   } catch (error) {
-    console.error('❌ Error sending individual notification:', error);
-    // Timestamp already set above - we attempted to send it, don't retry automatically
+    console.error('❌ Error sending email:', error);
   }
 }
 
-async function sendBatchNotifications(supabase: any, progressierApiKey: string) {
-  console.log('📱 Sending batch notifications');
+async function sendBatchEmails(supabase: any) {
+  console.log('📧 Sending batch emails');
 
   // Get all users with batch notifications enabled at the current hour
   const currentHour = new Date().getUTCHours();
@@ -191,67 +207,94 @@ async function sendBatchNotifications(supabase: any, progressierApiKey: string) 
     .eq('notification_timing_hour', currentHour);
 
   if (!users || users.length === 0) {
-    console.log('❌ No users found for batch notifications at this hour');
+    console.log('❌ No users found for batch emails at this hour');
     return;
   }
 
-  for (const user of users) {
+  for (const userSetting of users) {
     try {
+      // Get user's email from auth
+      const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userSetting.user_id);
+      
+      if (userError || !user?.email) {
+        console.error(`❌ Error fetching email for user ${userSetting.user_id}:`, userError);
+        continue;
+      }
+
       // Get ready items for this user
       const { data: readyItems } = await supabase
         .from('paused_items')
-        .select('id, title, store_name')
-        .eq('user_id', user.user_id)
+        .select('id, title, store_name, url')
+        .eq('user_id', userSetting.user_id)
         .eq('status', 'paused')
         .lte('review_at', new Date().toISOString());
 
       if (!readyItems || readyItems.length === 0) {
-        console.log(`❌ No ready items for user ${user.user_id}`);
+        console.log(`❌ No ready items for user ${userSetting.user_id}`);
         continue;
       }
 
-      // Send batch notification
       const itemCount = readyItems.length;
       const itemText = itemCount === 1 ? 'item' : 'items';
       
-      const notificationData = {
-        title: `It's time to meet your paused ${itemText} again.`,
-        body: `You have ${itemCount} ${itemText} ready for review.`,
-        data: {
-          userId: user.user_id,
-          type: 'batch',
-          itemCount: itemCount
-        }
-      };
+      // Build items list HTML
+      const itemsListHtml = readyItems.slice(0, 5).map((item: any) => `
+        <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #e5e7eb;">
+          <h4 style="margin: 0 0 4px 0; font-size: 16px; color: #1a1a1a;">${item.title}</h4>
+          ${item.store_name ? `<p style="margin: 0; color: #6b7280; font-size: 13px;">from ${item.store_name}</p>` : ''}
+        </div>
+      `).join('');
 
-      // Use the send-push-notifications function for consistency
-      console.log(`📤 Calling send-push-notifications for user ${user.user_id} with payload:`, {
-        userIds: [user.user_id],
-        title: notificationData.title,
-        body: notificationData.body,
-        data: notificationData.data
+      const moreItemsText = readyItems.length > 5 ? `<p style="text-align: center; color: #6b7280; font-size: 14px;">...and ${readyItems.length - 5} more ${readyItems.length - 5 === 1 ? 'item' : 'items'}</p>` : '';
+
+      console.log(`📤 Sending batch email to ${user.email} for ${itemCount} items`);
+      
+      const { error: emailError } = await resend.emails.send({
+        from: 'Pocket Pause <notifications@pocketpause.app>',
+        to: [user.email],
+        subject: `${itemCount} ${itemText} ready for review`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #6B46C1; margin: 0; font-size: 24px;">Pocket Pause</h1>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+              <h2 style="margin: 0 0 12px 0; font-size: 20px; color: #1a1a1a;">It's time to meet your paused ${itemText} again ✨</h2>
+              <p style="margin: 0; color: #4a4a4a; font-size: 16px;">You have ${itemCount} ${itemText} ready for review.</p>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              ${itemsListHtml}
+              ${moreItemsText}
+            </div>
+            
+            <div style="text-align: center;">
+              <a href="https://pocketpause.app" style="display: inline-block; background: #1a1a1a; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 500; font-size: 16px;">Review Your Items</a>
+            </div>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
+              <p>You're receiving this because you enabled email notifications for Pocket Pause.</p>
+              <p>To change your preferences, visit your settings in the app.</p>
+            </div>
+          </body>
+          </html>
+        `,
       });
 
-      const { data, error } = await supabase.functions.invoke('send-push-notifications', {
-        body: {
-          userIds: [user.user_id],
-          title: notificationData.title,
-          body: notificationData.body,
-          data: notificationData.data
-        }
-      });
-
-      console.log(`📥 send-push-notifications response for user ${user.user_id}:`, { data, error });
-
-      if (error) {
-        console.error(`❌ Failed to send batch notification to user ${user.user_id}:`, error);
-        console.error(`❌ Full error details:`, JSON.stringify(error, null, 2));
+      if (emailError) {
+        console.error(`❌ Failed to send batch email to user ${userSetting.user_id}:`, emailError);
       } else {
-        console.log(`✅ Batch notification sent to user ${user.user_id} for ${itemCount} items`);
-        console.log(`✅ Response data:`, data);
+        console.log(`✅ Batch email sent to user ${userSetting.user_id} for ${itemCount} items`);
       }
     } catch (error) {
-      console.error(`❌ Error sending batch notification to user ${user.user_id}:`, error);
+      console.error(`❌ Error sending batch email to user ${userSetting.user_id}:`, error);
     }
   }
 }
