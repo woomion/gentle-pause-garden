@@ -36,6 +36,7 @@ import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
 import DesktopItemCard from '../components/DesktopItemCard';
 import { useInstalledApp } from '../hooks/useInstalledApp';
 import { Button } from '../components/ui/button';
+import { useIsMobile } from '../hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
