@@ -43,7 +43,10 @@ const ItemReviewDetails = ({ item, onViewItem }: ItemReviewDetailsProps) => {
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
     if (target.parentElement) {
-      target.parentElement.innerHTML = '<div class="w-8 h-8 bg-gray-400 dark:bg-gray-500 rounded-full"></div>';
+      // Safe DOM manipulation instead of innerHTML to prevent XSS
+      const fallbackDiv = document.createElement('div');
+      fallbackDiv.className = 'w-8 h-8 bg-gray-400 dark:bg-gray-500 rounded-full';
+      target.parentElement.appendChild(fallbackDiv);
     }
   };
 
