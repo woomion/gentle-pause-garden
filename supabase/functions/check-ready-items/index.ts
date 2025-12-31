@@ -18,19 +18,20 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log('🔍 Checking for newly ready items...');
+    console.log('🔍 Checking for ready items that need notifications...');
 
-    // Find items that JUST became ready for review (within last 2 minutes)
-    // This ensures we only notify for items that recently became ready
+    // Find items that are ready for review and still haven't been notified.
+    // NOTE: Previously we only looked back 2 minutes, which can miss items if the job runs late.
     const now = new Date().toISOString();
-    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-    
+    const lookbackHours = 24;
+    const lookbackIso = new Date(Date.now() - lookbackHours * 60 * 60 * 1000).toISOString();
+
     const { data: readyItems, error: itemsError } = await supabase
       .from('paused_items')
       .select('id, user_id, title, review_at, individual_reminder_sent_at, created_at')
       .eq('status', 'paused')
       .lte('review_at', now) // Item is ready now
-      .gte('review_at', twoMinutesAgo) // Only items that became ready in the last 2 minutes
+      .gte('review_at', lookbackIso) // Avoid scanning forever; still allows retries
       .is('individual_reminder_sent_at', null) // Haven't sent notification yet
       .limit(50); // Process in batches to avoid timeouts
 
