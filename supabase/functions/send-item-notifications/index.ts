@@ -108,37 +108,46 @@ async function sendIndividualEmail(
     return;
   }
 
-  // IMMEDIATELY mark as being processed to prevent duplicates from concurrent calls
-  console.log('🔒 Marking item as being processed to prevent duplicate emails');
-  const processingTimestamp = new Date().toISOString();
-  const { error: updateError } = await supabase
+  // Get item details and check if already processed in one query
+  const { data: item, error: itemError } = await supabase
     .from('paused_items')
-    .update({ individual_reminder_sent_at: processingTimestamp })
-    .eq('id', itemId)
-    .eq('user_id', userId)
-    .is('individual_reminder_sent_at', null); // Only update if not already processed
-
-  if (updateError) {
-    console.error('❌ Error marking item as processed:', updateError);
-    return;
-  }
-
-  // Verify the update was successful (no other process beat us to it)
-  const { data: checkItem } = await supabase
-    .from('paused_items')
-    .select('individual_reminder_sent_at, title, store_name, url')
+    .select('id, individual_reminder_sent_at, title, store_name, url')
     .eq('id', itemId)
     .eq('user_id', userId)
     .single();
 
-  if (!checkItem || checkItem.individual_reminder_sent_at !== processingTimestamp) {
+  if (itemError || !item) {
+    console.error('❌ Error fetching item:', itemError);
+    return;
+  }
+
+  // If already processed, skip
+  if (item.individual_reminder_sent_at) {
+    console.log('⏭️ Item already has reminder sent, skipping');
+    return;
+  }
+
+  // Mark as being processed using atomic update with .is() check
+  console.log('🔒 Marking item as being processed to prevent duplicate emails');
+  const { data: updateResult, error: updateError } = await supabase
+    .from('paused_items')
+    .update({ individual_reminder_sent_at: new Date().toISOString() })
+    .eq('id', itemId)
+    .eq('user_id', userId)
+    .is('individual_reminder_sent_at', null)
+    .select('id');
+
+  // If no rows updated, another process beat us to it
+  if (updateError || !updateResult || updateResult.length === 0) {
     console.log('⏭️ Item already processed by another instance, skipping');
     return;
   }
 
-  const itemTitle = checkItem.title;
-  const storeName = checkItem.store_name;
-  const itemUrl = checkItem.url;
+  console.log('✅ Successfully claimed item for email processing');
+
+  const itemTitle = item.title;
+  const storeName = item.store_name;
+  const itemUrl = item.url;
 
   try {
     console.log(`📤 Sending email to ${user.email} for item: ${itemTitle}`);
