@@ -481,10 +481,8 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
         }
       }
       
-      // Use biggest image by area as last resort
-      if (!result.imageUrl) {
-        result.imageUrl = getBiggestImageByArea(doc, url);
-      }
+      // Don't use random secondary images as fallback - let the placeholder be used instead
+      // This prevents grabbing unrelated images when the product image isn't found
     }
 
     const confidence = (result.itemName ? 0.4 : 0) + (result.price ? 0.3 : 0) + (result.imageUrl ? 0.2 : 0);
