@@ -128,10 +128,18 @@ async function sendIndividualEmail(
   }
 
   // Mark as being processed using atomic update with .is() check
-  console.log('🔒 Marking item as being processed to prevent duplicate emails');
+  // NOTE: We use individual_reminder_sent_at as a lock.
+  // If sending fails, we reset it to null so the cron can retry.
+  const processingTimestamp = new Date().toISOString();
+  console.log('🔒 Marking item as being processed to prevent duplicate emails', {
+    itemId,
+    userId,
+    processingTimestamp,
+  });
+
   const { data: updateResult, error: updateError } = await supabase
     .from('paused_items')
-    .update({ individual_reminder_sent_at: new Date().toISOString() })
+    .update({ individual_reminder_sent_at: processingTimestamp })
     .eq('id', itemId)
     .eq('user_id', userId)
     .is('individual_reminder_sent_at', null)
@@ -149,10 +157,12 @@ async function sendIndividualEmail(
   const storeName = item.store_name;
   const itemUrl = item.url;
 
+  let emailSent = false;
+
   try {
     console.log(`📤 Sending email to ${user.email} for item: ${itemTitle}`);
-    
-    const { error: emailError } = await resend.emails.send({
+
+    const emailResponse: any = await resend.emails.send({
       from: 'Pocket Pause <notifications@pocketpause.app>',
       to: [user.email],
       subject: `Ready to review: ${itemTitle}`,
@@ -167,22 +177,22 @@ async function sendIndividualEmail(
           <div style="text-align: center; margin-bottom: 30px;">
             <h1 style="color: #6B46C1; margin: 0; font-size: 24px;">Pocket Pause</h1>
           </div>
-          
+
           <div style="background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
             <h2 style="margin: 0 0 12px 0; font-size: 20px; color: #1a1a1a;">Space brings clarity ✨</h2>
             <p style="margin: 0; color: #4a4a4a; font-size: 16px;">Your item is ready for review.</p>
           </div>
-          
+
           <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e7eb;">
             <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1a1a1a;">${itemTitle}</h3>
             ${storeName ? `<p style="margin: 0 0 16px 0; color: #6b7280; font-size: 14px;">from ${storeName}</p>` : ''}
             ${itemUrl ? `<a href="${itemUrl}" style="display: inline-block; background: #6B46C1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; font-size: 14px;">View Item</a>` : ''}
           </div>
-          
+
           <div style="text-align: center;">
             <a href="https://pocketpause.app" style="display: inline-block; background: #1a1a1a; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 500; font-size: 16px;">Open Pocket Pause</a>
           </div>
-          
+
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
             <p>You're receiving this because you enabled email notifications for Pocket Pause.</p>
             <p>To change your preferences, visit your settings in the app.</p>
@@ -192,13 +202,33 @@ async function sendIndividualEmail(
       `,
     });
 
-    if (emailError) {
-      console.error(`❌ Failed to send email:`, emailError);
+    if (emailResponse?.error) {
+      console.error('❌ Failed to send email via Resend:', emailResponse.error);
     } else {
-      console.log(`✅ Email sent successfully for item ${itemId}`);
+      emailSent = true;
+      console.log('✅ Email sent successfully:', emailResponse);
     }
   } catch (error) {
     console.error('❌ Error sending email:', error);
+  }
+
+  // If email was NOT sent, clear the lock so cron can retry.
+  if (!emailSent) {
+    console.log('↩️ Clearing individual_reminder_sent_at so the system can retry', {
+      itemId,
+      userId,
+    });
+
+    const { error: resetError } = await supabase
+      .from('paused_items')
+      .update({ individual_reminder_sent_at: null })
+      .eq('id', itemId)
+      .eq('user_id', userId)
+      .eq('individual_reminder_sent_at', processingTimestamp);
+
+    if (resetError) {
+      console.error('❌ Failed to reset individual_reminder_sent_at after send failure:', resetError);
+    }
   }
 }
 
