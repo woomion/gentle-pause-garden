@@ -20,6 +20,9 @@ export type Database = {
           emotion: string | null
           id: string
           image_url: string | null
+          individual_reminder_attempt_count: number
+          individual_reminder_last_error: string | null
+          individual_reminder_processing_at: string | null
           individual_reminder_sent_at: string | null
           is_cart: boolean | null
           item_type: string | null
@@ -42,6 +45,9 @@ export type Database = {
           emotion?: string | null
           id?: string
           image_url?: string | null
+          individual_reminder_attempt_count?: number
+          individual_reminder_last_error?: string | null
+          individual_reminder_processing_at?: string | null
           individual_reminder_sent_at?: string | null
           is_cart?: boolean | null
           item_type?: string | null
@@ -64,6 +70,9 @@ export type Database = {
           emotion?: string | null
           id?: string
           image_url?: string | null
+          individual_reminder_attempt_count?: number
+          individual_reminder_last_error?: string | null
+          individual_reminder_processing_at?: string | null
           individual_reminder_sent_at?: string | null
           is_cart?: boolean | null
           item_type?: string | null
