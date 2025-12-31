@@ -185,12 +185,11 @@ async function sendIndividualEmail(
 
           <div style="background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid #e5e7eb;">
             <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #1a1a1a;">${itemTitle}</h3>
-            ${storeName ? `<p style="margin: 0 0 16px 0; color: #6b7280; font-size: 14px;">from ${storeName}</p>` : ''}
-            ${itemUrl ? `<a href="${itemUrl}" style="display: inline-block; background: #6B46C1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; font-size: 14px;">View Item</a>` : ''}
+            ${storeName ? `<p style="margin: 0; color: #6b7280; font-size: 14px;">from ${storeName}</p>` : ''}
           </div>
 
           <div style="text-align: center;">
-            <a href="https://pocketpause.app" style="display: inline-block; background: #1a1a1a; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 500; font-size: 16px;">Open Pocket Pause</a>
+            <a href="https://pocketpause.app" style="display: inline-block; background: #6B46C1; color: white; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 500; font-size: 16px;">Open Pocket Pause to Review</a>
           </div>
 
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
