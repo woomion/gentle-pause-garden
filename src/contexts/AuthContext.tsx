@@ -7,8 +7,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,7 +32,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log('🔐 AuthProvider: Initializing authentication...');
     
-    // Set up auth state listener FIRST - this is critical
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('🔐 Auth state change:', event, session?.user?.email || 'no user');
@@ -37,131 +39,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Enhanced session persistence for app closure scenarios
         if (session) {
-          const sessionData = {
-            userId: session.user.id,
-            email: session.user.email,
-            timestamp: Date.now(),
-            accessToken: session.access_token,
-            refreshToken: session.refresh_token,
-            expiresAt: session.expires_at
-          };
-          localStorage.setItem('pocket-pause-session-backup', JSON.stringify(sessionData));
           localStorage.setItem('pocket-pause-last-session', JSON.stringify({
             userId: session.user.id,
             email: session.user.email,
             timestamp: Date.now()
           }));
         } else {
-          localStorage.removeItem('pocket-pause-session-backup');
           localStorage.removeItem('pocket-pause-last-session');
         }
-        
       }
     );
 
-    // THEN check for existing session with enhanced persistence recovery
-    const initializeAuth = async (retryCount = 0) => {
+    const initializeAuth = async () => {
       try {
-        console.log('🔐 Getting initial session... (attempt', retryCount + 1, ')');
-        
-        // Check localStorage for session backup
-        const sessionBackup = localStorage.getItem('pocket-pause-session-backup');
-        const lastSession = localStorage.getItem('pocket-pause-last-session');
-        
-        if (sessionBackup) {
-          try {
-            const backup = JSON.parse(sessionBackup);
-            console.log('🔐 Found session backup:', {
-              email: backup.email,
-              userId: backup.userId,
-              age: Math.round((Date.now() - backup.timestamp) / 1000 / 60) + ' minutes ago',
-              hasTokens: !!(backup.accessToken && backup.refreshToken)
-            });
-          } catch (e) {
-            console.log('🔐 Session backup parse error:', e);
-          }
-        }
-        
-        if (lastSession) {
-          const parsed = JSON.parse(lastSession);
-          console.log('🔐 Last known session:', {
-            email: parsed.email,
-            userId: parsed.userId,
-            age: Math.round((Date.now() - parsed.timestamp) / 1000 / 60) + ' minutes ago'
-          });
-        }
-        
+        console.log('🔐 Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('🔐 Error getting session:', error);
-          
-          // Try backup restoration if available
-          if (sessionBackup && retryCount === 0) {
-            console.log('🔐 Attempting session restoration from backup...');
-            try {
-              const backup = JSON.parse(sessionBackup);
-              const now = Math.floor(Date.now() / 1000);
-              
-              // Check if backup session is still valid (not expired)
-              if (backup.expiresAt && backup.expiresAt > now) {
-                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-                if (!refreshError && refreshData.session) {
-                  console.log('🔐 Session restored from backup');
-                  setSession(refreshData.session);
-                  setUser(refreshData.session.user);
-                  setLoading(false);
-                  return;
-                }
-              }
-            } catch (backupError) {
-              console.error('🔐 Backup restoration failed:', backupError);
-            }
-          }
-          
-          // Retry once for mobile network issues
-          if (retryCount === 0) {
-            console.log('🔐 Retrying session fetch in 2 seconds...');
-            setTimeout(() => initializeAuth(1), 2000);
-            return;
-          }
         } else {
           console.log('🔐 Initial session:', session?.user?.email || 'No session found');
-          console.log('🔐 Session details:', {
-            hasSession: !!session,
-            hasUser: !!session?.user,
-            userId: session?.user?.id,
-            email: session?.user?.email,
-            expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-          });
-          
-          // If no session but we had one before, try multiple recovery methods
-          if (!session && (lastSession || sessionBackup) && retryCount === 0) {
-            console.log('🔐 No session found but had one before, attempting recovery...');
-            try {
-              // First try explicit refresh
-              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-              if (refreshError) {
-                console.error('🔐 Session refresh failed:', refreshError);
-                
-                // Try again with slight delay for PWA scenarios
-                console.log('🔐 Retrying with delay for PWA...');
-                setTimeout(() => initializeAuth(1), 1000);
-                return;
-              } else if (refreshData.session) {
-                console.log('🔐 Session refreshed successfully');
-                setSession(refreshData.session);
-                setUser(refreshData.session.user);
-                setLoading(false);
-                return;
-              }
-            } catch (refreshErr) {
-              console.error('🔐 Error during session refresh:', refreshErr);
-            }
-          }
-          
           setSession(session);
           setUser(session?.user ?? null);
         }
@@ -174,64 +72,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initializeAuth();
 
-    // Enhanced PWA and mobile session recovery
-    const handleVisibilityChange = () => {
-      if (!document.hidden && (!user || !session)) {
-        console.log('🔐 App became visible and no session, checking auth state...');
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session && !user) {
-            console.log('🔐 Found session on visibility change:', session.user.email);
-            setSession(session);
-            setUser(session.user);
-          }
-        });
-      }
-    };
-    
-    // Handle page focus for PWA scenarios
-    const handleFocus = () => {
-      if (!user || !session) {
-        console.log('🔐 Window focused, attempting session recovery...');
-        initializeAuth();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-
-    // Cleanup
     return () => {
       console.log('🔐 Cleaning up auth listener');
       subscription.unsubscribe();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
     };
-  }, []); // Empty dependency array - only run once on mount
+  }, []);
 
-  const signInWithMagicLink = async (email: string) => {
+  const signUp = async (email: string, password: string) => {
     try {
-      // For PWA, we want the magic link to open in the app
-      // Use a custom URL scheme if available, otherwise fallback to domain
-      const redirectUrl = 'https://pocketpause.app/';
-      
-      console.log('🔐 Sending magic link with redirect:', redirectUrl);
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signUp({
         email,
+        password,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
       
       if (error) {
-        console.error('🔐 Magic link error:', error);
-      } else {
-        console.log('🔐 Magic link sent successfully');
+        console.error('🔐 Sign up error:', error);
+        return { error };
       }
       
-      return { error };
+      console.log('🔐 Sign up successful');
+      return { error: null };
     } catch (error) {
-      console.error('AuthProvider: Error in signInWithMagicLink:', error);
-      return { error };
+      console.error('🔐 Unexpected sign up error:', error);
+      return { error: error as Error };
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error('🔐 Sign in error:', error);
+        return { error };
+      }
+      
+      console.log('🔐 Sign in successful');
+      return { error: null };
+    } catch (error) {
+      console.error('🔐 Unexpected sign in error:', error);
+      return { error: error as Error };
     }
   };
 
@@ -239,7 +125,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await supabase.auth.signOut();
     } catch (error) {
-      console.error('AuthProvider: Error in signOut:', error);
+      console.error('🔐 Error in signOut:', error);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`
+      });
+      
+      if (error) {
+        console.error('🔐 Reset password error:', error);
+        return { error };
+      }
+      
+      console.log('🔐 Reset password email sent');
+      return { error: null };
+    } catch (error) {
+      console.error('🔐 Unexpected reset password error:', error);
+      return { error: error as Error };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) {
+        console.error('🔐 Update password error:', error);
+        return { error };
+      }
+      
+      console.log('🔐 Password updated successfully');
+      return { error: null };
+    } catch (error) {
+      console.error('🔐 Unexpected update password error:', error);
+      return { error: error as Error };
     }
   };
 
@@ -247,8 +171,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     loading,
-    signInWithMagicLink,
-    signOut
+    signUp,
+    signIn,
+    signOut,
+    resetPassword,
+    updatePassword
   };
 
   return (

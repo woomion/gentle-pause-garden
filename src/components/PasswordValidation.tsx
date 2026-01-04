@@ -12,12 +12,8 @@ interface ValidationRule {
 
 const validationRules: ValidationRule[] = [
   {
-    label: 'At least 6 characters',
-    test: (password) => password.length >= 6
-  },
-  {
-    label: 'Contains lowercase letter',
-    test: (password) => /[a-z]/.test(password)
+    label: 'At least 8 characters',
+    test: (password) => password.length >= 8
   },
   {
     label: 'Contains uppercase letter',
@@ -26,10 +22,6 @@ const validationRules: ValidationRule[] = [
   {
     label: 'Contains number',
     test: (password) => /\d/.test(password)
-  },
-  {
-    label: 'Contains symbol',
-    test: (password) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password)
   }
 ];
 
