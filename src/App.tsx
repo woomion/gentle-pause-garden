@@ -88,7 +88,7 @@ const App = () => {
   }
 
   
-  console.log('🎯 Rendering main app...');
+  console.log('🎯 Rendering main app with password auth...');
   
   return (
     <ErrorBoundary>
