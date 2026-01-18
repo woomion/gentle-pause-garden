@@ -536,8 +536,8 @@ console.log('Rendering main Index content');
                 </div>
               )}
 
-              {/* Beautiful empty state for new users */}
-              {!itemsLoading && storeReadyItems.length === 0 && currentPausedItems.length === 0 && (
+              {/* Empty state when no paused items (show even if there are items ready for review) */}
+              {!itemsLoading && currentPausedItems.length === 0 && (
                 <div className="mb-4">
                   {/* Desktop Grid Layout - same as regular items */}
                   <div className="hidden md:block">
