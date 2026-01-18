@@ -50,6 +50,13 @@ const SITE_CONFIGS: SiteConfig[] = [
   { domain: 'netaporter.com', problematic: true, requiresJs: true },
   { domain: 'patagonia.com', problematic: true, requiresJs: true },
   { domain: 'sculpd.com', problematic: true, requiresJs: true },
+  { domain: 'sezane.com', problematic: true, requiresJs: true },
+  { domain: 'aritzia.com', problematic: true, requiresJs: true },
+  { domain: 'revolve.com', problematic: true, requiresJs: true },
+  { domain: 'reformation.com', problematic: true, requiresJs: true },
+  { domain: 'everlane.com', problematic: true, requiresJs: true },
+  { domain: 'madewell.com', problematic: true, requiresJs: true },
+  { domain: 'jcrew.com', problematic: true, requiresJs: true },
   
   // Amazon shortener domains - need expansion first
   { domain: 'a.co', problematic: false, requiresJs: false },
@@ -339,7 +346,57 @@ const isValidProductImageUrl = (url: string): boolean => {
   return true;
 };
 
-// Find price near "Add to cart" or "Buy now" buttons for proximity detection
+// Direct fetch fallback when Firecrawl fails (e.g., out of credits)
+const fetchDirectHtml = async (url: string): Promise<{ html: string | null; ogImage: string | null }> => {
+  try {
+    console.log('🌐 Direct fetch fallback for:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
+      },
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (!response.ok) {
+      console.log('❌ Direct fetch failed with status:', response.status);
+      return { html: null, ogImage: null };
+    }
+
+    const html = await response.text();
+    console.log('✅ Direct fetch successful, HTML length:', html.length);
+    
+    // Quick og:image extraction from raw HTML
+    let ogImage: string | null = null;
+    const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
+                         html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    if (ogImageMatch?.[1]) {
+      ogImage = ogImageMatch[1];
+      // Handle relative URLs
+      if (ogImage && !ogImage.startsWith('http')) {
+        try {
+          ogImage = new URL(ogImage, url).toString();
+        } catch {}
+      }
+      // Convert http to https
+      if (ogImage?.startsWith('http://')) {
+        ogImage = ogImage.replace('http://', 'https://');
+      }
+      console.log('🖼️ Found og:image via direct fetch:', ogImage);
+    }
+    
+    return { html, ogImage };
+  } catch (error) {
+    console.log('❌ Direct fetch error:', error);
+    return { html: null, ogImage: null };
+  }
+};
+
+
 const findPriceNearBuyButton = (doc: Document): string | null => {
   const buySelectors = [
     '[class*="add-to-cart"]',
@@ -722,97 +779,118 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
             throw new Error(`Firecrawl failed: ${response.status}`);
           }
         } catch (error) {
-          console.log('📋 Firecrawl HTML fetch failed, trying enhanced parser with URL extraction');
+          console.log('📋 Firecrawl HTML fetch failed, trying direct fetch fallback');
           
-          // Try enhanced fallback  
-          try {
-            const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
-            const enhancedResult = await enhancedParser(finalUrl);
+          // Try direct fetch first (works when Firecrawl is out of credits)
+          const directResult = await fetchDirectHtml(finalUrl);
+          
+          if (directResult.html) {
+            console.log('✅ Direct fetch succeeded, parsing HTML');
+            result = await parseGenericEnhanced(directResult.html, finalUrl);
             
-            // If enhanced parser failed to get name, try URL extraction
-            if (!enhancedResult.itemName) {
-              console.log('🔍 Enhanced parser failed for', finalUrl, ', trying URL extraction');
-              enhancedResult.itemName = extractProductNameFromUrl(finalUrl);
-              console.log('🔍 URL extraction result for', finalUrl, ':', enhancedResult.itemName);
+            // Use ogImage if no image found in parsing
+            if (!result.data.imageUrl && directResult.ogImage) {
+              console.log('🖼️ Using ogImage from direct fetch:', directResult.ogImage);
+              result.data.imageUrl = normalizeImageUrl(directResult.ogImage);
+              result.confidence = Math.min(result.confidence + 0.15, 1);
             }
             
-            if (enhancedResult.itemName || enhancedResult.price || enhancedResult.imageUrl) {
-              result = {
-                success: true,
-                data: enhancedResult,
-                method: 'enhanced-fallback',
-                confidence: 0.4,
-                url: finalUrl,
-                canonicalUrl: enhancedResult.canonicalUrl || finalUrl,
-                raw: enhancedResult
-              };
-            } else {
-              // Simple fallback with URL extraction
-              const { parseProductUrl: simpleParser } = await import('./simpleUrlParser');
-              const simpleResult = await simpleParser(finalUrl);
+            // Try URL extraction if no name found
+            if (!result.data.itemName) {
+              result.data.itemName = extractProductNameFromUrl(finalUrl);
+            }
+          } else {
+            // Direct fetch failed, try enhanced parser
+            console.log('📋 Direct fetch failed, trying enhanced parser');
+            try {
+              const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
+              const enhancedResult = await enhancedParser(finalUrl);
               
-              if (!simpleResult.itemName) {
-                console.log('🔍 Simple parser failed for', finalUrl, ', trying URL extraction');
-                simpleResult.itemName = extractProductNameFromUrl(finalUrl);
-                console.log('🔍 URL extraction result for', finalUrl, ':', simpleResult.itemName);
+              // If enhanced parser failed to get name, try URL extraction
+              if (!enhancedResult.itemName) {
+                console.log('🔍 Enhanced parser failed for', finalUrl, ', trying URL extraction');
+                enhancedResult.itemName = extractProductNameFromUrl(finalUrl);
+                console.log('🔍 URL extraction result for', finalUrl, ':', enhancedResult.itemName);
               }
               
-              result = {
-                success: true,
-                data: simpleResult,
-                method: 'url-extraction-fallback',
-                confidence: simpleResult.itemName ? 0.3 : 0.2,
-                url: finalUrl,
-                canonicalUrl: simpleResult.canonicalUrl || finalUrl,
-                raw: simpleResult
-              };
-            }
-          } catch (fallbackError) {
-            console.error('All fallbacks failed:', fallbackError);
-            
-            // Last resort: URL-only extraction with better fallback
-            const urlName = extractProductNameFromUrl(finalUrl);
-            console.log('🔄 URL extraction result:', urlName);
-            
-            // Try basic title extraction if URL extraction fails
-            let finalName = urlName;
-            if (!urlName || urlName === 'Product') {
-              console.log('📝 Trying basic title extraction as final fallback');
-              try {
-                const response = await fetch(finalUrl, {
-                  method: 'GET',
-                  headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
-                  signal: AbortSignal.timeout(5000)
-                });
+              if (enhancedResult.itemName || enhancedResult.price || enhancedResult.imageUrl) {
+                result = {
+                  success: true,
+                  data: enhancedResult,
+                  method: 'enhanced-fallback',
+                  confidence: 0.4,
+                  url: finalUrl,
+                  canonicalUrl: enhancedResult.canonicalUrl || finalUrl,
+                  raw: enhancedResult
+                };
+              } else {
+                // Simple fallback with URL extraction
+                const { parseProductUrl: simpleParser } = await import('./simpleUrlParser');
+                const simpleResult = await simpleParser(finalUrl);
                 
-                if (response.ok) {
-                  const html = await response.text();
-                  const titleMatch = html.match(/<title[^>]*>([^<]+)</i);
-                  if (titleMatch && titleMatch[1]) {
-                    const title = titleMatch[1].trim().replace(/\s*[|\-–—]\s*[^|\-–—]*$/, '').trim();
-                    if (title.length > 3 && !title.toLowerCase().includes('error')) {
-                      finalName = title;
-                      console.log('✅ Extracted title as fallback:', title);
+                if (!simpleResult.itemName) {
+                  console.log('🔍 Simple parser failed for', finalUrl, ', trying URL extraction');
+                  simpleResult.itemName = extractProductNameFromUrl(finalUrl);
+                  console.log('🔍 URL extraction result for', finalUrl, ':', simpleResult.itemName);
+                }
+                
+                result = {
+                  success: true,
+                  data: simpleResult,
+                  method: 'url-extraction-fallback',
+                  confidence: simpleResult.itemName ? 0.3 : 0.2,
+                  url: finalUrl,
+                  canonicalUrl: simpleResult.canonicalUrl || finalUrl,
+                  raw: simpleResult
+                };
+              }
+            } catch (fallbackError) {
+              console.error('All fallbacks failed:', fallbackError);
+            
+              // Last resort: URL-only extraction with better fallback
+              const urlName = extractProductNameFromUrl(finalUrl);
+              console.log('🔄 URL extraction result:', urlName);
+              
+              // Try basic title extraction if URL extraction fails
+              let finalName = urlName;
+              if (!urlName || urlName === 'Product') {
+                console.log('📝 Trying basic title extraction as final fallback');
+                try {
+                  const response = await fetch(finalUrl, {
+                    method: 'GET',
+                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+                    signal: AbortSignal.timeout(5000)
+                  });
+                  
+                  if (response.ok) {
+                    const html = await response.text();
+                    const titleMatch = html.match(/<title[^>]*>([^<]+)</i);
+                    if (titleMatch && titleMatch[1]) {
+                      const title = titleMatch[1].trim().replace(/\s*[|\-–—]\s*[^|\-–—]*$/, '').trim();
+                      if (title.length > 3 && !title.toLowerCase().includes('error')) {
+                        finalName = title;
+                        console.log('✅ Extracted title as fallback:', title);
+                      }
                     }
                   }
+                } catch (error) {
+                  console.log('❌ Basic title extraction failed:', error);
                 }
-              } catch (error) {
-                console.log('❌ Basic title extraction failed:', error);
               }
-            }
-            
-            result = {
-              success: finalName !== 'Product',
-              data: {
-                itemName: finalName || 'Product',
-                storeName: getEnhancedStoreName(finalUrl),
+              
+              result = {
+                success: finalName !== 'Product',
+                data: {
+                  itemName: finalName || 'Product',
+                  storeName: getEnhancedStoreName(finalUrl),
+                  canonicalUrl: finalUrl
+                },
+                method: 'url-only',
+                confidence: finalName && finalName !== 'Product' ? 0.3 : 0.1,
+                url: finalUrl,
                 canonicalUrl: finalUrl
-              },
-              method: 'url-only',
-              confidence: finalName && finalName !== 'Product' ? 0.3 : 0.1,
-              url: finalUrl,
-              canonicalUrl: finalUrl
-            };
+              };
+            }
           }
         }
       }
@@ -858,24 +936,47 @@ export const parseProductUrlSmart = async (url: string): Promise<ParseResult> =>
           throw new Error('Firecrawl request failed');
         }
       } catch (error) {
-        console.log('⚠️ Firecrawl failed for well-behaved site, falling back to enhanced parser:', error);
-        const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
-        const enhancedResult = await enhancedParser(finalUrl);
+        console.log('⚠️ Firecrawl failed for well-behaved site, trying direct fetch:', error);
         
-        // Even for well-behaved sites, try URL extraction if no name found
-        if (!enhancedResult.itemName) {
-          enhancedResult.itemName = extractProductNameFromUrl(finalUrl);
+        // Try direct fetch first
+        const directResult = await fetchDirectHtml(finalUrl);
+        
+        if (directResult.html) {
+          console.log('✅ Direct fetch succeeded for well-behaved site');
+          result = await parseGenericEnhanced(directResult.html, finalUrl);
+          
+          // Use ogImage if no image found in parsing
+          if (!result.data.imageUrl && directResult.ogImage) {
+            console.log('🖼️ Using ogImage from direct fetch:', directResult.ogImage);
+            result.data.imageUrl = normalizeImageUrl(directResult.ogImage);
+            result.confidence = Math.min(result.confidence + 0.15, 1);
+          }
+          
+          // Try URL extraction if no name found
+          if (!result.data.itemName) {
+            result.data.itemName = extractProductNameFromUrl(finalUrl);
+          }
+        } else {
+          // Fallback to enhanced parser
+          console.log('⚠️ Direct fetch also failed, falling back to enhanced parser');
+          const { parseProductUrl: enhancedParser } = await import('./enhancedUrlParser');
+          const enhancedResult = await enhancedParser(finalUrl);
+          
+          // Even for well-behaved sites, try URL extraction if no name found
+          if (!enhancedResult.itemName) {
+            enhancedResult.itemName = extractProductNameFromUrl(finalUrl);
+          }
+          
+          result = {
+            success: true,
+            data: enhancedResult,
+            method: 'enhanced',
+            confidence: 0.7,
+            url: finalUrl,
+            canonicalUrl: enhancedResult.canonicalUrl || finalUrl,
+            raw: enhancedResult
+          };
         }
-        
-        result = {
-          success: true,
-          data: enhancedResult,
-          method: 'enhanced',
-          confidence: 0.7,
-          url: finalUrl,
-          canonicalUrl: enhancedResult.canonicalUrl || finalUrl,
-          raw: enhancedResult
-        };
       }
     }
 
@@ -965,7 +1066,20 @@ const getEnhancedStoreName = (url: string): string => {
     'nike.com': 'Nike',
     'adidas.com': 'Adidas',
     'zara.com': 'Zara',
-    'hm.com': 'H&M'
+    'hm.com': 'H&M',
+    'sezane.com': 'Sézane',
+    'aritzia.com': 'Aritzia',
+    'revolve.com': 'Revolve',
+    'reformation.com': 'Reformation',
+    'everlane.com': 'Everlane',
+    'madewell.com': 'Madewell',
+    'jcrew.com': 'J.Crew',
+    'gap.com': 'Gap',
+    'oldnavy.com': 'Old Navy',
+    'bananarepublic.com': 'Banana Republic',
+    'uniqlo.com': 'Uniqlo',
+    'cos.com': 'COS',
+    'arket.com': 'Arket'
   };
 
   try {
