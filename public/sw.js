@@ -1,12 +1,5 @@
 // public/sw.js — Pocket Pause PWA
 
-// IMPORTANT: load Progressier's SW (handles push, click, etc.)
-try {
-  importScripts('https://progressier.app/9LL6P8U26R3MyH8El0RL/sw.js');
-} catch (e) {
-  console.error('Failed to import Progressier SW:', e);
-}
-
 // Basic caching
 const CACHE_NAME = 'pocket-pause-v4';
 const urlsToCache = ['/', '/favicon.ico'];
@@ -65,8 +58,7 @@ self.addEventListener('fetch', event => {
 });
 
 // --- Push handling ---
-// Let Progressier handle ALL push notifications - no conflicts
-console.log('🔔 Service Worker loaded - Progressier will handle push notifications');
+console.log('🔔 Service Worker loaded');
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();

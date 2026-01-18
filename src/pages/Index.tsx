@@ -258,26 +258,6 @@ console.log('Rendering main Index content');
   return (
     <>
       <div className="min-h-screen min-h-[100dvh] bg-background transition-colors duration-300 flex flex-col md:bg-gradient-to-br md:from-background md:via-background/95 md:to-accent/10">
-        {/* TEMP: Admin test button for email testing */}
-        {user?.id === '2e36f1fb-d7c0-4b08-a979-7f8793f87492' && (
-          <div className="fixed top-4 right-4 z-50">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={async () => {
-                const result = await createTestItem();
-                if (result.success) {
-                  toast.success('Test item created! Ready in 5 minutes.');
-                } else {
-                  toast.error(result.error || 'Failed to create test item');
-                }
-              }}
-              className="bg-yellow-500/20 border-yellow-500 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-500/30"
-            >
-              🧪 Create Test Item (5min)
-            </Button>
-          </div>
-        )}
         
         {/* Header area - moved outside container for precise alignment */}
         <div className={`flex-shrink-0 ${installed ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-10' : 'pt-8 sm:pt-12 md:pt-14 lg:pt-16'}`}>
