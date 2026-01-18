@@ -144,34 +144,199 @@ const extractStoreName = (url: string): string => {
 
 // Calculate biggest image by area for generic fallback
 const getBiggestImageByArea = (doc: Document, baseUrl: string): string | null => {
-  const images = doc.querySelectorAll('img[src]') as NodeListOf<HTMLImageElement>;
+  const images = doc.querySelectorAll('img[src], img[data-src]') as NodeListOf<HTMLImageElement>;
   let biggestImage: HTMLImageElement | null = null;
   let maxArea = 0;
 
   for (const img of images) {
+    // Get actual source - check data-src for lazy-loaded images
+    const imgSrc = img.src || img.getAttribute('data-src') || '';
+    
     // Skip tiny images, icons, and loading indicators
-    if (img.width && img.height && img.width > 100 && img.height > 100) {
-      const area = img.width * img.height;
+    const width = img.width || img.naturalWidth || parseInt(img.getAttribute('width') || '0');
+    const height = img.height || img.naturalHeight || parseInt(img.getAttribute('height') || '0');
+    
+    if (width > 100 && height > 100) {
+      const area = width * height;
       if (area > maxArea && 
-          !img.src.includes('icon') && 
-          !img.src.includes('logo') &&
-          !img.src.includes('loading') &&
-          !img.src.includes('placeholder')) {
+          !imgSrc.includes('icon') && 
+          !imgSrc.includes('logo') &&
+          !imgSrc.includes('loading') &&
+          !imgSrc.includes('placeholder') &&
+          !imgSrc.includes('pixel') &&
+          !imgSrc.includes('transparent')) {
         maxArea = area;
         biggestImage = img;
       }
     }
   }
 
-  if (biggestImage?.src) {
-    try {
-      return new URL(biggestImage.src, baseUrl).toString();
-    } catch {
-      return biggestImage.src;
+  if (biggestImage) {
+    const imgSrc = biggestImage.src || biggestImage.getAttribute('data-src') || '';
+    if (imgSrc) {
+      try {
+        return new URL(imgSrc, baseUrl).toString();
+      } catch {
+        return imgSrc;
+      }
     }
   }
 
   return null;
+};
+
+// Enhanced image extraction with multiple strategies
+const extractBestImage = (doc: Document, url: string): string | null => {
+  // Strategy 1: og:image (most reliable for e-commerce)
+  const ogImage = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
+  if (ogImage) {
+    try {
+      const imageUrl = new URL(ogImage, url).toString();
+      if (isValidProductImageUrl(imageUrl)) {
+        console.log('🖼️ Found og:image:', imageUrl);
+        return imageUrl;
+      }
+    } catch {}
+  }
+
+  // Strategy 2: twitter:image
+  const twitterImage = doc.querySelector('meta[name="twitter:image"]')?.getAttribute('content');
+  if (twitterImage) {
+    try {
+      const imageUrl = new URL(twitterImage, url).toString();
+      if (isValidProductImageUrl(imageUrl)) {
+        console.log('🖼️ Found twitter:image:', imageUrl);
+        return imageUrl;
+      }
+    } catch {}
+  }
+
+  // Strategy 3: JSON-LD Product schema
+  const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  for (const script of scripts) {
+    try {
+      const data = JSON.parse(script.textContent || '');
+      const items = Array.isArray(data) ? data : [data];
+      for (const item of items) {
+        if (item['@type'] === 'Product' || (Array.isArray(item['@type']) && item['@type'].includes('Product'))) {
+          if (item.image) {
+            const imageData = Array.isArray(item.image) ? item.image[0] : item.image;
+            const imageUrl = typeof imageData === 'string' ? imageData : imageData?.url;
+            if (imageUrl) {
+              const normalizedUrl = new URL(imageUrl, url).toString();
+              if (isValidProductImageUrl(normalizedUrl)) {
+                console.log('🖼️ Found JSON-LD image:', normalizedUrl);
+                return normalizedUrl;
+              }
+            }
+          }
+        }
+      }
+    } catch {}
+  }
+
+  // Strategy 4: itemprop="image"
+  const itempropImg = doc.querySelector('[itemprop="image"]');
+  if (itempropImg) {
+    const imgSrc = itempropImg.getAttribute('src') || itempropImg.getAttribute('content') || itempropImg.getAttribute('href');
+    if (imgSrc) {
+      try {
+        const imageUrl = new URL(imgSrc, url).toString();
+        if (isValidProductImageUrl(imageUrl)) {
+          console.log('🖼️ Found itemprop image:', imageUrl);
+          return imageUrl;
+        }
+      } catch {}
+    }
+  }
+
+  // Strategy 5: Product-specific image selectors
+  const productImageSelectors = [
+    '.product-image img[src]',
+    '.product-gallery img[src]',
+    '.hero-image img[src]',
+    '[data-testid*="product"] img[src]',
+    '.main-image img[src]',
+    '.pdp-image img[src]',
+    'img[class*="product"][src]',
+    'img[class*="hero"][src]',
+    'img[data-src][class*="product"]',
+    'img[data-src][class*="main"]',
+  ];
+
+  for (const selector of productImageSelectors) {
+    const img = doc.querySelector(selector) as HTMLImageElement;
+    if (img) {
+      const imgSrc = img.src || img.getAttribute('data-src') || '';
+      if (imgSrc && isValidProductImageUrl(imgSrc)) {
+        try {
+          const imageUrl = new URL(imgSrc, url).toString();
+          console.log('🖼️ Found product image via selector:', imageUrl);
+          return imageUrl;
+        } catch {}
+      }
+    }
+  }
+
+  // Strategy 6: picture > source srcset
+  const pictureSource = doc.querySelector('picture source[srcset]');
+  if (pictureSource) {
+    const srcset = pictureSource.getAttribute('srcset') || '';
+    const firstUrl = srcset.split(',')[0]?.trim().split(' ')[0];
+    if (firstUrl && isValidProductImageUrl(firstUrl)) {
+      try {
+        const imageUrl = new URL(firstUrl, url).toString();
+        console.log('🖼️ Found picture source:', imageUrl);
+        return imageUrl;
+      } catch {}
+    }
+  }
+
+  // Strategy 7: Large img with srcset
+  const imgsWithSrcset = doc.querySelectorAll('img[srcset]');
+  for (const img of imgsWithSrcset) {
+    const srcset = img.getAttribute('srcset') || '';
+    // Parse and get the largest
+    const parts = srcset.split(',').map(s => s.trim());
+    let largestUrl = '';
+    let largestWidth = 0;
+    for (const part of parts) {
+      const [partUrl, descriptor] = part.split(/\s+/);
+      const width = parseInt(descriptor?.replace('w', '') || '0');
+      if (width > largestWidth) {
+        largestWidth = width;
+        largestUrl = partUrl;
+      }
+    }
+    if (largestUrl && largestWidth >= 300 && isValidProductImageUrl(largestUrl)) {
+      try {
+        const imageUrl = new URL(largestUrl, url).toString();
+        console.log('🖼️ Found srcset image:', imageUrl);
+        return imageUrl;
+      } catch {}
+    }
+  }
+
+  return null;
+};
+
+// Check if URL is likely a valid product image
+const isValidProductImageUrl = (url: string): boolean => {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  
+  const blacklist = [
+    'icon', 'logo', 'sprite', 'placeholder', 'loading', 'blank',
+    'pixel', 'spacer', 'tracking', 'beacon', 'button', 'arrow',
+    '1x1', 'transparent', 'badge', 'social', 'share', 'cart',
+    'favicon', 'avatar', 'profile', 'user', 'rating', 'star'
+  ];
+  
+  for (const pattern of blacklist) {
+    if (lowerUrl.includes(pattern)) return false;
+  }
+  
+  return true;
 };
 
 // Find price near "Add to cart" or "Buy now" buttons for proximity detection
@@ -360,7 +525,7 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
       storeName: getEnhancedStoreName(url)
     };
 
-    // Extract structured data first
+    // Extract structured data first (JSON-LD)
     const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
     for (const script of scripts) {
       try {
@@ -383,7 +548,14 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
             
             if (item.image) {
               const imageData = Array.isArray(item.image) ? item.image[0] : item.image;
-              result.imageUrl = typeof imageData === 'string' ? imageData : imageData?.url;
+              const imageUrl = typeof imageData === 'string' ? imageData : imageData?.url;
+              if (imageUrl && isValidProductImageUrl(imageUrl)) {
+                try {
+                  result.imageUrl = new URL(imageUrl, url).toString();
+                } catch {
+                  result.imageUrl = imageUrl;
+                }
+              }
             }
             break;
           }
@@ -393,7 +565,7 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
       }
     }
 
-    // OpenGraph fallback
+    // Title extraction
     if (!result.itemName) {
       const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute('content');
       if (ogTitle) {
@@ -401,14 +573,6 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
       }
     }
 
-    if (!result.imageUrl) {
-      const ogImage = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
-      if (ogImage) {
-        result.imageUrl = new URL(ogImage, url).toString();
-      }
-    }
-
-    // Enhanced title extraction
     if (!result.itemName) {
       const titleSelectors = [
         'h1[class*="product"]',
@@ -429,13 +593,11 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
 
     // Enhanced price extraction with proximity detection
     if (!result.price) {
-      // Try proximity detection first
       const proximityPrice = findPriceNearBuyButton(doc);
       if (proximityPrice) {
         result.price = proximityPrice;
-        result.priceCurrency = 'USD'; // Default, could be enhanced
+        result.priceCurrency = 'USD';
       } else {
-        // Fallback to standard selectors
         const priceSelectors = [
           '.price',
           '[class*="price"]:not([class*="original"])',
@@ -449,7 +611,7 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
             const match = element.textContent.match(/[\$€£¥₹](\d+(?:,\d{3})*(?:\.\d{2})?)/);
             if (match) {
               result.price = match[1].replace(/,/g, '');
-              result.priceCurrency = 'USD'; // Could be enhanced with currency detection
+              result.priceCurrency = 'USD';
               break;
             }
           }
@@ -457,32 +619,9 @@ const parseGenericEnhanced = async (html: string, url: string): Promise<ParseRes
       }
     }
 
-    // Enhanced image extraction with biggest-by-area fallback
+    // Use enhanced image extraction if no image found yet
     if (!result.imageUrl) {
-      const imgSelectors = [
-        'img[itemprop="image"]',
-        '.product-image img[src]:not([src*="placeholder"]):not([src*="loading"])',
-        '.hero-image img[src]',
-        'img[data-testid*="product"]:not([src*="placeholder"])',
-        '.main-image img[src]',
-        'img[alt*="product" i][src]'
-      ];
-      
-      for (const selector of imgSelectors) {
-        const img = doc.querySelector(selector) as HTMLImageElement;
-        if (img?.src && !img.src.includes('placeholder') && !img.src.includes('loading')) {
-          try {
-            result.imageUrl = new URL(img.src, url).toString();
-            break;
-          } catch {
-            result.imageUrl = img.src;
-            break;
-          }
-        }
-      }
-      
-      // Don't use random secondary images as fallback - let the placeholder be used instead
-      // This prevents grabbing unrelated images when the product image isn't found
+      result.imageUrl = extractBestImage(doc, url) || undefined;
     }
 
     const confidence = (result.itemName ? 0.4 : 0) + (result.price ? 0.3 : 0) + (result.imageUrl ? 0.2 : 0);
