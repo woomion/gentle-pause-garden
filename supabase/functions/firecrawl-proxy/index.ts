@@ -5,27 +5,33 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper to extract og:image from HTML
-function extractOgImageFromHtml(html: string): string | null {
-  if (!html) return null;
+// Helper to extract best image from HTML using multiple strategies
+function extractBestImageFromHtml(html: string, baseUrl: string): { image: string | null; source: string } {
+  if (!html) return { image: null, source: 'none' };
   
-  // Try og:image meta tag
+  // Strategy 1: og:image (most reliable for e-commerce)
   const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
                        html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
   if (ogImageMatch?.[1]) {
-    console.log('🖼️ Found og:image in HTML:', ogImageMatch[1]);
-    return ogImageMatch[1];
+    const imageUrl = normalizeImageUrl(ogImageMatch[1], baseUrl);
+    if (imageUrl && isValidProductImage(imageUrl)) {
+      console.log('🖼️ Found og:image:', imageUrl);
+      return { image: imageUrl, source: 'og:image' };
+    }
   }
   
-  // Try twitter:image
+  // Strategy 2: twitter:image
   const twitterImageMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i) ||
                             html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i);
   if (twitterImageMatch?.[1]) {
-    console.log('🖼️ Found twitter:image in HTML:', twitterImageMatch[1]);
-    return twitterImageMatch[1];
+    const imageUrl = normalizeImageUrl(twitterImageMatch[1], baseUrl);
+    if (imageUrl && isValidProductImage(imageUrl)) {
+      console.log('🖼️ Found twitter:image:', imageUrl);
+      return { image: imageUrl, source: 'twitter:image' };
+    }
   }
   
-  // Try to find product image in JSON-LD
+  // Strategy 3: JSON-LD Product schema
   const jsonLdMatch = html.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
   if (jsonLdMatch) {
     for (const match of jsonLdMatch) {
@@ -37,10 +43,11 @@ function extractOgImageFromHtml(html: string): string | null {
           if (item['@type'] === 'Product' || item['@type']?.includes?.('Product')) {
             const img = item.image;
             if (img) {
-              const imageUrl = Array.isArray(img) ? img[0] : (typeof img === 'string' ? img : img?.url);
-              if (imageUrl) {
+              const rawUrl = Array.isArray(img) ? img[0] : (typeof img === 'string' ? img : img?.url);
+              const imageUrl = normalizeImageUrl(rawUrl, baseUrl);
+              if (imageUrl && isValidProductImage(imageUrl)) {
                 console.log('🖼️ Found product image in JSON-LD:', imageUrl);
-                return imageUrl;
+                return { image: imageUrl, source: 'json-ld' };
               }
             }
           }
@@ -51,7 +58,124 @@ function extractOgImageFromHtml(html: string): string | null {
     }
   }
   
-  return null;
+  // Strategy 4: itemprop="image" on img or meta
+  const itempropMatch = html.match(/<(?:img|meta)[^>]*itemprop=["']image["'][^>]*(?:src|content)=["']([^"']+)["']/i) ||
+                        html.match(/<(?:img|meta)[^>]*(?:src|content)=["']([^"']+)["'][^>]*itemprop=["']image["']/i);
+  if (itempropMatch?.[1]) {
+    const imageUrl = normalizeImageUrl(itempropMatch[1], baseUrl);
+    if (imageUrl && isValidProductImage(imageUrl)) {
+      console.log('🖼️ Found itemprop image:', imageUrl);
+      return { image: imageUrl, source: 'itemprop' };
+    }
+  }
+  
+  // Strategy 5: data-src on main product images (lazy loading)
+  const dataSrcPatterns = [
+    /<img[^>]*class=["'][^"']*(?:product|hero|main|primary)[^"']*["'][^>]*data-src=["']([^"']+)["']/gi,
+    /<img[^>]*data-src=["']([^"']+)["'][^>]*class=["'][^"']*(?:product|hero|main|primary)[^"']*["']/gi,
+  ];
+  for (const pattern of dataSrcPatterns) {
+    const match = pattern.exec(html);
+    if (match?.[1]) {
+      const imageUrl = normalizeImageUrl(match[1], baseUrl);
+      if (imageUrl && isValidProductImage(imageUrl)) {
+        console.log('🖼️ Found data-src product image:', imageUrl);
+        return { image: imageUrl, source: 'data-src' };
+      }
+    }
+  }
+  
+  // Strategy 6: srcset on picture > source (responsive images)
+  const pictureMatch = html.match(/<picture[^>]*>[\s\S]*?<source[^>]*srcset=["']([^"'\s,]+)/i);
+  if (pictureMatch?.[1]) {
+    const imageUrl = normalizeImageUrl(pictureMatch[1], baseUrl);
+    if (imageUrl && isValidProductImage(imageUrl)) {
+      console.log('🖼️ Found picture source:', imageUrl);
+      return { image: imageUrl, source: 'picture' };
+    }
+  }
+  
+  // Strategy 7: Look for large image in srcset
+  const srcsetMatch = html.match(/<img[^>]*srcset=["']([^"']+)["']/i);
+  if (srcsetMatch?.[1]) {
+    // Parse srcset and get the largest image
+    const srcsetParts = srcsetMatch[1].split(',').map(s => s.trim());
+    let largestUrl = '';
+    let largestWidth = 0;
+    for (const part of srcsetParts) {
+      const [url, descriptor] = part.split(/\s+/);
+      const width = parseInt(descriptor?.replace('w', '') || '0');
+      if (width > largestWidth || !largestUrl) {
+        largestWidth = width;
+        largestUrl = url;
+      }
+    }
+    if (largestUrl) {
+      const imageUrl = normalizeImageUrl(largestUrl, baseUrl);
+      if (imageUrl && isValidProductImage(imageUrl)) {
+        console.log('🖼️ Found srcset image:', imageUrl);
+        return { image: imageUrl, source: 'srcset' };
+      }
+    }
+  }
+  
+  return { image: null, source: 'none' };
+}
+
+// Normalize relative URLs and convert http to https
+function normalizeImageUrl(url: string | undefined | null, baseUrl: string): string | null {
+  if (!url) return null;
+  try {
+    // Handle protocol-relative URLs
+    if (url.startsWith('//')) {
+      url = 'https:' + url;
+    }
+    // Handle relative URLs
+    if (!url.startsWith('http')) {
+      url = new URL(url, baseUrl).toString();
+    }
+    // Convert http to https
+    if (url.startsWith('http://')) {
+      url = url.replace('http://', 'https://');
+    }
+    return url;
+  } catch {
+    return null;
+  }
+}
+
+// Check if the URL is likely a valid product image (not icon, logo, etc.)
+function isValidProductImage(url: string): boolean {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  
+  // Blacklist patterns
+  const blacklist = [
+    'icon', 'logo', 'sprite', 'placeholder', 'loading', 'blank',
+    'pixel', 'spacer', 'tracking', 'beacon', 'button', 'arrow',
+    '1x1', 'transparent', 'badge', 'social', 'share', 'cart',
+    'favicon', 'avatar', 'profile', 'user'
+  ];
+  
+  for (const pattern of blacklist) {
+    if (lowerUrl.includes(pattern)) return false;
+  }
+  
+  // Should be an image file or image service
+  const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif'];
+  const hasValidExtension = validExtensions.some(ext => lowerUrl.includes(ext));
+  const isImageService = lowerUrl.includes('/images/') || lowerUrl.includes('/img/') || 
+                         lowerUrl.includes('cloudinary') || lowerUrl.includes('imgix') ||
+                         lowerUrl.includes('shopify') || lowerUrl.includes('scene7') ||
+                         lowerUrl.includes('amazonaws');
+  
+  return hasValidExtension || isImageService;
+}
+
+// Legacy function for backwards compatibility
+function extractOgImageFromHtml(html: string): string | null {
+  const result = extractBestImageFromHtml(html, '');
+  return result.image;
 }
 
 // Helper to do a scrape request and return structured data
@@ -93,15 +217,19 @@ async function doScrape(apiKey: string, formattedUrl: string, includeScreenshot 
   const screenshot = data.screenshot || null;
   const metadata = data.metadata || null;
   
-  // Extract image from metadata first, then try parsing HTML directly
+  // Extract image using multiple strategies
+  // First try metadata (fastest)
   let ogImage = metadata?.ogImage || metadata?.image || null;
+  let imageSource = ogImage ? 'metadata' : 'none';
   
-  // If no ogImage from metadata, parse it from the HTML
+  // If no image from metadata, use enhanced HTML extraction
   if (!ogImage && html) {
-    ogImage = extractOgImageFromHtml(html);
+    const extracted = extractBestImageFromHtml(html, formattedUrl);
+    ogImage = extracted.image;
+    imageSource = extracted.source;
   }
   
-  console.log('✅ Scrape successful, html length:', html?.length || 0, 'ogImage:', ogImage);
+  console.log('✅ Scrape successful, html length:', html?.length || 0, 'image:', ogImage, 'source:', imageSource);
 
   return { 
     success: true, 
@@ -109,6 +237,7 @@ async function doScrape(apiKey: string, formattedUrl: string, includeScreenshot 
     markdown, 
     screenshot,
     ogImage, 
+    imageSource,
     metadata,
     content: html 
   };
