@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { WifiOff, Wifi, RefreshCw } from 'lucide-react';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { offlineQueueStore } from '../stores/offlineQueueStore';
@@ -7,12 +6,10 @@ import { offlineSyncService } from '../services/offlineSyncService';
 
 const OfflineIndicator = () => {
   const { isOnline, wasOffline, clearWasOfflineFlag } = useNetworkStatus();
-  const [pendingCount, setPendingCount] = React.useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Debug logging
-  console.log('🔧 OfflineIndicator render:', { isOnline, wasOffline, pendingCount });
-
-  React.useEffect(() => {
+  useEffect(() => {
     const updatePendingCount = () => {
       setPendingCount(offlineQueueStore.getQueue().length);
     };
@@ -23,7 +20,14 @@ const OfflineIndicator = () => {
     return unsubscribe;
   }, []);
 
-  React.useEffect(() => {
+  // Determine visibility based on network status and pending operations
+  useEffect(() => {
+    // Only show if offline OR if online with pending operations
+    const shouldShow = !isOnline || (isOnline && pendingCount > 0);
+    setIsVisible(shouldShow);
+  }, [isOnline, pendingCount]);
+
+  useEffect(() => {
     // Auto-sync when coming back online
     if (isOnline && wasOffline && pendingCount > 0) {
       console.log('🔄 Auto-syncing after coming back online');
@@ -38,8 +42,9 @@ const OfflineIndicator = () => {
     }
   };
 
-  if (isOnline && pendingCount === 0) {
-    return null; // Hide when online and nothing to sync
+  // Don't render if we shouldn't be visible
+  if (!isVisible) {
+    return null;
   }
 
   return (
