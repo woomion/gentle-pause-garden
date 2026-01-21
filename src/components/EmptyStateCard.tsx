@@ -9,15 +9,15 @@ const EmptyStateCard = ({ mode }: EmptyStateCardProps) => {
   
   if (mode === 'pill') {
     return (
-      <div className="flex flex-col items-center justify-center text-center py-8 px-4 w-full">
+      <div className="flex flex-col items-center justify-center text-center py-8 px-4 w-full flex-1">
         <p className="text-sm text-muted-foreground max-w-xs">{message}</p>
       </div>
     );
   }
 
-  // Desktop mode - centered on all screen sizes
+  // Desktop mode - truly centered vertically and horizontally
   return (
-    <div className="flex flex-col items-center justify-center text-center py-16 px-4 w-full min-h-[200px]">
+    <div className="flex flex-col items-center justify-center text-center py-16 px-4 w-full flex-1 min-h-[40vh]">
       <p className="text-base text-muted-foreground max-w-md">{message}</p>
     </div>
   );
