@@ -1,150 +1,235 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
+import { Scan } from "lucide-react";
+import BarcodeScanner from "@/components/BarcodeScanner";
+import { parseProductUrl } from "@/utils/urlParser";
+import { extractStoreName } from "@/utils/pausedItemsUtils";
+import { triggerProcessingHaptic, triggerSuccessHaptic } from "@/utils/hapticUtils";
+
+const isProbablyUrl = (text: string) => {
+  const t = text.trim();
+  if (/^(https?:\/\/|www\.)/i.test(t)) return true;
+  if (!/^\S+$/.test(t)) return false;
+  try {
+    const u = new URL(t.startsWith('http') ? t : `https://${t}`);
+    return !!u.hostname && u.hostname.includes('.');
+  } catch {
+    return false;
+  }
+};
+
+const getFallbackTitleFromUrl = (rawUrl: string): string | undefined => {
+  try {
+    const u = new URL(rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`);
+    let seg = u.pathname.split('/').filter(Boolean).pop() || '';
+    seg = decodeURIComponent(seg)
+      .replace(/\.(html|htm|php|aspx)$/i, '')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b(dp|gp|product|products|item|sku|p)\b/gi, ' ')
+      .trim();
+    return seg || undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const GetApp = () => {
   const { user } = useAuth();
-  const appPath = user ? "/" : "/auth";
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  const [value, setValue] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
 
   useEffect(() => {
-    // SEO: title, meta description, canonical
-    const title = "Pocket Pause - A little space before you buy";
-    document.title = title;
+    // If already logged in, redirect to main app
+    if (user) {
+      navigate('/', { replace: true });
+      return;
+    }
 
-    const descContent = "Paste a link. Pause. Review later. Simple mindful spending app.";
+    // SEO
+    document.title = "Pocket Pause - A little space before you buy";
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement("meta");
       meta.name = "description";
       document.head.appendChild(meta);
     }
-    meta.content = descContent;
+    meta.content = "Paste a link. Pause. Review later. Simple mindful spending app.";
+  }, [user, navigate]);
 
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!canonical) {
-      canonical = document.createElement("link");
-      canonical.rel = "canonical";
-      document.head.appendChild(canonical);
+  const handleSubmit = async () => {
+    const raw = value.trim();
+    if (!raw || submitting) return;
+    
+    triggerProcessingHaptic();
+    setSubmitting(true);
+
+    try {
+      let itemName = raw;
+      let storeName = '';
+      let link: string | undefined;
+      let price: string | undefined;
+      let imageUrl: string | undefined;
+
+      if (isProbablyUrl(raw)) {
+        const url = raw.startsWith('http') ? raw : `https://${raw}`;
+        link = url;
+        try {
+          const parsed = await parseProductUrl(url);
+          if (parsed?.itemName) {
+            itemName = parsed.itemName;
+          } else {
+            const ft = getFallbackTitleFromUrl(url);
+            if (ft) itemName = ft;
+          }
+          if (parsed?.storeName) storeName = parsed.storeName; 
+          else storeName = extractStoreName(url);
+          if (parsed?.price) price = parsed.price;
+          if (parsed?.imageUrl) imageUrl = parsed.imageUrl;
+        } catch {
+          storeName = extractStoreName(url);
+          const ft = getFallbackTitleFromUrl(url);
+          if (ft) itemName = ft;
+        }
+      }
+
+      // Store the pending item for the guest flow
+      const pendingItem = {
+        itemName,
+        storeName,
+        price: price ?? '',
+        link,
+        imageUrl,
+        duration: '24 hours',
+        createdAt: new Date().toISOString(),
+      };
+      
+      localStorage.setItem('pendingPauseItem', JSON.stringify(pendingItem));
+      
+      triggerSuccessHaptic();
+      toast({ title: 'Item ready to pause!', description: 'Create an account to save it', duration: 3000 });
+      
+      // Navigate to auth with redirect back to app
+      navigate('/auth?redirect=/&pending=true');
+    } catch (e) {
+      console.error('Failed to process item', e);
+      toast({ title: 'Error', description: 'Could not process item', variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
     }
-    canonical.href = `${window.location.origin}${window.location.pathname}`;
-  }, []);
+  };
+
+  const handleBarcodeScanned = async (barcode: string) => {
+    try {
+      const { lookupProductByBarcode } = await import('@/utils/productLookup');
+      const productInfo = await lookupProductByBarcode(barcode);
+      const displayName = productInfo.itemName || `Scanned Item ${barcode.slice(-4)}`;
+      setValue(displayName);
+      
+      toast({
+        title: "Barcode scanned!",
+        description: `Found: ${displayName}`,
+      });
+    } catch (error) {
+      console.error('Error in handleBarcodeScanned:', error);
+      toast({
+        title: "Scan failed",
+        description: "Please try scanning again",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/30">
-      
-      {/* Hero Section */}
-      <section className="flex items-center justify-center min-h-[60vh] sm:min-h-screen px-4 py-8 sm:py-12">
-        <div className="text-center max-w-4xl mx-auto space-y-6 sm:space-y-8 md:space-y-10">
-          <div className="space-y-4 sm:space-y-6">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-inter text-purple-800 dark:text-purple-200">
-              Pocket Pause
-            </h2>
-            
-            {/* Pause Image */}
-            <div className="flex justify-center">
-              <img 
-                src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
-                alt="Pocket Pause" 
-                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 object-cover rounded-2xl shadow-lg"
-              />
-            </div>
-            
-            <div className="space-y-3 sm:space-y-4">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-purple-900 dark:text-purple-100 leading-tight font-inter px-2">
-                A pause button before you shop
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-purple-700 dark:text-purple-200 leading-relaxed font-inter italic max-w-3xl mx-auto px-4">
-                Bringing mindfulness into your money and clarity into your choices.
-              </p>
-            </div>
-            
-            <div className="pt-4">
-              <Button 
-                asChild 
-                className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-base sm:text-lg md:text-xl py-4 sm:py-6 px-6 sm:px-8 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
-              >
-                <Link to={appPath}>
-                  Pause Your First Link
-                </Link>
-              </Button>
-            </div>
+    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
+      {/* Main hero - vertically and horizontally centered */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md mx-auto space-y-8 text-center">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <img 
+              src="/lovable-uploads/1358c375-933c-4b12-9b1e-e3b852c396df.png" 
+              alt="Pocket Pause" 
+              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-2xl shadow-lg"
+            />
           </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="pt-8 sm:pt-12 pb-12 sm:pb-16 px-4 bg-stone-50 dark:bg-stone-900/10">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-purple-900 dark:text-purple-100 mb-6 sm:mb-12 font-inter px-2">
-            How It Works
-          </h2>
           
-          <div className="grid gap-8 sm:gap-12 md:grid-cols-3">
-            <div className="text-center space-y-3 sm:space-y-4">
-              <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-purple-600 dark:text-purple-400 font-inter">1</div>
-              <h3 className="text-xl sm:text-2xl font-bold text-purple-900 dark:text-purple-100 font-inter">Pause</h3>
-              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter px-2">
-                Drop a product link into Pocket Pause instead of buying right away.
-              </p>
-            </div>
-            
-            <div className="text-center space-y-3 sm:space-y-4">
-              <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-purple-600 dark:text-purple-400 font-inter">2</div>
-              <h3 className="text-xl sm:text-2xl font-bold text-purple-900 dark:text-purple-100 font-inter">Wait</h3>
-              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter px-2">
-                It rests quietly in your Pause List for the duration you choose.
-              </p>
-            </div>
-            
-            <div className="text-center space-y-3 sm:space-y-4">
-              <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-purple-600 dark:text-purple-400 font-inter">3</div>
-              <h3 className="text-xl sm:text-2xl font-bold text-purple-900 dark:text-purple-100 font-inter">Review</h3>
-              <p className="text-base sm:text-lg text-purple-700 dark:text-purple-200 font-inter px-2">
-                When the pause duration is up, the item returns for review, so you can decide with space.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* Closing CTA Section */}
-      <section className="py-12 sm:py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
-          <div className="space-y-3 sm:space-y-4">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-purple-900 dark:text-purple-100 font-inter px-2">
-              Shopping with space feels better.
-            </h2>
-            <p className="text-lg sm:text-xl md:text-2xl text-purple-700 dark:text-purple-200 font-inter px-2">
-              It's not about less. It's about clarity.
+          {/* Headline */}
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-inter">
+              Pocket Pause
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground font-domine italic">
+              A little space before you buy
             </p>
           </div>
-          
-          <div className="pt-2">
-            <Button 
-              asChild 
-              className="bg-purple-600 text-white hover:bg-purple-700 font-normal text-base sm:text-lg md:text-xl py-4 sm:py-6 px-6 sm:px-8 gap-2 sm:gap-3 rounded-xl font-inter w-full sm:w-auto"
-            >
-              <Link to={appPath}>
-                  Pause Now, Decide Later
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="py-6 sm:py-8 px-4 border-t border-purple-200 dark:border-purple-800">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs sm:text-sm text-purple-600 dark:text-purple-300 font-inter">
-            Pocket Pause · Your conscious spending companion
+          {/* Input area - matching app style */}
+          <div className="w-full space-y-3">
+            <div className="flex items-center gap-2 w-full">
+              <div className="flex-1 relative">
+                <Input
+                  ref={inputRef}
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder="Paste a link..."
+                  className="h-14 rounded-full text-base"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSubmit();
+                  }}
+                />
+              </div>
+              <button
+                onClick={() => setShowBarcodeScanner(true)}
+                className="h-14 px-4 bg-primary/10 hover:bg-primary/20 rounded-full border border-primary/20 hover:border-primary/40 transition-colors flex items-center gap-2"
+                title="Scan Barcode"
+              >
+                <Scan size={20} className="text-primary" />
+                <span className="text-sm text-primary hidden sm:inline">Scan</span>
+              </button>
+            </div>
+            
+            {/* Pause button appears when there's input */}
+            {value.trim() && (
+              <Button 
+                onClick={handleSubmit} 
+                disabled={!value.trim() || submitting} 
+                size="xl"
+                className="w-full h-14 rounded-full text-base"
+              >
+                {submitting ? 'Processing…' : 'Pause for 24 hours'}
+              </Button>
+            )}
+          </div>
+
+          {/* Subtle explanation */}
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+            Drop something you're thinking about buying. We'll hold it for a day so you can decide with clarity.
           </p>
         </div>
+      </main>
+
+      {/* Minimal footer */}
+      <footer className="py-4 px-4 text-center">
+        <p className="text-xs text-muted-foreground">
+          Mindful spending, one pause at a time
+        </p>
       </footer>
-      
+
+      {/* Barcode Scanner */}
+      <BarcodeScanner
+        isOpen={showBarcodeScanner}
+        onClose={() => setShowBarcodeScanner(false)}
+        onScan={handleBarcodeScanned}
+      />
     </div>
   );
 };
