@@ -115,10 +115,9 @@ const GetApp = () => {
       localStorage.setItem('pendingPauseItem', JSON.stringify(pendingItem));
       
       triggerSuccessHaptic();
-      toast({ title: 'Item ready to pause!', description: 'Create an account to save it', duration: 3000 });
       
-      // Navigate to auth with redirect back to app
-      navigate('/auth?redirect=/&pending=true');
+      // Navigate directly to the app - signup prompt will show there
+      navigate('/');
     } catch (e) {
       console.error('Failed to process item', e);
       toast({ title: 'Error', description: 'Could not process item', variant: 'destructive' });

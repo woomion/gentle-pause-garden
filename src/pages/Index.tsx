@@ -31,6 +31,7 @@ import GuestModeIndicator from '../components/GuestModeIndicator';
 import { usePausedItems } from '../hooks/usePausedItems';
 import { usePendingPauseItem } from '../hooks/usePendingPauseItem';
 import PausedItemDetail from '../components/PausedItemDetail';
+import GuestSignupPrompt from '../components/GuestSignupPrompt';
 import PillQuickPauseBar from '../components/pill/PillQuickPauseBar';
 import PillItem from '../components/pill/PillItem';
 import ReadyToReviewPill from '../components/pill/ReadyToReviewPill';
@@ -53,7 +54,7 @@ const Index = () => {
   const usageLimit = useUsageLimit();
   
   // Process any pending pause items from landing page flow
-  usePendingPauseItem();
+  const { showSignupPrompt, pendingItem, dismissSignupPrompt } = usePendingPauseItem();
   
   // Handle shared content auto-input
   useEffect(() => {
@@ -676,6 +677,14 @@ console.log('Rendering main Index content');
         freeItemsUsed={usageLimit.monthlyItemsUsed}
         maxFreeItems={usageLimit.maxFreeItems}
       />
+
+      {/* Guest signup prompt for pending items from landing page */}
+      {showSignupPrompt && (
+        <GuestSignupPrompt
+          itemName={pendingItem?.itemName}
+          onDismiss={dismissSignupPrompt}
+        />
+      )}
     </>
   );
 };

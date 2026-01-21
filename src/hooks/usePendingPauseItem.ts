@@ -3,7 +3,7 @@ import { usePausedItems } from './usePausedItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 
-interface PendingPauseItem {
+export interface PendingPauseItem {
   itemName: string;
   storeName: string;
   price: string;
@@ -16,6 +16,7 @@ interface PendingPauseItem {
 export const usePendingPauseItem = () => {
   const [hasPendingItem, setHasPendingItem] = useState(false);
   const [pendingItem, setPendingItem] = useState<PendingPauseItem | null>(null);
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const { addItem } = usePausedItems();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -28,11 +29,16 @@ export const usePendingPauseItem = () => {
         const item = JSON.parse(stored) as PendingPauseItem;
         setPendingItem(item);
         setHasPendingItem(true);
+        
+        // If user is not logged in, show the signup prompt
+        if (!user) {
+          setShowSignupPrompt(true);
+        }
       } catch {
         localStorage.removeItem('pendingPauseItem');
       }
     }
-  }, []);
+  }, [user]);
 
   // Process pending item when user becomes authenticated
   useEffect(() => {
@@ -55,10 +61,11 @@ export const usePendingPauseItem = () => {
           usePlaceholder: false,
         });
 
-        // Clear the pending item
+        // Clear the pending item and hide prompt
         localStorage.removeItem('pendingPauseItem');
         setPendingItem(null);
         setHasPendingItem(false);
+        setShowSignupPrompt(false);
 
         toast({
           title: 'Item paused!',
@@ -82,11 +89,18 @@ export const usePendingPauseItem = () => {
     localStorage.removeItem('pendingPauseItem');
     setPendingItem(null);
     setHasPendingItem(false);
+    setShowSignupPrompt(false);
+  };
+
+  const dismissSignupPrompt = () => {
+    setShowSignupPrompt(false);
   };
 
   return {
     hasPendingItem,
     pendingItem,
+    showSignupPrompt,
     clearPendingItem,
+    dismissSignupPrompt,
   };
 };
