@@ -46,11 +46,11 @@ export const parseDurationToDays = (duration: string): number => {
 export const calculateCheckInTimeDisplay = (checkInDate: Date): string => {
   const now = new Date();
   const diffMs = checkInDate.getTime() - now.getTime();
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffMinutes = Math.round(diffMs / (1000 * 60));
+  const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffMinutes < 0) return 'Ready to review';
+  if (diffMinutes <= 0) return 'Ready to review';
   if (diffMinutes < 60) return `Reviewing in ${diffMinutes} min${diffMinutes === 1 ? '' : 's'}`;
   if (diffHours < 24) return `Reviewing in ${diffHours}hr${diffHours === 1 ? '' : 's'}`;
   if (diffDays === 1) return 'Reviewing in 1 day';
