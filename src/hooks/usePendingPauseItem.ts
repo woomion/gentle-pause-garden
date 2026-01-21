@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePausedItems } from './usePausedItems';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -20,30 +20,61 @@ export const usePendingPauseItem = () => {
   const { addItem } = usePausedItems();
   const { user } = useAuth();
   const { toast } = useToast();
+  const hasProcessedRef = useRef(false);
 
-  // Check for pending item on mount
+  // Check for pending item on mount and add it to local store for guests
   useEffect(() => {
     const stored = localStorage.getItem('pendingPauseItem');
-    if (stored) {
-      try {
-        const item = JSON.parse(stored) as PendingPauseItem;
-        setPendingItem(item);
-        setHasPendingItem(true);
-        
-        // If user is not logged in, show the signup prompt
-        if (!user) {
-          setShowSignupPrompt(true);
-        }
-      } catch {
-        localStorage.removeItem('pendingPauseItem');
-      }
-    }
-  }, [user]);
+    if (!stored || hasProcessedRef.current) return;
 
-  // Process pending item when user becomes authenticated
+    try {
+      const item = JSON.parse(stored) as PendingPauseItem;
+      setPendingItem(item);
+      setHasPendingItem(true);
+
+      // If user is not logged in, add to local store immediately and show signup prompt
+      if (!user) {
+        hasProcessedRef.current = true;
+        
+        // Add to local store so it appears in the UI
+        addItem({
+          itemName: item.itemName,
+          storeName: item.storeName,
+          price: item.price,
+          notes: undefined,
+          duration: item.duration,
+          link: item.link,
+          photo: null,
+          imageUrl: item.imageUrl,
+          tags: [],
+          isCart: false,
+          itemType: 'item',
+          usePlaceholder: false,
+        });
+
+        // Clear the pending item from localStorage (it's now in the local store)
+        localStorage.removeItem('pendingPauseItem');
+        
+        // Show signup prompt
+        setShowSignupPrompt(true);
+        
+        toast({
+          title: 'Item paused!',
+          description: `"${item.itemName}" added. Sign up to save it permanently.`,
+          duration: 4000,
+        });
+      }
+    } catch {
+      localStorage.removeItem('pendingPauseItem');
+    }
+  }, [user, addItem, toast]);
+
+  // Process pending item when user becomes authenticated (for items added before login)
   useEffect(() => {
     const processPendingItem = async () => {
-      if (!user || !pendingItem) return;
+      if (!user || !pendingItem || hasProcessedRef.current) return;
+
+      hasProcessedRef.current = true;
 
       try {
         await addItem({
