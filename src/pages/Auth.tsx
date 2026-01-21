@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +10,16 @@ import { PasswordValidation } from '@/components/PasswordValidation';
 
 type AuthMode = 'signin' | 'signup' | 'forgot' | 'reset';
 
+interface PendingPauseItem {
+  itemName: string;
+  storeName: string;
+  price: string;
+  link?: string;
+  imageUrl?: string;
+  duration: string;
+  createdAt: string;
+}
+
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
@@ -19,9 +28,29 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<AuthMode>('signin');
+  const [pendingItem, setPendingItem] = useState<PendingPauseItem | null>(null);
   const { signIn, signUp, resetPassword, updatePassword, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const hasPendingItem = searchParams.get('pending') === 'true';
+  const redirectPath = searchParams.get('redirect') || '/';
+
+  // Check for pending item from landing page
+  useEffect(() => {
+    if (hasPendingItem) {
+      const stored = localStorage.getItem('pendingPauseItem');
+      if (stored) {
+        try {
+          setPendingItem(JSON.parse(stored));
+          // Default to signup for new users from landing
+          setMode('signup');
+        } catch {
+          // Invalid stored item
+        }
+      }
+    }
+  }, [hasPendingItem]);
 
   useEffect(() => {
     const urlMode = searchParams.get('mode');
@@ -32,9 +61,9 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate(redirectPath);
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectPath]);
 
   const validatePassword = (pwd: string): boolean => {
     return pwd.length >= 8 && /[A-Z]/.test(pwd) && /[0-9]/.test(pwd);
@@ -195,6 +224,21 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] flex items-center justify-center px-6">
       <div className="max-w-md w-full space-y-8">
+        {/* Pending item context banner */}
+        {pendingItem && (
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center">
+            <p className="text-sm text-foreground font-medium mb-1">
+              Ready to pause:
+            </p>
+            <p className="text-base text-foreground font-semibold truncate">
+              "{pendingItem.itemName}"
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Create an account to save it
+            </p>
+          </div>
+        )}
+
         <div className="text-center">
           <h1 className="text-3xl font-bold text-black dark:text-[#F9F5EB] mb-2">
             POCKET || PAUSE

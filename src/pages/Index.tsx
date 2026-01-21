@@ -29,6 +29,7 @@ import '../utils/testItemCreator'; // Import test item creator
 import { createTestItem } from '../utils/testItemCreator';
 import GuestModeIndicator from '../components/GuestModeIndicator';
 import { usePausedItems } from '../hooks/usePausedItems';
+import { usePendingPauseItem } from '../hooks/usePendingPauseItem';
 import PausedItemDetail from '../components/PausedItemDetail';
 import PillQuickPauseBar from '../components/pill/PillQuickPauseBar';
 import PillItem from '../components/pill/PillItem';
@@ -50,6 +51,9 @@ const Index = () => {
   const pillParam = searchParams.get('pill');
   const pillMode = pillParam ? pillParam === '1' : true;
   const usageLimit = useUsageLimit();
+  
+  // Process any pending pause items from landing page flow
+  usePendingPauseItem();
   
   // Handle shared content auto-input
   useEffect(() => {
