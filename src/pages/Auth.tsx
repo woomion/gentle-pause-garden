@@ -29,6 +29,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<AuthMode>('signin');
   const [pendingItem, setPendingItem] = useState<PendingPauseItem | null>(null);
+  const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
   const { signIn, signUp, resetPassword, updatePassword, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -52,18 +53,22 @@ const Auth = () => {
     }
   }, [hasPendingItem]);
 
-  useEffect(() => {
-    const urlMode = searchParams.get('mode');
-    if (urlMode === 'reset') {
-      setMode('reset');
-    }
-  }, [searchParams]);
+  // Check if we're in password reset mode from URL
+  const isResetMode = searchParams.get('mode') === 'reset';
 
   useEffect(() => {
-    if (user) {
+    if (isResetMode) {
+      setMode('reset');
+    }
+  }, [isResetMode]);
+
+  // Only redirect to app if user is logged in AND we're not in reset mode
+  // (Reset mode needs the user to set a new password first)
+  useEffect(() => {
+    if (user && !isResetMode) {
       navigate(redirectPath);
     }
-  }, [user, navigate, redirectPath]);
+  }, [user, navigate, redirectPath, isResetMode]);
 
   const validatePassword = (pwd: string): boolean => {
     return pwd.length >= 8 && /[A-Z]/.test(pwd) && /[0-9]/.test(pwd);
@@ -173,9 +178,10 @@ const Auth = () => {
         } else {
           toast({
             title: "Password updated!",
-            description: "You can now sign in with your new password.",
+            description: "Your new password is set.",
           });
-          navigate('/');
+          // Show success state with instructions for home screen app
+          setPasswordResetSuccess(true);
         }
       }
     } catch (error) {
@@ -220,6 +226,38 @@ const Auth = () => {
       default: return 'Sign In';
     }
   };
+
+  // Show success screen after password reset
+  if (passwordResetSuccess) {
+    return (
+      <div className="min-h-screen bg-cream dark:bg-[#200E3B] flex items-center justify-center px-6">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <div className="text-6xl mb-4">✅</div>
+          <h1 className="text-2xl font-bold text-black dark:text-[#F9F5EB]">
+            Password Updated!
+          </h1>
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-6 text-left space-y-4">
+            <p className="text-black dark:text-[#F9F5EB] font-medium">
+              📱 Using the home screen app?
+            </p>
+            <ol className="text-sm text-gray-700 dark:text-gray-300 space-y-2 list-decimal list-inside">
+              <li>Open Pocket Pause from your <strong>home screen</strong></li>
+              <li>Sign in with your <strong>new password</strong></li>
+            </ol>
+            <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+              The home screen app has separate storage from this browser, so you'll need to sign in there once.
+            </p>
+          </div>
+          <Button
+            onClick={() => navigate('/')}
+            className="w-full bg-transparent border-4 border-lavender hover:bg-lavender/10 text-black dark:text-[#F9F5EB] font-medium py-3 px-6 rounded-2xl"
+          >
+            Continue in Browser
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream dark:bg-[#200E3B] flex items-center justify-center px-6">
