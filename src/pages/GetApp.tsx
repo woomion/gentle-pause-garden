@@ -128,15 +128,35 @@ const GetApp = () => {
 
   const handleBarcodeScanned = async (barcode: string) => {
     try {
+      triggerProcessingHaptic();
       const { lookupProductByBarcode } = await import('@/utils/productLookup');
       const productInfo = await lookupProductByBarcode(barcode);
+      
       const displayName = productInfo.itemName || `Scanned Item ${barcode.slice(-4)}`;
-      setValue(displayName);
+      
+      // Store the full product info including image for the pending item
+      const pendingItem = {
+        itemName: displayName,
+        storeName: productInfo.storeName || '',
+        price: productInfo.price || '',
+        imageUrl: productInfo.imageUrl || '',
+        duration: '24 hours',
+        createdAt: new Date().toISOString(),
+      };
+      
+      localStorage.setItem('pendingPauseItem', JSON.stringify(pendingItem));
+      
+      triggerSuccessHaptic();
       
       toast({
-        title: "Barcode scanned!",
-        description: `Found: ${displayName}`,
+        title: "Product found!",
+        description: productInfo.imageUrl 
+          ? `${displayName} with image` 
+          : displayName,
       });
+      
+      // Navigate directly to the app
+      navigate('/');
     } catch (error) {
       console.error('Error in handleBarcodeScanned:', error);
       toast({
