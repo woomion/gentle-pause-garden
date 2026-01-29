@@ -182,6 +182,18 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
     setShowConfirmation(null);
   };
 
+  const handleImageSelected = (file: File) => {
+    console.log('📸 Image selected in PausedItemDetail:', file.name);
+    if (onEdit) {
+      // Create a local preview URL for immediate feedback
+      const previewUrl = URL.createObjectURL(file);
+      setLocalItem(prev => ({ ...prev, imageUrl: previewUrl, photo: file }));
+      
+      // Pass the file to the edit handler
+      onEdit(item, { photo: file });
+    }
+  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -205,7 +217,11 @@ const PausedItemDetail = ({ item, items = [], currentIndex = 0, isOpen, onClose,
         <div className="space-y-4">
           {/* Product image */}
           <div className="relative -mt-2">
-            <ItemImage item={localItem} />
+            <ItemImage 
+              item={localItem} 
+              showAddButton={!!onEdit}
+              onImageSelected={handleImageSelected}
+            />
             {/* Pause Duration Banner - touching bottom of image */}
         <PauseDurationBanner 
           checkInTime={localItem.checkInTime} 

@@ -22,6 +22,19 @@ const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(ma
 const DesktopItemCard = ({ item, showImages = true, onClick, onEdit, onDelete }: DesktopItemCardProps) => {
   const { handleViewItem } = useItemActions();
   const [showEditModal, setShowEditModal] = useState(false);
+  const [localItem, setLocalItem] = useState(item);
+
+  const handleImageSelected = (file: File) => {
+    console.log('📸 Image selected in DesktopItemCard:', file.name);
+    if (onEdit) {
+      // Create a local preview URL for immediate feedback
+      const previewUrl = URL.createObjectURL(file);
+      setLocalItem(prev => ({ ...prev, imageUrl: previewUrl, photo: file }));
+      
+      // Pass the file to the edit handler
+      onEdit(item, { photo: file });
+    }
+  };
 
   // Calculate progress for the top bar
   const progress = useMemo(() => {
@@ -63,10 +76,14 @@ const DesktopItemCard = ({ item, showImages = true, onClick, onEdit, onDelete }:
         {/* Main image - only show when showImages is true */}
         {showImages && (
           <div className="relative w-full aspect-[4/3] bg-muted/30 overflow-hidden">
-            <ItemImage item={item} />
+            <ItemImage 
+              item={localItem} 
+              showAddButton={!!onEdit}
+              onImageSelected={handleImageSelected}
+            />
             
-            {/* Actions dropdown overlay */}
-            <div className="absolute top-3 right-3">
+            {/* Actions dropdown overlay - positioned below plus button */}
+            <div className="absolute top-12 right-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                   <Button
