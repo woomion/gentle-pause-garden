@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { PausedItem as CloudPausedItem } from '@/stores/supabasePausedItemsStore';
 import { PausedItem as LocalPausedItem } from '@/stores/pausedItemsStore';
@@ -9,11 +9,14 @@ import ItemImage from './ItemImage';
 interface ReviewItemCardProps {
   item: CloudPausedItem | LocalPausedItem;
   onViewItem?: (item: CloudPausedItem | LocalPausedItem) => void;
+  onEdit?: (item: CloudPausedItem | LocalPausedItem, updates: Partial<CloudPausedItem | LocalPausedItem>) => void;
 }
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
-const ReviewItemCard = ({ item, onViewItem }: ReviewItemCardProps) => {
+const ReviewItemCard = ({ item, onViewItem, onEdit }: ReviewItemCardProps) => {
+  const [localItem, setLocalItem] = useState(item);
+  
   // Calculate progress for the progress bar (same as DesktopItemCard)
   const progress = useMemo(() => {
     const total = item.checkInDate.getTime() - item.pausedAt.getTime();
@@ -33,15 +36,31 @@ const ReviewItemCard = ({ item, onViewItem }: ReviewItemCardProps) => {
   const itemName = item.itemName || 'Untitled Item';
   const storeName = 'storeName' in item ? (item as any).storeName : '';
 
+  const handleImageSelected = (file: File) => {
+    console.log('📸 Image selected in ReviewItemCard:', file.name);
+    if (onEdit) {
+      // Create a local preview URL for immediate feedback
+      const previewUrl = URL.createObjectURL(file);
+      setLocalItem(prev => ({ ...prev, imageUrl: previewUrl, photo: file }));
+      
+      // Pass the file to the edit handler
+      onEdit(item, { photo: file });
+    }
+  };
+
   return (
     <div className="group relative bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl shadow-sm transition-all duration-300 overflow-hidden">
       {/* Main image */}
       <div className="relative w-full h-48 bg-muted/30 overflow-hidden">
-        <ItemImage item={item} />
+        <ItemImage 
+          item={localItem} 
+          showAddButton={!!onEdit}
+          onImageSelected={handleImageSelected}
+        />
         
         {/* View link button overlay */}
         {(item.link || (item as any).url) && onViewItem && (
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-3 right-12">
             <Button
               variant="ghost"
               size="sm"
